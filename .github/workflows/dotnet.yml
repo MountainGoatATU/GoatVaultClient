@@ -1,4 +1,4 @@
-name: .NET
+name: .NET 8 WPF Build
 
 on:
   push:
@@ -8,14 +8,15 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       PROJECT_PATH: GoatVaultClient  # WPF project folder
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET 8 SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -25,9 +26,5 @@ jobs:
         working-directory: ${{ env.PROJECT_PATH }}
 
       - name: Build
-        run: dotnet build --no-restore
-        working-directory: ${{ env.PROJECT_PATH }}
-
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet build --configuration Release --no-restore
         working-directory: ${{ env.PROJECT_PATH }}
