@@ -1,5 +1,6 @@
 ﻿using Isopoh.Cryptography.Argon2;
 using Isopoh.Cryptography.SecureArray;
+using Sodium;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
@@ -97,30 +98,49 @@ namespace GoatVaultClient
             string vaultJson = JsonSerializer.Serialize(vaultData);
             byte[] plaintextBytes = Encoding.UTF8.GetBytes(vaultJson);
 
-            byte[] nonce = new byte[12];
-            Rng.GetBytes(nonce); // create random nonce
+            /*byte[] nonce = new byte[12];
+            Rng.GetBytes(nonce); // create random nonce*/
+
+            byte[] nonce = SecretAeadXChaCha20Poly1305.GenerateNonce(); // 24 bytes
 
             // Encrypt the vault data using AES-GCM
-            byte[] ciphertext = new byte[plaintextBytes.Length];
+            //byte[] ciphertext = new byte[plaintextBytes.Length];
             // ciphertext will hold the encrypted data
             // thats why its the same length as plaintextBytes
-            byte[] authTag = new byte[16];
 
-            using (var aes = new AesGcm(derivedKey))
+            // ciphertext using ChaCha20-Poly1305
+            var ciphertext = SecretAeadXChaCha20Poly1305.Encrypt(plaintextBytes, nonce, derivedKey);
+            /*byte[] authTag = new byte[16];
+
+            using (var aes = new AesGcm(derivedKey, 16))
             {
                 aes.Encrypt(nonce, plaintextBytes, ciphertext, authTag);
             }
+            */
 
-            var payload = new
+            /*var payload = new
             {
                 user_id = vaultData.user_id,
                 salt = Convert.ToBase64String(salt),
                 nonce = Convert.ToBase64String(nonce),
                 auth_tag = Convert.ToBase64String(authTag),
                 encrypted_blob = Convert.ToBase64String(ciphertext)
-            };
+            };*/
+
+            var payload = new
+            {
+                user_id = vaultData.user_id,
+                salt = Convert.ToBase64String(salt),
+                nonce = Convert.ToBase64String(nonce),
+                encrypted_blob = Convert.ToBase64String(ciphertext)
+            }; // auth tag is included in ciphertext for ChaCha20-Poly1305
+
 
             string payloadJson = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+
+            byte[] decrypted = SecretAeadXChaCha20Poly1305.Decrypt(ciphertext, nonce, derivedKey);
+            string decryptedText = Encoding.UTF8.GetString(decrypted);
+            Console.WriteLine(decryptedText);
 
         }
     }
