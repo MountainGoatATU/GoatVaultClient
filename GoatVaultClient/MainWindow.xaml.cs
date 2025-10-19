@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
@@ -31,14 +33,181 @@ namespace GoatVaultClient
         public MainWindow()
         {
             InitializeComponent();
-            CreateVault();
         }
+
+        public async Task<string> HttpPost(string url, string jsonPayload)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
+                client.Timeout = TimeSpan.FromSeconds(10);
+                client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
+
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, content);
+                string responseData = await response.Content.ReadAsStringAsync();
+                return responseData;
+            }
+        }
+
+        public async Task<string> HttpGet(string url)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
+                client.Timeout = TimeSpan.FromSeconds(10);
+                client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
+                var response = await client.GetAsync(url);
+                string responseData = await response.Content.ReadAsStringAsync();
+                return responseData;
+            }
+        }
+
 
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = System.Security.Cryptography.RandomNumberGenerator.Create();
 
+        private static string CreateVault(string password)
+        {
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+            byte[] salt = new byte[16];
+            Rng.GetBytes(salt);
 
-        private void CreateVault() 
+            // Derive 32-byte key using Argon2id
+            var config = new Argon2Config
+            {
+                Type = Argon2Type.DataIndependentAddressing,
+                Version = Argon2Version.Nineteen,
+                TimeCost = 10,
+                MemoryCost = 32768,
+                Lanes = 5,
+                Threads = Environment.ProcessorCount,
+                Password = passwordBytes,
+                Salt = salt,
+                HashLength = 32
+            };
+            var argon2 = new Argon2(config);
+            byte[] derivedKey;
+
+            using (SecureArray<byte> hash = argon2.Hash())
+            {
+                derivedKey = (byte[])hash.Buffer.Clone();
+            }
+
+            // Example vault content (JSON)
+            var vaultData = new
+            {
+                entries = new[] {
+                    new { site = "github.com", username = "alice", password = "ghp_secret" },
+                    new { site = "gmail.com", username = "bob", password = "gmail_secret" }
+                }
+            };
+
+            string vaultJson = JsonSerializer.Serialize(vaultData, new JsonSerializerOptions { WriteIndented = true });
+            byte[] plaintextBytes = Encoding.UTF8.GetBytes(vaultJson);
+
+            // Encrypt using XChaCha20-Poly1305
+            byte[] nonce = SecretAeadXChaCha20Poly1305.GenerateNonce();
+            byte[] ciphertext = SecretAeadXChaCha20Poly1305.Encrypt(plaintextBytes, nonce, derivedKey);
+
+            // Prepare payload for server
+            var payload = new
+            {
+                name = "Testing Vault",
+                salt = Convert.ToBase64String(salt),
+                nonce = Convert.ToBase64String(nonce),
+                encrypted_blob = Convert.ToBase64String(ciphertext),
+                auth_tag = "QUJDREVGR0hJSktMTU5PUA==", // remove auth tag for XChaCha20-Poly1305, as it is included in ciphertext
+            };
+
+            return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        private static void DecryptVaultFromServer(string payloadJson, string password)
+        {
+            try
+            {
+                var payload = JsonSerializer.Deserialize<ServerPayload>(payloadJson);
+
+                // Decode base64 fields
+                byte[] salt = Convert.FromBase64String(payload.salt);
+                byte[] nonce = Convert.FromBase64String(payload.nonce);
+                byte[] ciphertext = Convert.FromBase64String(payload.encrypted_blob);
+
+                // Derive the same key from password and salt
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+
+                var config = new Argon2Config
+                {
+                    Type = Argon2Type.DataIndependentAddressing,
+                    Version = Argon2Version.Nineteen,
+                    TimeCost = 10,
+                    MemoryCost = 32768,
+                    Lanes = 5,
+                    Threads = Environment.ProcessorCount,
+                    Password = passwordBytes,
+                    Salt = salt,
+                    HashLength = 32
+                };
+                var argon2 = new Argon2(config);
+                byte[] derivedKey;
+                using (SecureArray<byte> hash = argon2.Hash())
+                {
+                    derivedKey = (byte[])hash.Buffer.Clone();
+                }
+
+                // Attempt to decrypt
+                byte[] decryptedBytes = SecretAeadXChaCha20Poly1305.Decrypt(ciphertext, nonce, derivedKey);
+                string decryptedJson = Encoding.UTF8.GetString(decryptedBytes);
+
+                Console.WriteLine("Decryption successful!");
+                Console.WriteLine(decryptedJson);
+            }
+            catch (CryptographicException)
+            {
+                Console.WriteLine("Decryption failed — incorrect password or data tampered.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+            }
+        }
+
+        public class ServerPayload
+        {
+            public string user_id { get; set; }
+            public string salt { get; set; }
+            public string nonce { get; set; }
+            public string encrypted_blob { get; set; }
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            /*
+            // Simulate user vault creation
+            string password = "password1";
+            string payloadJson = CreateVault(password);
+
+            // Send payload to server
+            //string user_id = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
+            string serverUrl = "https://dev-api.mountaingoat.dev/v1/users/b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a/vaults/"; // Replace with actual server URL
+            string response = await HttpPost(serverUrl, payloadJson);*/
+
+            // Simulate user decrypting vault after retrieval
+            string password = "password1";
+            string serverUrl = "https://dev-api.mountaingoat.dev/v1/users/b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a/vaults/bdc46987-90aa-44e1-a561-777b246392f5";
+            string payloadJson = await HttpGet(serverUrl);
+
+            DecryptVaultFromServer(payloadJson, password);
+
+            //DecryptVaultFromServer(payloadJson, "wrongpassword");
+        }
+
+        /*private void VaultTesting() 
         {
             var password = "password1";
             byte[] passwordBytes = Encoding.UTF8.GetBytes(password); // get bytes from password
@@ -81,8 +250,8 @@ namespace GoatVaultClient
             {
                 // verified
                 Console.WriteLine("Verified");
-            }*/
-            byte[] derivedKey;
+            }
+        byte[] derivedKey;
 
             using (SecureArray<byte> hashA = argon2A.Hash())
             {
@@ -98,8 +267,8 @@ namespace GoatVaultClient
             string vaultJson = JsonSerializer.Serialize(vaultData);
             byte[] plaintextBytes = Encoding.UTF8.GetBytes(vaultJson);
 
-            /*byte[] nonce = new byte[12];
-            Rng.GetBytes(nonce); // create random nonce*/
+            byte[] nonce = new byte[12];
+            Rng.GetBytes(nonce); // create random nonce
 
             byte[] nonce = SecretAeadXChaCha20Poly1305.GenerateNonce(); // 24 bytes
 
@@ -116,16 +285,16 @@ namespace GoatVaultClient
             {
                 aes.Encrypt(nonce, plaintextBytes, ciphertext, authTag);
             }
-            */
+            
 
-            /*var payload = new
+            var payload = new
             {
                 user_id = vaultData.user_id,
                 salt = Convert.ToBase64String(salt),
                 nonce = Convert.ToBase64String(nonce),
                 auth_tag = Convert.ToBase64String(authTag),
                 encrypted_blob = Convert.ToBase64String(ciphertext)
-            };*/
+            };
 
             var payload = new
             {
@@ -142,6 +311,6 @@ namespace GoatVaultClient
             string decryptedText = Encoding.UTF8.GetString(decrypted);
             Console.WriteLine(decryptedText);
 
-        }
+        }*/
     }
 }
