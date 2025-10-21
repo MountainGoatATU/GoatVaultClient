@@ -44,6 +44,7 @@ namespace GoatVaultClient
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
+                client.DefaultRequestHeaders.Add("X-API-KEY", "PB7KTNedJEz5oUdhTRpaz2T-SpZj_C5ZvD2AWPcPc");
 
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(url, content);
@@ -117,7 +118,7 @@ namespace GoatVaultClient
             // Prepare payload for server
             var payload = new
             {
-                name = "Testing Vault",
+                name = "Testing Vault 2",
                 salt = Convert.ToBase64String(salt),
                 nonce = Convert.ToBase64String(nonce),
                 encrypted_blob = Convert.ToBase64String(ciphertext),
@@ -187,22 +188,23 @@ namespace GoatVaultClient
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            /*
+            
             // Simulate user vault creation
             string password = "password1";
             string payloadJson = CreateVault(password);
 
             // Send payload to server
             //string user_id = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
-            string serverUrl = "https://dev-api.mountaingoat.dev/v1/users/b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a/vaults/"; // Replace with actual server URL
-            string response = await HttpPost(serverUrl, payloadJson);*/
+            //string serverUrl = "https://dev-api.mountaingoat.dev/v1/users/b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a/vaults/"; // Replace with actual server URL
+            string serverUrl = "http://127.0.0.1:8000/v1/users/b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a/vaults/"; // Local server for testing
+            string response = await HttpPost(serverUrl, payloadJson);
 
             // Simulate user decrypting vault after retrieval
-            string password = "password1";
+            /*string password = "password1";
             string serverUrl = "https://dev-api.mountaingoat.dev/v1/users/b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a/vaults/bdc46987-90aa-44e1-a561-777b246392f5";
             string payloadJson = await HttpGet(serverUrl);
 
-            DecryptVaultFromServer(payloadJson, password);
+            DecryptVaultFromServer(payloadJson, password);*/
 
             //DecryptVaultFromServer(payloadJson, "wrongpassword");
         }
