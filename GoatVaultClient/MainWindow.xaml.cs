@@ -44,7 +44,7 @@ namespace GoatVaultClient
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
-                client.DefaultRequestHeaders.Add("X-API-KEY", "PB7KTNedJEz5oUdhTRpaz2T-SpZj_C5ZvD2AWPcPc");
+                client.DefaultRequestHeaders.Add("X-API-KEY", "PB7KTN_edJEz5oUdhTRpaz2T_-SpZj_C5ZvD2AWPcPc");
 
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(url, content);
@@ -111,9 +111,18 @@ namespace GoatVaultClient
             string vaultJson = JsonSerializer.Serialize(vaultData, new JsonSerializerOptions { WriteIndented = true });
             byte[] plaintextBytes = Encoding.UTF8.GetBytes(vaultJson);
 
-            // Encrypt using XChaCha20-Poly1305
-            byte[] nonce = SecretAeadXChaCha20Poly1305.GenerateNonce();
-            byte[] ciphertext = SecretAeadXChaCha20Poly1305.Encrypt(plaintextBytes, nonce, derivedKey);
+            // Encrypt using AES-256-GCM
+            byte[] nonce = new byte[12]; 
+            Rng.GetBytes(nonce);
+
+            byte[] ciphertext = new byte[plaintextBytes.Length];
+            byte[] authTag = new byte[16];
+
+            using (var aesGcm = new AesGcm(derivedKey, 16))
+            {
+                // Encrypt the plaintext
+                aesGcm.Encrypt(nonce, plaintextBytes, ciphertext, authTag);
+            }
 
             // Prepare payload for server
             var payload = new
@@ -122,7 +131,7 @@ namespace GoatVaultClient
                 salt = Convert.ToBase64String(salt),
                 nonce = Convert.ToBase64String(nonce),
                 encrypted_blob = Convert.ToBase64String(ciphertext),
-                auth_tag = "QUJDREVGR0hJSktMTU5PUA==", // remove auth tag for XChaCha20-Poly1305, as it is included in ciphertext
+                auth_tag = Convert.ToBase64String(authTag)
             };
 
             return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
@@ -138,6 +147,7 @@ namespace GoatVaultClient
                 byte[] salt = Convert.FromBase64String(payload.salt);
                 byte[] nonce = Convert.FromBase64String(payload.nonce);
                 byte[] ciphertext = Convert.FromBase64String(payload.encrypted_blob);
+                byte[] authTag = Convert.FromBase64String(payload.auth_tag); 
 
                 // Derive the same key from password and salt
                 byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
@@ -162,7 +172,11 @@ namespace GoatVaultClient
                 }
 
                 // Attempt to decrypt
-                byte[] decryptedBytes = SecretAeadXChaCha20Poly1305.Decrypt(ciphertext, nonce, derivedKey);
+                byte[] decryptedBytes = new byte[ciphertext.Length];
+                using (var aesGcm = new AesGcm(derivedKey, 16))
+                {
+                    aesGcm.Decrypt(nonce, ciphertext, authTag, decryptedBytes);
+                }
                 string decryptedJson = Encoding.UTF8.GetString(decryptedBytes);
 
                 Console.WriteLine("Decryption successful!");
@@ -184,6 +198,7 @@ namespace GoatVaultClient
             public string salt { get; set; }
             public string nonce { get; set; }
             public string encrypted_blob { get; set; }
+            public string auth_tag { get; set; }
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -192,6 +207,8 @@ namespace GoatVaultClient
             // Simulate user vault creation
             string password = "password1";
             string payloadJson = CreateVault(password);
+
+            Console.WriteLine(payloadJson + "\n");
 
             // Send payload to server
             //string user_id = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
@@ -206,7 +223,7 @@ namespace GoatVaultClient
 
             DecryptVaultFromServer(payloadJson, password);*/
 
-            //DecryptVaultFromServer(payloadJson, "wrongpassword");
+            DecryptVaultFromServer(payloadJson, "password1");
         }
 
         /*private void VaultTesting() 
