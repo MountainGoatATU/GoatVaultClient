@@ -203,6 +203,15 @@ namespace GoatVaultClient
             public string auth_tag { get; set; }
         }
 
+        public class UserPayload
+        {
+            public string email { get; set; }
+            public string salt { get; set; }
+            public string password_hash { get; set; }
+            public bool mfa_enabled { get; set; }
+            public string mfa_secret { get; set; }
+        }
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             
