@@ -114,7 +114,7 @@ namespace GoatVaultClient
             byte[] plaintextBytes = Encoding.UTF8.GetBytes(vaultJson);
 
             // Encrypt using AES-256-GCM
-            byte[] nonce = new byte[12]; 
+            byte[] nonce = new byte[12];
             Rng.GetBytes(nonce);
 
             byte[] ciphertext = new byte[plaintextBytes.Length];
@@ -149,7 +149,7 @@ namespace GoatVaultClient
                 byte[] salt = Convert.FromBase64String(payload.salt);
                 byte[] nonce = Convert.FromBase64String(payload.nonce);
                 byte[] ciphertext = Convert.FromBase64String(payload.encrypted_blob);
-                byte[] authTag = Convert.FromBase64String(payload.auth_tag); 
+                byte[] authTag = Convert.FromBase64String(payload.auth_tag);
 
                 // Derive the same key from password and salt
                 byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
@@ -263,8 +263,8 @@ namespace GoatVaultClient
             // compare password hashes in constant time to prevent timing attacks
             return CryptographicOperations.FixedTimeEquals(
             Convert.FromBase64String(passwordHash),
-            Convert.FromBase64String(storedPasswordHash)) 
-                ? "Login successful" 
+            Convert.FromBase64String(storedPasswordHash))
+                ? "Login successful"
                 : "Login failed";
         }
 
@@ -289,7 +289,7 @@ namespace GoatVaultClient
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            
+
             // Simulate user vault creation
             /*string password = "password1";
             string payloadJson = CreateVault(password);
@@ -311,18 +311,20 @@ namespace GoatVaultClient
 
             //DecryptVaultFromServer(payloadJson, "password1");
 
+
+            // user testing
             string email = "example@gmail.com";
-            string password = "password1";
+            string password = "password";
+            string loginPassword = "password1";
 
             string registerJson = RegisterUser(email, password);
             string registerUrl = "http://127.0.0.1:8000/v1/users";
             string registerResponse = await HttpPost(registerUrl, registerJson);
-            Console.WriteLine("Register response:");
-            Console.WriteLine(registerResponse);
 
+            // deserialize the response into a UserPayload object to access the stored data
             var user = JsonSerializer.Deserialize<UserPayload>(registerJson);
-            string loginResult = LoginUser(email, password, user.salt, user.password_hash);
-            Console.WriteLine("Login result: " + loginResult);
+            string loginResult = LoginUser(email, loginPassword, user.salt, user.password_hash);
+            Console.Write(loginResult);
         }
 
         /*private void VaultTesting() 
@@ -428,32 +430,6 @@ namespace GoatVaultClient
             byte[] decrypted = SecretAeadXChaCha20Poly1305.Decrypt(ciphertext, nonce, derivedKey);
             string decryptedText = Encoding.UTF8.GetString(decrypted);
             Console.WriteLine(decryptedText);
-
         }*/
-
-        private async void UserTesting()
-        {
-            string email = "example@gmail.com";
-            string correctPassword = "password1";
-            string wrongPassword = "wrongpassword";
-
-            string serverUrl = "http://127.0.0.1:8000/v1/users";
-            string payloadJson = await HttpGet(serverUrl);
-
-            // register user
-            string userJson = RegisterUser(email, correctPassword);
-            var user = JsonSerializer.Deserialize<UserPayload>(userJson);
-            Console.WriteLine(userJson);
-
-            // correct password login
-            string resultCorrect = LoginUser(email, correctPassword, user.salt, user.password_hash);
-            Console.Write("Correct password: ");
-            Console.WriteLine(resultCorrect);
-
-            // wrong password login
-            string resultWrong = LoginUser(email, wrongPassword, user.salt, user.password_hash);
-            Console.Write("Wrong password: ");
-            Console.WriteLine(resultWrong);
-        }
     }
 }
