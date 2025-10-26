@@ -70,7 +70,7 @@ namespace GoatVaultClient
             }
         }
 
-       
+
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = System.Security.Cryptography.RandomNumberGenerator.Create();
 
@@ -311,7 +311,18 @@ namespace GoatVaultClient
 
             //DecryptVaultFromServer(payloadJson, "password1");
 
-            UserTesting();
+            string email = "example@gmail.com";
+            string password = "password1";
+
+            string registerJson = RegisterUser(email, password);
+            string registerUrl = "http://127.0.0.1:8000/v1/users";
+            string registerResponse = await HttpPost(registerUrl, registerJson);
+            Console.WriteLine("Register response:");
+            Console.WriteLine(registerResponse);
+
+            var user = JsonSerializer.Deserialize<UserPayload>(registerJson);
+            string loginResult = LoginUser(email, password, user.salt, user.password_hash);
+            Console.WriteLine("Login result: " + loginResult);
         }
 
         /*private void VaultTesting() 
@@ -420,11 +431,14 @@ namespace GoatVaultClient
 
         }*/
 
-        private void UserTesting()
+        private async void UserTesting()
         {
             string email = "example@gmail.com";
             string correctPassword = "password1";
             string wrongPassword = "wrongpassword";
+
+            string serverUrl = "http://127.0.0.1:8000/v1/users";
+            string payloadJson = await HttpGet(serverUrl);
 
             // register user
             string userJson = RegisterUser(email, correctPassword);
