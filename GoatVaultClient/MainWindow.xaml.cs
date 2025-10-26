@@ -303,13 +303,15 @@ namespace GoatVaultClient
             //string response = await HttpPost(serverUrl, payloadJson);
 
             // Simulate user decrypting vault after retrieval
-            string password = "password1";
+            //string password = "password1";
             string serverUrl = "http://127.0.0.1:8000/v1/users/b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a/vaults/64287312-d8e3-4617-b7ea-4b9cda640438";
             string payloadJson = await HttpGet(serverUrl);
 
-            DecryptVaultFromServer(payloadJson, password);
+            //DecryptVaultFromServer(payloadJson, password);
 
             //DecryptVaultFromServer(payloadJson, "password1");
+
+            UserTesting();
         }
 
         /*private void VaultTesting() 
@@ -417,5 +419,27 @@ namespace GoatVaultClient
             Console.WriteLine(decryptedText);
 
         }*/
+
+        private void UserTesting()
+        {
+            string email = "example@gmail.com";
+            string correctPassword = "password1";
+            string wrongPassword = "wrongpassword";
+
+            // register user
+            string userJson = RegisterUser(email, correctPassword);
+            var user = JsonSerializer.Deserialize<UserPayload>(userJson);
+            Console.WriteLine(userJson);
+
+            // correct password login
+            string resultCorrect = LoginUser(email, correctPassword, user.salt, user.password_hash);
+            Console.Write("Correct password: ");
+            Console.WriteLine(resultCorrect);
+
+            // wrong password login
+            string resultWrong = LoginUser(email, wrongPassword, user.salt, user.password_hash);
+            Console.Write("Wrong password: ");
+            Console.WriteLine(resultWrong);
+        }
     }
 }
