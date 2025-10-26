@@ -70,7 +70,7 @@ namespace GoatVaultClient
             }
         }
 
-
+       
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = System.Security.Cryptography.RandomNumberGenerator.Create();
 
@@ -194,6 +194,46 @@ namespace GoatVaultClient
             }
         }
 
+        private static string RegisterUser(string email, string password)
+        {
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+            byte[] salt = new byte[16];
+            Rng.GetBytes(salt);
+
+            var config = new Argon2Config
+            {
+                Type = Argon2Type.DataIndependentAddressing,
+                Version = Argon2Version.Nineteen,
+                TimeCost = 10,
+                MemoryCost = 32768,
+                Lanes = 5,
+                Threads = Environment.ProcessorCount,
+                Password = passwordBytes,
+                Salt = salt,
+                HashLength = 32
+            };
+
+            var argon2 = new Argon2(config);
+            string passwordHash;
+            using (SecureArray<byte> hash = argon2.Hash())
+            {
+                passwordHash = Convert.ToBase64String(hash.Buffer);
+            }
+
+            var userPayload = new UserPayload
+            {
+                email = email,
+                salt = Convert.ToBase64String(salt),
+                password_hash = passwordHash,
+                mfa_enabled = false,
+                mfa_secret = null
+            };
+
+
+            return JsonSerializer.Serialize(userPayload, new JsonSerializerOptions { WriteIndented = true }); // return json
+        }
+
+
         public class ServerPayload
         {
             public string user_id { get; set; }
@@ -209,7 +249,7 @@ namespace GoatVaultClient
             public string salt { get; set; }
             public string password_hash { get; set; }
             public bool mfa_enabled { get; set; }
-            public string mfa_secret { get; set; }
+            public string? mfa_secret { get; set; }
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
