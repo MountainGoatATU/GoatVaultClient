@@ -214,6 +214,7 @@ namespace GoatVaultClient
             };
 
             var argon2 = new Argon2(config);
+
             string passwordHash;
             using (SecureArray<byte> hash = argon2.Hash())
             {
@@ -226,11 +227,45 @@ namespace GoatVaultClient
                 salt = Convert.ToBase64String(salt),
                 password_hash = passwordHash,
                 mfa_enabled = false,
-                mfa_secret = null
+                mfa_secret = ""
             };
 
-
             return JsonSerializer.Serialize(userPayload, new JsonSerializerOptions { WriteIndented = true }); // return json
+        }
+
+
+        private static string LoginUser(string email, string password, string storedSalt, string storedPasswordHash)
+        {
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+            byte[] salt = Convert.FromBase64String(storedSalt);
+
+            var config = new Argon2Config
+            {
+                Type = Argon2Type.DataIndependentAddressing,
+                Version = Argon2Version.Nineteen,
+                TimeCost = 10,
+                MemoryCost = 32768,
+                Lanes = 5,
+                Threads = Environment.ProcessorCount,
+                Password = passwordBytes,
+                Salt = salt,
+                HashLength = 32
+            };
+
+            var argon2 = new Argon2(config);
+
+            string passwordHash;
+            using (SecureArray<byte> hash = argon2.Hash())
+            {
+                passwordHash = Convert.ToBase64String(hash.Buffer);
+            }
+
+            // compare password hashes in constant time to prevent timing attacks
+            return CryptographicOperations.FixedTimeEquals(
+            Convert.FromBase64String(passwordHash),
+            Convert.FromBase64String(storedPasswordHash)) 
+                ? "Login successful" 
+                : "Login failed";
         }
 
 
@@ -249,7 +284,7 @@ namespace GoatVaultClient
             public string salt { get; set; }
             public string password_hash { get; set; }
             public bool mfa_enabled { get; set; }
-            public string? mfa_secret { get; set; }
+            public string mfa_secret { get; set; }
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
