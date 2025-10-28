@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace GoatVaultClient.Models
 {
-    public class ServerPayload
+    public class VaultPayload
     {
         public string user_id { get; set; }
+        public string name { get; set; }
         public string salt { get; set; }
         public string nonce { get; set; }
         public string encrypted_blob { get; set; }

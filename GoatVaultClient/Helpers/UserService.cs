@@ -15,14 +15,14 @@ namespace GoatVaultClient.Helpers
     {
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
-        public string RegisterUser(string email, string password)
+        public UserPayload RegisterUser(string email, string password)
         {
             byte[] salt = new byte[16];
             Rng.GetBytes(salt);
 
             var passwordHash = HashPassword(password, salt);
 
-            var userPayload = new UserPayload
+            return new UserPayload
             {
                 email = email,
                 salt = Convert.ToBase64String(salt),
@@ -31,7 +31,7 @@ namespace GoatVaultClient.Helpers
                 mfa_secret = ""
             };
 
-            return JsonSerializer.Serialize(userPayload, new JsonSerializerOptions { WriteIndented = true });
+            //return JsonSerializer.Serialize(userPayload, new JsonSerializerOptions { WriteIndented = true });
         }
 
         public string LoginUser(string email, string password, string storedSalt, string storedPasswordHash)

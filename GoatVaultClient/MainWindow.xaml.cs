@@ -32,45 +32,49 @@ namespace GoatVaultClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly HttpService _httpService = new HttpService();
-        private readonly VaultService _vaultService = new VaultService();
-        private readonly UserService _userService = new UserService();
+        private readonly HttpService _httpService;
+        private readonly VaultService _vaultService;
+        private readonly UserService _userService;
 
-        public MainWindow()
+        public MainWindow(HttpService httpService, VaultService vaultService, UserService userService)
         {
             InitializeComponent();
+            _httpService = httpService;
+            _vaultService = vaultService;
+            _userService = userService;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string email = "example4578@gmail.com"; // Must be unique for each run
+            string email = "example4579@gmail.com"; // Must be unique for each run
             string password = "password";
             string userId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
             string vaultId = "9c3ea03d-6d90-4b33-8eea-b458be83839a";
 
-
+            /*
             // Register user
-            string registerJson = _userService.RegisterUser(email, password);
+            var registeredUser = _userService.RegisterUser(email, password);
             string registerUrl = "http://127.0.0.1:8000/v1/users";
-            string registerResponse = await _httpService.HttpPost(registerUrl, registerJson);
+            var registerResponse = await _httpService.PostAsync<UserPayload>(registerUrl, registeredUser);
             Console.WriteLine("Registration response:");
             Console.WriteLine(registerResponse + "\n");
 
 
             // Login user
-            var registeredUser = JsonSerializer.Deserialize<UserPayload>(registerJson);
+            //var registeredUser = JsonSerializer.Deserialize<UserPayload>(registerJson);
             string loginResult = _userService.LoginUser(email, password, registeredUser.salt, registeredUser.password_hash);
             Console.WriteLine("Login result: " + loginResult + "\n");
 
             // Create vault
-            string vaultPayload = _vaultService.CreateVault(password);
-            string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/{vaultId}";
-            string vaultResponse = await _httpService.HttpPost(vaultUrl, vaultPayload);
+            var vaultPayload = _vaultService.CreateVault(password);
+            string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
+            var vaultResponse = await _httpService.PostAsync<VaultPayload>(vaultUrl, vaultPayload);
             Console.WriteLine("Vault creation response:");
-            Console.WriteLine(vaultResponse + "\n");
+            Console.WriteLine(vaultResponse + "\n");*/
 
             // Retrieve and decrypt vault
-            string retrievedVaultJson = await _httpService.HttpGet(vaultUrl);
+            string getVaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/{vaultId}";
+            var retrievedVaultJson = await _httpService.GetAsync<VaultPayload>(getVaultUrl);
             _vaultService.DecryptVaultFromServer(retrievedVaultJson, password);
         }
 

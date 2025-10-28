@@ -16,7 +16,7 @@ namespace GoatVaultClient.Helpers
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
-        public string CreateVault(string password)
+        public VaultPayload CreateVault(string password)
         {
             byte[] salt = GenerateRandomBytes(16);
             byte[] key = DeriveKey(password, salt);
@@ -45,7 +45,7 @@ namespace GoatVaultClient.Helpers
             }
 
             // Prepare payload for server
-            var payload = new
+            return new VaultPayload
             {
                 name = "Testing Vault",
                 salt = Convert.ToBase64String(salt),
@@ -54,14 +54,13 @@ namespace GoatVaultClient.Helpers
                 auth_tag = Convert.ToBase64String(authTag)
             };
 
-            return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+            //return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
         }
 
-        public void DecryptVaultFromServer(string payloadJson, string password)
+        public void DecryptVaultFromServer(VaultPayload payload, string password)
         {
             try
             {
-                var payload = JsonSerializer.Deserialize<ServerPayload>(payloadJson);
                 if (payload == null)
                 {
                     Console.WriteLine("Vault is null!");
