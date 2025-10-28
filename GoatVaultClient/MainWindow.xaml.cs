@@ -46,6 +46,7 @@ namespace GoatVaultClient
             string email = "example4578@gmail.com"; // Must be unique for each run
             string password = "password";
             string userId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
+            string vaultId = "9c3ea03d-6d90-4b33-8eea-b458be83839a";
 
 
             // Register user
@@ -63,7 +64,7 @@ namespace GoatVaultClient
 
             // Create vault
             string vaultPayload = _vaultService.CreateVault(password);
-            string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
+            string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/{vaultId}";
             string vaultResponse = await _httpService.HttpPost(vaultUrl, vaultPayload);
             Console.WriteLine("Vault creation response:");
             Console.WriteLine(vaultResponse + "\n");
