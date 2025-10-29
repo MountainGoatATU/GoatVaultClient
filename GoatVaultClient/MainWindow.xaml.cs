@@ -73,9 +73,9 @@ namespace GoatVaultClient
             Console.WriteLine(vaultResponse + "\n");*/
 
             // Retrieve and decrypt vault
-            string getVaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/{vaultId}";
+            /*string getVaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/{vaultId}";
             var retrievedVaultJson = await _httpService.GetAsync<VaultPayload>(getVaultUrl);
-            _vaultService.DecryptVaultFromServer(retrievedVaultJson, password);
+            _vaultService.DecryptVaultFromServer(retrievedVaultJson, password);*/
         }
 
         /*private void VaultTesting() 

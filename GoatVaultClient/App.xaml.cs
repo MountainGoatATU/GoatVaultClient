@@ -1,9 +1,12 @@
-﻿using GoatVaultClient.Helpers;
+﻿using GoatVaultClient.DB;
+using GoatVaultClient.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -21,6 +24,14 @@ namespace GoatVaultClient
         protected override void OnStartup(StartupEventArgs e)
         {
             var services = new ServiceCollection();
+
+            // SQLite relative path to app folder
+            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "localvault.db");
+            string connectionString = $"Data Source={dbPath}";
+
+            // Register DbContext
+            services.AddDbContext<VaultDB>(options =>
+                options.UseSqlite(connectionString));
 
             // Register HttpService with HttpClientFactory
             services.AddHttpClient<HttpService>(client =>
@@ -41,6 +52,13 @@ namespace GoatVaultClient
             services.AddTransient<MainWindow>();
 
             Services = services.BuildServiceProvider();
+
+            // Ensure database is created
+            using (var scope = Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<VaultDB>();
+                db.Database.EnsureCreated(); // creates DB and tables if they don't exist
+            }
 
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
