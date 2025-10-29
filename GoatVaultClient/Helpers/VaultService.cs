@@ -1,4 +1,5 @@
-﻿using GoatVaultClient.Models;
+﻿using GoatVaultClient.DB;
+using GoatVaultClient.Models;
 using Isopoh.Cryptography.Argon2;
 using Isopoh.Cryptography.SecureArray;
 using System;
@@ -15,6 +16,12 @@ namespace GoatVaultClient.Helpers
     {
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
+        private readonly VaultDB _vaultDB;
+
+        public VaultService(VaultDB vaultDB)
+        {
+            _vaultDB = vaultDB;
+        }
 
         public VaultPayload CreateVault(string password)
         {
@@ -47,11 +54,15 @@ namespace GoatVaultClient.Helpers
             // Prepare payload for server
             return new VaultPayload
             {
+                _id = "ae7f31ae-dbdf-46d5-8f48-c613e2117fbd",
+                user_id = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a",
                 name = "Testing Vault",
                 salt = Convert.ToBase64String(salt),
                 nonce = Convert.ToBase64String(nonce),
                 encrypted_blob = Convert.ToBase64String(ciphertext),
-                auth_tag = Convert.ToBase64String(authTag)
+                auth_tag = Convert.ToBase64String(authTag),
+                created_at = DateTime.UtcNow,
+                updated_at = DateTime.UtcNow
             };
 
             //return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
@@ -95,6 +106,15 @@ namespace GoatVaultClient.Helpers
             {
                 Console.WriteLine($"Unexpected error: {ex.Message}");
             }
+        }
+
+        public async Task SaveVaultToLocalAsync(VaultPayload vault)
+        {
+            // Add the vault to the DbContext
+            _vaultDB.Vaults.Add(vault);
+
+            // Save changes to the SQLite database
+            await _vaultDB.SaveChangesAsync();
         }
 
         private static byte[] GenerateRandomBytes(int length)

@@ -63,11 +63,12 @@ namespace GoatVaultClient
             // Login user
             //var registeredUser = JsonSerializer.Deserialize<UserPayload>(registerJson);
             string loginResult = _userService.LoginUser(email, password, registeredUser.salt, registeredUser.password_hash);
-            Console.WriteLine("Login result: " + loginResult + "\n");
+            Console.WriteLine("Login result: " + loginResult + "\n");*/
 
             // Create vault
             var vaultPayload = _vaultService.CreateVault(password);
-            string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
+            await _vaultService.SaveVaultToLocalAsync(vaultPayload);
+            /*string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
             var vaultResponse = await _httpService.PostAsync<VaultPayload>(vaultUrl, vaultPayload);
             Console.WriteLine("Vault creation response:");
             Console.WriteLine(vaultResponse + "\n");*/

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GoatVaultClient.DB
 {
-    internal class VaultDB : DbContext
+    public class VaultDB : DbContext
     {
         public DbSet<VaultPayload> Vaults { get; set; }
 
