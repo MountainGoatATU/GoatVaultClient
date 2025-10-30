@@ -2,6 +2,8 @@
 using GoatVaultClient.Models;
 using Isopoh.Cryptography.Argon2;
 using Isopoh.Cryptography.SecureArray;
+using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace GoatVaultClient.Helpers
 {
@@ -54,7 +57,7 @@ namespace GoatVaultClient.Helpers
             // Prepare payload for server
             return new VaultPayload
             {
-                _id = "ae7f31ae-dbdf-46d5-8f48-c613e2117fbd",
+                _id = Guid.NewGuid().ToString(), // Generate a new UUID
                 user_id = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a",
                 name = "Testing Vault",
                 salt = Convert.ToBase64String(salt),
@@ -115,6 +118,14 @@ namespace GoatVaultClient.Helpers
 
             // Save changes to the SQLite database
             await _vaultDB.SaveChangesAsync();
+        }
+
+        public async Task<VaultPayload?> RetrieveVaultFromLocalAsync(string vaultId)
+        {
+            var vault = await _vaultDB.Vaults
+                .FirstOrDefaultAsync(v => v._id == vaultId);
+
+            return vault;
         }
 
         private static byte[] GenerateRandomBytes(int length)

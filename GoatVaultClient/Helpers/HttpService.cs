@@ -84,5 +84,6 @@ namespace GoatVaultClient.Helpers
 
         public Task<T> GetAsync<T>(string url) => SendAsync<T>(HttpMethod.Get, url);
         public Task<T> PostAsync<T>(string url, object payload) => SendAsync<T>(HttpMethod.Post, url, payload);
+        public Task<T> PatchAsync<T>(string url, object payload) => SendAsync<T>(HttpMethod.Patch, url, payload);
     }
 }
