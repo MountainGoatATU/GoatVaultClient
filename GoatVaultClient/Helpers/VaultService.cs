@@ -120,7 +120,7 @@ namespace GoatVaultClient.Helpers
             await _vaultDB.SaveChangesAsync();
         }
 
-        public async Task<VaultPayload?> RetrieveVaultFromLocalAsync(string vaultId)
+        public async Task<VaultPayload> RetrieveVaultFromLocalAsync(string vaultId)
         {
             var vault = await _vaultDB.Vaults
                 .FirstOrDefaultAsync(v => v._id == vaultId);
