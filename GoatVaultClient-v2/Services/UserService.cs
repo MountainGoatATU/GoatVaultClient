@@ -20,7 +20,7 @@ namespace GoatVaultClient_v2.Services
         UserPayload RegisterUser(string email, string password);
         LoginStatus LoginUser(string email, string password, string storedSalt, string storedPasswordHash);
     }
-    internal class UserService
+    internal class UserService : IUserService
     {
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
