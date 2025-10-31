@@ -1,21 +1,32 @@
-using System;
-using System.Net.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace GoatVaultClient.Helpers
+namespace GoatVaultClient_v2.Services
 {
-    public class HttpService
+    public interface IHttpService
     {
-        private readonly HttpClient _client;
+        // Public methods for making HTTP requests
+        Task<T> GetAsync<T>(string url);
+        Task<T> PostAsync<T>(string url, object payload);
+        Task<T> PatchAsync<T>(string url, object payload);
+    }
 
-        public HttpService(HttpClient client)
+    // Use of primary constructor to inject HttpClient dependency
+    internal class HttpService(HttpClient client) : IHttpService
+    {
+        private readonly HttpClient _client = client;
+
+        // JSON serialization options
+        private static readonly JsonSerializerOptions JsonOptions = new()
         {
-            _client = client;
-        }
+            PropertyNameCaseInsensitive = true
+        };
 
-        private async Task<T> SendAsync<T>(HttpMethod method, string url, object payload = null)
+        private async Task<T> SendAsync<T>(HttpMethod method, string url, object? payload = null)
         {
             try
             {
@@ -49,21 +60,11 @@ namespace GoatVaultClient.Helpers
                 // Read the response content as a string
                 var responseString = await response.Content.ReadAsStringAsync();
 
-                try
-                {
-                    // Deserialize the JSON response into the specified type T
-                    return JsonSerializer.Deserialize<T>(
-                        responseString,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                    );
-                }
-                catch (JsonException jsonEx)
-                {
-                    throw new InvalidOperationException(
-                        $"Failed to deserialize response from {url}. Raw content: {responseString}",
-                        jsonEx
-                    );
-                }
+                var result = JsonSerializer.Deserialize<T>(responseString, JsonOptions)
+                     ?? throw new InvalidOperationException(
+                         $"Failed to deserialize response into {typeof(T).Name}. Raw: {responseString}");
+
+                return result;
             }
             catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
             {
