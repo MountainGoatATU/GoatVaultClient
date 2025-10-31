@@ -20,7 +20,7 @@ namespace GoatVaultClient_v2.Services
         Task SaveVaultToLocalAsync(VaultPayload vault);
         Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId);
     }
-    internal class VaultService(VaultDB vaultDB) : IVaultService
+    public class VaultService(VaultDB vaultDB) : IVaultService
     {
         private readonly VaultDB _vaultDB = vaultDB;
     

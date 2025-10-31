@@ -43,10 +43,10 @@ namespace GoatVaultClient_v2
             builder.Services.AddSingleton<IVaultService, VaultService>();
             builder.Services.AddSingleton<IUserService, UserService>();
 
-            // ✅ Register your main page (or viewmodel if using MVVM)
+            // Register your main page (or viewmodel if using MVVM)
             builder.Services.AddSingleton<MainPage>();
 
-            // ✅ Ensure DB creation when app starts
+            // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<VaultDB>();

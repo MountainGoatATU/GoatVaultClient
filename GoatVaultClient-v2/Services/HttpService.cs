@@ -16,7 +16,7 @@ namespace GoatVaultClient_v2.Services
     }
 
     // Use of primary constructor to inject HttpClient dependency
-    internal class HttpService(HttpClient client) : IHttpService
+    public class HttpService(HttpClient client) : IHttpService
     {
         private readonly HttpClient _client = client;
 
