@@ -49,7 +49,7 @@ namespace GoatVaultClient
             string email = "example4579@gmail.com"; // Must be unique for each run
             string password = "password";
             string userId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
-            string vaultId = "9c3ea03d-6d90-4b33-8eea-b458be83839a";
+            string vaultId = "adef17a9-ab47-4c27-832c-75ed590ac663";
 
             /*
             // Register user
@@ -63,19 +63,60 @@ namespace GoatVaultClient
             // Login user
             //var registeredUser = JsonSerializer.Deserialize<UserPayload>(registerJson);
             string loginResult = _userService.LoginUser(email, password, registeredUser.salt, registeredUser.password_hash);
-            Console.WriteLine("Login result: " + loginResult + "\n");
+            Console.WriteLine("Login result: " + loginResult + "\n");*/
 
             // Create vault
-            var vaultPayload = _vaultService.CreateVault(password);
-            string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
+            /*var vaultPayload = _vaultService.CreateVault(password);
+            await _vaultService.SaveVaultToLocalAsync(vaultPayload);*/
+            /*string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
             var vaultResponse = await _httpService.PostAsync<VaultPayload>(vaultUrl, vaultPayload);
             Console.WriteLine("Vault creation response:");
             Console.WriteLine(vaultResponse + "\n");*/
 
             // Retrieve and decrypt vault
-            string getVaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/{vaultId}";
+            /*string getVaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/{vaultId}";
             var retrievedVaultJson = await _httpService.GetAsync<VaultPayload>(getVaultUrl);
-            _vaultService.DecryptVaultFromServer(retrievedVaultJson, password);
+            _vaultService.DecryptVaultFromServer(retrievedVaultJson, password);*/
+
+            // Retrieve and decrypt local vault
+            //var localVault = await _vaultService.RetrieveVaultFromLocalAsync(vaultPayload._id);
+
+            
+            /*
+             *          TESTING SYNCING
+             */
+
+            
+            // 1. Retrieve all vaults for specified user
+            string userVaultsUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
+            var userVaults = await _httpService.GetAsync<VaultListResponse>(userVaultsUrl);
+
+            // 2. Create local vault
+            var vaultPayload = _vaultService.CreateVault(password);
+            await _vaultService.SaveVaultToLocalAsync(vaultPayload);
+
+            // 3. If vault exists on server, compare nonce, if different, upload local vault to server + if vaults does not exists on server, upload local vault to server
+            var serverVault = userVaults.vaults.FirstOrDefault(v => v._id == vaultPayload._id);
+
+            if (serverVault != null)
+            {
+                // Vault exists on server, compare nonce
+                if (serverVault.nonce != vaultPayload.nonce)
+                {
+                    // Nonces are different, update server vault with local vault
+                    string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
+                    var vaultResponse = await _httpService.PatchAsync<VaultPayload>(vaultUrl, vaultPayload);
+
+                }
+                // Nonces are the same, no action needed
+            }
+            else
+            {
+                // Vault does not exist on server, upload local vault to server
+                string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
+                var vaultResponse = await _httpService.PostAsync<VaultPayload>(vaultUrl, vaultPayload);
+            }
+
         }
 
         /*private void VaultTesting() 
