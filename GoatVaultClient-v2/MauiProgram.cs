@@ -30,7 +30,7 @@ namespace GoatVaultClient_v2
                 options.UseSqlite(connectionString));
 
             // Register HttpService with HttpClientFactory
-            builder.Services.AddHttpClient<IHttpService, HttpService>(client =>
+            builder.Services.AddHttpClient<HttpService>(client =>
             {
                 client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
                 client.Timeout = TimeSpan.FromSeconds(10);
@@ -40,8 +40,9 @@ namespace GoatVaultClient_v2
             });
 
             // Register app services
-            builder.Services.AddSingleton<IVaultService, VaultService>();
-            builder.Services.AddSingleton<IUserService, UserService>();
+            //builder.Services.AddSingleton<IVaultService, VaultService>();
+            builder.Services.AddSingleton<VaultService>();
+            builder.Services.AddSingleton<UserService>();
 
             // Register your main page (or viewmodel if using MVVM)
             builder.Services.AddSingleton<MainPage>();
