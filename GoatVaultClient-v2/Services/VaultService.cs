@@ -32,6 +32,7 @@ namespace GoatVaultClient_v2.Services
             PropertyNameCaseInsensitive = true
         };
 
+        #region Vault Encryption/Decryption
         public VaultPayload CreateVault(string password)
         {
             byte[] salt = GenerateRandomBytes(16);
@@ -116,7 +117,26 @@ namespace GoatVaultClient_v2.Services
                 Console.WriteLine($"Unexpected error: {ex.Message}");
             }
         }
+        #endregion
 
+        #region Local Storage
+        // GET all vaults
+        public async Task<List<VaultPayload>> LoadAllVaultsFromLocalAsync()
+        {
+            var vaults = await _vaultDB.Vaults.ToListAsync();
+            return vaults;
+        }
+
+        // GET vault by ID
+        public async Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId)
+        {
+            var vault = await _vaultDB.Vaults
+                .FirstOrDefaultAsync(v => v.Id == vaultId);
+
+            return vault;
+        }
+
+        // POST
         public async Task SaveVaultToLocalAsync(VaultPayload vault)
         {
             // Add the vault to the DbContext
@@ -126,14 +146,29 @@ namespace GoatVaultClient_v2.Services
             await _vaultDB.SaveChangesAsync();
         }
 
-        public async Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId)
+        // PUT/PATCH
+        public async Task UpdateVaultInLocalAsync(VaultPayload vault)
+        {
+            // Update the vault in the DbContext
+            _vaultDB.Vaults.Update(vault);
+            // Save changes to the SQLite database
+            await _vaultDB.SaveChangesAsync();
+        }
+
+        // DELETE
+        public async Task DeleteVaultFromLocalAsync(string vaultId)
         {
             var vault = await _vaultDB.Vaults
                 .FirstOrDefaultAsync(v => v.Id == vaultId);
-
-            return vault;
+            if (vault != null)
+            {
+                _vaultDB.Vaults.Remove(vault);
+                await _vaultDB.SaveChangesAsync();
+            }
         }
+        #endregion
 
+        #region Helper Methods
         private static byte[] GenerateRandomBytes(int length)
         {
             byte[] bytes = new byte[length];
@@ -162,5 +197,6 @@ namespace GoatVaultClient_v2.Services
             using SecureArray<byte> hash = argon2.Hash();
             return (byte[])hash.Buffer.Clone();
         }
+        #endregion
     }
 }
