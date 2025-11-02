@@ -9,17 +9,17 @@ namespace GoatVaultClient_v2
         private readonly HttpService _httpService;
         private readonly VaultService _vaultService;
 
-        /*public MainPage(HttpService httpService, VaultService vaultService)
+        public MainPage(HttpService httpService, VaultService vaultService)
         {
             InitializeComponent();
             _httpService = httpService;
             _vaultService = vaultService;
-        }*/
+        }
 
-        public MainPage()
+        /*public MainPage()
         {
             InitializeComponent();
-        }
+        }*/
 
         private async void OnCounterClicked(object sender, EventArgs e)
         {
@@ -37,7 +37,7 @@ namespace GoatVaultClient_v2
             await _vaultService.SaveVaultToLocalAsync(vaultPayload);
 
             // 3. If vault exists on server, compare nonce, if different, upload local vault to server + if vaults does not exists on server, upload local vault to server
-            var serverVault = userVaults.Vaults.FirstOrDefault(v => v._id == vaultPayload._id);
+            var serverVault = userVaults.Vaults.FirstOrDefault(v => v.Id == vaultPayload.Id);
 
             if (serverVault != null)
             {

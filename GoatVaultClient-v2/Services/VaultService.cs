@@ -63,15 +63,15 @@ namespace GoatVaultClient_v2.Services
             // Prepare payload for server
             return new VaultPayload
             {
-                _id = Guid.NewGuid().ToString(), // Generate a new UUID
-                User_id = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a",
+                Id = Guid.NewGuid().ToString(), // Generate a new UUID
+                UserId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a",
                 Name = "Testing Vault",
                 Salt = Convert.ToBase64String(salt),
                 Nonce = Convert.ToBase64String(nonce),
-                Encrypted_blob = Convert.ToBase64String(ciphertext),
-                Auth_tag = Convert.ToBase64String(authTag),
-                Created_at = DateTime.UtcNow,
-                Updated_at = DateTime.UtcNow
+                EncryptedBlob = Convert.ToBase64String(ciphertext),
+                AuthTag = Convert.ToBase64String(authTag),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             //return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
@@ -90,8 +90,8 @@ namespace GoatVaultClient_v2.Services
                 // Decode base64 fields
                 byte[] salt = Convert.FromBase64String(payload.Salt);
                 byte[] nonce = Convert.FromBase64String(payload.Nonce);
-                byte[] ciphertext = Convert.FromBase64String(payload.Encrypted_blob);
-                byte[] authTag = Convert.FromBase64String(payload.Auth_tag);
+                byte[] ciphertext = Convert.FromBase64String(payload.EncryptedBlob);
+                byte[] authTag = Convert.FromBase64String(payload.AuthTag);
 
                 // Derive the same key from password and salt
                 byte[] key = DeriveKey(password, salt);
@@ -129,7 +129,7 @@ namespace GoatVaultClient_v2.Services
         public async Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId)
         {
             var vault = await _vaultDB.Vaults
-                .FirstOrDefaultAsync(v => v._id == vaultId);
+                .FirstOrDefaultAsync(v => v.Id == vaultId);
 
             return vault;
         }

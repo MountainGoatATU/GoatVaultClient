@@ -20,7 +20,13 @@ namespace GoatVaultClient_v2.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<VaultPayload>()
-                .HasKey(v => v._id);
+                .HasKey(v => v.Id);
+
+
+            modelBuilder.Entity<VaultPayload>(entityBuilder =>
+            {
+                entityBuilder.Property(b => b.Id).HasColumnName("_id");
+            });
         }
     }
 }
