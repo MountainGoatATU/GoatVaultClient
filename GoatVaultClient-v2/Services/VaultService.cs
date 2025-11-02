@@ -15,7 +15,7 @@ namespace GoatVaultClient_v2.Services
 {
     public interface IVaultService
     {
-        VaultPayload CreateVault(string password);
+        VaultPayload EncryptVault(string password);
         void DecryptVault(VaultPayload vault, string password);
         Task SaveVaultToLocalAsync(VaultPayload vault);
         Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId);
@@ -33,7 +33,7 @@ namespace GoatVaultClient_v2.Services
         };
 
         #region Vault Encryption/Decryption
-        public VaultPayload CreateVault(string password)
+        public VaultPayload EncryptVault(string password)
         {
             byte[] salt = GenerateRandomBytes(16);
             byte[] key = DeriveKey(password, salt);
@@ -121,6 +121,7 @@ namespace GoatVaultClient_v2.Services
 
         #region Local Storage
         // GET all vaults
+        // Retrieve all vaults from local SQLite database -> which means all the vaults for the current user
         public async Task<List<VaultPayload>> LoadAllVaultsFromLocalAsync()
         {
             var vaults = await _vaultDB.Vaults.ToListAsync();

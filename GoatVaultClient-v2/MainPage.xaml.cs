@@ -5,7 +5,6 @@ namespace GoatVaultClient_v2
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
         private readonly HttpService _httpService;
         private readonly VaultService _vaultService;
 
@@ -15,11 +14,6 @@ namespace GoatVaultClient_v2
             _httpService = httpService;
             _vaultService = vaultService;
         }
-
-        /*public MainPage()
-        {
-            InitializeComponent();
-        }*/
 
         private async void OnCounterClicked(object sender, EventArgs e)
         {
@@ -33,7 +27,7 @@ namespace GoatVaultClient_v2
             var userVaults = await _httpService.GetAsync<VaultListResponse>(userVaultsUrl);
 
             // 2. Create local vault
-            var vaultPayload = _vaultService.CreateVault(password);
+            var vaultPayload = _vaultService.EncryptVault(password);
             await _vaultService.SaveVaultToLocalAsync(vaultPayload);
 
             // 3. If vault exists on server, compare nonce, if different, upload local vault to server + if vaults does not exists on server, upload local vault to server
