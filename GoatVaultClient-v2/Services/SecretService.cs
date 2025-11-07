@@ -41,5 +41,23 @@ namespace GoatVaultClient_v2.Services
                 throw new Exception("Error creating secret shares: " + ex.Message);
             }
         }
+
+        public BigInteger ReconstructSecret(string[] shareStrings)
+        {
+            try
+            {
+                var gcd = new ExtendedEuclideanAlgorithm<BigInteger>();
+
+                var combine = new ShamirsSecretSharing<BigInteger>(gcd);
+
+                var recoveredSecret = _reconstructionUseCase.Reconstruction(shareStrings);
+
+                return recoveredSecret;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error reconstructing secret: " + ex.Message);
+            }
+        }
     }
 }
