@@ -20,7 +20,7 @@ namespace GoatVaultClient_v2.Services
             this._reconstructionUseCase = reconstructionUseCase;
         }
 
-        public List<string> CreateSecret(string phrase, int totalShares, int threshold)
+        public List<string> CreateSecret(int threshold, int totalShares, string phrase)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace GoatVaultClient_v2.Services
             }
         }
 
-        public BigInteger ReconstructSecret(string[] shareStrings)
+        public string ReconstructSecret(string[] shareStrings)
         {
             try
             {
@@ -50,9 +50,14 @@ namespace GoatVaultClient_v2.Services
 
                 var combine = new ShamirsSecretSharing<BigInteger>(gcd);
 
-                var recoveredSecret = _reconstructionUseCase.Reconstruction(shareStrings);
+                var reconstructedSecret = _reconstructionUseCase.Reconstruction(shareStrings);
 
-                return recoveredSecret;
+                byte[] bytes = reconstructedSecret.ToByteArray();
+                string tempString = Encoding.UTF8.GetString(bytes);
+
+                string originalString = tempString.Replace("\0", "");
+
+                return originalString;
             }
             catch (Exception ex)
             {
