@@ -20,15 +20,21 @@ namespace GoatVaultClient_v2.Services
             this._reconstructionUseCase = reconstructionUseCase;
         }
 
-        public List<string> CreateSecret(string secret, int totalShares, int threshold)
+        public List<string> CreateSecret(string phrase, int totalShares, int threshold)
         {
             try
             {
-                var shares = _makeSharesUseCase.MakeShares(threshold, totalShares, secret);
+                var gcd = new ExtendedEuclideanAlgorithm<BigInteger>();
+
+                //// Create Shamir's Secret Sharing instance with BigInteger
+                var split = new ShamirsSecretSharing<BigInteger>(gcd);
+
+                var shares = split.MakeShares(threshold, totalShares, phrase);
 
                 var shareStrings = shares.Select(s => s.ToString()).ToList();
 
                 return shareStrings;
+
             }
             catch (Exception ex)
             {
