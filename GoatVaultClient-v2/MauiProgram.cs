@@ -52,6 +52,7 @@ namespace GoatVaultClient_v2
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
             builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
             builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
+            builder.Services.AddTransient<SecretService>();
 
             // Register your main page (or viewmodel if using MVVM)
             builder.Services.AddSingleton<MainPage>();
