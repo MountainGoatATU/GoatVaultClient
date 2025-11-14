@@ -1,8 +1,12 @@
-﻿using GoatVaultClient_v2.Database;
+﻿using System.Net.Http.Headers;
+using System.Numerics;
+using GoatVaultClient_v2.Database;
 using GoatVaultClient_v2.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Net.Http.Headers;
+using SecretSharingDotNet.Cryptography;
+using SecretSharingDotNet.Math;
 
 namespace GoatVaultClient_v2
 {
@@ -43,6 +47,12 @@ namespace GoatVaultClient_v2
             //builder.Services.AddSingleton<IVaultService, VaultService>();
             builder.Services.AddSingleton<VaultService>();
             builder.Services.AddSingleton<UserService>();
+
+            //Shamir services
+            builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
+            builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
+            builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
+            builder.Services.AddTransient<SecretService>();
 
             // Register your main page (or viewmodel if using MVVM)
             builder.Services.AddSingleton<MainPage>();
