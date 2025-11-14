@@ -7,12 +7,14 @@ namespace GoatVaultClient_v3
     {
         private readonly HttpService _httpService;
         private readonly VaultService _vaultService;
+        private readonly SercretService _sercretService;
 
-        public MainPage(HttpService httpService, VaultService vaultService)
+        public MainPage(HttpService httpService, VaultService vaultService, SercretService sercretService)
         {
             InitializeComponent();
             _httpService = httpService;
             _vaultService = vaultService;
+            _sercretService = sercretService;
         }
 
         private async void OnCounterClicked(object sender, EventArgs e)
