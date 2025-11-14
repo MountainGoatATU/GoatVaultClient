@@ -1,4 +1,5 @@
-﻿using GoatVaultClient_v3.Models;
+﻿using System.Diagnostics;
+using GoatVaultClient_v3.Models;
 using GoatVaultClient_v3.Services;
 
 namespace GoatVaultClient_v3
@@ -7,12 +8,14 @@ namespace GoatVaultClient_v3
     {
         private readonly HttpService _httpService;
         private readonly VaultService _vaultService;
+        private readonly SecretService _secretService;
 
-        public MainPage(HttpService httpService, VaultService vaultService)
+        public MainPage(HttpService httpService, VaultService vaultService, SecretService secretService)
         {
             InitializeComponent();
             _httpService = httpService;
             _vaultService = vaultService;
+            _secretService = secretService;
         }
 
         private async void OnCounterClicked(object sender, EventArgs e)
@@ -21,6 +24,19 @@ namespace GoatVaultClient_v3
             string password = "password";
             string userId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
             string vaultId = "adef17a9-ab47-4c27-832c-75ed590ac663";
+            List<string> secrets = new List<string>();
+
+            //Shamir Secret Sharing Example
+            secrets = _secretService.CreateSecret(3, 7, password);
+            Debug.WriteLine("Generated Shares: ");
+            Debug.WriteLine(string.Join(Environment.NewLine, secrets));
+            Debug.WriteLine(_secretService.ReconstructSecret(secrets.ToArray()));
+            // Testing with 3 shares
+            string[] tempValidShares = new string[] { secrets[1], secrets[2], secrets[4] };
+            Debug.WriteLine(_secretService.ReconstructSecret(tempValidShares.ToArray()));
+            //Testing with 2 shares (should fail)
+            string[] tempInvalidShares = new string[] { secrets[0], secrets[2] };
+            Debug.WriteLine(_secretService.ReconstructSecret(tempInvalidShares.ToArray()));
 
             // 1. Retrieve all vaults for specified user
             string userVaultsUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";

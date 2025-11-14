@@ -3,7 +3,59 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GoatVaultClient_v3.MainPage">
 
-    <ScrollView>
+    <Grid RowSpacing="10" ColumnSpacing="10" BackgroundColor="White" Margin="0">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Topbar -->
+        <BoxView Grid.Row="0" Grid.ColumnSpan="3" Color="LightBlue" />
+
+        <!-- Sidebar -->
+        <BoxView Grid.Column="0" Grid.Row="1" Grid.RowSpan="2" Color="LightSkyBlue" />
+
+        <!-- User Icon -->
+        <Button Grid.Row="0" Grid.Column="0" WidthRequest="80" HeightRequest="80"
+                CornerRadius="40" BackgroundColor="Transparent"
+                HorizontalOptions="Center" VerticalOptions="Center">
+            <Button.ImageSource>
+                <FontImageSource FontFamily="FASolid" Glyph="&#xf007;" Color="White" Size="36"/>
+            </Button.ImageSource>
+        </Button>
+
+        <!-- Top bar content -->
+        <StackLayout Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" Padding="8" VerticalOptions="Center" BackgroundColor="Transparent">
+            <uranium:TextField Title="Search..." WidthRequest="220" HeightRequest="40" HorizontalOptions="Start" CornerRadius="20"/>
+            <Button Text="Filter" WidthRequest="80" HeightRequest="40" />
+        </StackLayout>
+
+        <!-- Side bar content -->
+        <StackLayout Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" Spacing="18" Padding="0" BackgroundColor="Transparent" VerticalOptions="Start">
+            <Button Text="Education" BackgroundColor="Transparent" TextColor="White" HorizontalOptions="Start"/>
+            <Button Text="Wizard" BackgroundColor="Transparent" TextColor="White" HorizontalOptions="Start"/>
+            <Button Text="Settings" BackgroundColor="Transparent" TextColor="White" HorizontalOptions="Start"/>
+        </StackLayout>
+
+        <!-- Main content -->
+        <StackLayout Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Grid.ColumnSpan="2" Padding="12">
+            <!-- placeholder content -->
+            <Label Text="Main content area" FontSize="16"/>
+        </StackLayout>
+
+    </Grid>
+
+
+
+    <!--<ScrollView>
         <VerticalStackLayout
             Padding="30,0"
             Spacing="25">
@@ -31,6 +83,6 @@
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Fill" />
         </VerticalStackLayout>
-    </ScrollView>
+    </ScrollView>-->
 
 </ContentPage>

@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Logging;
 using UraniumUI;
+using SecretSharingDotNet.Cryptography;
+using SecretSharingDotNet.Math;
+using System.Numerics;
 
 namespace GoatVaultClient_v3
 {
@@ -48,6 +51,12 @@ namespace GoatVaultClient_v3
             //Register app services
             builder.Services.AddSingleton<VaultService>();
             builder.Services.AddSingleton<UserService>();
+
+            //Shamir services
+            builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
+            builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
+            builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
+            builder.Services.AddTransient<SecretService>();
 
             //Register your main page (or viewmodel if using MVVM)
             builder.Services.AddSingleton<MainPage>();
