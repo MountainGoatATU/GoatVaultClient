@@ -5,8 +5,9 @@ using GoatVaultClient_v2.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SecretSharingDotNet.Cryptography;
-using SecretSharingDotNet.Math;
+using System.Net.Http.Headers;
+using UraniumUI;
+using UraniumUI.Material;
 
 namespace GoatVaultClient_v2
 {
@@ -17,10 +18,13 @@ namespace GoatVaultClient_v2
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseUraniumUI()
+                .UseUraniumUIMaterial()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFontAwesomeIconFonts();
                 });
 
 #if DEBUG
