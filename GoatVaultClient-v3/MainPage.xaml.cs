@@ -7,9 +7,9 @@ namespace GoatVaultClient_v3
     {
         private readonly HttpService _httpService;
         private readonly VaultService _vaultService;
-        private readonly SercretService _sercretService;
+        private readonly SecretService _sercretService;
 
-        public MainPage(HttpService httpService, VaultService vaultService, SercretService sercretService)
+        public MainPage(HttpService httpService, VaultService vaultService, SecretService sercretService)
         {
             InitializeComponent();
             _httpService = httpService;
