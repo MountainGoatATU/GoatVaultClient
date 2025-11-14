@@ -1,15 +1,11 @@
-﻿using System.Net.Http.Headers;
-using System.Numerics;
-using GoatVaultClient_v2.Database;
-using GoatVaultClient_v2.Services;
+﻿using GoatVaultClient_v3.Database;
+using GoatVaultClient_v3.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
+using Microsoft.Extensions.Logging;
 using UraniumUI;
-using UraniumUI.Material;
 
-namespace GoatVaultClient_v2
+namespace GoatVaultClient_v3
 {
     public static class MauiProgram
     {
@@ -24,18 +20,20 @@ namespace GoatVaultClient_v2
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                    fonts.AddFontAwesomeIconFonts();
+
+                    fonts.AddMaterialSymbolsFonts();
                 });
 
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
-            // Setup SQLite local database
+
+            //Setup SQLite local database
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "localvault.db");
             string connectionString = $"Data Source={dbPath}";
 
             builder.Services.AddDbContext<VaultDB>(options =>
-                options.UseSqlite(connectionString));
+               options.UseSqlite(connectionString));
 
             // Register HttpService with HttpClientFactory
             builder.Services.AddHttpClient<HttpService>(client =>
@@ -46,19 +44,12 @@ namespace GoatVaultClient_v2
                     "Mozilla/5.0 (MAUI; Android/iOS/Desktop) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
                 client.DefaultRequestHeaders.Add("X-API-KEY", "PB7KTN_edJEz5oUdhTRpaz2T_-SpZj_C5ZvD2AWPcPc");
             });
-
-            // Register app services
-            //builder.Services.AddSingleton<IVaultService, VaultService>();
+       
+            //Register app services
             builder.Services.AddSingleton<VaultService>();
             builder.Services.AddSingleton<UserService>();
 
-            //Shamir services
-            builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
-            builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
-            builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
-            builder.Services.AddTransient<SecretService>();
-
-            // Register your main page (or viewmodel if using MVVM)
+            //Register your main page (or viewmodel if using MVVM)
             builder.Services.AddSingleton<MainPage>();
 
             // Ensure DB creation when app starts
