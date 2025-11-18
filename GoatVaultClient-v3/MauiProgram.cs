@@ -25,6 +25,7 @@ namespace GoatVaultClient_v3
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 
                     fonts.AddMaterialSymbolsFonts();
+                    fonts.AddFontAwesomeIconFonts();
                 });
 
 #if DEBUG
