@@ -9,7 +9,7 @@ namespace GoatVaultClient_v3.Models
 {
     public class VaultPayload
     {
-        [JsonPropertyName("vault_salt")] public string? Vault_Salt { get; set; }
+        [JsonPropertyName("vault_salt")] public string? VaultSalt { get; set; }
         [JsonPropertyName("nonce")] public string? Nonce { get; set; }
         [JsonPropertyName("encrypted_blob")] public string? EncryptedBlob { get; set; }
         [JsonPropertyName("auth_tag")] public string? AuthTag { get; set; }

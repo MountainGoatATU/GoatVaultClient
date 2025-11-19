@@ -55,7 +55,7 @@ namespace GoatVaultClient_v3.Services
             // Prepare payload for server
             return new VaultPayload
             {
-                Vault_Salt = Convert.ToBase64String(vault_salt),
+                VaultSalt = Convert.ToBase64String(vault_salt),
                 Nonce = Convert.ToBase64String(nonce),
                 EncryptedBlob = Convert.ToBase64String(ciphertext),
                 AuthTag = Convert.ToBase64String(authTag)
@@ -64,43 +64,47 @@ namespace GoatVaultClient_v3.Services
             //return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
         }
 
-        public void DecryptVault(VaultPayload payload, string password)
+        public VaultData DecryptVault(VaultPayload payload, string password)
         {
+            if (payload == null)
+                throw new ArgumentNullException(nameof(payload));
+
             try
             {
-                if (payload == null)
-                {
-                    Console.WriteLine("Vault is null!");
-                    return;
-                }
-
-                // Decode base64 fields
-                byte[] vault_salt = Convert.FromBase64String(payload.Vault_Salt);
+                // Decode Base64 fields
+                byte[] vaultSalt = Convert.FromBase64String(payload.VaultSalt);
                 byte[] nonce = Convert.FromBase64String(payload.Nonce);
                 byte[] ciphertext = Convert.FromBase64String(payload.EncryptedBlob);
                 byte[] authTag = Convert.FromBase64String(payload.AuthTag);
 
-                // Derive the same key from password and salt
-                byte[] key = DeriveKey(password, vault_salt);
+                // Derive encryption key
+                byte[] key = DeriveKey(password, vaultSalt);
 
-                // Attempt to decrypt
+                // Decrypt
                 byte[] decryptedBytes = new byte[ciphertext.Length];
                 using (var aesGcm = new AesGcm(key, 16))
                 {
                     aesGcm.Decrypt(nonce, ciphertext, authTag, decryptedBytes);
                 }
 
+                // Convert decrypted bytes to JSON
                 string decryptedJson = Encoding.UTF8.GetString(decryptedBytes);
-                Console.WriteLine("Decryption successful!");
-                Console.WriteLine(decryptedJson);
+
+                // Deserialize JSON into VaultData
+                var vaultData = JsonSerializer.Deserialize<VaultData>(decryptedJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? throw new InvalidOperationException("Failed to deserialize decrypted vault.");
+
+                return vaultData;
             }
             catch (CryptographicException)
             {
-                Console.WriteLine("Decryption failed — incorrect password or data tampered.");
+                throw new InvalidOperationException("Decryption failed — incorrect password or data tampered.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
+                throw new Exception($"Unexpected error while decrypting vault: {ex.Message}", ex);
             }
         }
         #endregion
@@ -108,7 +112,7 @@ namespace GoatVaultClient_v3.Services
         #region Local Storage
         // GET all vaults
         // Retrieve all vaults from local SQLite database -> which means all the vaults for the current user
-        public async Task<List<VaultPayload>> LoadAllVaultsFromLocalAsync()
+        /*public async Task<List<VaultPayload>> LoadAllVaultsFromLocalAsync()
         {
             var vaults = await _vaultDB.Vaults.ToListAsync();
             return vaults;
@@ -152,7 +156,7 @@ namespace GoatVaultClient_v3.Services
                 _vaultDB.Vaults.Remove(vault);
                 await _vaultDB.SaveChangesAsync();
             }
-        }
+        }*/
         #endregion
 
         #region Helper Methods
