@@ -20,9 +20,9 @@ namespace GoatVaultClient_v3.Services
         Task SaveVaultToLocalAsync(VaultPayload vault);
         Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId);
     }
-    public class VaultService(GoatVaultDB vaultDB) : IVaultService
+    public class VaultService(GoatVaultDB goatVaultDB) : IVaultService
     {
-        private readonly GoatVaultDB _vaultDB = vaultDB;
+        private readonly GoatVaultDB _goatVaultDB = goatVaultDB;
     
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
@@ -110,53 +110,40 @@ namespace GoatVaultClient_v3.Services
         #endregion
 
         #region Local Storage
-        // GET all vaults
-        // Retrieve all vaults from local SQLite database -> which means all the vaults for the current user
-        /*public async Task<List<VaultPayload>> LoadAllVaultsFromLocalAsync()
-        {
-            var vaults = await _vaultDB.Vaults.ToListAsync();
-            return vaults;
-        }
 
-        // GET vault by ID
-        public async Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId)
+        // GET
+        public async Task<DbModel?> LoadUserFromLocalAsync(string userId)
         {
-            var vault = await _vaultDB.Vaults
-                .FirstOrDefaultAsync(v => v.Id == vaultId);
-
-            return vault;
+            return await _goatVaultDB.LocalCopy
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         // POST
-        public async Task SaveVaultToLocalAsync(VaultPayload vault)
+        public async Task SaveUserToLocalAsync(DbModel user)
         {
-            // Add the vault to the DbContext
-            _vaultDB.Vaults.Add(vault);
-
-            // Save changes to the SQLite database
-            await _vaultDB.SaveChangesAsync();
+            _goatVaultDB.LocalCopy.Add(user);
+            await _goatVaultDB.SaveChangesAsync();
         }
 
         // PUT/PATCH
-        public async Task UpdateVaultInLocalAsync(VaultPayload vault)
+        public async Task UpdateUserInLocalAsync(DbModel user)
         {
-            // Update the vault in the DbContext
-            _vaultDB.Vaults.Update(vault);
-            // Save changes to the SQLite database
-            await _vaultDB.SaveChangesAsync();
+            _goatVaultDB.LocalCopy.Update(user);
+            await _goatVaultDB.SaveChangesAsync();
         }
 
         // DELETE
-        public async Task DeleteVaultFromLocalAsync(string vaultId)
+        public async Task DeleteUserFromLocalAsync(string userId)
         {
-            var vault = await _vaultDB.Vaults
-                .FirstOrDefaultAsync(v => v.Id == vaultId);
-            if (vault != null)
+            var user = await _goatVaultDB.LocalCopy
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user != null)
             {
-                _vaultDB.Vaults.Remove(vault);
-                await _vaultDB.SaveChangesAsync();
+                _goatVaultDB.LocalCopy.Remove(user);
+                await _goatVaultDB.SaveChangesAsync();
             }
-        }*/
+        }
         #endregion
 
         #region Helper Methods
