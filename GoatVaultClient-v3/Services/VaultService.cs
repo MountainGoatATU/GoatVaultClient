@@ -20,9 +20,9 @@ namespace GoatVaultClient_v3.Services
         Task SaveVaultToLocalAsync(VaultPayload vault);
         Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId);
     }
-    public class VaultService(VaultDB vaultDB) : IVaultService
+    public class VaultService(GoatVaultDB vaultDB) : IVaultService
     {
-        private readonly VaultDB _vaultDB = vaultDB;
+        private readonly GoatVaultDB _vaultDB = vaultDB;
     
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();

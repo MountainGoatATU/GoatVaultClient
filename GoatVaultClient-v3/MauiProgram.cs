@@ -35,7 +35,7 @@ namespace GoatVaultClient_v3
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "localvault.db");
             string connectionString = $"Data Source={dbPath}";
 
-            builder.Services.AddDbContext<VaultDB>(options =>
+            builder.Services.AddDbContext<GoatVaultDB>(options =>
                options.UseSqlite(connectionString));
 
             // Register HttpService with HttpClientFactory
@@ -64,7 +64,7 @@ namespace GoatVaultClient_v3
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<VaultDB>();
+                var db = scope.ServiceProvider.GetRequiredService<GoatVaultDB>();
                 db.Database.EnsureCreated();
             }
 
