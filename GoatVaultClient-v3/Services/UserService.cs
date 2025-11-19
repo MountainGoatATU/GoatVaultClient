@@ -41,6 +41,18 @@ namespace GoatVaultClient_v3.Services
             //return JsonSerializer.Serialize(userPayload, new JsonSerializerOptions { WriteIndented = true });
         }
 
+        // Used during login to generate the auth verifier to compare against stored value
+        public string GenerateAuthVerifier(string masterPassword, string authSaltBase64)
+        {
+            // Convert the stored Base64 salt to byte[]
+            byte[] authSalt = Convert.FromBase64String(authSaltBase64);
+
+            // Hash the password using the salt
+            string authVerifier = HashPassword(masterPassword, authSalt);
+
+            return authVerifier;
+        }
+
         private static string HashPassword(string password, byte[] salt)
         {
             byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
