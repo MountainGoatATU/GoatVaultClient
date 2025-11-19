@@ -15,7 +15,7 @@ namespace GoatVaultClient_v3.Services
 {
     public interface IVaultService
     {
-        VaultPayload EncryptVault(string password);
+        VaultPayload EncryptVault(string password, VaultData vaultData);
         void DecryptVault(VaultPayload vault, string password);
         Task SaveVaultToLocalAsync(VaultPayload vault);
         Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId);
@@ -33,19 +33,10 @@ namespace GoatVaultClient_v3.Services
         };
 
         #region Vault Encryption/Decryption
-        public VaultPayload EncryptVault(string password)
+        public VaultPayload EncryptVault(string masterPassword, VaultData vaultData)
         {
-            byte[] salt = GenerateRandomBytes(16);
-            byte[] key = DeriveKey(password, salt);
-
-            // Example vault content (JSON)
-            var vaultData = new
-            {
-                entries = new[] {
-                    new { site = "github.com", username = "alice", password = "ghp_secret" },
-                    new { site = "gmail.com", username = "bob", password = "gmail_secret" }
-                }
-            };
+            byte[] vault_salt = GenerateRandomBytes(16);
+            byte[] key = DeriveKey(masterPassword, vault_salt);
 
             string vaultJson = JsonSerializer.Serialize(vaultData, JsonOptions);
             byte[] plaintextBytes = Encoding.UTF8.GetBytes(vaultJson);
@@ -64,15 +55,10 @@ namespace GoatVaultClient_v3.Services
             // Prepare payload for server
             return new VaultPayload
             {
-                Id = Guid.NewGuid().ToString(), // Generate a new UUID
-                UserId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a",
-                Name = "Testing Vault",
-                Salt = Convert.ToBase64String(salt),
+                Vault_Salt = Convert.ToBase64String(vault_salt),
                 Nonce = Convert.ToBase64String(nonce),
                 EncryptedBlob = Convert.ToBase64String(ciphertext),
-                AuthTag = Convert.ToBase64String(authTag),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                AuthTag = Convert.ToBase64String(authTag)
             };
 
             //return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
@@ -89,13 +75,13 @@ namespace GoatVaultClient_v3.Services
                 }
 
                 // Decode base64 fields
-                byte[] salt = Convert.FromBase64String(payload.Salt);
+                byte[] vault_salt = Convert.FromBase64String(payload.Vault_Salt);
                 byte[] nonce = Convert.FromBase64String(payload.Nonce);
                 byte[] ciphertext = Convert.FromBase64String(payload.EncryptedBlob);
                 byte[] authTag = Convert.FromBase64String(payload.AuthTag);
 
                 // Derive the same key from password and salt
-                byte[] key = DeriveKey(password, salt);
+                byte[] key = DeriveKey(password, vault_salt);
 
                 // Attempt to decrypt
                 byte[] decryptedBytes = new byte[ciphertext.Length];

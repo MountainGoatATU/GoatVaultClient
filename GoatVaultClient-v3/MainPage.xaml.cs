@@ -26,6 +26,9 @@ namespace GoatVaultClient_v3
             string vaultId = "adef17a9-ab47-4c27-832c-75ed590ac663";
             List<string> secrets = new List<string>();
 
+
+
+            /*
             //Shamir Secret Sharing Example
             secrets = _secretService.CreateSecret(3, 7, password);
             Debug.WriteLine("Generated Shares: ");
@@ -67,6 +70,7 @@ namespace GoatVaultClient_v3
                 string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
                 var vaultResponse = await _httpService.PostAsync<VaultPayload>(vaultUrl, vaultPayload);
             }
+            */
         }
     }
 }

@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace GoatVaultClient_v3.Models
+{
+    public class RegisterResponse
+    {
+        [JsonPropertyName("_id")] public string Id { get; set; }
+        [JsonPropertyName("email")] public string Email { get; set; }
+        [JsonPropertyName("auth_salt")] public string AuthSalt { get; set; }
+        [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; set; }
+        [JsonPropertyName("mfa_secret")] public string? MfaSecret { get; set; }
+        [JsonPropertyName("vault")] public VaultPayload Vault { get; set; }
+    }
+}
