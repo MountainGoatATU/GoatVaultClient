@@ -7,13 +7,15 @@ namespace GoatVaultClient_v3
     public partial class MainPage : ContentPage
     {
         private readonly HttpService _httpService;
+        private readonly UserService _userService;
         private readonly VaultService _vaultService;
         private readonly SecretService _secretService;
 
-        public MainPage(HttpService httpService, VaultService vaultService, SecretService secretService)
+        public MainPage(HttpService httpService, UserService userService,VaultService vaultService, SecretService secretService)
         {
             InitializeComponent();
             _httpService = httpService;
+            _userService = userService;
             _vaultService = vaultService;
             _secretService = secretService;
         }
