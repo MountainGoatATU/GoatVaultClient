@@ -8,11 +8,13 @@ public partial class LoginPage : ContentPage
 	}
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new GratitudePage());
+        // Pass a valid IServiceProvider instance to GratitudePage
+        await Navigation.PushAsync(new GratitudePage(((App)Application.Current).Services));
     }
 
     private async void OnGoToRegister(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new RegisterPage());
+        // Pass a valid IServiceProvider instance to RegisterPage
+        await Navigation.PushAsync(new RegisterPage(((App)Application.Current).Services));
     }
 }
