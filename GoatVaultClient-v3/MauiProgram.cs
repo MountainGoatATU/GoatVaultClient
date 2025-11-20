@@ -1,8 +1,11 @@
-﻿using GoatVaultClient_v3.Database;
+﻿using System.Net.Http.Headers;
+using System.Numerics;
+using GoatVaultClient_v3.Database;
 using GoatVaultClient_v3.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Logging;
+using SecretSharingDotNet.Cryptography;
+using SecretSharingDotNet.Math;
 using UraniumUI;
 using SecretSharingDotNet.Cryptography;
 using SecretSharingDotNet.Math;
@@ -25,6 +28,7 @@ namespace GoatVaultClient_v3
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 
                     fonts.AddMaterialSymbolsFonts();
+                    fonts.AddFontAwesomeIconFonts();
                 });
 
 #if DEBUG
@@ -58,8 +62,12 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
             builder.Services.AddTransient<SecretService>();
 
-            //Register your main page (or viewmodel if using MVVM)
-            builder.Services.AddSingleton<MainPage>();
+            // Register pages
+            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<IntroductionPage>();
+            builder.Services.AddTransient<RegisterPage>();
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<GratitudePage>();
 
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GoatVaultClient_v3.IntroductionPage"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+             xmlns:fa="clr-namespace:UraniumUI.Icons.FontAwesome;assembly=UraniumUI.Icons.FontAwesome"
+             Title="Introduction">
+    <Grid Padding="30">
+        <VerticalStackLayout Spacing="30" VerticalOptions="Center" HorizontalOptions="Center">
+
+            <!-- Logo -->
+            <material:ButtonView WidthRequest="140" HeightRequest="140" BackgroundColor="LightSkyBlue">
+                <material:ButtonView.StrokeShape>
+                    <RoundRectangle CornerRadius="70"/>
+                </material:ButtonView.StrokeShape>
+                <Image Source="vault_icon.png" Aspect="AspectFit"/>
+            </material:ButtonView>
+
+            <Label Text="Welcome to Goat Vault!" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Label Text="Securely store and manage all your passwords in one place." 
+                   FontSize="16" 
+                   HorizontalOptions="Center" 
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Get Started -->
+            <material:ButtonView WidthRequest="220" HeightRequest="55" BackgroundColor="SkyBlue">
+                <material:ButtonView.StrokeShape>
+                    <RoundRectangle CornerRadius="27"/>
+                </material:ButtonView.StrokeShape>
+                <Label Text="Get Started" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
+                <material:ButtonView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnGetStartedClicked"/>
+                </material:ButtonView.GestureRecognizers>
+            </material:ButtonView>
+
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

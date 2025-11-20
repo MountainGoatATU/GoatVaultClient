@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GoatVaultClient_v3.RegisterPage"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+             xmlns:fa="clr-namespace:UraniumUI.Icons.FontAwesome;assembly=UraniumUI.Icons.FontAwesome"
+             Title="RegisterPage">
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="20">
+
+            <material:TextField x:Name="UsernameEntry" Title="Username"/>
+            <material:TextField x:Name="MasterPasswordEntry" Title="Master Password" IsPassword="True"/>
+            <material:TextField x:Name="ConfirmPasswordEntry" Title="Confirm Password" IsPassword="True"/>
+
+            <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="SkyBlue">
+                <material:ButtonView.StrokeShape>
+                    <RoundRectangle CornerRadius="25"/>
+                </material:ButtonView.StrokeShape>
+                <Label Text="Register" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
+                <material:ButtonView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnRegisterClicked"/>
+                </material:ButtonView.GestureRecognizers>
+            </material:ButtonView>
+
+            <Label Text="Already have an account?" TextColor="Blue" HorizontalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnGoToLogin"/>
+                </Label.GestureRecognizers>
+            </Label>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

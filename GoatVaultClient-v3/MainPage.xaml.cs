@@ -8,14 +8,14 @@ namespace GoatVaultClient_v3
     {
         private readonly HttpService _httpService;
         private readonly VaultService _vaultService;
-        private readonly SecretService _secretService;
+        private readonly SecretService _sercretService;
 
-        public MainPage(HttpService httpService, VaultService vaultService, SecretService secretService)
+        public MainPage(HttpService httpService, VaultService vaultService, SecretService sercretService)
         {
             InitializeComponent();
             _httpService = httpService;
             _vaultService = vaultService;
-            _secretService = secretService;
+            _sercretService = sercretService;
         }
 
         private async void OnCounterClicked(object sender, EventArgs e)

@@ -6,12 +6,30 @@
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
+    <!-- Primary Colors -->
+    <Color x:Key="PrimaryColor">#2196F3</Color>
+    <Color x:Key="PrimaryLightColor">#BBDEFB</Color>
+    <Color x:Key="PrimaryDarkColor">#1976D2</Color>
+
+    <!-- Secondary -->
+    <Color x:Key="AccentColor">#FF9800</Color>
+
+    <!-- Backgrounds -->
+    <Color x:Key="SidebarBackground">#D6ECFF</Color>
+    <Color x:Key="MainBackground">#F5F5F5</Color>
+    <Color x:Key="ButtonBackground">#87CEFA</Color>
+
+    <!-- Text -->
+    <Color x:Key="TextPrimary">#212121</Color>
+    <Color x:Key="TextSecondary">#757575</Color>
+    
     <Color x:Key="Primary">#512BD4</Color>
     <Color x:Key="PrimaryDark">#ac99ea</Color>
     <Color x:Key="PrimaryDarkText">#242424</Color>
     <Color x:Key="Secondary">#DFD8F7</Color>
     <Color x:Key="SecondaryDarkText">#9880e5</Color>
     <Color x:Key="Tertiary">#2B0B98</Color>
+    <Color x:Key="LightSkyBlue">#BFEFFF</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
@@ -33,6 +51,8 @@
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+    <SolidColorBrush x:Key="SkyBlueBrush" Color="#87CEEB"/>
+    <SolidColorBrush x:Key="LightSkyBlueBrush" Color="#BFEFFF"/>
 
     <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
     <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
@@ -42,4 +62,5 @@
     <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+    
 </ResourceDictionary>
