@@ -49,12 +49,12 @@ namespace GoatVaultClient_v3
                 client.Timeout = TimeSpan.FromSeconds(10);
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(
                     "Mozilla/5.0 (MAUI; Android/iOS/Desktop) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
-                client.DefaultRequestHeaders.Add("X-API-KEY", "PB7KTN_edJEz5oUdhTRpaz2T_-SpZj_C5ZvD2AWPcPc");
             });
        
             //Register app services
             builder.Services.AddSingleton<VaultService>();
             builder.Services.AddSingleton<UserService>();
+            builder.Services.AddSingleton<AuthTokenService>();
 
             //Shamir services
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
