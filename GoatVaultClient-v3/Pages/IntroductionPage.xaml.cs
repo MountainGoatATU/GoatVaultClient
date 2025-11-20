@@ -8,12 +8,13 @@ public partial class Introduction : ContentPage
 
     public Introduction(IServiceProvider services)
     {
-        InitializeComponent();
         _services = services;
+        InitializeComponent();
     }
 
     private async void OnGetStartedClicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new RegisterPage(_services));
+        var registerPage = _services.GetRequiredService<RegisterPage>();
+        await Navigation.PushAsync(registerPage);
     }
 }

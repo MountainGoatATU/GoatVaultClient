@@ -1,9 +1,10 @@
 ﻿namespace GoatVaultClient_v3
 {
+    using Microsoft.Extensions.DependencyInjection;
+
     public partial class App : Application
     {
         private readonly IServiceProvider _services;
-
         public IServiceProvider Services => _services;
 
         public App(IServiceProvider services)
@@ -14,7 +15,8 @@
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new NavigationPage(new Introduction(_services)));
+            var introductionPage = _services.GetRequiredService<Introduction>();
+            return new Window(new NavigationPage(introductionPage));
         }
     }
 }

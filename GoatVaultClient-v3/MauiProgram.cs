@@ -59,8 +59,12 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
             builder.Services.AddTransient<SecretService>();
 
-            //Register the main page
+            // Register pages
             builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<Introduction>();
+            builder.Services.AddTransient<RegisterPage>();
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<GratitudePage>();
 
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())

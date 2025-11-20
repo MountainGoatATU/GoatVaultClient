@@ -11,11 +11,13 @@ public partial class RegisterPage : ContentPage
     }
     private async void OnRegisterClicked(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new GratitudePage(_services));
+        var gratitudePage = _services.GetRequiredService<GratitudePage>();
+        await Navigation.PushAsync(gratitudePage);
     }
 
     private async void OnGoToLogin(object sender, EventArgs e)
     {
-        await Navigation.PushAsync(new LoginPage());
+        var loginPage = _services.GetRequiredService<LoginPage>();
+        await Navigation.PushAsync(loginPage);
     }
 }

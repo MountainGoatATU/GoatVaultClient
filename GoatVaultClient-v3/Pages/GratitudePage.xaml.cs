@@ -13,9 +13,9 @@ public partial class GratitudePage : ContentPage
         InitializeComponent();
     }
 
-    private void OnContinueClicked(object sender, EventArgs e)
+    private async void OnContinueClicked(object sender, EventArgs e)
     {
         var mainPage = _services.GetRequiredService<MainPage>();
-        Application.Current.MainPage = new NavigationPage(mainPage);
+        await Navigation.PushAsync(mainPage);
     }
 }
