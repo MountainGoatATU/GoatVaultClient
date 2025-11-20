@@ -61,7 +61,7 @@ namespace GoatVaultClient_v3
 
             // Register pages
             builder.Services.AddTransient<MainPage>();
-            builder.Services.AddTransient<Introduction>();
+            builder.Services.AddTransient<IntroductionPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<GratitudePage>();

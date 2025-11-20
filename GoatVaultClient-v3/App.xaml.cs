@@ -15,7 +15,7 @@
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            var introductionPage = _services.GetRequiredService<Introduction>();
+            var introductionPage = _services.GetRequiredService<IntroductionPage>();
             return new Window(new NavigationPage(introductionPage));
         }
     }
