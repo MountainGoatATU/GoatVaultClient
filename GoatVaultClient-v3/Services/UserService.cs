@@ -17,43 +17,40 @@ namespace GoatVaultClient_v3.Services
     }
     public interface IUserService
     {
-        UserPayload RegisterUser(string email, string password);
-        LoginStatus LoginUser(string email, string password, string storedSalt, string storedPasswordHash);
+        RegisterRequest RegisterUser(string email, string password, VaultPayload vault);
     }
-    internal class UserService : IUserService
+    public class UserService : IUserService
     {
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
-        public UserPayload RegisterUser(string email, string password)
+        public RegisterRequest RegisterUser(string email, string masterPassword, VaultPayload vault)
         {
-            byte[] salt = new byte[16];
-            Rng.GetBytes(salt);
+            byte[] authSalt = new byte[16];
+            Rng.GetBytes(authSalt);
 
-            var passwordHash = HashPassword(password, salt);
+            var authVerifier = HashPassword(masterPassword, authSalt);
 
-            return new UserPayload
+            return new RegisterRequest
             {
+                AuthSalt = Convert.ToBase64String(authSalt),
+                AuthVerifier = authVerifier,
                 Email = email,
-                Salt = Convert.ToBase64String(salt),
-                Password_hash = passwordHash,
-                Mfa_enabled = false,
-                Mfa_secret = ""
+                Vault = vault,
             };
 
             //return JsonSerializer.Serialize(userPayload, new JsonSerializerOptions { WriteIndented = true });
         }
 
-        public LoginStatus LoginUser(string email, string password, string storedSalt, string storedPasswordHash)
+        // Used during login to generate the auth verifier to compare against stored value
+        public string GenerateAuthVerifier(string masterPassword, string authSaltBase64)
         {
-            byte[] salt = Convert.FromBase64String(storedSalt);
-            var newHash = HashPassword(password, salt);
+            // Convert the stored Base64 salt to byte[]
+            byte[] authSalt = Convert.FromBase64String(authSaltBase64);
 
-            bool isEqual = CryptographicOperations.FixedTimeEquals(
-                Convert.FromBase64String(newHash),
-                Convert.FromBase64String(storedPasswordHash)
-            );
+            // Hash the password using the salt
+            string authVerifier = HashPassword(masterPassword, authSalt);
 
-            return isEqual ? LoginStatus.Success : LoginStatus.Error;
+            return authVerifier;
         }
 
         private static string HashPassword(string password, byte[] salt)
