@@ -48,7 +48,7 @@
                 </Grid.ColumnDefinitions>
 
                 <material:TextField Grid.Column="0" Title="Search..." WidthRequest="500" HeightRequest="60" Margin="20,0,0,0"/>
-                
+
                 <material:ButtonView Grid.Column="1" WidthRequest="40" HeightRequest="40" BackgroundColor="SkyBlue">
                     <material:ButtonView.StrokeShape>
                         <RoundRectangle CornerRadius="20"/>
@@ -209,7 +209,7 @@
     </Grid>
 
     <!--<ScrollView>
-     <VerticalStackLayout
+       <VerticalStackLayout
          Padding="30,0"
          Spacing="25">
          <Image
@@ -235,6 +235,6 @@
              SemanticProperties.Hint="Counts the number of times you click"
              Clicked="OnCounterClicked"
              HorizontalOptions="Fill" />
-     </VerticalStackLayout>
- </ScrollView>-->
+        </VerticalStackLayout>
+    </ScrollView>-->
 </ContentPage>

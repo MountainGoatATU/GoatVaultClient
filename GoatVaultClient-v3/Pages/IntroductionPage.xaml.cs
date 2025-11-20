@@ -2,11 +2,11 @@ using Microsoft.Maui.Controls;
 
 namespace GoatVaultClient_v3;
 
-public partial class Introduction : ContentPage
+public partial class IntroductionPage : ContentPage
 {
     private readonly IServiceProvider _services;
 
-    public Introduction(IServiceProvider services)
+    public IntroductionPage(IServiceProvider services)
     {
         _services = services;
         InitializeComponent();
