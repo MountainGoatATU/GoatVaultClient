@@ -108,7 +108,7 @@ namespace GoatVaultClient_v3.Services
         #endregion
 
         #region Local Storage
-        ´/*
+        /*
         // GET
         public async Task<DbModel?> LoadUserFromLocalAsync(string userId)
         {
