@@ -16,9 +16,7 @@ namespace GoatVaultClient_v3.Services
     public interface IVaultService
     {
         VaultPayload EncryptVault(string password, VaultData vaultData);
-        void DecryptVault(VaultPayload vault, string password);
-        Task SaveVaultToLocalAsync(VaultPayload vault);
-        Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId);
+        VaultData DecryptVault(VaultPayload vault, string password);
     }
     public class VaultService(GoatVaultDB goatVaultDB) : IVaultService
     {
@@ -110,7 +108,7 @@ namespace GoatVaultClient_v3.Services
         #endregion
 
         #region Local Storage
-
+        ´/*
         // GET
         public async Task<DbModel?> LoadUserFromLocalAsync(string userId)
         {
@@ -144,6 +142,7 @@ namespace GoatVaultClient_v3.Services
                 await _goatVaultDB.SaveChangesAsync();
             }
         }
+        */
         #endregion
 
         #region Helper Methods
