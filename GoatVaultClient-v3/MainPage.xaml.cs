@@ -17,7 +17,7 @@ namespace GoatVaultClient_v3
             _httpService = httpService;
             _userService = userService;
             _vaultService = vaultService;
-            _secretService = sercretService;
+            _secretService = secretService;
         }
 
         private async void OnCounterClicked(object sender, EventArgs e)
