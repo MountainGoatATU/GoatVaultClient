@@ -8,7 +8,7 @@
              Title="LoginPage1">
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="20">
-            <material:TextField x:Name="UsernameEntry" Title="Username"/>
+            <material:TextField x:Name="EmailEntry" Title="Email"/>
             <material:TextField x:Name="PasswordEntry" Title="Password" IsPassword="True"/>
 
             <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="SkyBlue">

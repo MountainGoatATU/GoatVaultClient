@@ -20,7 +20,7 @@ public partial class LoginPage : ContentPage
 	}
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        string email = UsernameEntry.Text?.Trim() ?? "";
+        string email = EmailEntry.Text?.Trim() ?? "";
         string password = PasswordEntry.Text ?? "";
         
         // Validation
@@ -39,11 +39,12 @@ public partial class LoginPage : ContentPage
                 initPayload
             );
 
+            //Generate local salt 
             string loginVerifier = _userService.GenerateAuthVerifier(password, initResponse.AuthSalt);
 
             var verifyPayload = new VerifyRequest
             {
-                UserId = initResponse.UserId,
+                UserId = Guid.Parse(initResponse.UserId),
                 AuthVerifier = loginVerifier
             };
 
