@@ -26,7 +26,7 @@ namespace GoatVaultClient_v3
 
         private async void OnRegisterClicked(object sender, EventArgs e)
         {
-            string email = UsernameEntry.Text?.Trim() ?? "";
+            string email = EmailEntry.Text?.Trim() ?? "";
             string password = MasterPasswordEntry.Text ?? "";
             string confirmPassword = ConfirmPasswordEntry.Text ?? "";
 
@@ -56,9 +56,6 @@ namespace GoatVaultClient_v3
                     "http://127.0.0.1:8000/v1/auth/register",
                     registerRequest
                 );
-
-                // Save returned token or auth_salt
-                _authTokenService.SetToken(response.AuthSalt);
 
                 // Navigate to next page
                 var gratitudePage = _services.GetRequiredService<GratitudePage>();
