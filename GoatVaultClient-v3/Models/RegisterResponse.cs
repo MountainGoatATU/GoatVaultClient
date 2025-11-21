@@ -11,9 +11,5 @@ namespace GoatVaultClient_v3.Models
     {
         [JsonPropertyName("_id")] public string Id { get; set; }
         [JsonPropertyName("email")] public string Email { get; set; }
-        [JsonPropertyName("auth_salt")] public string AuthSalt { get; set; }
-        [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; set; }
-        [JsonPropertyName("mfa_secret")] public string? MfaSecret { get; set; }
-        [JsonPropertyName("vault")] public VaultPayload Vault { get; set; }
     }
 }

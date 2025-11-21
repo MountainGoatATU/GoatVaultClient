@@ -10,6 +10,7 @@ namespace GoatVaultClient_v3.Models
     public class VerifyResponse
     {
         [JsonPropertyName("access_token")] public string AccessToken { get; set; }
+        [JsonPropertyName("vault")] public VaultPayload Vault { get; set; }
         [JsonPropertyName("token_type")] public string TokenType { get; set; }
     }
 }

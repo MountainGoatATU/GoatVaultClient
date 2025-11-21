@@ -9,7 +9,7 @@ namespace GoatVaultClient_v3.Models
 {
     public class VerifyRequest
     {
-        [JsonPropertyName("user_id")] public string UserId { get; set; }
+        [JsonPropertyName("_id")] public Guid UserId { get; set; }
         [JsonPropertyName("auth_verifier")] public string AuthVerifier { get; set; }
     }
 }
