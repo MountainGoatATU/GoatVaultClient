@@ -39,7 +39,7 @@ namespace GoatVaultClient_v3
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "localvault.db");
             string connectionString = $"Data Source={dbPath}";
 
-            builder.Services.AddDbContext<VaultDB>(options =>
+            builder.Services.AddDbContext<GoatVaultDB>(options =>
                options.UseSqlite(connectionString));
 
             // Register HttpService with HttpClientFactory
@@ -49,12 +49,12 @@ namespace GoatVaultClient_v3
                 client.Timeout = TimeSpan.FromSeconds(10);
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(
                     "Mozilla/5.0 (MAUI; Android/iOS/Desktop) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
-                client.DefaultRequestHeaders.Add("X-API-KEY", "PB7KTN_edJEz5oUdhTRpaz2T_-SpZj_C5ZvD2AWPcPc");
             });
        
             //Register app services
             builder.Services.AddSingleton<VaultService>();
             builder.Services.AddSingleton<UserService>();
+            builder.Services.AddSingleton<AuthTokenService>();
 
             //Shamir services
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
@@ -72,7 +72,7 @@ namespace GoatVaultClient_v3
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<VaultDB>();
+                var db = scope.ServiceProvider.GetRequiredService<GoatVaultDB>();
                 db.Database.EnsureCreated();
             }
 

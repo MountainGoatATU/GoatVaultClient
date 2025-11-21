@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,12 +14,14 @@ namespace GoatVaultClient_v3.Services
         Task<T> GetAsync<T>(string url);
         Task<T> PostAsync<T>(string url, object payload);
         Task<T> PatchAsync<T>(string url, object payload);
+        Task<T> DeleteAsync<T>(string url);
     }
 
     // Use of primary constructor to inject HttpClient dependency
-    public class HttpService(HttpClient client) : IHttpService
+    public class HttpService(HttpClient client, AuthTokenService authTokenService) : IHttpService
     {
         private readonly HttpClient _client = client;
+        private readonly AuthTokenService _authTokenService = authTokenService;
 
         // JSON serialization options
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -32,6 +35,13 @@ namespace GoatVaultClient_v3.Services
             {
                 // Create the HTTP request based on the method and URL
                 using var request = new HttpRequestMessage(method, url);
+
+                // Attach Authorization header if token exists
+                var token = _authTokenService.GetToken();
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
 
                 // If there's a payload, serialize it to JSON and add it to the request body
                 if (payload != null)

@@ -7,13 +7,15 @@ namespace GoatVaultClient_v3
     public partial class MainPage : ContentPage
     {
         private readonly HttpService _httpService;
+        private readonly UserService _userService;
         private readonly VaultService _vaultService;
         private readonly SecretService _secretService;
 
-        public MainPage(HttpService httpService, VaultService vaultService, SecretService sercretService)
+        public MainPage(HttpService httpService, UserService userService,VaultService vaultService, SecretService secretService)
         {
             InitializeComponent();
             _httpService = httpService;
+            _userService = userService;
             _vaultService = vaultService;
             _secretService = sercretService;
         }
@@ -26,6 +28,9 @@ namespace GoatVaultClient_v3
             string vaultId = "adef17a9-ab47-4c27-832c-75ed590ac663";
             List<string> secrets = new List<string>();
 
+
+
+            /*
             //Shamir Secret Sharing Example
             secrets = _secretService.CreateSecret(3, 7, password);
             Debug.WriteLine("Generated Shares: ");
@@ -67,6 +72,7 @@ namespace GoatVaultClient_v3
                 string vaultUrl = $"http://127.0.0.1:8000/v1/users/{userId}/vaults/";
                 var vaultResponse = await _httpService.PostAsync<VaultPayload>(vaultUrl, vaultPayload);
             }
+            */
         }
     }
 }

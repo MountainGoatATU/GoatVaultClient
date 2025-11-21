@@ -15,14 +15,12 @@ namespace GoatVaultClient_v3.Services
 {
     public interface IVaultService
     {
-        VaultPayload EncryptVault(string password);
-        void DecryptVault(VaultPayload vault, string password);
-        Task SaveVaultToLocalAsync(VaultPayload vault);
-        Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId);
+        VaultPayload EncryptVault(string password, VaultData vaultData);
+        VaultData DecryptVault(VaultPayload vault, string password);
     }
-    public class VaultService(VaultDB vaultDB) : IVaultService
+    public class VaultService(GoatVaultDB goatVaultDB) : IVaultService
     {
-        private readonly VaultDB _vaultDB = vaultDB;
+        private readonly GoatVaultDB _goatVaultDB = goatVaultDB;
     
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
@@ -33,19 +31,10 @@ namespace GoatVaultClient_v3.Services
         };
 
         #region Vault Encryption/Decryption
-        public VaultPayload EncryptVault(string password)
+        public VaultPayload EncryptVault(string masterPassword, VaultData vaultData)
         {
-            byte[] salt = GenerateRandomBytes(16);
-            byte[] key = DeriveKey(password, salt);
-
-            // Example vault content (JSON)
-            var vaultData = new
-            {
-                entries = new[] {
-                    new { site = "github.com", username = "alice", password = "ghp_secret" },
-                    new { site = "gmail.com", username = "bob", password = "gmail_secret" }
-                }
-            };
+            byte[] vault_salt = GenerateRandomBytes(16);
+            byte[] key = DeriveKey(masterPassword, vault_salt);
 
             string vaultJson = JsonSerializer.Serialize(vaultData, JsonOptions);
             byte[] plaintextBytes = Encoding.UTF8.GetBytes(vaultJson);
@@ -64,109 +53,96 @@ namespace GoatVaultClient_v3.Services
             // Prepare payload for server
             return new VaultPayload
             {
-                Id = Guid.NewGuid().ToString(), // Generate a new UUID
-                UserId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a",
-                Name = "Testing Vault",
-                Salt = Convert.ToBase64String(salt),
+                VaultSalt = Convert.ToBase64String(vault_salt),
                 Nonce = Convert.ToBase64String(nonce),
                 EncryptedBlob = Convert.ToBase64String(ciphertext),
-                AuthTag = Convert.ToBase64String(authTag),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                AuthTag = Convert.ToBase64String(authTag)
             };
 
             //return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
         }
 
-        public void DecryptVault(VaultPayload payload, string password)
+        public VaultData DecryptVault(VaultPayload payload, string password)
         {
+            if (payload == null)
+                throw new ArgumentNullException(nameof(payload));
+
             try
             {
-                if (payload == null)
-                {
-                    Console.WriteLine("Vault is null!");
-                    return;
-                }
-
-                // Decode base64 fields
-                byte[] salt = Convert.FromBase64String(payload.Salt);
+                // Decode Base64 fields
+                byte[] vaultSalt = Convert.FromBase64String(payload.VaultSalt);
                 byte[] nonce = Convert.FromBase64String(payload.Nonce);
                 byte[] ciphertext = Convert.FromBase64String(payload.EncryptedBlob);
                 byte[] authTag = Convert.FromBase64String(payload.AuthTag);
 
-                // Derive the same key from password and salt
-                byte[] key = DeriveKey(password, salt);
+                // Derive encryption key
+                byte[] key = DeriveKey(password, vaultSalt);
 
-                // Attempt to decrypt
+                // Decrypt
                 byte[] decryptedBytes = new byte[ciphertext.Length];
                 using (var aesGcm = new AesGcm(key, 16))
                 {
                     aesGcm.Decrypt(nonce, ciphertext, authTag, decryptedBytes);
                 }
 
+                // Convert decrypted bytes to JSON
                 string decryptedJson = Encoding.UTF8.GetString(decryptedBytes);
-                Console.WriteLine("Decryption successful!");
-                Console.WriteLine(decryptedJson);
+
+                // Deserialize JSON into VaultData
+                var vaultData = JsonSerializer.Deserialize<VaultData>(decryptedJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? throw new InvalidOperationException("Failed to deserialize decrypted vault.");
+
+                return vaultData;
             }
             catch (CryptographicException)
             {
-                Console.WriteLine("Decryption failed — incorrect password or data tampered.");
+                throw new InvalidOperationException("Decryption failed — incorrect password or data tampered.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
+                throw new Exception($"Unexpected error while decrypting vault: {ex.Message}", ex);
             }
         }
         #endregion
 
         #region Local Storage
-        // GET all vaults
-        // Retrieve all vaults from local SQLite database -> which means all the vaults for the current user
-        public async Task<List<VaultPayload>> LoadAllVaultsFromLocalAsync()
+        /*
+        // GET
+        public async Task<DbModel?> LoadUserFromLocalAsync(string userId)
         {
-            var vaults = await _vaultDB.Vaults.ToListAsync();
-            return vaults;
-        }
-
-        // GET vault by ID
-        public async Task<VaultPayload> LoadVaultFromLocalAsync(string vaultId)
-        {
-            var vault = await _vaultDB.Vaults
-                .FirstOrDefaultAsync(v => v.Id == vaultId);
-
-            return vault;
+            return await _goatVaultDB.LocalCopy
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         // POST
-        public async Task SaveVaultToLocalAsync(VaultPayload vault)
+        public async Task SaveUserToLocalAsync(DbModel user)
         {
-            // Add the vault to the DbContext
-            _vaultDB.Vaults.Add(vault);
-
-            // Save changes to the SQLite database
-            await _vaultDB.SaveChangesAsync();
+            _goatVaultDB.LocalCopy.Add(user);
+            await _goatVaultDB.SaveChangesAsync();
         }
 
         // PUT/PATCH
-        public async Task UpdateVaultInLocalAsync(VaultPayload vault)
+        public async Task UpdateUserInLocalAsync(DbModel user)
         {
-            // Update the vault in the DbContext
-            _vaultDB.Vaults.Update(vault);
-            // Save changes to the SQLite database
-            await _vaultDB.SaveChangesAsync();
+            _goatVaultDB.LocalCopy.Update(user);
+            await _goatVaultDB.SaveChangesAsync();
         }
 
         // DELETE
-        public async Task DeleteVaultFromLocalAsync(string vaultId)
+        public async Task DeleteUserFromLocalAsync(string userId)
         {
-            var vault = await _vaultDB.Vaults
-                .FirstOrDefaultAsync(v => v.Id == vaultId);
-            if (vault != null)
+            var user = await _goatVaultDB.LocalCopy
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user != null)
             {
-                _vaultDB.Vaults.Remove(vault);
-                await _vaultDB.SaveChangesAsync();
+                _goatVaultDB.LocalCopy.Remove(user);
+                await _goatVaultDB.SaveChangesAsync();
             }
         }
+        */
         #endregion
 
         #region Helper Methods
