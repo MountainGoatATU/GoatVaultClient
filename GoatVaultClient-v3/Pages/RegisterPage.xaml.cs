@@ -52,7 +52,7 @@ namespace GoatVaultClient_v3
                 registerRequest.Vault = vaultPayload;
 
                 // Send request to backend
-                var response = await _httpService.PostAsync<RegisterResponse>(
+                var response = await _httpService.PostAsync<AuthRegisterResponse>(
                     "http://127.0.0.1:8000/v1/auth/register",
                     registerRequest
                 );

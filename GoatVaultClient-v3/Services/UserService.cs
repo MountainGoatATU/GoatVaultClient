@@ -17,20 +17,20 @@ namespace GoatVaultClient_v3.Services
     }
     public interface IUserService
     {
-        RegisterRequest RegisterUser(string email, string password, VaultPayload vault);
+        AuthRegisterRequest RegisterUser(string email, string password, VaultPayload vault);
     }
     public class UserService : IUserService
     {
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
-        public RegisterRequest RegisterUser(string email, string masterPassword, VaultPayload vault)
+        public AuthRegisterRequest RegisterUser(string email, string masterPassword, VaultPayload vault)
         {
             byte[] authSalt = new byte[16];
             Rng.GetBytes(authSalt);
 
             var authVerifier = HashPassword(masterPassword, authSalt);
 
-            return new RegisterRequest
+            return new AuthRegisterRequest
             {
                 AuthSalt = Convert.ToBase64String(authSalt),
                 AuthVerifier = authVerifier,
