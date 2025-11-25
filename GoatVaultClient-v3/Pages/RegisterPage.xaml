@@ -9,7 +9,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="20">
 
-            <material:TextField x:Name="UsernameEntry" Title="Username"/>
+            <material:TextField x:Name="EmailEntry" Title="Email"/>
             <material:TextField x:Name="MasterPasswordEntry" Title="Master Password" IsPassword="True"/>
             <material:TextField x:Name="ConfirmPasswordEntry" Title="Confirm Password" IsPassword="True"/>
 
