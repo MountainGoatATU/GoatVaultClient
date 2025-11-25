@@ -11,12 +11,13 @@
         {
             _services = services;
             InitializeComponent();
+            MainPage = services.GetRequiredService<MainPage>();
         }
 
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            var introductionPage = _services.GetRequiredService<IntroductionPage>();
-            return new Window(new NavigationPage(introductionPage));
-        }
+        //protected override Window CreateWindow(IActivationState? activationState)
+        //{
+        //    var introductionPage = _services.GetRequiredService<IntroductionPage>();
+        //    return new Window(new NavigationPage(introductionPage));
+        //}
     }
 }
