@@ -69,7 +69,7 @@ public partial class LoginPage : ContentPage
         }
     }
 
-        
+      
 
     private async void OnGoToRegister(object sender, EventArgs e)
     {
