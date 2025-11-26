@@ -63,6 +63,9 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
             builder.Services.AddTransient<SecretService>();
 
+            // UraniumUI dialogs
+            builder.Services.AddCommunityToolkitDialogs();
+
             // Register pages
             builder.Services.AddSingleton<MainPage>();
             builder.Services.AddSingleton<MainPageViewModel>();
