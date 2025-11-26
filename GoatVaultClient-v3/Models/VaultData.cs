@@ -10,14 +10,6 @@ namespace GoatVaultClient_v3.Models
     {
         public List<string> Categories { get; set; }
         public List<VaultEntry> Entries { get; set; }
-        public VaultData()
-        {
-            Entries = new List<VaultEntry>();
-            Categories = new List<string>()
-            {
-                "DEFAULT"
-            };
-        }
     }
 
 }
