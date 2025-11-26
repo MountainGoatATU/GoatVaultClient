@@ -14,6 +14,17 @@ namespace GoatVaultClient_v3
             
         }
 
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            // Safely cast the BindingContext and call the method
+            if (BindingContext is MainPageViewModel vm)
+            {
+                vm.LoadVaultData();
+            }
+        }
+
         private async void OnCounterClicked(object sender, EventArgs e)
         {
             //string email = "example4579@gmail.com"; // Must be unique for each run
