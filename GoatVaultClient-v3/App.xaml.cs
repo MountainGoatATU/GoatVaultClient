@@ -13,6 +13,7 @@
         {
             _services = services;
             InitializeComponent();
+            MainPage = new AppShell();
             _sessionService = sessionService;
             //MainPage = services.GetRequiredService<MainPage>();
         }
@@ -22,10 +23,10 @@
             _sessionService.Lock();
         }
 
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            var introductionPage = _services.GetRequiredService<IntroductionPage>();
-            return new Window(new NavigationPage(introductionPage));
-        }
+        //protected override Window CreateWindow(IActivationState? activationState)
+        //{
+        //    var introductionPage = _services.GetRequiredService<IntroductionPage>();
+        //    return new Window(new NavigationPage(introductionPage));
+        //}
     }
 }

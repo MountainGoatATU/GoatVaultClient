@@ -6,9 +6,22 @@
     xmlns:local="clr-namespace:GoatVaultClient_v3"
     Title="GoatVaultClient_v3">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <Tab Title="IntroductionPage" Icon="user_icon.png">
+            <ShellContent ContentTemplate="{DataTemplate local:IntroductionPage}" Route="IntroductionPage" />
+        </Tab>
+        <Tab Title="MainPage" Icon="home_icon.png">
+            <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" />
+        </Tab>
+        <Tab Title="LoginPage" Icon="user_icon.png">
+            <ShellContent ContentTemplate="{DataTemplate local:LoginPage}" Route="LoginPage" />
+        </Tab>
+        <Tab Title="RegisterPage" Icon="user_icon.png">
+            <ShellContent ContentTemplate="{DataTemplate local:RegisterPage}" Route="RegisterPage" />
+        </Tab>
+        <Tab Title="GratitudePage" Icon="user_icon.png">
+            <ShellContent ContentTemplate="{DataTemplate local:GratitudePage}" Route="GratitudePage" />
+        </Tab>
+    </TabBar>
 
 </Shell>
