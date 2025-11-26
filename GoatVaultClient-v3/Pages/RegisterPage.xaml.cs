@@ -48,7 +48,7 @@ namespace GoatVaultClient_v3
                 var registerRequest = _userService.RegisterUser(email, password, null);
 
                 // Encrypt vault using the password
-                var vaultPayload = _vaultService.EncryptVault(password, new VaultData());
+                var vaultPayload = _vaultService.EncryptVault(password,null);
                 registerRequest.Vault = vaultPayload;
 
                 // Send register request to backend
@@ -64,7 +64,6 @@ namespace GoatVaultClient_v3
                     AuthVerifier = registerRequest.AuthVerifier
                 };
 
-                
                 var verifyResponse = await _httpService.PostAsync<VerifyResponse>(
                     "http://127.0.0.1:8000/v1/auth/verify",
                     verifyRequest
@@ -73,11 +72,31 @@ namespace GoatVaultClient_v3
                 _authTokenService.SetToken(verifyResponse.AccessToken);
 
                 // Retrieve the newly created user
-                var userResponse = await _httpService.GetAsync<DbModel>(
+                var userResponse = await _httpService.GetAsync<UserResponse>(
                     $"http://127.0.0.1:8000/v1/users/{registerResponse.Id}"
                 );
 
+                // Set the user
                 _userService.User = userResponse;
+
+                // Delete the user if already exists in local storage
+                if (await _vaultService.LoadUserFromLocalAsync(_userService.User.Id) != null)
+                {
+                    await _vaultService.DeleteUserFromLocalAsync(_userService.User.Id);
+                }
+
+                //Add Vault to local storage
+                await _vaultService.SaveUserToLocalAsync(new DbModel
+                {
+                    Id = _userService.User.Id,
+                    Email = _userService.User.Email,
+                    AuthSalt = _userService.User.AuthSalt,
+                    MfaEnabled = _userService.User.MfaEnabled,
+                    Vault = _userService.User.Vault
+                });
+
+                // Decrypt vault
+                _vaultService.DecryptVault(_userService.User.Vault, password);
 
                 // Navigate to next page
                 var gratitudePage = _services.GetRequiredService<GratitudePage>();

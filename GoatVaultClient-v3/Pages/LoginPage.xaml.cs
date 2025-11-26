@@ -9,13 +9,15 @@ public partial class LoginPage : ContentPage
     private readonly UserService _userService;
     private readonly HttpService _httpService;
     private readonly AuthTokenService _authTokenService;
+    private readonly VaultService _vaultService;
 
-    public LoginPage(IServiceProvider services, UserService userService, HttpService httpService, AuthTokenService authTokenService)
+    public LoginPage(IServiceProvider services, UserService userService, HttpService httpService, AuthTokenService authTokenService, VaultService vaultService)
 	{
         _services = services;
         _userService = userService;
         _httpService = httpService;
         _authTokenService = authTokenService;
+        _vaultService = vaultService;
         InitializeComponent();
 	}
     private async void OnLoginClicked(object sender, EventArgs e)
@@ -56,15 +58,34 @@ public partial class LoginPage : ContentPage
             _authTokenService.SetToken(verifyResponse.AccessToken);
 
             // Retrieve user
-            var userResponse = await _httpService.GetAsync<DbModel>(
+            var userResponse = await _httpService.GetAsync<UserResponse>(
                 $"http://127.0.0.1:8000/v1/users/{initResponse.UserId}"
             );
 
             _userService.User = userResponse;
 
+            // Delete the user if already exists in local storage
+            if (await _vaultService.LoadUserFromLocalAsync(_userService.User.Id) != null)
+            {
+                await _vaultService.DeleteUserFromLocalAsync(_userService.User.Id);
+            }
+
+            //Add Vault to local storage
+            await _vaultService.SaveUserToLocalAsync( new DbModel
+            {
+                Id = _userService.User.Id,
+                Email = _userService.User.Email,
+                AuthSalt = _userService.User.AuthSalt,
+                MfaEnabled = _userService.User.MfaEnabled,
+                Vault = _userService.User.Vault
+            });
+
+            // Decrypt vault
+            _vaultService.DecryptVault(_userService.User.Vault, password);
+
             // Navigate to gratitude page (temporary
-            var gratitudePage = _services.GetRequiredService<GratitudePage>();
-            await Navigation.PushAsync(gratitudePage);
+            var mainPage = _services.GetRequiredService<MainPage>();
+            await Navigation.PushAsync(mainPage);
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
