@@ -10,6 +10,7 @@ using UraniumUI;
 using SecretSharingDotNet.Cryptography;
 using SecretSharingDotNet.Math;
 using System.Numerics;
+using GoatVaultClient_v3.ViewModels;
 
 namespace GoatVaultClient_v3
 {
@@ -63,7 +64,8 @@ namespace GoatVaultClient_v3
             builder.Services.AddTransient<SecretService>();
 
             // Register pages
-            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddSingleton<MainPageViewModel>();
             builder.Services.AddTransient<IntroductionPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<LoginPage>();
