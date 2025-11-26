@@ -72,12 +72,16 @@ namespace GoatVaultClient_v3
             builder.Services.AddCommunityToolkitDialogs();
 
             // Register pages
-            builder.Services.AddSingleton<MainPage>();
             builder.Services.AddSingleton<MainPageViewModel>();
-            builder.Services.AddTransient<IntroductionPage>();
-            builder.Services.AddTransient<RegisterPage>();
-            builder.Services.AddTransient<LoginPage>();
-            builder.Services.AddTransient<GratitudePage>();
+            builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddSingleton<IntroductionPageViewModel>();
+            builder.Services.AddSingleton<IntroductionPage>();
+            builder.Services.AddSingleton<RegisterPageViewModel>();
+            builder.Services.AddSingleton<RegisterPage>();
+            builder.Services.AddSingleton<LoginPageViewModel>();
+            builder.Services.AddSingleton<LoginPage>();
+            builder.Services.AddSingleton<GratitudePageViewModel>();
+            builder.Services.AddSingleton<GratitudePage>();
 
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())
