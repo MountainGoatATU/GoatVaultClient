@@ -10,14 +10,16 @@ public partial class LoginPage : ContentPage
     private readonly HttpService _httpService;
     private readonly AuthTokenService _authTokenService;
     private readonly VaultService _vaultService;
+    private readonly VaultSessionService _vaultSessionService;
 
-    public LoginPage(IServiceProvider services, UserService userService, HttpService httpService, AuthTokenService authTokenService, VaultService vaultService)
+    public LoginPage(IServiceProvider services, UserService userService, HttpService httpService, AuthTokenService authTokenService, VaultService vaultService, VaultSessionService vaultSessionService)
 	{
         _services = services;
         _userService = userService;
         _httpService = httpService;
         _authTokenService = authTokenService;
         _vaultService = vaultService;
+        _vaultSessionService = vaultSessionService;
         InitializeComponent();
 	}
     private async void OnLoginClicked(object sender, EventArgs e)
@@ -81,7 +83,7 @@ public partial class LoginPage : ContentPage
             });
 
             // Decrypt vault
-            _vaultService.DecryptVault(_userService.User.Vault, password);
+             _vaultSessionService.DecryptedVault = _vaultService.DecryptVault(_userService.User.Vault, password);
 
             // Navigate to gratitude page (temporary
             var mainPage = _services.GetRequiredService<MainPage>();

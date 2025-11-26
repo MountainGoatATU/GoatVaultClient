@@ -12,6 +12,7 @@ namespace GoatVaultClient_v3
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
         private readonly VaultService _vaultService;
+        private readonly VaultSessionService _vaultSessionService;
 
         public RegisterPage(IServiceProvider services)
         {
@@ -22,6 +23,7 @@ namespace GoatVaultClient_v3
             _httpService = services.GetRequiredService<HttpService>();
             _authTokenService = services.GetRequiredService<AuthTokenService>();
             _vaultService = services.GetRequiredService<VaultService>();
+            _vaultSessionService = services.GetRequiredService<VaultSessionService>();
         }
 
         private async void OnRegisterClicked(object sender, EventArgs e)
@@ -96,7 +98,7 @@ namespace GoatVaultClient_v3
                 });
 
                 // Decrypt vault
-                _vaultService.DecryptVault(_userService.User.Vault, password);
+                _vaultSessionService.DecryptedVault = _vaultService.DecryptVault(_userService.User.Vault, password);
 
                 // Navigate to next page
                 var gratitudePage = _services.GetRequiredService<GratitudePage>();
