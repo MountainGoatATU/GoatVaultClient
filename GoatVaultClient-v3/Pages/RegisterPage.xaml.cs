@@ -51,11 +51,18 @@ namespace GoatVaultClient_v3
                 var vaultPayload = _vaultService.EncryptVault(password, new VaultData());
                 registerRequest.Vault = vaultPayload;
 
-                // Send request to backend
-                var response = await _httpService.PostAsync<RegisterResponse>(
+                // Send register request to backend
+                var registerResponse = await _httpService.PostAsync<RegisterResponse>(
                     "http://127.0.0.1:8000/v1/auth/register",
                     registerRequest
                 );
+
+                // Retrieve the newly created user
+                var userResponse = await _httpService.GetAsync<DbModel>(
+                    $"http://127.0.0.1:8000/v1/users/{registerResponse.Id}"                    
+                );
+
+                _userService.User = userResponse;
 
                 // Navigate to next page
                 var gratitudePage = _services.GetRequiredService<GratitudePage>();
