@@ -24,13 +24,13 @@
         <BoxView Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Color="#D6ECFF"/>
         <BoxView Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Color="#F5F5F5"/>
 
-        <material:ButtonView Padding="10" Margin="10,20,10,10" WidthRequest="80" HeightRequest="80" BackgroundColor="LightSkyBlue">
+        <material:ButtonView WidthRequest="55" HeightRequest="55" BackgroundColor="LightSkyBlue">
             <material:ButtonView.StrokeShape>
                 <RoundRectangle CornerRadius="40"/>
             </material:ButtonView.StrokeShape>
             <Image>
                 <Image.Source>
-                    <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.User}" Color="White" Size="40"/>
+                    <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.User}" Color="White" Size="24"/>
                 </Image.Source>
             </Image>
         </material:ButtonView>
