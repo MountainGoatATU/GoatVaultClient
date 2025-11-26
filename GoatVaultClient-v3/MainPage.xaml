@@ -7,10 +7,6 @@
              xmlns:fa="clr-namespace:UraniumUI.Icons.FontAwesome;assembly=UraniumUI.Icons.FontAwesome"
              x:Class="GoatVaultClient_v3.MainPage">
 
-    <ContentPage.BindingContext>
-        <vm:MainPageViewModel />
-    </ContentPage.BindingContext>
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60"/>

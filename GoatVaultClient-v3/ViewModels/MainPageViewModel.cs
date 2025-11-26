@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient_v3.Models;
+using GoatVaultClient_v3.Services;
 
 namespace GoatVaultClient_v3.ViewModels
 {
     public partial class MainPageViewModel : ObservableObject
     {
+       
+
         // The list bound to the CollectionView
         [ObservableProperty]
         private ObservableCollection<FolderItem> folders;
@@ -23,9 +26,20 @@ namespace GoatVaultClient_v3.ViewModels
         private string currentContextName = "My Vault";
 
         private bool _isSortedAscending = true;
+        
+        //Dependency Injection
+        private readonly HttpService _httpService;
+        private readonly UserService _userService;
+        private readonly VaultService _vaultService;
+        //private readonly SecretService _secretService;
 
-        public MainPageViewModel()
+        public MainPageViewModel(VaultService vaultService, HttpService httpService, UserService userService)
         {
+            //Dependency Injection
+            _httpService = httpService;
+            _userService = userService;
+            _vaultService = vaultService;
+
             // Dummy Data
             Folders = new ObservableCollection<FolderItem>
             {
