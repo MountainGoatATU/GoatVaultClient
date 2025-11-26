@@ -59,7 +59,8 @@ namespace GoatVaultClient_v3.ViewModels
 
             if (!string.IsNullOrWhiteSpace(result))
             {
-                Categories.Add(result.Trim().ToUpper());
+                _vaultSessionService.DecryptedVault.Categories.Add(result.Trim());
+                LoadVaultData();
             }
         }
 
