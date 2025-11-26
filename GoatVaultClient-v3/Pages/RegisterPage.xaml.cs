@@ -57,9 +57,24 @@ namespace GoatVaultClient_v3
                     registerRequest
                 );
 
+                //Retrieve the token
+                var verifyRequest = new VerifyRequest
+                {
+                    UserId = Guid.Parse(registerResponse.Id),
+                    AuthVerifier = registerRequest.AuthVerifier
+                };
+
+                
+                var verifyResponse = await _httpService.PostAsync<VerifyResponse>(
+                    "http://127.0.0.1:8000/v1/auth/verify",
+                    verifyRequest
+                );
+
+                _authTokenService.SetToken(verifyResponse.AccessToken);
+
                 // Retrieve the newly created user
                 var userResponse = await _httpService.GetAsync<DbModel>(
-                    $"http://127.0.0.1:8000/v1/users/{registerResponse.Id}"                    
+                    $"http://127.0.0.1:8000/v1/users/{registerResponse.Id}"
                 );
 
                 _userService.User = userResponse;

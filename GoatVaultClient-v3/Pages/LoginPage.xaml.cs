@@ -55,6 +55,13 @@ public partial class LoginPage : ContentPage
 
             _authTokenService.SetToken(verifyResponse.AccessToken);
 
+            // Retrieve user
+            var userResponse = await _httpService.GetAsync<DbModel>(
+                $"http://127.0.0.1:8000/v1/users/{initResponse.UserId}"
+            );
+
+            _userService.User = userResponse;
+
             // Navigate to gratitude page (temporary
             var gratitudePage = _services.GetRequiredService<GratitudePage>();
             await Navigation.PushAsync(gratitudePage);
