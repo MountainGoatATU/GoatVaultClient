@@ -8,7 +8,16 @@ namespace GoatVaultClient_v3.Models
 {
     public class VaultData
     {
-        public List<VaultEntry> Entries { get; set; } = new List<VaultEntry>();
+        public List<string> Categories { get; set; }
+        public List<VaultEntry> Entries { get; set; }
+        public VaultData()
+        {
+            Entries = new List<VaultEntry>();
+            Categories = new List<string>()
+            {
+                "DEFAULT"
+            };
+        }
     }
 
 }
