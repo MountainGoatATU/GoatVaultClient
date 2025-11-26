@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="GoatVaultClient_v3.GratitudePage"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-             xmlns:fa="clr-namespace:UraniumUI.Icons.FontAwesome;assembly=UraniumUI.Icons.FontAwesome"
+             xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
+             x:Class="GoatVaultClient_v3.GratitudePage"
+             x:DataType="vm:GratitudePageViewModel"
              Title="GratitudePage">
+
     <Grid Padding="30">
         <VerticalStackLayout Spacing="30" VerticalOptions="Center" HorizontalOptions="Center">
+
             <Label Text="Thank you!" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
             <Label Text="Your account has been successfully created." FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
 
@@ -16,10 +17,12 @@
                     <RoundRectangle CornerRadius="25"/>
                 </material:ButtonView.StrokeShape>
                 <Label Text="Continue" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
+
                 <material:ButtonView.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnContinueClicked"/>
+                    <TapGestureRecognizer Command="{Binding ContinueCommand}"/>
                 </material:ButtonView.GestureRecognizers>
             </material:ButtonView>
+
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

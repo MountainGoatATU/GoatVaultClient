@@ -27,43 +27,15 @@ namespace GoatVaultClient_v3.ViewModels
         private bool _isSortedAscending = true;
 
         //Dependency Injection
-        private readonly HttpService _httpService;
-        private readonly UserService _userService;
-        private readonly VaultService _vaultService;
         private readonly VaultSessionService _vaultSessionService;
-        //private readonly SecretService _secretService;
 
         public MainPageViewModel(VaultService vaultService, HttpService httpService, UserService userService, VaultSessionService vaultSessionService)
         {
             //Dependency Injection
-            _httpService = httpService;
-            _userService = userService;
-            _vaultService = vaultService;
             _vaultSessionService = vaultSessionService;
-            if (_vaultSessionService.DecryptedVault == null)
-            {
-                throw new InvalidOperationException("Decrypted vault is not available in the session.");
-            } else
-            {
-                Categories = new ObservableCollection<string>(_vaultSessionService.DecryptedVault.Categories);
-                Passwords = new ObservableCollection<VaultEntry>(_vaultSessionService.DecryptedVault.Entries);
-            }
 
-            //// Dummy Data
-            //Categories = new ObservableCollection<FolderItem>
-            //{
-            //    new FolderItem { Name = "Documents" },
-            //    new FolderItem { Name = "Photos" },
-            //    new FolderItem { Name = "Work Projects" },
-            //    new FolderItem { Name = "Recipes" }
-            //};
-            //Passwords = new ObservableCollection<PasswordItem>
-            //{
-            //    new PasswordItem { Description = "Google", UserName = "john.doe@gmail.com", Password = "password123" },
-            //    new PasswordItem { Description = "Netflix", UserName = "chill_user", Password = "secure!Password" },
-            //    new PasswordItem { Description = "GitHub", UserName = "dev_guru", Password = "gitcommitpush" },
-            //    new PasswordItem { Description = "Amazon", UserName = "shopper123", Password = "primeMember!" }
-            //};
+            Categories = new ObservableCollection<string>();
+            Passwords = new ObservableCollection<VaultEntry>();
         }
 
         [RelayCommand]
@@ -101,6 +73,35 @@ namespace GoatVaultClient_v3.ViewModels
         private async Task CreatePassword()
         {
 
+        }
+
+        // 1. Create a method to load the data
+        public void LoadVaultData()
+        {
+            // If the session is empty (user logged out or not ready), do nothing
+            if (_vaultSessionService.DecryptedVault == null)
+                return;
+
+            // 2. Reload Categories
+            // We clear and add instead of 'new ObservableCollection' to keep UI bindings stable, 
+            // though replacing the collection works too if PropertyChanged is fired.
+            if (_vaultSessionService.DecryptedVault.Categories != null)
+            {
+                Categories = new ObservableCollection<string>(_vaultSessionService.DecryptedVault.Categories);
+            }
+
+            // 3. Reload Passwords
+            if (_vaultSessionService.DecryptedVault.Entries != null)
+            {
+                Passwords = new ObservableCollection<VaultEntry>(_vaultSessionService.DecryptedVault.Entries);
+            }
+        }
+
+        // 4. Trigger this method when the page appears
+        [RelayCommand]
+        private void Appearing()
+        {
+            LoadVaultData();
         }
     }
 }

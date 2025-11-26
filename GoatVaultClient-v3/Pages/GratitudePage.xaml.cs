@@ -1,21 +1,14 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using GoatVaultClient_v3.ViewModels;
 
 namespace GoatVaultClient_v3;
 
 public partial class GratitudePage : ContentPage
 {
-    private readonly IServiceProvider _services;
-
-    public GratitudePage(IServiceProvider services)
+    public GratitudePage(GratitudePageViewModel vm)
     {
-        _services = services;
         InitializeComponent();
-    }
-
-    private async void OnContinueClicked(object sender, EventArgs e)
-    {
-        var mainPage = _services.GetRequiredService<MainPage>();
-        await Navigation.PushAsync(mainPage);
+        BindingContext = vm;
     }
 }
