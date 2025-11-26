@@ -11,6 +11,8 @@ using SecretSharingDotNet.Cryptography;
 using SecretSharingDotNet.Math;
 using System.Numerics;
 using GoatVaultClient_v3.ViewModels;
+using System.Diagnostics;
+using CommunityToolkit.Maui;
 
 namespace GoatVaultClient_v3
 {
@@ -21,6 +23,7 @@ namespace GoatVaultClient_v3
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .ConfigureFonts(fonts =>
@@ -37,8 +40,9 @@ namespace GoatVaultClient_v3
 #endif
 
             //Setup SQLite local database
-            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "localvault.db");
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "localvaultTest.db");
             string connectionString = $"Data Source={dbPath}";
+            Debug.WriteLine(dbPath);
 
             builder.Services.AddDbContext<GoatVaultDB>(options =>
                options.UseSqlite(connectionString));
@@ -56,6 +60,7 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<VaultService>();
             builder.Services.AddSingleton<UserService>();
             builder.Services.AddSingleton<AuthTokenService>();
+            builder.Services.AddSingleton<VaultSessionService>();
 
             //Shamir services
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
