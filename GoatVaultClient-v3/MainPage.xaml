@@ -119,16 +119,16 @@
                     <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:FolderItem">
+                    <DataTemplate x:DataType="x:String">
                         <Grid Padding="0,2">
                             <Border StrokeThickness="0" StrokeShape="RoundRectangle 5" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="8,4">
                                 <Grid ColumnDefinitions="30, *">
                                     <Image Grid.Column="0" HeightRequest="20" WidthRequest="20" HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit">
                                         <Image.Source>
-                                            <FontImageSource Glyph="{Binding Icon}" FontFamily="FASolid" Color="{AppThemeBinding Light=#skyblue, Dark=#bb86fc}" Size="16"/>
+                                            <FontImageSource Glyph="Folder" FontFamily="FASolid" Color="{AppThemeBinding Light=#skyblue, Dark=#bb86fc}" Size="16"/>
                                         </Image.Source>
                                     </Image>
-                                    <Label Grid.Column="1" Text="{Binding Name}" FontSize="13" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                                    <Label Grid.Column="1" Text="{Binding .}" FontSize="13" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                                 </Grid>
                             </Border>
                         </Grid>
