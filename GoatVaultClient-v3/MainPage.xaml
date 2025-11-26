@@ -114,7 +114,7 @@
                 </material:ButtonView>
             </Grid>
 
-            <CollectionView Grid.Row="1" ItemsSource="{Binding Folders}" SelectionMode="Single" EmptyView="No folders found.">
+            <CollectionView Grid.Row="1" ItemsSource="{Binding Categories}" SelectionMode="Single" EmptyView="No folders found.">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
                 </CollectionView.ItemsLayout>
