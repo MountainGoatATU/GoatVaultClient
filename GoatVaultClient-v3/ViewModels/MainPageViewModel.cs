@@ -13,48 +13,57 @@ namespace GoatVaultClient_v3.ViewModels
 {
     public partial class MainPageViewModel : ObservableObject
     {
-       
-
         // The list bound to the CollectionView
         [ObservableProperty]
-        private ObservableCollection<FolderItem> folders;
+        private ObservableCollection<string> categories;
         [ObservableProperty]
-        private ObservableCollection<PasswordItem> passwords;
+        private ObservableCollection<VaultEntry> passwords;
 
         // Displayed in the Header
         [ObservableProperty]
         private string currentContextName = "My Vault";
+        // This attribute generates the "IsBusy" property automatically
 
         private bool _isSortedAscending = true;
-        
+
         //Dependency Injection
         private readonly HttpService _httpService;
         private readonly UserService _userService;
         private readonly VaultService _vaultService;
+        private readonly VaultSessionService _vaultSessionService;
         //private readonly SecretService _secretService;
 
-        public MainPageViewModel(VaultService vaultService, HttpService httpService, UserService userService)
+        public MainPageViewModel(VaultService vaultService, HttpService httpService, UserService userService, VaultSessionService vaultSessionService)
         {
             //Dependency Injection
             _httpService = httpService;
             _userService = userService;
             _vaultService = vaultService;
+            _vaultSessionService = vaultSessionService;
+            if (_vaultSessionService.DecryptedVault == null)
+            {
+                throw new InvalidOperationException("Decrypted vault is not available in the session.");
+            } else
+            {
+                Categories = new ObservableCollection<string>(_vaultSessionService.DecryptedVault.Categories);
+                Passwords = new ObservableCollection<VaultEntry>(_vaultSessionService.DecryptedVault.Entries);
+            }
 
-            // Dummy Data
-            Folders = new ObservableCollection<FolderItem>
-            {
-                new FolderItem { Name = "Documents" },
-                new FolderItem { Name = "Photos" },
-                new FolderItem { Name = "Work Projects" },
-                new FolderItem { Name = "Recipes" }
-            };
-            Passwords = new ObservableCollection<PasswordItem>
-            {
-                new PasswordItem { Description = "Google", UserName = "john.doe@gmail.com", Password = "password123" },
-                new PasswordItem { Description = "Netflix", UserName = "chill_user", Password = "secure!Password" },
-                new PasswordItem { Description = "GitHub", UserName = "dev_guru", Password = "gitcommitpush" },
-                new PasswordItem { Description = "Amazon", UserName = "shopper123", Password = "primeMember!" }
-            };
+            //// Dummy Data
+            //Categories = new ObservableCollection<FolderItem>
+            //{
+            //    new FolderItem { Name = "Documents" },
+            //    new FolderItem { Name = "Photos" },
+            //    new FolderItem { Name = "Work Projects" },
+            //    new FolderItem { Name = "Recipes" }
+            //};
+            //Passwords = new ObservableCollection<PasswordItem>
+            //{
+            //    new PasswordItem { Description = "Google", UserName = "john.doe@gmail.com", Password = "password123" },
+            //    new PasswordItem { Description = "Netflix", UserName = "chill_user", Password = "secure!Password" },
+            //    new PasswordItem { Description = "GitHub", UserName = "dev_guru", Password = "gitcommitpush" },
+            //    new PasswordItem { Description = "Amazon", UserName = "shopper123", Password = "primeMember!" }
+            //};
         }
 
         [RelayCommand]
@@ -62,10 +71,10 @@ namespace GoatVaultClient_v3.ViewModels
         {
             // Toggle sort order
             var sorted = _isSortedAscending
-                ? Folders.OrderBy(f => f.Name).ToList()
-                : Folders.OrderByDescending(f => f.Name).ToList();
+                ? Categories.OrderBy(f => f).ToList()
+                : Categories.OrderByDescending(f => f).ToList();
 
-            Folders = new ObservableCollection<FolderItem>(sorted);
+            Categories = new ObservableCollection<string>(sorted);
             _isSortedAscending = !_isSortedAscending;
         }
 
@@ -78,10 +87,7 @@ namespace GoatVaultClient_v3.ViewModels
 
             if (!string.IsNullOrWhiteSpace(result))
             {
-                Folders.Add(new FolderItem
-                {
-                    Name = result
-                });
+                Categories.Add(result.Trim().ToUpper());
             }
         }
 
