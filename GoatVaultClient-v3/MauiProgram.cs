@@ -13,6 +13,8 @@ using System.Numerics;
 using GoatVaultClient_v3.ViewModels;
 using System.Diagnostics;
 using CommunityToolkit.Maui;
+using Mopups.Hosting;
+using Mopups.Services;
 
 namespace GoatVaultClient_v3
 {
@@ -24,6 +26,7 @@ namespace GoatVaultClient_v3
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                .ConfigureMopups()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .ConfigureFonts(fonts =>

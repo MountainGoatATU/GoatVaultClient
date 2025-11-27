@@ -8,6 +8,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient_v3.Models;
 using GoatVaultClient_v3.Services;
+using GoatVaultClient_v3.Pages;
+using Mopups.Services;
 
 namespace GoatVaultClient_v3.ViewModels
 {
@@ -73,7 +75,8 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private async Task CreatePassword()
         {
-
+            var popup = new NewPasswordPopup();
+            await MopupService.Instance.PushAsync(popup);
         }
 
         // 1. Create a method to load the data

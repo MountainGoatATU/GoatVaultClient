@@ -76,6 +76,7 @@
 		<PackageReference Include="SecretSharingDotNet" Version="0.12.0" />
 		<PackageReference Include="UraniumUI" Version="2.13.0" />
 		<PackageReference Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.13.0" />
+		<PackageReference Include="UraniumUI.Dialogs.Mopups" Version="2.13.0" />
 		<PackageReference Include="UraniumUI.Icons.FontAwesome" Version="2.13.0" />
 		<PackageReference Include="UraniumUI.Icons.MaterialIcons" Version="2.13.0" />
 		<PackageReference Include="UraniumUI.Icons.MaterialSymbols" Version="2.13.0" />
@@ -99,6 +100,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\LoginPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\NewPasswordPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\RegisterPage.xaml">
