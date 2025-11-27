@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
              x:Class="GoatVaultClient_v3.RegisterPage"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
@@ -9,9 +10,9 @@
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="20">
 
-            <material:TextField x:Name="EmailEntry" Title="Email"/>
-            <material:TextField x:Name="MasterPasswordEntry" Title="Master Password" IsPassword="True"/>
-            <material:TextField x:Name="ConfirmPasswordEntry" Title="Confirm Password" IsPassword="True"/>
+            <material:TextField Text="{Binding Email}" Title="Email"/>
+            <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True"/>
+            <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True"/>
 
             <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="SkyBlue">
                 <material:ButtonView.StrokeShape>
@@ -19,13 +20,13 @@
                 </material:ButtonView.StrokeShape>
                 <Label Text="Register" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
                 <material:ButtonView.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnRegisterClicked"/>
+                    <TapGestureRecognizer Command="{Binding RegisterCommand}"/>
                 </material:ButtonView.GestureRecognizers>
             </material:ButtonView>
 
             <Label Text="Already have an account?" TextColor="Blue" HorizontalOptions="Center">
                 <Label.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnGoToLogin"/>
+                    <TapGestureRecognizer Command="{Binding GoToLoginCommand}"/>
                 </Label.GestureRecognizers>
             </Label>
 

@@ -33,6 +33,24 @@ namespace GoatVaultClient_v3.Services
         #region Vault Encryption/Decryption
         public VaultModel EncryptVault(string masterPassword, VaultData vaultData)
         {
+            // Create default vault structure if none exists
+            if (vaultData == null)
+            {
+                vaultData = new VaultData
+                {
+                    Categories = new List<string>()
+                    {
+                        "General",
+                        "Email",
+                        "Banking",
+                        "Social Media",
+                        "Work",
+                        "Entertainment"
+                    },
+                    Entries = new List<VaultEntry>()
+                };
+            }
+
             byte[] vault_salt = GenerateRandomBytes(16);
             byte[] key = DeriveKey(masterPassword, vault_salt);
 
@@ -108,7 +126,6 @@ namespace GoatVaultClient_v3.Services
         #endregion
 
         #region Local Storage
-        /*
         // GET
         public async Task<DbModel?> LoadUserFromLocalAsync(string userId)
         {
@@ -142,7 +159,6 @@ namespace GoatVaultClient_v3.Services
                 await _goatVaultDB.SaveChangesAsync();
             }
         }
-        */
         #endregion
 
         #region Helper Methods
