@@ -10,7 +10,7 @@ namespace GoatVaultClient_v3.Models
     public class UserResponse
     {
         // Map "_id" from JSON to "Id" in C#
-        [JsonPropertyName("id")]
+        [JsonPropertyName("_id")]
         public string Id { get; set; }
 
         [JsonPropertyName("auth_salt")]
