@@ -238,8 +238,14 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:VaultEntry">
                             <Grid Padding="0,2">
+                                
                                 <Border StrokeThickness="0" StrokeShape="RoundRectangle 5" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="10,8">
-                                    <Grid ColumnDefinitions="30, 2*, 1.5*, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                    <Grid ColumnDefinitions="30, 2*, 1.5*, Auto, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                        
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}" CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
+                                        
                                         <Image Grid.Column="0" HeightRequest="20" WidthRequest="20" HorizontalOptions="Center" VerticalOptions="Center">
                                             <Image.Source>
                                                 <FontImageSource FontFamily="FASolid" Glyph="{Binding Icon}" Color="{AppThemeBinding Light=Gray, Dark=#aaa}" Size="18"/>
@@ -249,6 +255,7 @@
                                             <Label Text="{Binding Description}" FontAttributes="Bold" FontSize="14" TextColor="{AppThemeBinding Light=Black, Dark=White}" LineBreakMode="TailTruncation"/>
                                             <Label Text="{Binding UserName}" FontSize="11" TextColor="Gray" LineBreakMode="TailTruncation"/>
                                         </VerticalStackLayout>
+                                        
                                         <Label Grid.Column="2" Text="********" VerticalOptions="Center" HorizontalOptions="Start" TextColor="{AppThemeBinding Light=#555, Dark=#aaa}" FontSize="14" FontAttributes="Bold"/>
                                         <material:ButtonView Grid.Column="3" WidthRequest="36" HeightRequest="36" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}"
                                                              PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyPasswordCommand}"
@@ -259,6 +266,20 @@
                                             <Image VerticalOptions="Center" HorizontalOptions="Center">
                                                 <Image.Source>
                                                     <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Copy}" Color="White" Size="16"/>
+                                                </Image.Source>
+                                            </Image>
+                                        </material:ButtonView>
+                                        
+                                        <material:ButtonView Grid.Column="4" WidthRequest="36" HeightRequest="36"
+                                                             BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}"
+                                                             PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
+                                                             CommandParameter="{Binding .}">
+                                            <material:ButtonView.StrokeShape>
+                                                <RoundRectangle CornerRadius="18"/>
+                                            </material:ButtonView.StrokeShape>
+                                            <Image VerticalOptions="Center" HorizontalOptions="Center">
+                                                <Image.Source>
+                                                    <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Trash}" Color="White" Size="16"/>
                                                 </Image.Source>
                                             </Image>
                                         </material:ButtonView>
