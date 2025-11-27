@@ -12,7 +12,7 @@
             <Label Text="Thank you!" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
             <Label Text="Your account has been successfully created." FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
 
-            <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="SkyBlue">
+            <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
                 <material:ButtonView.StrokeShape>
                     <RoundRectangle CornerRadius="25"/>
                 </material:ButtonView.StrokeShape>

@@ -11,7 +11,6 @@ namespace GoatVaultClient_v3
         {
             InitializeComponent();
             BindingContext = viewModel;
-            
         }
 
         protected override void OnAppearing()
