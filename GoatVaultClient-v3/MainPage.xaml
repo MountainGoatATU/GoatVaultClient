@@ -129,13 +129,37 @@
                             <DataTemplate x:DataType="x:String">
                                 <Grid Padding="0,2">
                                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 5" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="8,4">
-                                        <Grid ColumnDefinitions="30, *">
+                                        <Grid ColumnDefinitions="30, *, 32, 32" ColumnSpacing="5" Padding="8,4">
                                             <Image Grid.Column="0" HeightRequest="20" WidthRequest="20" HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit">
                                                 <Image.Source>
                                                     <FontImageSource Glyph="Folder" FontFamily="FASolid" Size="16" Color="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}"/>
                                                 </Image.Source>
                                             </Image>
                                             <Label Grid.Column="1" Text="{Binding .}" FontSize="13" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+
+                                            <!-- Edit icon -->
+                                            <material:ButtonView Grid.Column="2" WidthRequest="28" HeightRequest="28" PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}" CommandParameter="{Binding .}" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}" HorizontalOptions="End">
+                                                <material:ButtonView.StrokeShape>
+                                                    <RoundRectangle CornerRadius="14"/>
+                                                </material:ButtonView.StrokeShape>
+                                                <Image>
+                                                    <Image.Source>
+                                                        <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Pencil}" Color="White" Size="14"/>
+                                                    </Image.Source>
+                                                </Image>
+                                            </material:ButtonView>
+
+                                            <!-- Delete icon -->
+                                            <material:ButtonView Grid.Column="3" WidthRequest="28" HeightRequest="28" PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}" CommandParameter="{Binding .}" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}" HorizontalOptions="End">
+                                                <material:ButtonView.StrokeShape>
+                                                    <RoundRectangle CornerRadius="14"/>
+                                                </material:ButtonView.StrokeShape>
+                                                <Image>
+                                                    <Image.Source>
+                                                        <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Trash}" Color="White" Size="14"/>
+                                                    </Image.Source>
+                                                </Image>
+                                            </material:ButtonView>
                                         </Grid>
                                     </Border>
                                 </Grid>
