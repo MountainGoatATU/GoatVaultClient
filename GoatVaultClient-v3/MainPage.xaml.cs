@@ -1,32 +1,37 @@
 ﻿using System.Diagnostics;
 using GoatVaultClient_v3.Models;
 using GoatVaultClient_v3.Services;
+using GoatVaultClient_v3.ViewModels;
 
 namespace GoatVaultClient_v3
 {
     public partial class MainPage : ContentPage
     {
-        private readonly HttpService _httpService;
-        private readonly UserService _userService;
-        private readonly VaultService _vaultService;
-        private readonly SecretService _secretService;
-
-        public MainPage(HttpService httpService, UserService userService,VaultService vaultService, SecretService secretService)
+        public MainPage(MainPageViewModel viewModel)
         {
             InitializeComponent();
-            _httpService = httpService;
-            _userService = userService;
-            _vaultService = vaultService;
-            _secretService = secretService;
+            BindingContext = viewModel;
+            
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            // Safely cast the BindingContext and call the method
+            if (BindingContext is MainPageViewModel vm)
+            {
+                vm.LoadVaultData();
+            }
         }
 
         private async void OnCounterClicked(object sender, EventArgs e)
         {
-            string email = "example4579@gmail.com"; // Must be unique for each run
-            string password = "password";
-            string userId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
-            string vaultId = "adef17a9-ab47-4c27-832c-75ed590ac663";
-            List<string> secrets = new List<string>();
+            //string email = "example4579@gmail.com"; // Must be unique for each run
+            //string password = "password";
+            //string userId = "b1c1f27a-cc59-4d2b-ae74-7b3b0e33a61a";
+            //string vaultId = "adef17a9-ab47-4c27-832c-75ed590ac663";
+            //List<string> secrets = new List<string>();
 
 
 

@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace GoatVaultClient_v3.Models
 {
-    public class VaultEntry
+    public class PasswordItem
     {
-        public string Site { get; set; }
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public string UserName { get; set; }
         public string Password { get; set; }
         public string Description { get; set; }
-        public string Category { get; set; }
+        public string Icon { get; set; } = "\uf084";
+        public string MaskedPassword => "••••••••••••";
     }
 }

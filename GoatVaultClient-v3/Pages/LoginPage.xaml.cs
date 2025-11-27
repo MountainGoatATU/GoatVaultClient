@@ -1,21 +1,11 @@
-using GoatVaultClient_v3.Models;
-using GoatVaultClient_v3.Services;
+using GoatVaultClient_v3.ViewModels;
 
 namespace GoatVaultClient_v3;
 
 public partial class LoginPage : ContentPage
 {
-    private readonly IServiceProvider _services;
-    private readonly UserService _userService;
-    private readonly HttpService _httpService;
-    private readonly AuthTokenService _authTokenService;
-
-    public LoginPage(IServiceProvider services, UserService userService, HttpService httpService, AuthTokenService authTokenService)
-	{
-        _services = services;
-        _userService = userService;
-        _httpService = httpService;
-        _authTokenService = authTokenService;
+    public LoginPage(LoginPageViewModel viewModel)
+    {
         InitializeComponent();
 	}
     private async void OnLoginClicked(object sender, EventArgs e)
@@ -32,9 +22,9 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            var initPayload = new AuthInitRequest { Email = email };
+            var initPayload = new InitRequest { Email = email };
 
-            var initResponse = await _httpService.PostAsync<AuthInitResponse>(
+            var initResponse = await _httpService.PostAsync<InitResponse>(
                 "http://127.0.0.1:8000/v1/auth/init",
                 initPayload
             );
@@ -42,13 +32,13 @@ public partial class LoginPage : ContentPage
             //Generate local salt 
             string loginVerifier = _userService.GenerateAuthVerifier(password, initResponse.AuthSalt);
 
-            var verifyPayload = new AuthVerifyRequest
+            var verifyPayload = new VerifyRequest
             {
                 UserId = Guid.Parse(initResponse.UserId),
                 AuthVerifier = loginVerifier
             };
 
-            var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
+            var verifyResponse = await _httpService.PostAsync<VerifyResponse>(
                 "http://127.0.0.1:8000/v1/auth/verify",
                 verifyPayload
             );

@@ -20,6 +20,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
+		<!--Company name-->
+		<Company>GoatVaultSystems</Company>
+
 		<!-- Display name -->
 		<ApplicationTitle>GoatVaultClient-v3</ApplicationTitle>
 
@@ -60,6 +63,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="12.2.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
 		<PackageReference Include="Isopoh.Cryptography.SecureArray" Version="2.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
@@ -70,6 +75,8 @@
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.120" />
 		<PackageReference Include="SecretSharingDotNet" Version="0.12.0" />
 		<PackageReference Include="UraniumUI" Version="2.13.0" />
+		<PackageReference Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.13.0" />
+		<PackageReference Include="UraniumUI.Dialogs.Mopups" Version="2.13.0" />
 		<PackageReference Include="UraniumUI.Icons.FontAwesome" Version="2.13.0" />
 		<PackageReference Include="UraniumUI.Icons.MaterialIcons" Version="2.13.0" />
 		<PackageReference Include="UraniumUI.Icons.MaterialSymbols" Version="2.13.0" />

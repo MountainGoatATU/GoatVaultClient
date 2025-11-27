@@ -10,6 +10,9 @@ using UraniumUI;
 using SecretSharingDotNet.Cryptography;
 using SecretSharingDotNet.Math;
 using System.Numerics;
+using GoatVaultClient_v3.ViewModels;
+using System.Diagnostics;
+using CommunityToolkit.Maui;
 
 namespace GoatVaultClient_v3
 {
@@ -20,6 +23,7 @@ namespace GoatVaultClient_v3
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .ConfigureFonts(fonts =>
@@ -36,8 +40,9 @@ namespace GoatVaultClient_v3
 #endif
 
             //Setup SQLite local database
-            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "localvault.db");
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "localvaultTest.db");
             string connectionString = $"Data Source={dbPath}";
+            Debug.WriteLine(dbPath);
 
             builder.Services.AddDbContext<GoatVaultDB>(options =>
                options.UseSqlite(connectionString));
@@ -55,6 +60,7 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<VaultService>();
             builder.Services.AddSingleton<UserService>();
             builder.Services.AddSingleton<AuthTokenService>();
+            builder.Services.AddSingleton<VaultSessionService>();
 
             //Shamir services
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
@@ -62,12 +68,20 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
             builder.Services.AddTransient<SecretService>();
 
+            // UraniumUI dialogs
+            builder.Services.AddCommunityToolkitDialogs();
+
             // Register pages
-            builder.Services.AddTransient<MainPage>();
-            builder.Services.AddTransient<IntroductionPage>();
-            builder.Services.AddTransient<RegisterPage>();
-            builder.Services.AddTransient<LoginPage>();
-            builder.Services.AddTransient<GratitudePage>();
+            builder.Services.AddSingleton<MainPageViewModel>();
+            builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddSingleton<IntroductionPageViewModel>();
+            builder.Services.AddSingleton<IntroductionPage>();
+            builder.Services.AddSingleton<RegisterPageViewModel>();
+            builder.Services.AddSingleton<RegisterPage>();
+            builder.Services.AddSingleton<LoginPageViewModel>();
+            builder.Services.AddSingleton<LoginPage>();
+            builder.Services.AddSingleton<GratitudePageViewModel>();
+            builder.Services.AddSingleton<GratitudePage>();
 
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())
