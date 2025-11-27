@@ -5,14 +5,9 @@ namespace GoatVaultClient_v3.Dialogs;
 
 public partial class NewFolderPopup : PopupPage
 {
-	public NewFolderPopup()
-	{
-		InitializeComponent();
-	}
-    private void Cancel_Clicked(object sender, EventArgs e) => MopupService.Instance.PopAsync();
-
-    private void Create_Clicked(object sender, EventArgs e)
+    public NewFolderPopup()
     {
-        MopupService.Instance.PopAsync();
+        InitializeComponent();
+        BindingContext = new ViewModels.NewFolderPopupViewModel();
     }
 }
