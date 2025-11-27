@@ -145,6 +145,17 @@ namespace GoatVaultClient_v3.ViewModels
         }
 
         [RelayCommand]
+        private void EditCategory(string category)
+        {
+            if (string.IsNullOrWhiteSpace(category))
+                return;
+
+            NewCategoryName = category;
+            _editingCategory = category;
+            IsCategoryFormVisible = true;
+        }
+
+        [RelayCommand]
         private void CancelCategory()
         {
             IsCategoryFormVisible = false; // Shows list, hides form
