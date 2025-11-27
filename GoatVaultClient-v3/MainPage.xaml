@@ -94,133 +94,199 @@
             </material:ButtonView>
         </VerticalStackLayout>
 
-        <Grid RowDefinitions="Auto,*,Auto" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" BackgroundColor="#f5f5f5" Padding="10">
+        <Grid Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" BackgroundColor="#f5f5f5" Padding="10">
 
-            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="10,5" BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#1e1e1e}">
-                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                    <Label Text="Current Location" FontSize="10" TextColor="Gray"/>
-                    <Label Text="{Binding CurrentContextName}" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
-                </VerticalStackLayout>
+            <Grid RowDefinitions="Auto, *" IsVisible="{Binding IsCategoryListVisible}">
 
-                <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" BackgroundColor="SkyBlue" PressedCommand="{Binding SortFoldersCommand}">
-                    <material:ButtonView.StrokeShape>
-                        <RoundRectangle CornerRadius="16"/>
-                    </material:ButtonView.StrokeShape>
-                    <Image>
-                        <Image.Source>
-                            <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.SortDown}" Color="White" Size="24"/>
-                        </Image.Source>
-                    </Image>
-                </material:ButtonView>
+                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="10,5" BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#1e1e1e}">
+                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Label Text="Current Location" FontSize="10" TextColor="Gray"/>
+                        <Label Text="{Binding SelectedCategory}" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                    </VerticalStackLayout>
+                    <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" BackgroundColor="SkyBlue" PressedCommand="{Binding SortFoldersCommand}">
+                        <material:ButtonView.StrokeShape>
+                            <RoundRectangle CornerRadius="16"/>
+                        </material:ButtonView.StrokeShape>
+                        <Image>
+                            <Image.Source>
+                                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.SortDown}" Color="White" Size="24"/>
+                            </Image.Source>
+                        </Image>
+                    </material:ButtonView>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <CollectionView ItemsSource="{Binding Categories}" SelectionMode="Single" SelectedItem="{Binding SelectedCategory}" EmptyView="No folders found.">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Grid Padding="0,2">
+                                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 5" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="8,4">
+                                        <Grid ColumnDefinitions="30, *">
+                                            <Image Grid.Column="0" HeightRequest="20" WidthRequest="20" HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit">
+                                                <Image.Source>
+                                                    <FontImageSource Glyph="Folder" FontFamily="FASolid" Color="{AppThemeBinding Light=#skyblue, Dark=#bb86fc}" Size="16"/>
+                                                </Image.Source>
+                                            </Image>
+                                            <Label Grid.Column="1" Text="{Binding .}" FontSize="13" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <material:ButtonView PressedCommand="{Binding CreateCategoryCommand}" HorizontalOptions="End" VerticalOptions="End" Margin="20" HeightRequest="50" WidthRequest="50" BackgroundColor="SkyBlue" ZIndex="10">
+                        <material:ButtonView.Shadow>
+                            <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.3"/>
+                        </material:ButtonView.Shadow>
+                        <material:ButtonView.StrokeShape>
+                            <RoundRectangle CornerRadius="25"/>
+                        </material:ButtonView.StrokeShape>
+                        <Label Text="&#x2b;" FontFamily="FaSolid" TextColor="White" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </material:ButtonView>
+                </Grid>
             </Grid>
 
-            <CollectionView Grid.Row="1" ItemsSource="{Binding Categories}" SelectionMode="Single" EmptyView="No folders found.">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
-                </CollectionView.ItemsLayout>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="x:String">
-                        <Grid Padding="0,2">
-                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 5" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="8,4">
-                                <Grid ColumnDefinitions="30, *">
-                                    <Image Grid.Column="0" HeightRequest="20" WidthRequest="20" HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit">
-                                        <Image.Source>
-                                            <FontImageSource Glyph="Folder" FontFamily="FASolid" Color="{AppThemeBinding Light=#skyblue, Dark=#bb86fc}" Size="16"/>
-                                        </Image.Source>
-                                    </Image>
-                                    <Label Grid.Column="1" Text="{Binding .}" FontSize="13" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+            <Grid RowDefinitions="Auto, *" IsVisible="{Binding IsCategoryFormVisible}">
 
-            <material:ButtonView Grid.Row="1" PressedCommand="{Binding CreateFolderCommand}" HorizontalOptions="End" VerticalOptions="End" Margin="20" HeightRequest="50" WidthRequest="50" BackgroundColor="SkyBlue" ZIndex="10">
-                <material:ButtonView.Shadow>
-                    <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.3"/>
-                </material:ButtonView.Shadow>
-                <material:ButtonView.StrokeShape>
-                    <RoundRectangle CornerRadius="25"/>
-                </material:ButtonView.StrokeShape>
-                <Label Text="&#x2b;" FontFamily="FaSolid" TextColor="White" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
-            </material:ButtonView>
+                <Label Grid.Row="0" Text="New Category" FontSize="20" FontAttributes="Bold" Margin="0,0,0,20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="15">
+                        <material:TextField Title="Category Name" Text="{Binding NewCategoryName}" />
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,20,0,0">
+                            <material:ButtonView Grid.Column="0" HeightRequest="45" BackgroundColor="#E0E0E0" PressedCommand="{Binding CancelCategoryCommand}">
+                                <material:ButtonView.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </material:ButtonView.StrokeShape>
+                                <Label Text="Cancel" TextColor="Black" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </material:ButtonView>
+
+                            <material:ButtonView Grid.Column="1" HeightRequest="45" BackgroundColor="SkyBlue" PressedCommand="{Binding SaveCategoryCommand}">
+                                <material:ButtonView.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </material:ButtonView.StrokeShape>
+                                <Label Text="Save" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </material:ButtonView>
+                        </Grid>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
         </Grid>
 
-        <Grid RowDefinitions="Auto,*,Auto" Grid.Row="1" Grid.Column="2" Grid.RowSpan="2" BackgroundColor="#f5f5f5" Padding="10">
+        <Grid Grid.Row="1" Grid.Column="2" Grid.RowSpan="2" BackgroundColor="#f5f5f5" Padding="10">
 
-            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="10,5" BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#1e1e1e}">
-                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                    <Label Text="Vault Items" FontSize="10" TextColor="Gray"/>
-                    <Label Text="Passwords" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
-                </VerticalStackLayout>
+            <Grid RowDefinitions="Auto,*,Auto" IsVisible="{Binding IsEntriesListVisible}">
 
-                <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" BackgroundColor="SkyBlue" PressedCommand="{Binding SortPasswordsCommand}">
-                    <material:ButtonView.StrokeShape>
-                        <RoundRectangle CornerRadius="16"/>
-                    </material:ButtonView.StrokeShape>
-                    <Image>
-                        <Image.Source>
-                            <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.SortDown}" Color="White" Size="24"/>
-                        </Image.Source>
-                    </Image>
-                </material:ButtonView>
-            </Grid>
+                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="10,5" BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#1e1e1e}">
+                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Label Text="Vault Items" FontSize="10" TextColor="Gray"/>
+                        <Label Text="Passwords" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                    </VerticalStackLayout>
+                    <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" BackgroundColor="SkyBlue" PressedCommand="{Binding SortPasswordsCommand}">
+                        <material:ButtonView.StrokeShape>
+                            <RoundRectangle CornerRadius="16"/>
+                        </material:ButtonView.StrokeShape>
+                        <Image>
+                            <Image.Source>
+                                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.SortDown}" Color="White" Size="24"/>
+                            </Image.Source>
+                        </Image>
+                    </material:ButtonView>
+                </Grid>
 
-            <CollectionView Grid.Row="1" ItemsSource="{Binding Passwords}" SelectionMode="Single" EmptyView="No items found.">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
-                </CollectionView.ItemsLayout>
-
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:PasswordItem">
-                        <Grid Padding="0,2">
-                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 5" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="10,8">
-                                <Grid ColumnDefinitions="30, 2*, 1.5*, Auto" ColumnSpacing="10" VerticalOptions="Center">
-
-                                    <Image Grid.Column="0" HeightRequest="20" WidthRequest="20" HorizontalOptions="Center" VerticalOptions="Center">
-                                        <Image.Source>
-                                            <FontImageSource FontFamily="FASolid" Glyph="{Binding Icon}" Color="Gray" Size="18"/>
-                                        </Image.Source>
-                                    </Image>
-
-                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
-                                        <Label Text="{Binding Description}" FontAttributes="Bold" FontSize="14" TextColor="{AppThemeBinding Light=Black, Dark=White}" LineBreakMode="TailTruncation"/>
-                                        <Label Text="{Binding UserName}" FontSize="11" TextColor="Gray" LineBreakMode="TailTruncation"/>
-                                    </VerticalStackLayout>
-
-                                    <Label Grid.Column="2" Text="{Binding MaskedPassword}" VerticalOptions="Center" HorizontalOptions="Start" TextColor="{AppThemeBinding Light=#555, Dark=#aaa}" FontSize="14" FontAttributes="Bold"/>
-
-                                    <material:ButtonView Grid.Column="3" WidthRequest="36" HeightRequest="36" BackgroundColor="SkyBlue" 
-                                                         PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyPasswordCommand}"
-                                                         CommandParameter="{Binding Password}">
-                                        <material:ButtonView.StrokeShape>
-                                            <RoundRectangle CornerRadius="18"/>
-                                        </material:ButtonView.StrokeShape>
-                                        <Image VerticalOptions="Center" HorizontalOptions="Center">
+                <CollectionView Grid.Row="1" ItemsSource="{Binding Passwords}" SelectionMode="Single" EmptyView="No items found.">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:VaultEntry">
+                            <Grid Padding="0,2">
+                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 5" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="10,8">
+                                    <Grid ColumnDefinitions="30, 2*, 1.5*, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                        <Image Grid.Column="0" HeightRequest="20" WidthRequest="20" HorizontalOptions="Center" VerticalOptions="Center">
                                             <Image.Source>
-                                                <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Copy}" Color="White" Size="16"/>
+                                                <FontImageSource FontFamily="FASolid" Glyph="{Binding Icon}" Color="Gray" Size="18"/>
                                             </Image.Source>
                                         </Image>
-                                    </material:ButtonView>
+                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+                                            <Label Text="{Binding Description}" FontAttributes="Bold" FontSize="14" TextColor="{AppThemeBinding Light=Black, Dark=White}" LineBreakMode="TailTruncation"/>
+                                            <Label Text="{Binding UserName}" FontSize="11" TextColor="Gray" LineBreakMode="TailTruncation"/>
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="2" Text="********" VerticalOptions="Center" HorizontalOptions="Start" TextColor="{AppThemeBinding Light=#555, Dark=#aaa}" FontSize="14" FontAttributes="Bold"/>
+                                        <material:ButtonView Grid.Column="3" WidthRequest="36" HeightRequest="36" BackgroundColor="SkyBlue" 
+                                                             PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyPasswordCommand}"
+                                                             CommandParameter="{Binding Password}">
+                                            <material:ButtonView.StrokeShape>
+                                                <RoundRectangle CornerRadius="18"/>
+                                            </material:ButtonView.StrokeShape>
+                                            <Image VerticalOptions="Center" HorizontalOptions="Center">
+                                                <Image.Source>
+                                                    <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Copy}" Color="White" Size="16"/>
+                                                </Image.Source>
+                                            </Image>
+                                        </material:ButtonView>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
 
-                                </Grid>
+                <material:ButtonView Grid.Row="1" PressedCommand="{Binding CreateEntryCommand}" HorizontalOptions="End" VerticalOptions="End" Margin="20" HeightRequest="50" WidthRequest="50" BackgroundColor="SkyBlue" ZIndex="10">
+                    <material:ButtonView.Shadow>
+                        <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.3"/>
+                    </material:ButtonView.Shadow>
+                    <material:ButtonView.StrokeShape>
+                        <RoundRectangle CornerRadius="25"/>
+                    </material:ButtonView.StrokeShape>
+                    <Label Text="&#x2b;" FontFamily="FaSolid" TextColor="White" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                </material:ButtonView>
+            </Grid>
+
+            <Grid RowDefinitions="Auto, *" IsVisible="{Binding IsEntryFormVisible}">
+
+                <Label Grid.Row="0" Text="Create New Entry" FontSize="20" FontAttributes="Bold" Margin="0,0,0,20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="15">
+
+                        <VerticalStackLayout>
+                            <Border StrokeShape="RoundRectangle 5" StrokeThickness="0" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="0">
+                                <Picker ItemsSource="{Binding Categories}" 
+                                        SelectedItem="{Binding NewEntrySelectedCategory}"
+                                        TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                                        TitleColor="Gray"/>
                             </Border>
+                        </VerticalStackLayout>
+
+                        <material:TextField Title="Service Name (e.g. Netflix)" Text="{Binding NewEntryDescription}" />
+                        <material:TextField Title="Username / Email" Text="{Binding NewEntryUsername}" />
+                        <material:TextField Title="Password" Text="{Binding NewEntryPassword}" IsPassword="True"/>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,20,0,0">
+                            <material:ButtonView Grid.Column="0" HeightRequest="45" BackgroundColor="#E0E0E0" PressedCommand="{Binding CancelEntryCommand}">
+                                <material:ButtonView.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </material:ButtonView.StrokeShape>
+                                <Label Text="Cancel" TextColor="Black" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </material:ButtonView>
+
+                            <material:ButtonView Grid.Column="1" HeightRequest="45" BackgroundColor="SkyBlue" PressedCommand="{Binding SaveEntryCommand}">
+                                <material:ButtonView.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </material:ButtonView.StrokeShape>
+                                <Label Text="Save Entry" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </material:ButtonView>
                         </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
 
-            <material:ButtonView Grid.Row="1" PressedCommand="{Binding CreatePasswordCommand}" HorizontalOptions="End" VerticalOptions="End" Margin="20" HeightRequest="50" WidthRequest="50" BackgroundColor="SkyBlue" ZIndex="10">
-                <material:ButtonView.Shadow>
-                    <Shadow Brush="Black" Offset="2,2" Radius="5" Opacity="0.3"/>
-                </material:ButtonView.Shadow>
-                <material:ButtonView.StrokeShape>
-                    <RoundRectangle CornerRadius="25"/>
-                </material:ButtonView.StrokeShape>
-                <Label Text="&#x2b;" FontFamily="FaSolid" TextColor="White" FontSize="24" HorizontalOptions="Center" VerticalOptions="Center"/>
-            </material:ButtonView>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
         </Grid>
-
     </Grid>
 </ContentPage>

@@ -13,22 +13,54 @@ namespace GoatVaultClient_v3.ViewModels
 {
     public partial class MainPageViewModel : ObservableObject
     {
-        // The list bound to the CollectionView
+        #region Properties
+        /*
+         * Observables
+         */
+        private List<VaultEntry> _allVaultEntries = new List<VaultEntry>();
         [ObservableProperty]
         private ObservableCollection<string> categories;
         [ObservableProperty]
         private ObservableCollection<VaultEntry> passwords;
-
-        // Displayed in the Header
         [ObservableProperty]
-        private string currentContextName = "My Vault";
-        // This attribute generates the "IsBusy" property automatically
+        private string selectedCategory;
+
+        /*
+         * Visibility Toggles for Forms and Lists
+         */
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsEntriesListVisible))] // Updates the list visibility when form visibility changes
+        private bool isEntryFormVisible;
+        public bool IsEntriesListVisible => !IsEntryFormVisible;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsCategoryListVisible))]
+        private bool isCategoryFormVisible;
+        public bool IsCategoryListVisible => !IsCategoryFormVisible;
+
+        /*
+         * Input Fields for new Entry and Category
+         */
+        [ObservableProperty]
+        private string newCategoryName;
+
+        [ObservableProperty]
+        private string newEntryDescription;
+
+        [ObservableProperty]
+        private string newEntryUsername;
+
+        [ObservableProperty]
+        private string newEntryPassword;
+
+        [ObservableProperty]
+        private string newEntrySelectedCategory;
 
         private bool _isSortedAscending = true;
 
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
-
+        #endregion
         public MainPageViewModel(VaultService vaultService, HttpService httpService, UserService userService, VaultSessionService vaultSessionService)
         {
             //Dependency Injection
@@ -37,7 +69,57 @@ namespace GoatVaultClient_v3.ViewModels
             Categories = new ObservableCollection<string>();
             Passwords = new ObservableCollection<VaultEntry>();
         }
+        #region Synchronous methods
+        partial void OnSelectedCategoryChanged(string value)
+        {
+            ApplyFilter();
+        }
 
+        public void LoadVaultData()
+        {
+            // If the session is empty (user logged out or not ready), do nothing
+            if (_vaultSessionService.DecryptedVault == null)
+                return;
+
+            // 2. Reload Categories
+            // We clear and add instead of 'new ObservableCollection' to keep UI bindings stable, 
+            // though replacing the collection works too if PropertyChanged is fired.
+            if (_vaultSessionService.DecryptedVault.Categories != null)
+            {
+                Categories.Clear();
+                Categories = new ObservableCollection<string>(_vaultSessionService.DecryptedVault.Categories);
+            }
+
+            // 3. Reload Passwords
+            if (_vaultSessionService.DecryptedVault.Entries != null)
+            {
+                _allVaultEntries = _vaultSessionService.DecryptedVault.Entries;
+
+                ApplyFilter();
+            }
+        }
+
+        // 5. ADD: The Filter Logic
+        private void ApplyFilter()
+        {
+            IEnumerable<VaultEntry> filtered;
+
+            if (string.IsNullOrEmpty(SelectedCategory))
+            {
+                // If no category selected, show all
+                filtered = _allVaultEntries;
+            }
+            else
+            {
+                // Assuming VaultEntry has a 'Category' property. 
+                // If not, you will need to add it to your Model.
+                filtered = _allVaultEntries.Where(x => x.Category == SelectedCategory);
+            }
+
+            Passwords = new ObservableCollection<VaultEntry>(filtered);
+        }
+        #endregion
+        #region Commands
         [RelayCommand]
         private void SortList()
         {
@@ -51,18 +133,37 @@ namespace GoatVaultClient_v3.ViewModels
         }
 
         [RelayCommand]
-        private async Task CreateFolder()
+        private async Task CreateCategory()
         {
-            // Using native MAUI DisplayPromptAsync for the input dialog
-            // You can replace this with Mopups or a custom Uranium Popup if preferred
-            string result = await Shell.Current.DisplayPromptAsync("New Folder", "Enter folder name:");
+            NewCategoryName = string.Empty;
+            IsCategoryFormVisible = true; // Hides list, shows form
+        }
 
-            if (!string.IsNullOrWhiteSpace(result))
+        [RelayCommand]
+        private void CancelCategory()
+        {
+            IsCategoryFormVisible = false; // Shows list, hides form
+        }
+
+        // 5. ADD: Save Command
+        [RelayCommand]
+        private void SaveCategory()
+        {
+            if (string.IsNullOrWhiteSpace(NewCategoryName))
+                return;
+
+            // Add to the service data
+            if (_vaultSessionService.DecryptedVault.Categories != null)
             {
-                _vaultSessionService.DecryptedVault.Categories.Add(result.Trim());
+                _vaultSessionService.DecryptedVault.Categories.Add(NewCategoryName.Trim());
+
+                // Refresh the UI list
                 LoadVaultData();
             }
+
+            IsCategoryFormVisible = false;
         }
+
 
         [RelayCommand]
         private async Task CopyPassword()
@@ -71,31 +172,44 @@ namespace GoatVaultClient_v3.ViewModels
         }
 
         [RelayCommand]
-        private async Task CreatePassword()
+        private async Task CreateEntry()
         {
+            NewEntryDescription = string.Empty;
+            NewEntryUsername = string.Empty;
+            NewEntryPassword = string.Empty;
 
+            NewEntrySelectedCategory = SelectedCategory ?? Categories.FirstOrDefault();
+
+            IsEntryFormVisible = true;
         }
 
-        // 1. Create a method to load the data
-        public void LoadVaultData()
+        [RelayCommand]
+        private void CancelEntry()
         {
-            // If the session is empty (user logged out or not ready), do nothing
-            if (_vaultSessionService.DecryptedVault == null)
+            IsEntryFormVisible = false;
+        }
+
+        [RelayCommand]
+        private void SaveEntry()
+        {
+            // Basic Validation
+            if (string.IsNullOrWhiteSpace(NewEntryDescription) || string.IsNullOrWhiteSpace(NewEntryPassword))
                 return;
 
-            // 2. Reload Categories
-            // We clear and add instead of 'new ObservableCollection' to keep UI bindings stable, 
-            // though replacing the collection works too if PropertyChanged is fired.
-            if (_vaultSessionService.DecryptedVault.Categories != null)
+            var newEntry = new VaultEntry
             {
-                Categories = new ObservableCollection<string>(_vaultSessionService.DecryptedVault.Categories);
-            }
+                Description = NewEntryDescription,
+                UserName = NewEntryUsername,
+                Password = NewEntryPassword,
+                Category = NewEntrySelectedCategory
+            };
 
-            // 3. Reload Passwords
-            if (_vaultSessionService.DecryptedVault.Entries != null)
-            {
-                Passwords = new ObservableCollection<VaultEntry>(_vaultSessionService.DecryptedVault.Entries);
-            }
+            // Add to the decrypted vault
+            _vaultSessionService.DecryptedVault.Entries.Add(newEntry);
+            // Hide the entry form
+            IsEntryFormVisible = false;
+            // Reload the data to reflect the new entry
+            LoadVaultData();
         }
 
         // 4. Trigger this method when the page appears
@@ -104,5 +218,6 @@ namespace GoatVaultClient_v3.ViewModels
         {
             LoadVaultData();
         }
+        #endregion
     }
 }
