@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultClient_v3.Models;
 using Mopups.Services;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,18 @@ namespace GoatVaultClient_v3.ViewModels
 {
     public partial class NewPasswordPopupViewModel : ObservableObject
     {
+        [ObservableProperty]
+        private string site = string.Empty;
+
+        [ObservableProperty]
+        private string username = string.Empty;
+
+        [ObservableProperty]
+        private string password = string.Empty;
+
+        [ObservableProperty]
+        private string category = "Default";
+
         [RelayCommand]
         private async Task Cancel()
         {
@@ -20,7 +33,22 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private async Task Create()
         {
-            await MopupService.Instance.PopAsync();
+            if (!string.IsNullOrWhiteSpace(Site) &&
+                !string.IsNullOrWhiteSpace(Username) &&
+                !string.IsNullOrWhiteSpace(Password))
+            {
+                if (App.Current.MainPage.BindingContext is MainPageViewModel mainVm)
+                {
+                    mainVm.Passwords.Add(new VaultEntry
+                    {
+                        Site = Site,
+                        Username = Username,
+                        Password = Password,
+                        Category = string.IsNullOrWhiteSpace(Category) ? "Default" : Category
+                    });
+                }
+                await MopupService.Instance.PopAsync();
+            }
         }
     }
 }

@@ -11,6 +11,9 @@ namespace GoatVaultClient_v3.ViewModels
 {
     public partial class NewFolderPopupViewModel : ObservableObject
     {
+        [ObservableProperty]
+        private string folderName = string.Empty;
+
         [RelayCommand]
         private async Task Cancel()
         {
@@ -20,7 +23,14 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private async Task Create()
         {
-            await MopupService.Instance.PopAsync();
+            if (!string.IsNullOrWhiteSpace(FolderName))
+            {
+                if (App.Current.MainPage.BindingContext is MainPageViewModel mainVm)
+                {
+                    mainVm.Categories.Add(FolderName.Trim());
+                }
+                await MopupService.Instance.PopAsync();
+            }
         }
     }
 }
