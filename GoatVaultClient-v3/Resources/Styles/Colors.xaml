@@ -15,7 +15,7 @@
     <Color x:Key="ButtonBackgroundDark">#4A90E2</Color>
 
     <Color x:Key="CancelButtonBackgroundLight">#E0E0E0</Color>
-    <Color x:Key="CancelButtonBackgroundDark">#3a3a3a</Color>
+    <Color x:Key="CancelButtonBackgroundDark">#4a4a4a</Color>
 
     <!-- Primary Colors -->
     <Color x:Key="PrimaryColor">#2196F3</Color>

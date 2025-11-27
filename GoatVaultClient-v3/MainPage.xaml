@@ -170,7 +170,7 @@
                                 <material:ButtonView.StrokeShape>
                                     <RoundRectangle CornerRadius="10"/>
                                 </material:ButtonView.StrokeShape>
-                                <Label Text="Cancel" TextColor="Black" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Label Text="Cancel" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                             </material:ButtonView>
 
                             <material:ButtonView Grid.Column="1" HeightRequest="45" PressedCommand="{Binding SaveCategoryCommand}" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
@@ -218,7 +218,7 @@
                                     <Grid ColumnDefinitions="30, 2*, 1.5*, Auto" ColumnSpacing="10" VerticalOptions="Center">
                                         <Image Grid.Column="0" HeightRequest="20" WidthRequest="20" HorizontalOptions="Center" VerticalOptions="Center">
                                             <Image.Source>
-                                                <FontImageSource FontFamily="FASolid" Glyph="{Binding Icon}" Color="Gray" Size="18"/>
+                                                <FontImageSource FontFamily="FASolid" Glyph="{Binding Icon}" Color="{AppThemeBinding Light=Gray, Dark=#aaa}" Size="18"/>
                                             </Image.Source>
                                         </Image>
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
@@ -283,7 +283,7 @@
                                 <material:ButtonView.StrokeShape>
                                     <RoundRectangle CornerRadius="10"/>
                                 </material:ButtonView.StrokeShape>
-                                <Label Text="Cancel" TextColor="Black" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Label Text="Cancel" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                             </material:ButtonView>
 
                             <material:ButtonView Grid.Column="1" HeightRequest="45" PressedCommand="{Binding SaveEntryCommand}" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">

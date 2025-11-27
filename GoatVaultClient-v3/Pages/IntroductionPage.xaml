@@ -10,7 +10,7 @@
     <Grid Padding="30">
         <VerticalStackLayout Spacing="30" VerticalOptions="Center" HorizontalOptions="Center">
 
-            <material:ButtonView WidthRequest="140" HeightRequest="140" BackgroundColor="LightSkyBlue">
+            <material:ButtonView WidthRequest="140" HeightRequest="140" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
                 <material:ButtonView.StrokeShape>
                     <RoundRectangle CornerRadius="70"/>
                 </material:ButtonView.StrokeShape>
@@ -20,7 +20,7 @@
             <Label Text="Welcome to Goat Vault!" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
             <Label Text="Securely store and manage all your passwords in one place." FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
-            <material:ButtonView WidthRequest="220" HeightRequest="55" BackgroundColor="SkyBlue">
+            <material:ButtonView WidthRequest="220" HeightRequest="55" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
                 <material:ButtonView.StrokeShape>
                     <RoundRectangle CornerRadius="27"/>
                 </material:ButtonView.StrokeShape>

@@ -14,7 +14,7 @@
             <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True"/>
             <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True"/>
 
-            <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="SkyBlue">
+            <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
                 <material:ButtonView.StrokeShape>
                     <RoundRectangle CornerRadius="25"/>
                 </material:ButtonView.StrokeShape>
