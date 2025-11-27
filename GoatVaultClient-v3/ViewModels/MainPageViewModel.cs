@@ -10,6 +10,7 @@ using GoatVaultClient_v3.Models;
 using GoatVaultClient_v3.Services;
 using GoatVaultClient_v3.Pages;
 using Mopups.Services;
+using GoatVaultClient_v3.Dialogs;
 
 namespace GoatVaultClient_v3.ViewModels
 {
@@ -55,15 +56,18 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private async Task CreateFolder()
         {
+            var popup = new CreateFolderPopup();
+            await MopupService.Instance.PushAsync(popup);
+
             // Using native MAUI DisplayPromptAsync for the input dialog
             // You can replace this with Mopups or a custom Uranium Popup if preferred
-            string result = await Shell.Current.DisplayPromptAsync("New Folder", "Enter folder name:");
+            //string result = await Shell.Current.DisplayPromptAsync("New Folder", "Enter folder name:");
 
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                _vaultSessionService.DecryptedVault.Categories.Add(result.Trim());
-                LoadVaultData();
-            }
+            //if (!string.IsNullOrWhiteSpace(result))
+            //{
+            //    _vaultSessionService.DecryptedVault.Categories.Add(result.Trim());
+            //    LoadVaultData();
+            //}
         }
 
         [RelayCommand]
