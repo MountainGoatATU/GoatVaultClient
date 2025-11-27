@@ -58,6 +58,8 @@ namespace GoatVaultClient_v3.ViewModels
 
         private bool _isSortedAscending = true;
 
+        private string _editingCategory;
+
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
         #endregion
