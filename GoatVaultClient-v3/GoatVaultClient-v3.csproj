@@ -84,6 +84,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Dialogs\NewFolderPopup.xaml.cs">
+	    <DependentUpon>NewFolderPopup.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\IntroductionPage.xaml.cs">
 	    <DependentUpon>IntroductionPage.xaml</DependentUpon>
 	  </Compile>
@@ -93,7 +96,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Dialogs\CreateFolderPopup.xaml">
+	  <MauiXaml Update="Dialogs\NewFolderPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\GratitudePage.xaml">

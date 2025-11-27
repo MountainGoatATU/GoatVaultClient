@@ -56,7 +56,7 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private async Task CreateFolder()
         {
-            var popup = new CreateFolderPopup();
+            var popup = new NewFolderPopup();
             await MopupService.Instance.PushAsync(popup);
 
             // Using native MAUI DisplayPromptAsync for the input dialog
