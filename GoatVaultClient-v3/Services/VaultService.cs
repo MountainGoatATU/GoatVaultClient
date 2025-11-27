@@ -15,8 +15,8 @@ namespace GoatVaultClient_v3.Services
 {
     public interface IVaultService
     {
-        VaultPayload EncryptVault(string password, VaultData vaultData);
-        VaultData DecryptVault(VaultPayload vault, string password);
+        VaultModel EncryptVault(string password, VaultData vaultData);
+        VaultData DecryptVault(VaultModel vault, string password);
     }
     public class VaultService(GoatVaultDB goatVaultDB) : IVaultService
     {
@@ -31,7 +31,7 @@ namespace GoatVaultClient_v3.Services
         };
 
         #region Vault Encryption/Decryption
-        public VaultPayload EncryptVault(string masterPassword, VaultData vaultData)
+        public VaultModel EncryptVault(string masterPassword, VaultData vaultData)
         {
             // Create default vault structure if none exists
             if (vaultData == null)
@@ -69,7 +69,7 @@ namespace GoatVaultClient_v3.Services
             }
 
             // Prepare payload for server
-            return new VaultPayload
+            return new VaultModel
             {
                 VaultSalt = Convert.ToBase64String(vault_salt),
                 Nonce = Convert.ToBase64String(nonce),
@@ -80,7 +80,7 @@ namespace GoatVaultClient_v3.Services
             //return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
         }
 
-        public VaultData DecryptVault(VaultPayload payload, string password)
+        public VaultData DecryptVault(VaultModel payload, string password)
         {
             if (payload == null)
                 throw new ArgumentNullException(nameof(payload));

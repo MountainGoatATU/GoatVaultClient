@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace GoatVaultClient_v3.Models
 {
-    public class VerifyRequest
+    public class AuthInitRequest
     {
-        [JsonPropertyName("_id")] public Guid UserId { get; set; }
-        [JsonPropertyName("auth_verifier")] public string AuthVerifier { get; set; }
+        [JsonPropertyName("email")] public string Email { get; set; }
     }
 }
