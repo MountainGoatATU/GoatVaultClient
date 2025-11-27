@@ -39,7 +39,7 @@ namespace GoatVaultClient_v3
     		builder.Logging.AddDebug();
 #endif
 
-            //Setup SQLite local database
+            // Setup SQLite local database
             string dbPath = Path.Combine(FileSystem.AppDataDirectory, "localvaultTest.db");
             string connectionString = $"Data Source={dbPath}";
             Debug.WriteLine(dbPath);
@@ -56,13 +56,13 @@ namespace GoatVaultClient_v3
                     "Mozilla/5.0 (MAUI; Android/iOS/Desktop) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
             });
        
-            //Register app services
+            // Register app services
             builder.Services.AddSingleton<VaultService>();
             builder.Services.AddSingleton<UserService>();
             builder.Services.AddSingleton<AuthTokenService>();
             builder.Services.AddSingleton<VaultSessionService>();
 
-            //Shamir services
+            // Shamir services
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
             builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
             builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
