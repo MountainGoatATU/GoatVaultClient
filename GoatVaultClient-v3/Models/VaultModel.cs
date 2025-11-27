@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GoatVaultClient_v3.Models
 {
-    public class VaultPayload
+    public class VaultModel
     {
         [JsonPropertyName("vault_salt")] public string? VaultSalt { get; set; }
         [JsonPropertyName("nonce")] public string? Nonce { get; set; }

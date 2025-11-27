@@ -26,11 +26,11 @@ namespace GoatVaultClient_v3.Models
 
         [NotMapped]
         [JsonIgnore]
-        public VaultPayload Vault
+        public VaultModel Vault
         {
             get => string.IsNullOrEmpty(VaultJson)
-                ? new VaultPayload()
-                : JsonSerializer.Deserialize<VaultPayload>(VaultJson)!;
+                ? new VaultModel()
+                : JsonSerializer.Deserialize<VaultModel>(VaultJson)!;
             set => VaultJson = JsonSerializer.Serialize(value);
         }
 
