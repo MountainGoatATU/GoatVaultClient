@@ -26,18 +26,18 @@
         <BoxView Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Color="{AppThemeBinding Light={StaticResource MainBackgroundLight}, Dark={StaticResource MainBackgroundDark}}"/>
 
         <!-- User Avatar Button -->
-        <material:ButtonView WidthRequest="55" HeightRequest="55" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}"/>
+        <material:ButtonView WidthRequest="55" HeightRequest="55" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
             <material:ButtonView.StrokeShape>
-                <RoundRectangle CornerRadius="40"/>
+                <RoundRectangle CornerRadius="27"/>
             </material:ButtonView.StrokeShape>
             <Image>
                 <Image.Source>
                     <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.User}" Color="White" Size="24"/>
-            </Image.Source>
+                </Image.Source>
             </Image>
+        </material:ButtonView>
 
-
-            <Label Grid.Row="1" Grid.Column="0" Text="Goat Vault" FontSize="14" HorizontalOptions="Center" Margin="0,5,0,10"/>
+        <Label Grid.Row="1" Grid.Column="0" Text="Goat Vault" FontSize="14" HorizontalOptions="Center" Margin="0,5,0,10"/>
 
         <!-- Search Bar and Filter -->
         <Grid Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2">
