@@ -189,14 +189,30 @@ namespace GoatVaultClient_v3.ViewModels
             if (string.IsNullOrWhiteSpace(NewCategoryName))
                 return;
 
-            // Add to the service data
-            if (_vaultSessionService.DecryptedVault.Categories != null)
+            if (!string.IsNullOrWhiteSpace(_editingCategory))
             {
-                _vaultSessionService.DecryptedVault.Categories.Add(NewCategoryName.Trim());
+                // Update existing category
+                int index = _vaultSessionService.DecryptedVault.Categories.IndexOf(_editingCategory);
+                if (index >= 0)
+                    _vaultSessionService.DecryptedVault.Categories[index] = NewCategoryName.Trim();
 
-                // Refresh the UI list
-                LoadVaultData();
+                // Update category in existing entries
+                foreach (var entry in _vaultSessionService.DecryptedVault.Entries
+                             .Where(e => e.Category == _editingCategory))
+                {
+                    entry.Category = NewCategoryName.Trim();
+                }
+
+                _editingCategory = null;
             }
+            else
+            {
+                // Add new category
+                _vaultSessionService.DecryptedVault.Categories.Add(NewCategoryName.Trim());
+            }
+
+            // Refresh the UI list
+            LoadVaultData();
 
             IsCategoryFormVisible = false;
         }
