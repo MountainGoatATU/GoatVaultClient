@@ -60,6 +60,8 @@ namespace GoatVaultClient_v3.ViewModels
 
         private string _editingCategory;
 
+        private string _editingEntry;
+
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
         #endregion
