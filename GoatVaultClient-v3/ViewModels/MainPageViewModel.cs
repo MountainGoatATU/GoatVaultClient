@@ -120,8 +120,11 @@ namespace GoatVaultClient_v3.ViewModels
         }
         #endregion
         #region Commands
+        /*
+         * Categories Commands
+         */
         [RelayCommand]
-        private void SortList()
+        private void SortCategories()
         {
             // Toggle sort order
             var sorted = _isSortedAscending
@@ -163,12 +166,19 @@ namespace GoatVaultClient_v3.ViewModels
 
             IsCategoryFormVisible = false;
         }
-
+        /*
+         * Entries Commands
+         */
+        [RelayCommand]
+        private void SortEntries()
+        {
+            throw new NotImplementedException("CopyEntry command is not implemented yet.");
+        }
 
         [RelayCommand]
-        private async Task CopyPassword()
+        private async Task CopyEntry()
         {
-
+            throw new NotImplementedException("CopyEntry command is not implemented yet.");
         }
 
         [RelayCommand]

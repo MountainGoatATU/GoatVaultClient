@@ -103,7 +103,7 @@
                         <Label Text="Current Location" FontSize="10" TextColor="Gray"/>
                         <Label Text="{Binding SelectedCategory}" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                     </VerticalStackLayout>
-                    <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" BackgroundColor="SkyBlue" PressedCommand="{Binding SortFoldersCommand}">
+                    <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" BackgroundColor="SkyBlue" PressedCommand="{Binding SortCategoriesCommand}">
                         <material:ButtonView.StrokeShape>
                             <RoundRectangle CornerRadius="16"/>
                         </material:ButtonView.StrokeShape>
@@ -187,7 +187,7 @@
                         <Label Text="Vault Items" FontSize="10" TextColor="Gray"/>
                         <Label Text="Passwords" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                     </VerticalStackLayout>
-                    <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" BackgroundColor="SkyBlue" PressedCommand="{Binding SortPasswordsCommand}">
+                    <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" BackgroundColor="SkyBlue" PressedCommand="{Binding SortEntriesCommand}">
                         <material:ButtonView.StrokeShape>
                             <RoundRectangle CornerRadius="16"/>
                         </material:ButtonView.StrokeShape>
