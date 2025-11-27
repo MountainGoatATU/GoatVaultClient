@@ -156,6 +156,27 @@ namespace GoatVaultClient_v3.ViewModels
         }
 
         [RelayCommand]
+        private void DeleteCategory(string category)
+        {
+            if (string.IsNullOrWhiteSpace(category))
+                return;
+
+            if (_vaultSessionService.DecryptedVault.Categories.Contains(category))
+            {
+                _vaultSessionService.DecryptedVault.Categories.Remove(category);
+
+                // Remove all entries in that category
+                var entriesToRemove = _vaultSessionService.DecryptedVault.Entries
+                    .Where(e => e.Category == category)
+                    .ToList();
+                foreach (var entry in entriesToRemove)
+                    _vaultSessionService.DecryptedVault.Entries.Remove(entry);
+
+                LoadVaultData();
+            }
+        }
+
+        [RelayCommand]
         private void CancelCategory()
         {
             IsCategoryFormVisible = false; // Shows list, hides form
