@@ -52,8 +52,8 @@ namespace GoatVaultClient_v3.ViewModels
                 IsBusy = true;
 
                 // 2. Init Auth
-                var initPayload = new InitRequest { Email = Email };
-                var initResponse = await _httpService.PostAsync<InitResponse>(
+                var initPayload = new AuthInitRequest { Email = Email };
+                var initResponse = await _httpService.PostAsync<AuthInitResponse>(
                     "http://127.0.0.1:8000/v1/auth/init",
                     initPayload
                 );
@@ -62,12 +62,12 @@ namespace GoatVaultClient_v3.ViewModels
                 string loginVerifier = _userService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
 
                 // 4. Verify
-                var verifyPayload = new VerifyRequest
+                var verifyPayload = new AuthVerifyRequest
                 {
                     UserId = Guid.Parse(initResponse.UserId),
                     AuthVerifier = loginVerifier
                 };
-                var verifyResponse = await _httpService.PostAsync<VerifyResponse>(
+                var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
                     "http://127.0.0.1:8000/v1/auth/verify",
                     verifyPayload
                 );

@@ -23,6 +23,6 @@ namespace GoatVaultClient_v3.Models
         public bool MfaEnabled { get; set; }
 
         [JsonPropertyName("vault")]
-        public VaultPayload Vault { get; set; }
+        public VaultModel Vault { get; set; }
     }
 }

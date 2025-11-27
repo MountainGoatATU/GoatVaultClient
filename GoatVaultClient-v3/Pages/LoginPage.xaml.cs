@@ -4,11 +4,12 @@ namespace GoatVaultClient_v3;
 
 public partial class LoginPage : ContentPage
 {
-    public LoginPage(LoginPageViewModel viewModel)
+    public LoginPage(LoginPageViewModel vm)
     {
         InitializeComponent();
-	}
-    private async void OnLoginClicked(object sender, EventArgs e)
+        BindingContext = vm;
+    }
+    /*private async void OnLoginClicked(object sender, EventArgs e)
     {
         string email = EmailEntry.Text?.Trim() ?? "";
         string password = PasswordEntry.Text ?? "";
@@ -57,13 +58,13 @@ public partial class LoginPage : ContentPage
         {
             await DisplayAlert("Error", ex.Message, "OK");
         }
-    }
+    }*/
 
       
 
-    private async void OnGoToRegister(object sender, EventArgs e)
+    /*private async void OnGoToRegister(object sender, EventArgs e)
     {
         var registerPage = _services.GetRequiredService<RegisterPage>();
         await Navigation.PushAsync(registerPage);
-    }
+    }*/
 }

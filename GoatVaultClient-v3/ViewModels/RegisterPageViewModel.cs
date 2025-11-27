@@ -72,19 +72,19 @@ namespace GoatVaultClient_v3.ViewModels
 
                 // 3. API: Register
                 // Note: Ideally move these URL strings to a Constants file
-                var registerResponse = await _httpService.PostAsync<RegisterResponse>(
+                var registerResponse = await _httpService.PostAsync<AuthRegisterResponse>(
                     "http://127.0.0.1:8000/v1/auth/register",
                     registerRequest
                 );
 
                 // 4. API: Verify (Get Token)
-                var verifyRequest = new VerifyRequest
+                var verifyRequest = new AuthVerifyRequest
                 {
                     UserId = Guid.Parse(registerResponse.Id),
                     AuthVerifier = registerRequest.AuthVerifier
                 };
 
-                var verifyResponse = await _httpService.PostAsync<VerifyResponse>(
+                var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
                     "http://127.0.0.1:8000/v1/auth/verify",
                     verifyRequest
                 );

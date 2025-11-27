@@ -8,10 +8,10 @@ namespace GoatVaultClient_v3
 {
     public partial class RegisterPage : ContentPage
     {
-        public RegisterPage(RegisterPageViewModel viewModel)
+        public RegisterPage(RegisterPageViewModel vm)
         {
             InitializeComponent();
-            BindingContext = viewModel;
+            BindingContext = vm;
         }
     }
 }
