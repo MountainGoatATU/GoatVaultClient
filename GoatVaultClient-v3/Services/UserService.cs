@@ -17,13 +17,13 @@ namespace GoatVaultClient_v3.Services
     }
     public interface IUserService
     {
-        AuthRegisterRequest RegisterUser(string email, string password, VaultPayload vault);
+        AuthRegisterRequest RegisterUser(string email, string password, VaultModel vault);
     }
     public class UserService : IUserService
     {
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
-        public AuthRegisterRequest RegisterUser(string email, string masterPassword, VaultPayload vault)
+        public AuthRegisterRequest RegisterUser(string email, string masterPassword, VaultModel vault)
         {
             byte[] authSalt = new byte[16];
             Rng.GetBytes(authSalt);

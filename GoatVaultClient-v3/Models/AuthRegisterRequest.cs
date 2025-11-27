@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace GoatVaultClient_v3.Models
 {
-    public class RegisterRequest
+    public class AuthRegisterRequest
     {
         [JsonPropertyName("email")] public string Email { get; set; }
         [JsonPropertyName("auth_salt")] public string AuthSalt { get; set; }
         [JsonPropertyName("auth_verifier")] public string AuthVerifier { get; set; }
-        [JsonPropertyName("vault")] public VaultPayload Vault { get; set; }
+        [JsonPropertyName("vault")] public VaultModel Vault { get; set; }
     }
 }

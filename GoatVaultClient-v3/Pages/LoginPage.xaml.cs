@@ -32,9 +32,9 @@ public partial class LoginPage : ContentPage
 
         try
         {
-            var initPayload = new InitRequest { Email = email };
+            var initPayload = new AuthInitRequest { Email = email };
 
-            var initResponse = await _httpService.PostAsync<InitResponse>(
+            var initResponse = await _httpService.PostAsync<AuthInitResponse>(
                 "http://127.0.0.1:8000/v1/auth/init",
                 initPayload
             );
@@ -42,13 +42,13 @@ public partial class LoginPage : ContentPage
             //Generate local salt 
             string loginVerifier = _userService.GenerateAuthVerifier(password, initResponse.AuthSalt);
 
-            var verifyPayload = new VerifyRequest
+            var verifyPayload = new AuthVerifyRequest
             {
                 UserId = Guid.Parse(initResponse.UserId),
                 AuthVerifier = loginVerifier
             };
 
-            var verifyResponse = await _httpService.PostAsync<VerifyResponse>(
+            var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
                 "http://127.0.0.1:8000/v1/auth/verify",
                 verifyPayload
             );

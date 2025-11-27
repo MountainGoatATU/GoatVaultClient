@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GoatVaultClient_v3.Models
 {
-    public class RegisterResponse
+    public class AuthRegisterResponse
     {
         [JsonPropertyName("_id")] public string Id { get; set; }
         [JsonPropertyName("email")] public string Email { get; set; }
