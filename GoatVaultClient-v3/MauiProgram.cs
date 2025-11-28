@@ -13,7 +13,6 @@ using System.Numerics;
 using GoatVaultClient_v3.ViewModels;
 using System.Diagnostics;
 using CommunityToolkit.Maui;
-using GoatVaultClient_v3.Pages;
 
 namespace GoatVaultClient_v3
 {
@@ -62,6 +61,7 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<UserService>();
             builder.Services.AddSingleton<AuthTokenService>();
             builder.Services.AddSingleton<VaultSessionService>();
+            builder.Services.AddSingleton<MarkdownHelperService>();
 
             // Shamir services
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
