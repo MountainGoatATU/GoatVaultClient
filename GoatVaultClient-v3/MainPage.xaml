@@ -258,7 +258,7 @@
                                         
                                         <Label Grid.Column="2" Text="********" VerticalOptions="Center" HorizontalOptions="Start" TextColor="{AppThemeBinding Light=#555, Dark=#aaa}" FontSize="14" FontAttributes="Bold"/>
                                         <material:ButtonView Grid.Column="3" WidthRequest="36" HeightRequest="36" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}"
-                                                             PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyPasswordCommand}"
+                                                             PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyEntryCommand}"
                                                              CommandParameter="{Binding Password}">
                                             <material:ButtonView.StrokeShape>
                                                 <RoundRectangle CornerRadius="18"/>
