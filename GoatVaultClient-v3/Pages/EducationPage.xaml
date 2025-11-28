@@ -2,17 +2,69 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
+             xmlns:models="clr-namespace:GoatVaultClient_v3.Models"
              x:Class="GoatVaultClient_v3.EducationPage"
              x:DataType="vm:EducationPageViewModel"
              Title="EducationPage">
-    <Grid>
-        <WebView Source="{Binding HtmlSource}"/>
-        
-        <ActivityIndicator x:Name="LoadingSpinner"
-                           IsRunning="{Binding IsLoading}"
+    <Grid RowDefinitions="Auto, *">
+
+        <CollectionView Grid.Row="0"
+                ItemsSource="{Binding Topics}"
+                HeightRequest="60" 
+                SelectionMode="Single"
+                SelectedItem="{Binding CurrentTopic}">
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:EducationTopic">
+                    <Border StrokeShape="RoundRectangle 20"
+                    StrokeThickness="0"
+                    Padding="15,5"
+                    Margin="5,10"
+                    HorizontalOptions="Start" 
+                    VerticalOptions="Center">
+
+                        <Label Text="{Binding Title}" 
+                       VerticalOptions="Center" 
+                       HorizontalOptions="Center"
+                       FontAttributes="Bold"
+                       FontSize="14"/>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup Name="CommonStates">
+
+                                <VisualState Name="Selected">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="#512BD4" />
+                                        <Setter TargetName="Label" Property="Label.TextColor" Value="White" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="#F0F0F0" />
+                                        <Setter TargetName="Label" Property="Label.TextColor" Value="#512BD4" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid Grid.Row="1">
+            <WebView Source="{Binding HtmlSource}" Navigating="OnWebViewNavigating"/>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" 
                            IsVisible="{Binding IsLoading}"
                            HorizontalOptions="Center"
                            VerticalOptions="Center"
-                           Color="Blue"/>
+                           Color="#512BD4"/>
+        </Grid>
     </Grid>
 </ContentPage>
