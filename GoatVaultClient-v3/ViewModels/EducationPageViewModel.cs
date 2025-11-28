@@ -14,7 +14,7 @@ namespace GoatVaultClient_v3.ViewModels
         private readonly MarkdownHelperService _markdownHelperService;
 
         [ObservableProperty]
-        private bool _isLoading = true;
+        private bool _isLoading;
 
         [ObservableProperty]
         private HtmlWebViewSource _htmlSource; 
@@ -31,7 +31,7 @@ namespace GoatVaultClient_v3.ViewModels
             try
             {
                 // Load and convert the Markdown file to HTML
-                string htmlContent = await _markdownHelperService.GetHtmlFromAssetAsync("intro.md");
+                string htmlContent = await _markdownHelperService.GetHtmlFromAssetAsync("Structure.md");
 
                 // Create a source for the webview
                 HtmlSource = new HtmlWebViewSource

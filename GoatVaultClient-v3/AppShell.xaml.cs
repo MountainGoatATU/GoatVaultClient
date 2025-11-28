@@ -1,5 +1,4 @@
-﻿using GoatVaultClient_v3.Pages;
-
+﻿
 namespace GoatVaultClient_v3
 {
     public partial class AppShell : Shell
