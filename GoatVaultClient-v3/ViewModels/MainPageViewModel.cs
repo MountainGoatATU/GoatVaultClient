@@ -237,6 +237,9 @@ namespace GoatVaultClient_v3.ViewModels
 
             // Copy to clipboard
             await Clipboard.Default.SetTextAsync(password);
+
+            await Task.Delay(10000); // 10 seconds
+            await Clipboard.Default.SetTextAsync(""); // Clear clipboard
         }
 
         [RelayCommand]
