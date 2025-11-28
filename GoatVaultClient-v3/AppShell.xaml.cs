@@ -13,6 +13,8 @@ namespace GoatVaultClient_v3
             Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
             Routing.RegisterRoute(nameof(IntroductionPage), typeof(IntroductionPage));
             Routing.RegisterRoute(nameof(EducationPage), typeof(EducationPage));
+            Routing.RegisterRoute(nameof(EducationDetailPage), typeof(EducationDetailPage));
+
         }
     }
 }

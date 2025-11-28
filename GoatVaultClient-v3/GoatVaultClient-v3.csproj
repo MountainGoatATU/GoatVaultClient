@@ -101,9 +101,6 @@
 	  <MauiXaml Update="Pages\EducationDetailPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\EducationMenuPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
 	  <MauiXaml Update="Pages\EducationPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
