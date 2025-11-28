@@ -8,8 +8,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient_v3.Models;
 using GoatVaultClient_v3.Services;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 
 namespace GoatVaultClient_v3.ViewModels
 {
@@ -237,12 +237,6 @@ namespace GoatVaultClient_v3.ViewModels
 
             // Copy to clipboard
             await Clipboard.Default.SetTextAsync(password);
-
-            // Show confirmation
-            if (Application.Current?.MainPage != null)
-            {
-                await Application.Current.MainPage.DisplayAlert("Copied", "Password copied to clipboard", "OK");
-            }
         }
 
         [RelayCommand]
