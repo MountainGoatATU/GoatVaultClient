@@ -22,6 +22,9 @@
         <Tab Title="GratitudePage" Icon="user_icon.png">
             <ShellContent ContentTemplate="{DataTemplate local:GratitudePage}" Route="GratitudePage" />
         </Tab>
+        <Tab Title="EducationPage" Icon="user_icon.png">
+            <ShellContent ContentTemplate="{DataTemplate local:EducationPage}" Route="EducationPage" />
+        </Tab>
     </TabBar>
 
 </Shell>

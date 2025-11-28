@@ -63,10 +63,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiCss Remove="Resources\Raw\quiz.css" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="12.2.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
 		<PackageReference Include="Isopoh.Cryptography.SecureArray" Version="2.0.0" />
+		<PackageReference Include="Markdig" Version="0.44.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.11" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.11" />
@@ -93,6 +98,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Pages\EducationDetailPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\EducationPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\GratitudePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

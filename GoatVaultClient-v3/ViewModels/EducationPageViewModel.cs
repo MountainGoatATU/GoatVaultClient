@@ -1,0 +1,64 @@
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using GoatVaultClient_v3;
+using GoatVaultClient_v3.Models;
+using GoatVaultClient_v3.ViewModels;
+
+namespace GoatVaultClient_v3.ViewModels
+{
+    public partial class EducationPageViewModel : BaseViewModel
+    {
+        public ObservableCollection<EducationTopic> Topics { get; }
+
+        [ObservableProperty]
+        private EducationTopic _currentTopic;
+
+        public EducationPageViewModel()
+        {
+            // Define your topics here as you did before
+            Topics = new ObservableCollection<EducationTopic>
+        {
+            new EducationTopic { Title = "Introduction", FileName = "Structure.md",
+                Quiz = new QuizData
+                    {
+                        Title = "What is the purpose of the education structure?",
+                        Questions = new List<QuizOption>
+                        {
+                            new QuizOption { Text = "To educate the user", IsCorrect = true },
+                            new QuizOption { Text = "To waste users's time", IsCorrect = false },
+                            new QuizOption { Text = "To provide misleading topics and incorrect information", IsCorrect = false }
+                        }
+                    }},
+            new EducationTopic { Title = "Shamir", FileName = "Shamir.md",
+                Quiz = new QuizData
+                    {
+                        Title = "What is Shamir Secret Sharing?",
+                        Questions = new List<QuizOption>
+                        {
+                            new QuizOption { Text = "Just some guy telling a secret to his frined", IsCorrect = true },
+                            new QuizOption { Text = "Shamir does have a secret he wants to share", IsCorrect = false },
+                            new QuizOption { Text = "A way on how to retrieve passwords from multiple shares by using interpolation", IsCorrect = false }
+                        }
+                    } }
+        };
+        }
+
+        [RelayCommand]
+        public async Task OpenTopicAsync(EducationTopic topic)
+        {
+            if (topic == null) return;
+
+            // Navigate to the detail page and pass the 'topic' object
+            var navigationParameter = new Dictionary<string, object>
+        {
+            { "Topic", topic }
+        };
+
+            //Resetting the topic in the menu
+            CurrentTopic = null;
+
+            await Shell.Current.GoToAsync(nameof(EducationDetailPage), navigationParameter);
+        }
+    }
+}

@@ -61,6 +61,7 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<UserService>();
             builder.Services.AddSingleton<AuthTokenService>();
             builder.Services.AddSingleton<VaultSessionService>();
+            builder.Services.AddSingleton<MarkdownHelperService>();
 
             // Shamir services
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
@@ -82,6 +83,10 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<LoginPage>();
             builder.Services.AddSingleton<GratitudePageViewModel>();
             builder.Services.AddSingleton<GratitudePage>();
+            builder.Services.AddSingleton<EducationPageViewModel>();
+            builder.Services.AddSingleton<EducationPage>();
+            builder.Services.AddSingleton<EducationDetailViewModel>();
+            builder.Services.AddSingleton<EducationDetailPage>();
 
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())
