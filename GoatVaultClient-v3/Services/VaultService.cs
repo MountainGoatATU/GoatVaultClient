@@ -177,6 +177,8 @@ namespace GoatVaultClient_v3.Services
                 }
 
                 await _goatVaultDB.SaveChangesAsync();
+                // Lock the vault session
+                _vaultSessionService.Lock();
             }
             catch (Exception ex)
             {

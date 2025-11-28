@@ -16,6 +16,8 @@ namespace GoatVaultClient_v3.Services
         public void Lock()
         {
             DecryptedVault = null;
+            CurrentUser = null;
+            MasterPassword = null;
 
             // Force Garbage Collection to remove secrets from heap (Optional but good)
             GC.Collect();
