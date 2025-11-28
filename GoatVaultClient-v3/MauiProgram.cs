@@ -13,6 +13,7 @@ using System.Numerics;
 using GoatVaultClient_v3.ViewModels;
 using System.Diagnostics;
 using CommunityToolkit.Maui;
+using GoatVaultClient_v3.Pages;
 
 namespace GoatVaultClient_v3
 {
@@ -82,6 +83,8 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<LoginPage>();
             builder.Services.AddSingleton<GratitudePageViewModel>();
             builder.Services.AddSingleton<GratitudePage>();
+            builder.Services.AddSingleton<EducationPageViewModel>();
+            builder.Services.AddSingleton<EducationPage>();
 
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())

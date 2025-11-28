@@ -1,4 +1,6 @@
-﻿namespace GoatVaultClient_v3
+﻿using GoatVaultClient_v3.Pages;
+
+namespace GoatVaultClient_v3
 {
     public partial class AppShell : Shell
     {
@@ -11,6 +13,7 @@
             Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
             Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
             Routing.RegisterRoute(nameof(IntroductionPage), typeof(IntroductionPage));
+            Routing.RegisterRoute(nameof(EducationPage), typeof(EducationPage));
         }
     }
 }
