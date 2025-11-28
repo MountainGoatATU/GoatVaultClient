@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +64,15 @@ namespace GoatVaultClient_v3.ViewModels
         private string _editingCategory;
 
         private VaultEntry _editingEntry;
+
+        private bool _isPasswordVisible;
+
+        public bool IsPasswordVisible
+        {
+            get => _isPasswordVisible;
+            set => SetProperty(ref _isPasswordVisible, value);
+        }
+
 
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
@@ -324,6 +334,12 @@ namespace GoatVaultClient_v3.ViewModels
             LoadVaultData();
         }
 
+        [RelayCommand]
+        private void TogglePasswordVisibility()
+        {
+            IsPasswordVisible = !IsPasswordVisible;
+        }
+
         // 4. Trigger this method when the page appears
         [RelayCommand]
         private void Appearing()
@@ -332,4 +348,26 @@ namespace GoatVaultClient_v3.ViewModels
         }
         #endregion
     }
+
+    public class InverseBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            => !(bool)value;
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => !(bool)value;
+    }
+
+    public class EyeIconConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isVisible = (bool)value;
+            return isVisible ? "\uf070" : "\uf06e";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
 }

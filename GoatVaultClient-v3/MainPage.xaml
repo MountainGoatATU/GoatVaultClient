@@ -7,6 +7,13 @@
              xmlns:fa="clr-namespace:UraniumUI.Icons.FontAwesome;assembly=UraniumUI.Icons.FontAwesome"
              x:Class="GoatVaultClient_v3.MainPage">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <vm:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <vm:EyeIconConverter x:Key="EyeIconConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60"/>
@@ -312,8 +319,7 @@
             </Grid>
 
             <!-- Entry Form -->
-            <Grid RowDefinitions="Auto, *" IsVisible="{Binding IsEntryFormVisible}">
-
+            <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="Auto, *" IsVisible="{Binding IsEntryFormVisible}">
                 <Label Grid.Row="0" Text="Create New Entry" FontSize="20" FontAttributes="Bold" Margin="0,0,0,20" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
 
                 <ScrollView Grid.Row="1">
@@ -322,15 +328,25 @@
                         <VerticalStackLayout>
                             <Border StrokeShape="RoundRectangle 5" StrokeThickness="0" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="0">
                                 <Picker ItemsSource="{Binding Categories}" 
-                                        SelectedItem="{Binding NewEntrySelectedCategory}"
-                                        TextColor="{AppThemeBinding Light=Black, Dark=White}"
-                                        TitleColor="Gray"/>
+                                SelectedItem="{Binding NewEntrySelectedCategory}"
+                                TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                                TitleColor="Gray"/>
                             </Border>
                         </VerticalStackLayout>
-
                         <material:TextField Title="Service Name (e.g. Netflix)" Text="{Binding NewEntryDescription}" />
                         <material:TextField Title="Username / Email" Text="{Binding NewEntryUsername}" />
-                        <material:TextField Title="Password" Text="{Binding NewEntryPassword}" IsPassword="True"/>
+
+                        <Grid>
+                            <material:TextField Title="Password" Text="{Binding NewEntryPassword}" IsPassword="{Binding IsPasswordVisible, Converter={StaticResource InverseBoolConverter}}"/>
+
+                            <material:ButtonView WidthRequest="40" HeightRequest="40" BackgroundColor="Transparent" HorizontalOptions="End" VerticalOptions="Center" PressedCommand="{Binding TogglePasswordVisibilityCommand}">
+                                <Image>
+                                    <Image.Source>
+                                        <FontImageSource FontFamily="FASolid" Glyph="{Binding IsPasswordVisible, Converter={StaticResource EyeIconConverter}}" Size="18" Color="Gray"/>
+                                    </Image.Source>
+                                </Image>
+                            </material:ButtonView>
+                        </Grid>
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,20,0,0">
                             <material:ButtonView Grid.Column="0" HeightRequest="45" PressedCommand="{Binding CancelEntryCommand}" BackgroundColor="{AppThemeBinding Light={StaticResource CancelButtonBackgroundLight}, Dark={StaticResource CancelButtonBackgroundDark}}">
