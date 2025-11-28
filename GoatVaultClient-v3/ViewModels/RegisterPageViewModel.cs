@@ -90,6 +90,7 @@ namespace GoatVaultClient_v3.ViewModels
                 );
 
                 _authTokenService.SetToken(verifyResponse.AccessToken);
+                _vaultSessionService.MasterPassword = Password;
 
                 // 5. API: Get User Profile
                 var userResponse = await _httpService.GetAsync<UserResponse>(
@@ -97,28 +98,28 @@ namespace GoatVaultClient_v3.ViewModels
                 );
 
                 // Update Singleton User Service
-                _userService.User = userResponse;
+                _vaultSessionService.CurrentUser = userResponse;
 
                 // 6. Local Database Logic
                 // Check if user exists locally, if so, remove them (fresh start)
-                var existingUser = await _vaultService.LoadUserFromLocalAsync(_userService.User.Id);
+                var existingUser = await _vaultService.LoadUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
                 if (existingUser != null)
                 {
-                    await _vaultService.DeleteUserFromLocalAsync(_userService.User.Id);
+                    await _vaultService.DeleteUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
                 }
 
                 // Save new user to SQLite
                 await _vaultService.SaveUserToLocalAsync(new DbModel
                 {
-                    Id = _userService.User.Id,
-                    Email = _userService.User.Email,
-                    AuthSalt = _userService.User.AuthSalt,
-                    MfaEnabled = _userService.User.MfaEnabled,
-                    Vault = _userService.User.Vault
+                    Id = _vaultSessionService.CurrentUser.Id,
+                    Email = _vaultSessionService.CurrentUser.Email,
+                    AuthSalt = _vaultSessionService.CurrentUser.AuthSalt,
+                    MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled,
+                    Vault = _vaultSessionService.CurrentUser.Vault
                 });
 
                 // 7. Decrypt & Store Session in RAM
-                _vaultSessionService.DecryptedVault = _vaultService.DecryptVault(_userService.User.Vault, Password);
+                _vaultSessionService.DecryptedVault = _vaultService.DecryptVault(_vaultSessionService.CurrentUser.Vault, Password);
 
                 // 8. Navigate
                 // Using Shell navigation is standard for MAUI

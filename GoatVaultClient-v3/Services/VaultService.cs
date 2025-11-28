@@ -17,11 +17,14 @@ namespace GoatVaultClient_v3.Services
     {
         VaultModel EncryptVault(string password, VaultData vaultData);
         VaultData DecryptVault(VaultModel vault, string password);
+        Task SyncAndCloseAsync(UserResponse currentUser, string password, VaultData vaultData);
     }
-    public class VaultService(GoatVaultDB goatVaultDB) : IVaultService
+    public class VaultService(GoatVaultDB goatVaultDB, HttpService httpService, VaultSessionService vaultSessionService) : IVaultService
     {
         private readonly GoatVaultDB _goatVaultDB = goatVaultDB;
-    
+        private readonly HttpService _httpService = httpService;
+        private readonly VaultSessionService _vaultSessionService = vaultSessionService;
+
         // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
@@ -121,6 +124,63 @@ namespace GoatVaultClient_v3.Services
             catch (Exception ex)
             {
                 throw new Exception($"Unexpected error while decrypting vault: {ex.Message}", ex);
+            }
+        }
+
+        public async Task SyncAndCloseAsync(UserResponse user, string password, VaultData vaultData)
+        {
+            if (user == null || string.IsNullOrEmpty(password) || vaultData == null)
+                return;
+
+            try
+            {
+                //Encrypt the vault data
+                VaultModel encryptedModel = EncryptVault(password, vaultData);
+
+                //Model for local DB
+                var dbModel = new DbModel
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    AuthSalt = user.AuthSalt,
+                    MfaEnabled = user.MfaEnabled,
+                    Vault = encryptedModel,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                //Model for server sync
+                var userRequest = new UserRequest
+                {
+                    Email = user.Email,
+                    MfaEnabled = user.MfaEnabled,
+                    Vault = encryptedModel
+                };
+
+                var existingUser = await _goatVaultDB.LocalCopy.FirstOrDefaultAsync(u => u.Id == user.Id);
+                if (existingUser != null)
+                {
+                    //Update local Vault
+                    existingUser.Vault = dbModel.Vault;
+                    _goatVaultDB.LocalCopy.Update(existingUser);
+
+                    //Sync with server
+                    var userResponse = await _httpService.PatchAsync<UserResponse>(
+                    $"http://127.0.0.1:8000/v1/users/{_vaultSessionService.CurrentUser.Id}",
+                    userRequest
+                );
+
+                }
+                else
+                {
+                    // Create local vault
+                    _goatVaultDB.LocalCopy.Add(dbModel);
+                }
+
+                await _goatVaultDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error syncing on close: {ex.Message}");
             }
         }
         #endregion
