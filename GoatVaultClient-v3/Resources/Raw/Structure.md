@@ -1,10 +1,3 @@
-#draft
-# Visual structure
-
-
----
-
-
 # 🧠 Password Manager Learning Section
 
 
@@ -403,4 +396,4 @@
 
 ---
 # UI Mockup
-![[education-section.png]]
+![education-section.png](images/education-section.png)
