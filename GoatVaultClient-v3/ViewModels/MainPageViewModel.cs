@@ -60,7 +60,7 @@ namespace GoatVaultClient_v3.ViewModels
 
         private string _editingCategory;
 
-        private string _editingEntry;
+        private VaultEntry _editingEntry;
 
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
@@ -246,6 +246,33 @@ namespace GoatVaultClient_v3.ViewModels
         }
 
         [RelayCommand]
+        private void EditEntry(VaultEntry entry)
+        {
+            if (entry == null)
+                return;
+
+            NewEntryDescription = entry.Description;
+            NewEntryUsername = entry.UserName;
+            NewEntryPassword = entry.Password;
+            NewEntrySelectedCategory = entry.Category;
+
+            _editingEntry = entry;
+
+            IsEntryFormVisible = true;
+        }
+
+        [RelayCommand]
+        private void DeleteEntry(VaultEntry entry)
+        {
+            if (entry == null)
+                return;
+
+            _vaultSessionService.DecryptedVault.Entries.Remove(entry);
+            LoadVaultData();
+        }
+
+
+        [RelayCommand]
         private void CancelEntry()
         {
             IsEntryFormVisible = false;
@@ -258,16 +285,30 @@ namespace GoatVaultClient_v3.ViewModels
             if (string.IsNullOrWhiteSpace(NewEntryDescription) || string.IsNullOrWhiteSpace(NewEntryPassword))
                 return;
 
-            var newEntry = new VaultEntry
+            if (_editingEntry != null)
             {
-                Description = NewEntryDescription,
-                UserName = NewEntryUsername,
-                Password = NewEntryPassword,
-                Category = NewEntrySelectedCategory
-            };
+                // Edit if exists
+                _editingEntry.Description = NewEntryDescription;
+                _editingEntry.UserName = NewEntryUsername;
+                _editingEntry.Password = NewEntryPassword;
+                _editingEntry.Category = NewEntrySelectedCategory;
 
-            // Add to the decrypted vault
-            _vaultSessionService.DecryptedVault.Entries.Add(newEntry);
+                _editingEntry = null;
+            }
+            else
+            {
+                //Add new
+                var newEntry = new VaultEntry
+                {
+                    Description = NewEntryDescription,
+                    UserName = NewEntryUsername,
+                    Password = NewEntryPassword,
+                    Category = NewEntrySelectedCategory
+                };
+                // Add to the decrypted vault
+                _vaultSessionService.DecryptedVault.Entries.Add(newEntry);
+            }
+
             // Hide the entry form
             IsEntryFormVisible = false;
             // Reload the data to reflect the new entry
