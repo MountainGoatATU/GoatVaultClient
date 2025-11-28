@@ -1,10 +1,14 @@
 ﻿using Markdig;
 
-namespace YourNamespace
+namespace GoatVaultClient_v3.Services
 {
-    public static class MarkdownHelper
+    public interface IMarkdownHelperService
     {
-        public static async Task<string> GetHtmlFromAssetAsync(string filename)
+        Task<string> GetHtmlFromAssetAsync(string filename);
+    }
+    public class MarkdownHelperService
+    {
+        public async Task<string> GetHtmlFromAssetAsync(string filename)
         {
             // 1. Open the file from the Resources/Raw folder
             using var stream = await FileSystem.OpenAppPackageFileAsync(filename);
@@ -23,7 +27,7 @@ namespace YourNamespace
             return CreateHtmlDocument(htmlBody);
         }
 
-        private static string CreateHtmlDocument(string htmlBody)
+        private string CreateHtmlDocument(string htmlBody)
         {
             // Simple CSS for a clean "Documentation" look
             var css = @"
