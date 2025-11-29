@@ -73,31 +73,33 @@ namespace GoatVaultClient_v3.ViewModels
                 );
 
                 _authTokenService.SetToken(verifyResponse.AccessToken);
+                _vaultSessionService.MasterPassword = Password;
 
                 // 5. Get User Data
                 var userResponse = await _httpService.GetAsync<UserResponse>(
                     $"http://127.0.0.1:8000/v1/users/{initResponse.UserId}"
                 );
-                _userService.User = userResponse;
+
+                _vaultSessionService.CurrentUser = userResponse;
 
                 // 6. Sync Local DB (Delete old if exists, save new)
-                var existingUser = await _vaultService.LoadUserFromLocalAsync(_userService.User.Id);
+                var existingUser = await _vaultService.LoadUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
                 if (existingUser != null)
                 {
-                    await _vaultService.DeleteUserFromLocalAsync(_userService.User.Id);
+                    await _vaultService.DeleteUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
                 }
 
                 await _vaultService.SaveUserToLocalAsync(new DbModel
                 {
-                    Id = _userService.User.Id,
-                    Email = _userService.User.Email,
-                    AuthSalt = _userService.User.AuthSalt,
-                    MfaEnabled = _userService.User.MfaEnabled,
-                    Vault = _userService.User.Vault
+                    Id = _vaultSessionService.CurrentUser.Id,
+                    Email = _vaultSessionService.CurrentUser.Email,
+                    AuthSalt = _vaultSessionService.CurrentUser.AuthSalt,
+                    MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled,
+                    Vault = _vaultSessionService.CurrentUser.Vault
                 });
 
                 // 7. Decrypt & Store Session
-                _vaultSessionService.DecryptedVault = _vaultService.DecryptVault(_userService.User.Vault, Password);
+                _vaultSessionService.DecryptedVault = _vaultService.DecryptVault(_vaultSessionService.CurrentUser.Vault, Password);
 
                 // 8. Navigate to App (MainPage)
                 // Note: Originally you went to GratitudePage, but for login, MainPage is standard.

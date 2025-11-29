@@ -21,7 +21,6 @@ namespace GoatVaultClient_v3.Services
     }
     public class UserService : IUserService
     {
-        public UserResponse User;
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
 
         public AuthRegisterRequest RegisterUser(string email, string masterPassword, VaultModel vault)
