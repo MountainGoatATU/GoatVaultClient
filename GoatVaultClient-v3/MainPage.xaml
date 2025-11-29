@@ -74,11 +74,16 @@
                 <material:ButtonView.StrokeShape>
                     <RoundRectangle CornerRadius="27"/>
                 </material:ButtonView.StrokeShape>
+
                 <Image>
                     <Image.Source>
                         <FontImageSource FontFamily="FASolid" Glyph="{x:Static fa:Solid.Book}" Color="White" Size="24"/>
                     </Image.Source>
                 </Image>
+
+                <material:ButtonView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoToEducationCommand}"/>
+                </material:ButtonView.GestureRecognizers>
             </material:ButtonView>
 
             <material:ButtonView WidthRequest="55" HeightRequest="55" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">

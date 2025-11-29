@@ -346,6 +346,13 @@ namespace GoatVaultClient_v3.ViewModels
         {
             LoadVaultData();
         }
+
+        [RelayCommand]
+        private async Task GoToEducation()
+        {
+            // Navigate to Education Page
+            await Shell.Current.GoToAsync($"//{nameof(EducationPage)}");
+        }
         #endregion
     }
 
