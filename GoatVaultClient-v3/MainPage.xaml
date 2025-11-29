@@ -9,7 +9,6 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <vm:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <vm:EyeIconConverter x:Key="EyeIconConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
