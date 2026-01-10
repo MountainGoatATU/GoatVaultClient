@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
              xmlns:models="clr-namespace:GoatVaultClient_v3.Models"
@@ -15,21 +16,19 @@
     
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="60"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Sidebar and Topbar -->
-        <BoxView Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Color="{AppThemeBinding Light={StaticResource SidebarBackgroundLight}, Dark={StaticResource SidebarBackgroundDark}}"/>
-        <BoxView Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Color="{AppThemeBinding Light={StaticResource SidebarBackgroundLight}, Dark={StaticResource SidebarBackgroundDark}}"/>
-        <BoxView Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Color="{AppThemeBinding Light={StaticResource MainBackgroundLight}, Dark={StaticResource MainBackgroundDark}}"/>
+        
 
         <!-- User Avatar Button -->
         <material:ButtonView WidthRequest="55" HeightRequest="55" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
@@ -46,7 +45,7 @@
         <Label Grid.Row="1" Grid.Column="0" Text="Goat Vault" FontSize="14" HorizontalOptions="Center" Margin="0,5,0,10"/>
 
         <!-- Search Bar and Filter -->
-        <Grid Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2">
+        <Grid Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" BackgroundColor="{AppThemeBinding Light={StaticResource SidebarBackgroundLight}, Dark={StaticResource SidebarBackgroundDark}}">
             <Grid HorizontalOptions="Start" VerticalOptions="Center" ColumnSpacing="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -117,7 +116,7 @@
                 <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="10,5" BackgroundColor="{AppThemeBinding Light=#f0f0f0, Dark=#1e1e1e}">
                     <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
                         <Label Text="Current Location" FontSize="10" TextColor="Gray"/>
-                        <Label Text="{Binding SelectedCategory}" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                        <Label Text="{Binding SelectedCategory.Name}" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
                     </VerticalStackLayout>
                     <material:ButtonView Grid.Column="1" WidthRequest="32" HeightRequest="32" PressedCommand="{Binding SortCategoriesCommand}" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
                         <material:ButtonView.StrokeShape>
@@ -137,7 +136,7 @@
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="x:String">
+                            <DataTemplate x:DataType="models:FolderItem">
                                 <Grid Padding="0,2">
                                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 5" BackgroundColor="{AppThemeBinding Light=White, Dark=#2d2d2d}" Padding="8,4">
                                         <Grid ColumnDefinitions="30, *, 32, 32" ColumnSpacing="5" Padding="8,4">
@@ -146,7 +145,7 @@
                                                     <FontImageSource Glyph="Folder" FontFamily="FASolid" Size="16" Color="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}"/>
                                                 </Image.Source>
                                             </Image>
-                                            <Label Grid.Column="1" Text="{Binding .}" FontSize="13" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
+                                            <Label Grid.Column="1" Text="{Binding Name}" FontSize="13" VerticalOptions="Center" TextColor="{AppThemeBinding Light=Black, Dark=White}"/>
 
                                             <!-- Edit icon -->
                                             <material:ButtonView Grid.Column="2" WidthRequest="28" HeightRequest="28" PressedCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}" CommandParameter="{Binding .}" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}" HorizontalOptions="End">
