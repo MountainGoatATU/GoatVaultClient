@@ -9,9 +9,9 @@ namespace GoatVaultClient_v3.Services
 {
     public class VaultSessionService
     {
-        public VaultData DecryptedVault { get; set; }
-        public UserResponse CurrentUser { get; set; }
-        public string? MasterPassword { get; set; }
+        public VaultData DecryptedVault { get; set; } = null;
+        public UserResponse CurrentUser { get; set; } = null;
+        public string? MasterPassword { get; set; } = "";
         
         public void Lock()
         {

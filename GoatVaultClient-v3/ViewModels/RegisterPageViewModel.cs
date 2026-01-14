@@ -44,6 +44,7 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private async Task Register()
         {
+            string url = "https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com";
             if (IsBusy) return;
 
             // 1. Validation
@@ -73,7 +74,7 @@ namespace GoatVaultClient_v3.ViewModels
                 // 3. API: Register
                 // Note: Ideally move these URL strings to a Constants file
                 var registerResponse = await _httpService.PostAsync<AuthRegisterResponse>(
-                    "http://127.0.0.1:8000/v1/auth/register",
+                    $"{url}/v1/auth/register",
                     registerRequest
                 );
 
@@ -85,7 +86,7 @@ namespace GoatVaultClient_v3.ViewModels
                 };
 
                 var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
-                    "http://127.0.0.1:8000/v1/auth/verify",
+                    $"{url}/v1/auth/verify",
                     verifyRequest
                 );
 
@@ -94,7 +95,7 @@ namespace GoatVaultClient_v3.ViewModels
 
                 // 5. API: Get User Profile
                 var userResponse = await _httpService.GetAsync<UserResponse>(
-                    $"http://127.0.0.1:8000/v1/users/{registerResponse.Id}"
+                    $"{url}/v1/users/{registerResponse.Id}"
                 );
 
                 // Update Singleton User Service

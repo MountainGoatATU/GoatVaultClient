@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient_v3.Models;
 using GoatVaultClient_v3.Services;
+using static System.Net.WebRequestMethods;
 
 namespace GoatVaultClient_v3.ViewModels
 {
@@ -38,6 +39,7 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private async Task Login()
         {
+            string url = "https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com";
             if (IsBusy) return;
 
             // 1. Validation
@@ -54,7 +56,7 @@ namespace GoatVaultClient_v3.ViewModels
                 // 2. Init Auth
                 var initPayload = new AuthInitRequest { Email = Email };
                 var initResponse = await _httpService.PostAsync<AuthInitResponse>(
-                    "http://127.0.0.1:8000/v1/auth/init",
+                    $"{url}/v1/auth/init",
                     initPayload
                 );
 
@@ -68,7 +70,7 @@ namespace GoatVaultClient_v3.ViewModels
                     AuthVerifier = loginVerifier
                 };
                 var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
-                    "http://127.0.0.1:8000/v1/auth/verify",
+                    $"{url}/v1/auth/verify",
                     verifyPayload
                 );
 
@@ -77,7 +79,7 @@ namespace GoatVaultClient_v3.ViewModels
 
                 // 5. Get User Data
                 var userResponse = await _httpService.GetAsync<UserResponse>(
-                    $"http://127.0.0.1:8000/v1/users/{initResponse.UserId}"
+                    $"{url}/v1/users/{initResponse.UserId}"
                 );
 
                 _vaultSessionService.CurrentUser = userResponse;

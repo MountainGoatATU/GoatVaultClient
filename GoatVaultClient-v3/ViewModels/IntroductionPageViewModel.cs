@@ -9,7 +9,7 @@ namespace GoatVaultClient_v3.ViewModels
         private async Task GetStarted()
         {
             // Navigate to Register Page
-            await Shell.Current.GoToAsync($"//{nameof(RegisterPage)}");
+            await Shell.Current.GoToAsync($"{nameof(RegisterPage)}");
         }
     }
 }

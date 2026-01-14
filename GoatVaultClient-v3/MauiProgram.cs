@@ -1,18 +1,19 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Numerics;
+using System.Numerics;
+using CommunityToolkit.Maui;
 using GoatVaultClient_v3.Database;
 using GoatVaultClient_v3.Services;
+using GoatVaultClient_v3.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Mopups.Hosting;
 using SecretSharingDotNet.Cryptography;
+using SecretSharingDotNet.Cryptography;
+using SecretSharingDotNet.Math;
 using SecretSharingDotNet.Math;
 using UraniumUI;
-using SecretSharingDotNet.Cryptography;
-using SecretSharingDotNet.Math;
-using System.Numerics;
-using GoatVaultClient_v3.ViewModels;
-using System.Diagnostics;
-using CommunityToolkit.Maui;
 
 namespace GoatVaultClient_v3
 {
@@ -26,10 +27,13 @@ namespace GoatVaultClient_v3
                 .UseMauiCommunityToolkit()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
+                .ConfigureMopups()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont("JetBrainsMono-Regular.ttf", "JetBrainsMonoRegular");
+                    fonts.AddFont("JetBrainsMon-Semibold.ttf", "JetBrainsMonoSemibold");
 
                     fonts.AddMaterialSymbolsFonts();
                     fonts.AddFontAwesomeIconFonts();
@@ -63,6 +67,9 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<VaultSessionService>();
             builder.Services.AddSingleton<MarkdownHelperService>();
 
+            //Test services
+            builder.Services.AddSingleton<FakeDataSource>();
+
             // Shamir services
             builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
             builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
@@ -70,6 +77,7 @@ namespace GoatVaultClient_v3
             builder.Services.AddTransient<SecretService>();
 
             // UraniumUI dialogs
+            builder.Services.AddMopupsDialogs();
             builder.Services.AddCommunityToolkitDialogs();
 
             // Register pages
