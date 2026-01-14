@@ -11,6 +11,10 @@ using GoatVaultClient_v3.Models;
 using GoatVaultClient_v3.Services;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Maui.Core.Extensions;
+using UraniumUI.Dialogs;
+using UraniumUI.Icons.MaterialSymbols;
+using Mopups.Services;
 
 namespace GoatVaultClient_v3.ViewModels
 {
@@ -22,50 +26,22 @@ namespace GoatVaultClient_v3.ViewModels
          */
         private List<VaultEntry> _allVaultEntries = new List<VaultEntry>();
         [ObservableProperty]
-        private ObservableCollection<string> categories;
+        private ObservableCollection<CategoryItem> categories = [];
         [ObservableProperty]
-        private ObservableCollection<VaultEntry> passwords;
+        private ObservableCollection<VaultEntry> passwords = [];
         [ObservableProperty]
-        private string selectedCategory;
-
-        /*
-         * Visibility Toggles for Forms and Lists
-         */
+        private CategoryItem selectedCategory = null;
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsEntriesListVisible))] // Updates the list visibility when form visibility changes
-        private bool isEntryFormVisible;
-        public bool IsEntriesListVisible => !IsEntryFormVisible;
+        private VaultEntry selectedEntry = null;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsCategoryListVisible))]
-        private bool isCategoryFormVisible;
-        public bool IsCategoryListVisible => !IsCategoryFormVisible;
+        private CategoryItem newEntrySelectedCategory;
 
-        /*
-         * Input Fields for new Entry and Category
-         */
-        [ObservableProperty]
-        private string newCategoryName;
+        private bool _categoriesSortAsc = true;
 
-        [ObservableProperty]
-        private string newEntryDescription;
+        private bool _passwordsSortAsc = true;
 
-        [ObservableProperty]
-        private string newEntryUsername;
-
-        [ObservableProperty]
-        private string newEntryPassword;
-
-        [ObservableProperty]
-        private string newEntrySelectedCategory;
-
-        private bool _isSortedAscending = true;
-
-        private string _editingCategory;
-
-        private VaultEntry _editingEntry;
-
-        private bool _isPasswordVisible;
+        private bool _isPasswordVisible = false;
 
         public bool IsPasswordVisible
         {
@@ -76,51 +52,56 @@ namespace GoatVaultClient_v3.ViewModels
 
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
+        private readonly FakeDataSource _fakeDataSource;
+        private readonly IDialogService _dialogService;
         #endregion
-        public MainPageViewModel(VaultService vaultService, HttpService httpService, UserService userService, VaultSessionService vaultSessionService)
+        public MainPageViewModel(VaultService vaultService, HttpService httpService, UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
         {
             //Dependency Injection
             _vaultSessionService = vaultSessionService;
+            _fakeDataSource = fakeDataSource;
+            _dialogService = dialogService;
 
-            Categories = new ObservableCollection<string>();
-            Passwords = new ObservableCollection<VaultEntry>();
+            LoadVaultData();
         }
+
         #region Synchronous methods
-        partial void OnSelectedCategoryChanged(string value)
-        {
-            ApplyFilter();
-        }
-
         public void LoadVaultData()
         {
-            // If the session is empty (user logged out or not ready), do nothing
-            if (_vaultSessionService.DecryptedVault == null)
-                return;
-
-            // 2. Reload Categories
-            // We clear and add instead of 'new ObservableCollection' to keep UI bindings stable, 
-            // though replacing the collection works too if PropertyChanged is fired.
-            if (_vaultSessionService.DecryptedVault.Categories != null)
+            if (!Categories.Any() && !Passwords.Any())
             {
-                Categories.Clear();
-                Categories = new ObservableCollection<string>(_vaultSessionService.DecryptedVault.Categories);
+                // TEST DATA IF USER NOT LOGGED IN
+                Categories = _fakeDataSource.GetFolderItems().ToObservableCollection<CategoryItem>();
+                Passwords = _fakeDataSource.GetVaultEntryItems(10).ToObservableCollection<VaultEntry>();
+                _allVaultEntries = Passwords.ToList();
             }
-
-            // 3. Reload Passwords
-            if (_vaultSessionService.DecryptedVault.Entries != null)
+            
+            if (_vaultSessionService.DecryptedVault != null)
             {
-                _allVaultEntries = _vaultSessionService.DecryptedVault.Entries;
+                if (_vaultSessionService.DecryptedVault.Categories != null)
+                {
+                    //Reload Categories
+                    Categories.Clear();
+                    Categories = _vaultSessionService.DecryptedVault.Categories
+                        .Select(c => new CategoryItem { Name = c })
+                        .ToObservableCollection();
+                }
+                if (_vaultSessionService.DecryptedVault.Entries != null)
+                {
+                    // Reload Passwords
+                    _allVaultEntries = _vaultSessionService.DecryptedVault.Entries;
 
-                ApplyFilter();
+                    ApplyFilter();
+                }
             }
         }
 
-        // 5. ADD: The Filter Logic
+        //The Filter Logic
         private void ApplyFilter()
         {
             IEnumerable<VaultEntry> filtered;
 
-            if (string.IsNullOrEmpty(SelectedCategory))
+            if (SelectedCategory == null)
             {
                 // If no category selected, show all
                 filtered = _allVaultEntries;
@@ -129,10 +110,15 @@ namespace GoatVaultClient_v3.ViewModels
             {
                 // Assuming VaultEntry has a 'Category' property. 
                 // If not, you will need to add it to your Model.
-                filtered = _allVaultEntries.Where(x => x.Category == SelectedCategory);
+                filtered = _allVaultEntries.Where(x => x.Category == SelectedCategory.Name);
             }
 
             Passwords = new ObservableCollection<VaultEntry>(filtered);
+        }
+
+        partial void OnSelectedCategoryChanged(CategoryItem value)
+        {
+            ApplyFilter();
         }
         #endregion
         #region Commands
@@ -143,208 +129,187 @@ namespace GoatVaultClient_v3.ViewModels
         private void SortCategories()
         {
             // Toggle sort order
-            var sorted = _isSortedAscending
-                ? Categories.OrderBy(f => f).ToList()
-                : Categories.OrderByDescending(f => f).ToList();
+            var sorted = _categoriesSortAsc
+                ? Categories.OrderBy(f => f.Name)
+                : Categories.OrderByDescending(f => f.Name);
 
-            Categories = new ObservableCollection<string>(sorted);
-            _isSortedAscending = !_isSortedAscending;
+            Categories = sorted.ToObservableCollection<CategoryItem>();
+            _categoriesSortAsc = !_categoriesSortAsc;
         }
 
         [RelayCommand]
-        private async Task CreateCategory()
+        public async Task CreateCategory()
         {
-            NewCategoryName = string.Empty;
-            IsCategoryFormVisible = true; // Hides list, shows form
-        }
+            var result = await _dialogService.DisplayFormViewAsync("New Category", new CategoryItem());
 
-        [RelayCommand]
-        private void EditCategory(string category)
-        {
-            if (string.IsNullOrWhiteSpace(category))
-                return;
-
-            NewCategoryName = category;
-            _editingCategory = category;
-            IsCategoryFormVisible = true;
-        }
-
-        [RelayCommand]
-        private void DeleteCategory(string category)
-        {
-            if (string.IsNullOrWhiteSpace(category))
-                return;
-
-            if (_vaultSessionService.DecryptedVault.Categories.Contains(category))
+            if (result != null)
             {
-                _vaultSessionService.DecryptedVault.Categories.Remove(category);
-
-                // Remove all entries in that category
-                var entriesToRemove = _vaultSessionService.DecryptedVault.Entries
-                    .Where(e => e.Category == category)
-                    .ToList();
-                foreach (var entry in entriesToRemove)
-                    _vaultSessionService.DecryptedVault.Entries.Remove(entry);
-
-                LoadVaultData();
+                Categories.Add(result);
             }
+            
         }
 
         [RelayCommand]
-        private void CancelCategory()
+        public async Task EditCategory(CategoryItem category)
         {
-            IsCategoryFormVisible = false; // Shows list, hides form
-        }
+            var editingCategory = new CategoryItem
+            { Name = category.Name };
 
-        // 5. ADD: Save Command
-        [RelayCommand]
-        private void SaveCategory()
-        {
-            if (string.IsNullOrWhiteSpace(NewCategoryName))
-                return;
+            var result = await _dialogService.DisplayFormViewAsync("Edit Category", editingCategory);
 
-            if (!string.IsNullOrWhiteSpace(_editingCategory))
+            if (result != null)
             {
-                // Update existing category
-                int index = _vaultSessionService.DecryptedVault.Categories.IndexOf(_editingCategory);
-                if (index >= 0)
-                    _vaultSessionService.DecryptedVault.Categories[index] = NewCategoryName.Trim();
-
-                // Update category in existing entries
-                foreach (var entry in _vaultSessionService.DecryptedVault.Entries
-                             .Where(e => e.Category == _editingCategory))
+                var entries = Passwords.Where(e => e.Category == category.Name);
+                foreach(var e in entries)
                 {
-                    entry.Category = NewCategoryName.Trim();
+                    e.Category = result.Name;
                 }
 
-                _editingCategory = null;
+                category.Name = result.Name;
             }
-            else
-            {
-                // Add new category
-                _vaultSessionService.DecryptedVault.Categories.Add(NewCategoryName.Trim());
-            }
-
-            // Refresh the UI list
-            LoadVaultData();
-
-            IsCategoryFormVisible = false;
         }
+
+        [RelayCommand]
+        private async Task DeleteCategory(CategoryItem category)
+        {
+            var result = await _dialogService.ConfirmAsync($"Are you sure you want to delete category \"{category.Name}\"? All entries under this category will also be deleted.", "Confirm Delete", "Delete", "Cancel");
+
+            if (result)
+            {
+                Categories.Remove(category);
+            }
+        }
+        // 5. ADD: Save Command
+        //[RelayCommand]
+        //private void SaveCategory()
+        //{
+        //    if (string.IsNullOrWhiteSpace(NewCategoryName))
+        //        return;
+
+        //    if (!string.IsNullOrWhiteSpace(_editingCategory.Name))
+        //    {
+        //        // Update existing category
+        //        int index = _vaultSessionService.DecryptedVault.Categories.IndexOf(_editingCategory);
+        //        if (index >= 0)
+        //            _vaultSessionService.DecryptedVault.Categories[index] = NewCategoryName.Trim();
+
+        //        // Update category in existing entries
+        //        foreach (var entry in _vaultSessionService.DecryptedVault.Entries
+        //                     .Where(e => e.Category == _editingCategory))
+        //        {
+        //            entry.Category = NewCategoryName.Trim();
+        //        }
+
+        //        _editingCategory = null;
+        //    }
+        //    else
+        //    {
+        //        if (_vaultSessionService.CurrentUser != null)
+        //        {
+        //            // Add new category
+        //            _vaultSessionService.DecryptedVault.Categories.Add(NewCategoryName.Trim());
+        //        }
+        //        else
+        //        {
+        //            Categories.Add(new CategoryItem { Name = NewCategoryName.Trim() });
+        //        }
+                
+        //    }
+
+        //    // Refresh the UI list
+        //    LoadVaultData();
+
+        //    IsCategoryFormVisible = false;
+        //}
         /*
          * Entries Commands
          */
         [RelayCommand]
-        private void SortEntries()
+        private void SortEntries(CategoryItem category)
         {
-            throw new NotImplementedException("CopyEntry command is not implemented yet.");
+            // Toggle sort order
+            var sorted = _passwordsSortAsc
+                ? Passwords.OrderBy(f => f.Site)
+                : Passwords.OrderByDescending(f => f.Site);
+
+            Passwords = sorted.ToObservableCollection<VaultEntry>();
+            _passwordsSortAsc = !_passwordsSortAsc;
         }
 
         [RelayCommand]
-        private async Task CopyEntry(string password)
+        public async Task CopyEntry(string password)
         {
-            if (string.IsNullOrEmpty(password))
+            if (selectedEntry == null)
                 return;
 
             // Copy to clipboard
-            await Clipboard.Default.SetTextAsync(password);
+            await Clipboard.Default.SetTextAsync(selectedEntry.Password);
 
             await Task.Delay(10000); // 10 seconds
             await Clipboard.Default.SetTextAsync(""); // Clear clipboard
         }
 
         [RelayCommand]
-        private async Task CreateEntry()
+        public async Task CreateEntry()
         {
-            NewEntryDescription = string.Empty;
-            NewEntryUsername = string.Empty;
-            NewEntryPassword = string.Empty;
+            var formModel = new VaultEntryForm
+            {
+                // Populate the list of category names from your ViewModel
+                AvailableCategories = Categories.ToList(),
 
-            NewEntrySelectedCategory = SelectedCategory ?? Categories.FirstOrDefault();
+                // Optional: Set a default selected category
+                Category = Categories.FirstOrDefault()?.Name
+            };
 
-            IsEntryFormVisible = true;
+            // 2. Show the Auto-Generated Dialog
+            // UraniumUI reads the [Selectable] attribute and renders a Picker using AvailableCategories
+            var dialog = new Controls.Popups.VaultEntryDialog(formModel);
+
+            await MopupService.Instance.PushAsync(dialog);
+            var isSaved = await dialog.WaitForScan();
+
+            if (isSaved)
+            {
+                // Simple validation
+                if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
+                {
+                    return;
+                }
+
+                Passwords.Add(formModel);
+            }
         }
 
         [RelayCommand]
         private void EditEntry(VaultEntry entry)
         {
-            if (entry == null)
-                return;
-
-            NewEntryDescription = entry.Description;
-            NewEntryUsername = entry.UserName;
-            NewEntryPassword = entry.Password;
-            NewEntrySelectedCategory = entry.Category;
-
-            _editingEntry = entry;
-
-            IsEntryFormVisible = true;
+            
         }
 
         [RelayCommand]
-        private void DeleteEntry(VaultEntry entry)
+        public async Task DeleteEntry()
         {
-            if (entry == null)
+            if (selectedEntry == null)
+            {
                 return;
-
-            _vaultSessionService.DecryptedVault.Entries.Remove(entry);
-            LoadVaultData();
-        }
-
-
-        [RelayCommand]
-        private void CancelEntry()
-        {
-            IsEntryFormVisible = false;
+            }
+            var result = await _dialogService.ConfirmAsync($"Delete \"{selectedEntry.Site}\"", $"Are you sure you want to remove password for \"{selectedEntry.Site}\"?");
+            if (result)
+            {
+                Passwords.Remove(selectedEntry);
+            }
         }
 
         [RelayCommand]
         private void SaveEntry()
         {
-            // Basic Validation
-            if (string.IsNullOrWhiteSpace(NewEntryDescription) || string.IsNullOrWhiteSpace(NewEntryPassword))
-                return;
-
-            if (_editingEntry != null)
-            {
-                // Edit if exists
-                _editingEntry.Description = NewEntryDescription;
-                _editingEntry.UserName = NewEntryUsername;
-                _editingEntry.Password = NewEntryPassword;
-                _editingEntry.Category = NewEntrySelectedCategory;
-
-                _editingEntry = null;
-            }
-            else
-            {
-                //Add new
-                var newEntry = new VaultEntry
-                {
-                    Description = NewEntryDescription,
-                    UserName = NewEntryUsername,
-                    Password = NewEntryPassword,
-                    Category = NewEntrySelectedCategory
-                };
-                // Add to the decrypted vault
-                _vaultSessionService.DecryptedVault.Entries.Add(newEntry);
-            }
-
-            // Hide the entry form
-            IsEntryFormVisible = false;
-            // Reload the data to reflect the new entry
-            LoadVaultData();
+            
         }
 
         [RelayCommand]
         private void TogglePasswordVisibility()
         {
             IsPasswordVisible = !IsPasswordVisible;
-        }
-
-        // 4. Trigger this method when the page appears
-        [RelayCommand]
-        private void Appearing()
-        {
-            LoadVaultData();
         }
 
         [RelayCommand]
@@ -361,7 +326,7 @@ namespace GoatVaultClient_v3.ViewModels
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             bool isVisible = (bool)value;
-            return isVisible ? "\uf070" : "\uf06e";
+            return isVisible ? MaterialRounded.Visibility_off : MaterialRounded.Visibility;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
