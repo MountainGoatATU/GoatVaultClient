@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:GoatVaultClient_v3.Controls"
+             x:Class="GoatVaultClient_v3.Controls.CategoryItemCell"
+             x:Name="this">
+    <Border StrokeShape="RoundRectangle 12"
+            StrokeThickness="0"
+            
+            BackgroundColor="Transparent">
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal">
+                    <VisualState.Setters>
+                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource LightSurfaceContainer}, Dark={x:StaticResource DarkSurfaceContainer}}" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="PointerOver">
+                    <VisualState.Setters>
+                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource LightSurfaceContainerHigh}, Dark={x:StaticResource DarkSurfaceContainerHigh}}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Grid ColumnDefinitions="40, *, Auto" VerticalOptions="Center" Padding="{x:StaticResource pContent}">
+
+            <Image Grid.Column="0" 
+                   VerticalOptions="Center" 
+                   HorizontalOptions="Start"
+                   HeightRequest="{x:StaticResource iconDesktop}"
+                   WidthRequest="{x:StaticResource iconDesktop}">
+                <Image.Source>
+                    <FontImageSource FontFamily="MaterialRounded"
+                                     Glyph="{Binding IconGlyph, Source={x:Reference this}}"
+                                     Color="{AppThemeBinding Light=Black, Dark=White}"
+                                     Size="{x:StaticResource iconDesktopResolution}"/>
+                </Image.Source>
+            </Image>
+
+            <Label Grid.Column="1"
+                   Text="{Binding Text, Source={x:Reference this}}"
+                   VerticalOptions="Center"
+                   FontSize="14"
+                   TextColor="{AppThemeBinding Light=Black, Dark=White}" 
+                   LineBreakMode="TailTruncation"/>
+
+
+        </Grid>
+    </Border>
+</ContentView>
