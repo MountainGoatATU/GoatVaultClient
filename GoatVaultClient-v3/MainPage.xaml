@@ -8,8 +8,7 @@
              xmlns:controls="clr-namespace:GoatVaultClient_v3.Controls"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              x:Class="GoatVaultClient_v3.MainPage"
-             BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}"
-             >
+             BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
 
     
 

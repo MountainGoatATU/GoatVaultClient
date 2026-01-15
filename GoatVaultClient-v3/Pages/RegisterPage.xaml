@@ -1,35 +1,40 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
-             x:Class="GoatVaultClient_v3.RegisterPage"
-             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-             xmlns:fa="clr-namespace:UraniumUI.Icons.FontAwesome;assembly=UraniumUI.Icons.FontAwesome"
-             Title="RegisterPage">
-    <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="20">
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
+             xmlns:models="clr-namespace:GoatVaultClient_v3.Models"
+             xmlns:controls="clr-namespace:GoatVaultClient_v3.Controls"
+             xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+             x:Class="GoatVaultClient_v3.RegisterPage"
+             BackgroundColor="{AppThemeBinding Dark={x:StaticResource DarkSurface}}">
 
-            <material:TextField Text="{Binding Email}" Title="Email"/>
-            <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True"/>
-            <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True"/>
+    <controls:Component Padding="20" Margin="20">
+        <ScrollView>
+            <VerticalStackLayout Padding="30" Spacing="20">
 
-            <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
-                <material:ButtonView.StrokeShape>
-                    <RoundRectangle CornerRadius="25"/>
-                </material:ButtonView.StrokeShape>
-                <Label Text="Register" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
-                <material:ButtonView.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding RegisterCommand}"/>
-                </material:ButtonView.GestureRecognizers>
-            </material:ButtonView>
+                <material:TextField Text="{Binding Email}" Title="Email"/>
+                <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True"/>
+                <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True"/>
 
-            <Label Text="Already have an account?" TextColor="Blue" HorizontalOptions="Center">
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding GoToLoginCommand}"/>
-                </Label.GestureRecognizers>
-            </Label>
+                <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
+                    <material:ButtonView.StrokeShape>
+                        <RoundRectangle CornerRadius="25"/>
+                    </material:ButtonView.StrokeShape>
+                    <Label Text="Register" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <material:ButtonView.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RegisterCommand}"/>
+                    </material:ButtonView.GestureRecognizers>
+                </material:ButtonView>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <Label Text="Already have an account?" TextColor="Blue" HorizontalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToLoginCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </controls:Component>
 </ContentPage>
