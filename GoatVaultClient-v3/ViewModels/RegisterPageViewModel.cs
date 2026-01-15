@@ -147,7 +147,7 @@ namespace GoatVaultClient_v3.ViewModels
         private async Task GoToLogin()
         {
             // Navigate back to Login
-            await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+            await Shell.Current.GoToAsync($"{nameof(LoginPage)}");
         }
     }
 }
