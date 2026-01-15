@@ -14,25 +14,29 @@
         <ScrollView>
             <VerticalStackLayout Padding="30" Spacing="20">
 
-                <material:TextField Text="{Binding Email}" Title="Email"/>
-                <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True"/>
-                <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True"/>
+                <material:TextField Text="{Binding Email}" Title="Email" AllowClear="True"/>
+                
+                <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True" AllowClear="True">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment/>
+                    </material:TextField.Attachments>
+                </material:TextField>
 
-                <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
-                    <material:ButtonView.StrokeShape>
-                        <RoundRectangle CornerRadius="25"/>
-                    </material:ButtonView.StrokeShape>
-                    <Label Text="Register" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
-                    <material:ButtonView.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding RegisterCommand}"/>
-                    </material:ButtonView.GestureRecognizers>
-                </material:ButtonView>
+                <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True" AllowClear="True">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment/>
+                    </material:TextField.Attachments>
+                </material:TextField>
+                
+                <Button Text="Register" Command="{Binding RegisterCommand}" StyleClass="FilledButton"/>
 
                 <Label Text="Already have an account?" TextColor="Blue" HorizontalOptions="Center">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToLoginCommand}"/>
                     </Label.GestureRecognizers>
                 </Label>
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="Blue" HorizontalOptions="Center"/>
 
             </VerticalStackLayout>
         </ScrollView>
