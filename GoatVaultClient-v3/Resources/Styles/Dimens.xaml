@@ -31,10 +31,10 @@
     <x:Double x:Key="iconMobileZone">48</x:Double>
     <!--Text Field-->
     <x:Double x:Key="textFieldHeight">50</x:Double>
-    <x:Double x:Key="textFieldWidth">350</x:Double>
+    <x:Double x:Key="textFieldWidth">400</x:Double>
     <!--Buttons-->
     <x:Double x:Key="buttonHeight">50</x:Double>
-    <x:Double x:Key="buttonWidth">200</x:Double>
+    <x:Double x:Key="buttonWidth">250</x:Double>
     <!--Text Size-->
     <x:Double x:Key="tMedium">16</x:Double>
     <x:Double x:Key="tLarge">36</x:Double>

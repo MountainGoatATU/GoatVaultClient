@@ -126,7 +126,7 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private async Task GoToRegister()
         {
-            await Shell.Current.GoToAsync($"//{nameof(RegisterPage)}");
+            await Shell.Current.GoToAsync($"{nameof(RegisterPage)}");
         }
     }
 }

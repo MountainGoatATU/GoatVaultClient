@@ -1,42 +1,37 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
+             xmlns:models="clr-namespace:GoatVaultClient_v3.Models"
+             xmlns:controls="clr-namespace:GoatVaultClient_v3.Controls"
+             xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              x:Class="GoatVaultClient_v3.LoginPage"
              x:DataType="vm:LoginPageViewModel"
-             Title="LoginPage">
+             Title="LoginPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="20">
-
-            <material:TextField Title="Email" 
-                                Text="{Binding Email}" 
-                                Keyboard="Email" />
-
-            <material:TextField Title="Password" 
-                                Text="{Binding Password}" 
-                                IsPassword="True" />
-
-            <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
-                <material:ButtonView.StrokeShape>
-                    <RoundRectangle CornerRadius="25"/>
-                </material:ButtonView.StrokeShape>
-                <Label Text="Login" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
-
-                <material:ButtonView.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding LoginCommand}"/>
-                </material:ButtonView.GestureRecognizers>
-            </material:ButtonView>
-
-            <Label Text="Don't have an account yet?" TextColor="Blue" HorizontalOptions="Center">
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding GoToRegisterCommand}"/>
-                </Label.GestureRecognizers>
-            </Label>
-
-            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="Blue"/>
-
-        </VerticalStackLayout>
-    </ScrollView>
+    
+    <controls:Component Padding="{StaticResource formPadding}">
+        <Grid RowDefinitions="*,Auto,*">
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Padding="30" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
+                    <Label Text="Login" FontSize="{StaticResource tLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                    <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource PrimaryTextField}"/>
+                    <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                        <material:TextField.Attachments>
+                            <material:TextFieldPasswordShowHideAttachment/>
+                        </material:TextField.Attachments>
+                    </material:TextField>
+                    <Button Text="Login" Command="{Binding LoginCommand}" Style="{StaticResource PrimaryButton}"/>
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
+                        <Label Text="Don't have an account yet?" Style="{StaticResource PrimaryLabel}" VerticalOptions="Center"/>
+                        <Button Text="Register" Command="{Binding GoToRegisterCommand}" BackgroundColor="Transparent" FontSize="{StaticResource tMedium}"/>
+                    </HorizontalStackLayout>
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Style="{StaticResource PrimaryActivityIndicator}"/>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+    </controls:Component>
 </ContentPage>

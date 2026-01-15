@@ -8,8 +8,11 @@
              xmlns:controls="clr-namespace:GoatVaultClient_v3.Controls"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              x:Class="GoatVaultClient_v3.RegisterPage"
+             x:DataType="vm:RegisterPageViewModel"
+             Title="RegisterPage"
              BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
 
+    
     <controls:Component Padding="{StaticResource formPadding}">
         <Grid RowDefinitions="*,Auto,*">
             <ScrollView Grid.Row="1">
