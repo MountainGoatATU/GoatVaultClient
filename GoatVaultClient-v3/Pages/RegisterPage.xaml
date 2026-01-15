@@ -11,34 +11,36 @@
              BackgroundColor="{AppThemeBinding Dark={x:StaticResource DarkSurface}}">
 
     <controls:Component Padding="20" Margin="20">
-        <ScrollView>
-            <VerticalStackLayout Padding="30" Spacing="20">
+        <Grid RowDefinitions="*,Auto,*">
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Padding="30" Spacing="20" HorizontalOptions="Center" WidthRequest="350">
 
-                <material:TextField Text="{Binding Email}" Title="Email" AllowClear="True"/>
-                
-                <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True" AllowClear="True">
-                    <material:TextField.Attachments>
-                        <material:TextFieldPasswordShowHideAttachment/>
-                    </material:TextField.Attachments>
-                </material:TextField>
+                    <material:TextField Text="{Binding Email}" Title="Email" AllowClear="True"/>
 
-                <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True" AllowClear="True">
-                    <material:TextField.Attachments>
-                        <material:TextFieldPasswordShowHideAttachment/>
-                    </material:TextField.Attachments>
-                </material:TextField>
-                
-                <Button Text="Register" Command="{Binding RegisterCommand}" StyleClass="FilledButton"/>
+                    <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True" AllowClear="True">
+                        <material:TextField.Attachments>
+                            <material:TextFieldPasswordShowHideAttachment/>
+                        </material:TextField.Attachments>
+                    </material:TextField>
 
-                <Label Text="Already have an account?" TextColor="Blue" HorizontalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding GoToLoginCommand}"/>
-                    </Label.GestureRecognizers>
-                </Label>
+                    <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True" AllowClear="True">
+                        <material:TextField.Attachments>
+                            <material:TextFieldPasswordShowHideAttachment/>
+                        </material:TextField.Attachments>
+                    </material:TextField>
 
-                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="Blue" HorizontalOptions="Center"/>
+                    <Button Text="Register" Command="{Binding RegisterCommand}" StyleClass="FilledButton"/>
 
-            </VerticalStackLayout>
-        </ScrollView>
+                    <Label Text="Already have an account?" TextColor="Blue" HorizontalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToLoginCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="Blue" HorizontalOptions="Center"/>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
     </controls:Component>
 </ContentPage>
