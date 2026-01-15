@@ -15,28 +15,26 @@
     
     <controls:Component Padding="{StaticResource formPadding}">
         <Grid RowDefinitions="*,Auto,*">
-            <ScrollView Grid.Row="1">
-                <VerticalStackLayout Padding="30" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
-                    <Label Text="Register" FontSize="{StaticResource tLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
-                    <material:TextField Text="{Binding Email}" Title="Email" Style="{StaticResource PrimaryTextField}"/>
-                    <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True" Style="{StaticResource PrimaryTextField}">
-                        <material:TextField.Attachments>
-                            <material:TextFieldPasswordShowHideAttachment/>
-                        </material:TextField.Attachments>
-                    </material:TextField>
-                    <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True" Style="{StaticResource PrimaryTextField}">
-                        <material:TextField.Attachments>
-                            <material:TextFieldPasswordShowHideAttachment/>
-                        </material:TextField.Attachments>
-                    </material:TextField>
-                    <Button Text="Register" Command="{Binding RegisterCommand}" Style="{StaticResource PrimaryButton}" />
-                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
-                        <Label Text="Already have an account?" Style="{StaticResource PrimaryLabel}" VerticalOptions="Center"/>
-                        <Button Text="Login" Command="{Binding GoToLoginCommand}" BackgroundColor="Transparent" FontSize="{StaticResource tMedium}"/>
-                    </HorizontalStackLayout>
-                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Style="{StaticResource PrimaryActivityIndicator}" />
-                </VerticalStackLayout>
-            </ScrollView>
+            <VerticalStackLayout Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
+                <Label Text="Register" FontSize="{StaticResource tLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                <material:TextField Text="{Binding Email}" Title="Email" Style="{StaticResource PrimaryTextField}"/>
+                <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment/>
+                    </material:TextField.Attachments>
+                </material:TextField>
+                <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment/>
+                    </material:TextField.Attachments>
+                </material:TextField>
+                <Button Text="Register" Command="{Binding RegisterCommand}" Style="{StaticResource PrimaryButton}" />
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
+                    <Label Text="Already have an account?" Style="{StaticResource PrimaryLabel}" VerticalOptions="Center"/>
+                    <Button Text="Login" Command="{Binding GoToLoginCommand}" BackgroundColor="Transparent" FontSize="{StaticResource tMedium}"/>
+                </HorizontalStackLayout>
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Style="{StaticResource PrimaryActivityIndicator}" />
+            </VerticalStackLayout>
         </Grid>
     </controls:Component>
 </ContentPage>
