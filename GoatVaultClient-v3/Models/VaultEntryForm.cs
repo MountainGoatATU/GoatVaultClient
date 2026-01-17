@@ -21,13 +21,13 @@ namespace GoatVaultClient_v3.Models
         [RelayCommand]
         private void GeneratePassword()
         {
-            var pwdGen = new Password();
-            Password = pwdGen.IncludeLowercase()
-                             .IncludeUppercase()
-                             .IncludeNumeric()
-                             .IncludeSpecial()
-                             .LengthRequired(16)
-                             .Next();
+            var passwordGenerator = new Password();
+            Password = passwordGenerator.IncludeLowercase()
+                                        .IncludeUppercase()
+                                        .IncludeNumeric()
+                                        .IncludeSpecial()
+                                        .LengthRequired(16)
+                                        .Next();
         }
     }
 }
