@@ -52,6 +52,7 @@
                         </HorizontalStackLayout>
                     </controls:ComponentHeader.Actions>
                 </controls:ComponentHeader>
+                <SearchBar Placeholder="Search passwords..." Text="{Binding SearchText}" Margin="0,0,0,10"/>
                 <CollectionView ItemsSource="{Binding Passwords}" SelectionMode="Single" SelectedItem="{Binding SelectedEntry}">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="{x:StaticResource sContent}" />

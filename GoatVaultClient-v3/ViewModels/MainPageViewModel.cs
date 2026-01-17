@@ -37,6 +37,9 @@ namespace GoatVaultClient_v3.ViewModels
         [ObservableProperty]
         private CategoryItem newEntrySelectedCategory;
 
+        [ObservableProperty]
+        private string searchText = null;
+
         private bool _categoriesSortAsc = true;
 
         private bool _passwordsSortAsc = true;
@@ -113,6 +116,11 @@ namespace GoatVaultClient_v3.ViewModels
                 filtered = _allVaultEntries.Where(x => x.Category == SelectedCategory.Name);
             }
 
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                filtered = filtered.Where(x => x.Site != null && x.Site.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+            }
+
             Passwords = new ObservableCollection<VaultEntry>(filtered);
         }
 
@@ -120,6 +128,12 @@ namespace GoatVaultClient_v3.ViewModels
         {
             ApplyFilter();
         }
+
+        partial void OnSearchTextChanged(string value)
+        {
+            ApplyFilter();
+        }
+
         #endregion
         #region Commands
         /*
