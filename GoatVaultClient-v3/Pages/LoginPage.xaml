@@ -9,27 +9,24 @@
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              x:Class="GoatVaultClient_v3.LoginPage"
              x:DataType="vm:LoginPageViewModel"
-             Title="LoginPage"
              BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
 
-    
+
     <controls:Component Padding="{StaticResource formPadding}">
-        <Grid RowDefinitions="*,Auto,*">
-            <VerticalStackLayout Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
-                <Label Text="Login" FontSize="{StaticResource tLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
-                <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource PrimaryTextField}"/>
-                <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource PrimaryTextField}">
-                    <material:TextField.Attachments>
-                        <material:TextFieldPasswordShowHideAttachment/>
-                    </material:TextField.Attachments>
-                </material:TextField>
-                <Button Text="Login" Command="{Binding LoginCommand}" Style="{StaticResource PrimaryButton}"/>
-                <HorizontalStackLayout HorizontalOptions="Center">
-                    <Label Text="Don't have an account yet?" Style="{StaticResource PrimaryLabel}" VerticalOptions="Center"/>
-                    <Button Text="Register" Command="{Binding GoToRegisterCommand}" BackgroundColor="Transparent" FontSize="{StaticResource tMedium}"/>
-                </HorizontalStackLayout>
-                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Style="{StaticResource PrimaryActivityIndicator}"/>
-            </VerticalStackLayout>
-        </Grid>
+        <VerticalStackLayout VerticalOptions="Center" Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
+            <Label Text="Login" FontSize="{StaticResource tLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
+            <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource PrimaryTextField}"/>
+            <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                <material:TextField.Attachments>
+                    <material:TextFieldPasswordShowHideAttachment/>
+                </material:TextField.Attachments>
+            </material:TextField>
+            <Button Text="Login" Command="{Binding LoginCommand}" Style="{StaticResource PrimaryButton}"/>
+            <HorizontalStackLayout HorizontalOptions="Center">
+                <Label Text="Don't have an account yet?" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant}, Dark={x:StaticResource DarkOnSurfaceVariant}}" VerticalOptions="Center"/>
+                <Button Text="Register" Command="{Binding GoToRegisterCommand}" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface}, Dark={x:StaticResource DarkOnSurface}}" FontSize="{StaticResource tMedium}"/>
+            </HorizontalStackLayout>
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
+        </VerticalStackLayout>
     </controls:Component>
 </ContentPage>

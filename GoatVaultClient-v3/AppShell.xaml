@@ -5,10 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:local="clr-namespace:GoatVaultClient_v3"
-    Title="GoatVaultClient_v3">
+    Title="GoatVaultClient_v3"
+    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
 
     <FlyoutItem Title="Introduction" Icon="{FontImageSource FontFamily=MaterialRounded, Glyph={x:Static m:MaterialRounded.Handshake}}">
-        <ShellContent Title="IntroductionPage" ContentTemplate="{DataTemplate local:IntroductionPage}" Route="IntroductionPage" Icon="{FontImageSource FontFamily=MaterialRounded, Glyph={x:Static m:MaterialRounded.Key}}" />
+        <ShellContent ContentTemplate="{DataTemplate local:IntroductionPage}" Route="IntroductionPage" Icon="{FontImageSource FontFamily=MaterialRounded, Glyph={x:Static m:MaterialRounded.Key}}" />
     </FlyoutItem>
     <FlyoutItem Title="Vault" Icon="{FontImageSource FontFamily=MaterialRounded, Glyph={x:Static m:MaterialRounded.Home}}">
         <ShellContent Title="Vault" ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" Icon="user_icon.png" />

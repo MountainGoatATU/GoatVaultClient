@@ -9,31 +9,30 @@
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              x:Class="GoatVaultClient_v3.RegisterPage"
              x:DataType="vm:RegisterPageViewModel"
-             Title="RegisterPage"
              BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
 
     
-    <controls:Component Padding="{StaticResource formPadding}">
+    <controls:Component Padding="{StaticResource pContent}">
         <Grid RowDefinitions="*,Auto,*">
             <VerticalStackLayout Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
                 <Label Text="Register" FontSize="{StaticResource tLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
-                <material:TextField Text="{Binding Email}" Title="Email" Style="{StaticResource PrimaryTextField}"/>
-                <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                <material:TextField Text="{Binding Email}" Title="Email"/>
+                <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True">
                     <material:TextField.Attachments>
                         <material:TextFieldPasswordShowHideAttachment/>
                     </material:TextField.Attachments>
                 </material:TextField>
-                <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                <material:TextField Text="{Binding ConfirmPassword}" Title="Confirm Password" IsPassword="True">
                     <material:TextField.Attachments>
                         <material:TextFieldPasswordShowHideAttachment/>
                     </material:TextField.Attachments>
                 </material:TextField>
-                <Button Text="Register" Command="{Binding RegisterCommand}" Style="{StaticResource PrimaryButton}" />
+                <Button Text="Register" Command="{Binding RegisterCommand}"/>
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
-                    <Label Text="Already have an account?" Style="{StaticResource PrimaryLabel}" VerticalOptions="Center"/>
+                    <Label Text="Already have an account?" VerticalOptions="Center"/>
                     <Button Text="Login" Command="{Binding GoToLoginCommand}" BackgroundColor="Transparent" FontSize="{StaticResource tMedium}"/>
                 </HorizontalStackLayout>
-                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Style="{StaticResource PrimaryActivityIndicator}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
             </VerticalStackLayout>
         </Grid>
     </controls:Component>

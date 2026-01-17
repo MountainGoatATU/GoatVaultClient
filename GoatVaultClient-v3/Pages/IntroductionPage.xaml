@@ -4,8 +4,7 @@
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
              x:Class="GoatVaultClient_v3.IntroductionPage"
-             x:DataType="vm:IntroductionPageViewModel"
-             Title="Introduction">
+             x:DataType="vm:IntroductionPageViewModel">
 
     <Grid Padding="30">
         <VerticalStackLayout Spacing="30" VerticalOptions="Center" HorizontalOptions="Center">
