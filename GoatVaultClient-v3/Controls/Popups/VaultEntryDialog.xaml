@@ -3,6 +3,8 @@
                   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                   xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
                   xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+                  xmlns:controls="clr-namespace:GoatVaultClient_v3.Controls"
+                  xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
                   x:Class="GoatVaultClient_v3.Controls.Popups.VaultEntryDialog"
                   BackgroundColor="#80000000"
                   CloseWhenBackgroundIsClicked="True">
@@ -28,12 +30,12 @@
                     <material:TextField Title="Site" Text="{Binding Site}"/>
                     <material:TextField Title="Username" Text="{Binding UserName}"/>
                     <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
-                        <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True">
+                        <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" WidthRequest="250">
                             <material:TextField.Attachments>
                                 <material:TextFieldPasswordShowHideAttachment/>
                             </material:TextField.Attachments>
                         </material:TextField>
-                        <Button Text="Generate" Command="{Binding GeneratePasswordCommand}"/>
+                        <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sync}" Command="{Binding GeneratePasswordCommand}"/>
                     </HorizontalStackLayout>
 
                     <material:AutoCompleteTextField x:Name="CategoryInput"
