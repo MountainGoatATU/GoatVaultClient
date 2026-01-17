@@ -27,7 +27,10 @@
 
                     <material:TextField Title="Site" Text="{Binding Site}" />
                     <material:TextField Title="Username" Text="{Binding UserName}" />
-                    <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" />
+                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                        <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" />
+                        <Button Text="Generate" Command="{Binding GeneratePasswordCommand}"/>
+                    </HorizontalStackLayout>
 
                     <material:AutoCompleteTextField x:Name="CategoryInput"
                                                     Title="Category"
