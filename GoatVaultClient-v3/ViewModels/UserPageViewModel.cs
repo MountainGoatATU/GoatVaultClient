@@ -78,22 +78,20 @@ namespace GoatVaultClient_v3.ViewModels
             var popup = new AuthorizePopup(title: "Authorization", isPassword: true, buttonText: "OK");
             await MopupService.Instance.PushAsync(popup);
 
-            // Počkej, až se popup zavře
             while (MopupService.Instance.PopupStack.Contains(popup))
                 await Task.Delay(50);
 
-            // Pokud uživatel kliknul Cancel
             if (popup.Result == null)
                 return false;
 
-            // Pokud heslo nesedí, zobraz standardní alert
             if (popup.Result != MasterPassword)
             {
-                await App.Current.MainPage.DisplayAlert("Error", "Incorrect master password", "OK");
-                return false; // neautorizováno
+                var errorPopup = new IncorrectPasswordPopup();
+                await MopupService.Instance.PushAsync(errorPopup);
+                return false;
             }
 
-            return true; // autorizováno
+            return true;
         }
     }
 }
