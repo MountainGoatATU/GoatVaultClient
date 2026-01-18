@@ -18,7 +18,7 @@ namespace GoatVaultClient_v3.Services
             return new PasswordCrackInfo
             {
                 Score = result.Score,
-                CrackTimeText = result.CrackTimeDisplay.OfflineFastHashing1e10PerSecond
+                CrackTimeText = result.CrackTimeDisplay.OfflineSlowHashing1e4PerSecond
             };
         }
     }
