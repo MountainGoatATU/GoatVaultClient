@@ -14,19 +14,19 @@
         <Grid RowDefinitions="*, Auto">
             <ScrollView Grid.Row="0" MaximumHeightRequest="450" VerticalScrollBarVisibility="Default">
                 <VerticalStackLayout Spacing="15" Padding="20">
-                    <Label Text="Authorize" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label x:Name="TitleLabel" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
                     <HorizontalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
-                        <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" WidthRequest="300">
+                        <material:TextField x:Name="InputEntry" Text="{Binding Password}" IsPassword="True" WidthRequest="305">
                             <material:TextField.Attachments>
-                                <material:TextFieldPasswordShowHideAttachment/>
+                                <material:TextFieldPasswordShowHideAttachment x:Name="ShowHideAttachment"/>
                             </material:TextField.Attachments>
                         </material:TextField>
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </ScrollView>
             <Grid Grid.Row="1" ColumnDefinitions="*,*" Padding="10" ColumnSpacing="10" BackgroundColor="#10000000">
-                <Button Text="Cancel" StyleClass="OutlinedButton" Clicked="OnCancelClicked"/>
-                <Button Grid.Column="1" Text="Save" StyleClass="FilledButton" Clicked="OnSaveClicked"/>
+                <Button x:Name="CancelButton" Text="Cancel" StyleClass="OutlinedButton" Clicked="OnCancelClicked"/>
+                <Button x:Name="SaveButton" Grid.Column="1" StyleClass="FilledButton" Clicked="OnSaveClicked"/>
             </Grid>
         </Grid>
     </Border>

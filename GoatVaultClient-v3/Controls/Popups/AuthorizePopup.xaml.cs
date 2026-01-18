@@ -7,18 +7,23 @@ public partial class AuthorizePopup : PopupPage
 {
     public string Result { get; private set; }
 
-    public AuthorizePopup()
+    public AuthorizePopup(string title = "Authorize", bool isPassword = true, string buttonText = "OK")
 	{
 		InitializeComponent();
-	}
 
-    private async void OnConfirm(object sender, EventArgs e)
+        TitleLabel.Text = title;
+        InputEntry.IsPassword = isPassword;
+        SaveButton.Text = buttonText;
+        ShowHideAttachment.IsVisible = isPassword;
+    }
+
+    private async void OnSaveClicked(object sender, EventArgs e)
     {
-        Result = PasswordEntry.Text;
+        Result = InputEntry.Text;
         await MopupService.Instance.PopAsync();
     }
 
-    private async void OnCancel(object sender, EventArgs e)
+    private async void OnCancelClicked(object sender, EventArgs e)
     {
         Result = null;
         await MopupService.Instance.PopAsync();
