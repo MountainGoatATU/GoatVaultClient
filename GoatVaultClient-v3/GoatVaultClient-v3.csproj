@@ -89,6 +89,7 @@
 		<PackageReference Include="UraniumUI.Icons.MaterialSymbols" Version="2.14.0" />
 		<PackageReference Include="UraniumUI.Material" Version="2.14.0" />
 		<PackageReference Include="UraniumUI.Validations.DataAnnotations" Version="2.14.0" />
+		<PackageReference Include="zxcvbn-core" Version="7.0.92" />
 	</ItemGroup>
 
 	<ItemGroup>
