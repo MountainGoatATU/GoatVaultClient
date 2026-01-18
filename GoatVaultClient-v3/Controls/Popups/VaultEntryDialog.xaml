@@ -37,6 +37,10 @@
                         </material:TextField>
                         <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sync}" Command="{Binding GeneratePasswordCommand}"/>
                     </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="5" Padding="0,5,0,0">
+                        <Label Text="{Binding CrackTimeText}" FontAttributes="Bold" TextColor="DarkRed"/>
+                        <ProgressBar Progress="{Binding CrackProgress}" HeightRequest="10" BackgroundColor="LightGray" ProgressColor="Green"/>
+                    </VerticalStackLayout>
 
                     <material:AutoCompleteTextField x:Name="CategoryInput"
                                                     Title="Category"
