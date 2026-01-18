@@ -17,5 +17,7 @@
     <FlyoutItem Title="Education" Icon="{FontImageSource FontFamily=MaterialRounded, Glyph={x:Static m:MaterialRounded.Book}}">
         <ShellContent Title="EducationPage" ContentTemplate="{DataTemplate local:EducationPage}" Route="EducationPage" Icon="{FontImageSource FontFamily=MaterialRounded, Glyph={x:Static m:MaterialRounded.Book}}" />
     </FlyoutItem>
-    
+    <FlyoutItem Title="User" Icon="{FontImageSource FontFamily=MaterialRounded, Glyph={x:Static m:MaterialRounded.Account_circle}}">
+        <ShellContent Title="UserSettings" ContentTemplate="{DataTemplate local:Pages.UserPage}" Route="UserPage" />
+    </FlyoutItem>
 </Shell>

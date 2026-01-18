@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Numerics;
 using CommunityToolkit.Maui;
 using GoatVaultClient_v3.Database;
+using GoatVaultClient_v3.Pages;
 using GoatVaultClient_v3.Services;
 using GoatVaultClient_v3.ViewModels;
 using Microsoft.EntityFrameworkCore;
@@ -95,6 +96,9 @@ namespace GoatVaultClient_v3
             builder.Services.AddSingleton<EducationPage>();
             builder.Services.AddSingleton<EducationDetailViewModel>();
             builder.Services.AddSingleton<EducationDetailPage>();
+            builder.Services.AddSingleton<UserPageViewModel>();
+            builder.Services.AddSingleton<UserPage>();
+
 
             // Ensure DB creation when app starts
             using (var scope = builder.Services.BuildServiceProvider().CreateScope())
