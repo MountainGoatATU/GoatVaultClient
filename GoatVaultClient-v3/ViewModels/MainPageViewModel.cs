@@ -266,11 +266,13 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         public async Task CreateEntry()
         {
-            var formModel = new VaultEntryForm
-            {
-                // Populate the list of category names from your ViewModel
-                AvailableCategories = Categories.ToList(),
+            var passwordService = new PasswordStrengthService();
 
+            // Populate the list of category names from your ViewModel
+            var categoriesList = Categories.ToList();
+
+            var formModel = new VaultEntryForm(passwordService, categoriesList)
+            {
                 // Optional: Set a default selected category
                 Category = Categories.FirstOrDefault()?.Name
             };
