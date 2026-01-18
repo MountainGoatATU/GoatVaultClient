@@ -60,7 +60,7 @@ namespace GoatVaultClient_v3.Models
                                         .IncludeUppercase()
                                         .IncludeNumeric()
                                         .IncludeSpecial()
-                                        .LengthRequired(16)
+                                        .LengthRequired(22)
                                         .Next();
         }
     }
