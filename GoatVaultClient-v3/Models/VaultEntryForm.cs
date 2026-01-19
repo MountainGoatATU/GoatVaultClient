@@ -89,7 +89,7 @@ namespace GoatVaultClient_v3.Models
             if (IncludeNumbers) generator.IncludeNumeric();
             if (IncludeSpecial) generator.IncludeSpecial();
 
-            Password = generator.Generate(PasswordLength).Next();
+            Password = generator.LengthRequired(PasswordLength).Next();
         }
     }
 }
