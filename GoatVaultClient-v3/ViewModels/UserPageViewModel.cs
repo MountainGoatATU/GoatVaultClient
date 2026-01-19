@@ -13,31 +13,10 @@ namespace GoatVaultClient_v3.ViewModels
     public partial class UserPageViewModel : BaseViewModel
     {
         [ObservableProperty]
-        private string name = "Example User";
-
-        [ObservableProperty]
         private string email = "user@example.com";
 
         [ObservableProperty]
         private string masterPassword = "password123";
-
-       
-        [RelayCommand]
-        private async Task EditNameAsync()
-        {
-            if (!await AuthorizeAsync())
-            {
-                return;
-            }
-
-            var popup = new AuthorizePopup(title: "Edit Name", isPassword: false, buttonText: "Save");
-            await MopupService.Instance.PushAsync(popup);
-            while (MopupService.Instance.PopupStack.Contains(popup))
-                await Task.Delay(50);
-
-            if (!string.IsNullOrWhiteSpace(popup.Result))
-                Name = popup.Result;
-        }
 
         [RelayCommand]
         private async Task EditEmailAsync()

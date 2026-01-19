@@ -20,11 +20,6 @@
             </material:ButtonView>
             <VerticalStackLayout Spacing="20" Padding="10">
                 <Grid ColumnDefinitions="200,*,Auto">
-                    <Label Text="Name" FontAttributes="Bold" VerticalOptions="Center"/>
-                    <Label Grid.Column="1" Text="{Binding Name}" VerticalOptions="Center"/>
-                    <controls:ImageButton Grid.Column="2" IconGlyph="{x:Static m:MaterialRounded.Edit}" Command="{Binding EditNameCommand}"/>
-                </Grid>
-                <Grid ColumnDefinitions="200,*,Auto">
                     <Label Text="Email" FontAttributes="Bold" VerticalOptions="Center"/>
                     <Label Grid.Column="1" Text="{Binding Email}" VerticalOptions="Center"/>
                     <controls:ImageButton Grid.Column="2" IconGlyph="{x:Static m:MaterialRounded.Edit}" Command="{Binding EditEmailCommand}"/>
