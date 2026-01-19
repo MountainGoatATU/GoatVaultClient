@@ -35,6 +35,8 @@ namespace GoatVaultClient_v3
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                     fonts.AddFont("JetBrainsMono-Regular.ttf", "JetBrainsMonoRegular");
                     fonts.AddFont("JetBrainsMon-Semibold.ttf", "JetBrainsMonoSemibold");
+                    fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular"); 
+                    fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");       
 
                     fonts.AddMaterialSymbolsFonts();
                     fonts.AddFontAwesomeIconFonts();
