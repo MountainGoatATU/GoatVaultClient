@@ -1,10 +1,14 @@
-﻿namespace GoatVaultClientTests
+﻿using GoatVaultClient_v3.Services;
+
+namespace GoatVaultClientTests
 {
-    public class Tests
+    public class VaultServiceTests
     {
+        private IVaultService _vaultService;
         [SetUp]
         public void Setup()
         {
+            
         }
 
         [Test]
