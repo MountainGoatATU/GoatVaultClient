@@ -12,9 +12,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary x:Name="appColors" Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary x:Name="appStyles" Source="Resources/Styles/Styles.xaml" />
-                <ResourceDictionary x:Name="appTypography" Source="/Resources/Styles/Typography.xaml" />
-                <ResourceDictionary x:Name="MaterialColors" Source="/Resources/Styles/MaterialColors.xaml"/>
-                <ResourceDictionary x:Name="appDimens" Source="/Resources/Styles/Dimens.xaml"/>
+                <ResourceDictionary x:Name="MaterialColors" Source="Resources/Styles/MaterialColors.xaml"/>
+                <ResourceDictionary x:Name="appTypography" Source="Resources/Styles/Typography.xaml" />
+                <ResourceDictionary x:Name="appDimens" Source="Resources/Styles/Dimens.xaml"/>
                 <material:StyleResource ColorsOverride="{x:Reference appColors}" BasedOn="{x:Reference appStyles}" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

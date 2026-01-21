@@ -1,20 +1,22 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    x:Class="GoatVaultClient_v3.Resources.Styles.Typography"
+                    >
 
     <OnPlatform x:Key="MaterialRegularFont" x:TypeArguments="x:String">
-        <On Platform="Android" Value="RobotoRegular" />
-        <On Platform="iOS" Value="RobotoRegular" />
-        <On Platform="WinUI" Value="Roboto-Regular.ttf#Roboto" />
+        <On Platform="Android" Value="JetBrainsMonoRegular" />
+        <On Platform="iOS" Value="JetBrainsMonoRegular" />
+        <On Platform="WinUI" Value="JetBrainsMono-Regular.ttf#JetBrainsMono" />
     </OnPlatform>
 
     <OnPlatform x:Key="MaterialMediumFont" x:TypeArguments="x:String">
-        <On Platform="Android" Value="RobotoMedium" />
-        <On Platform="iOS" Value="RobotoMedium" />
-        <On Platform="WinUI" Value="Roboto-Medium.ttf#Roboto" />
+        <On Platform="Android" Value="JetBrainsMonoSemibold" />
+        <On Platform="iOS" Value="JetBrainsMonoSemibold" />
+        <On Platform="WinUI" Value="JetBrainsMono-Semibold.ttf#JetBrainsMono" />
     </OnPlatform>
 
     <Style x:Key="MaterialLabelBase" TargetType="Label">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light=LightOnSurface, Dark=DarkOnSurface}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}" />
     </Style>
 
     <Style x:Key="MaterialDisplayLarge" TargetType="Label" BasedOn="{StaticResource MaterialLabelBase}">

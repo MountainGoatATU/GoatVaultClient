@@ -17,7 +17,8 @@
 
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource ButtonBackgroundLight}, Dark={x:StaticResource ButtonBackgroundDark}}"/>
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource LightSecondary}, Dark={x:StaticResource DarkSecondary}}"/>
+                            <Setter Property="Color" Value="{AppThemeBinding Light={x:StaticResource LightOnSecondary}, Dark={x:StaticResource DarkOnSecondary}}" />
                         </VisualState.Setters>
                     </VisualState>
 

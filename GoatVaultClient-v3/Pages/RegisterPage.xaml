@@ -15,7 +15,7 @@
     <controls:Component Padding="{StaticResource pContent}">
         <Grid RowDefinitions="*,Auto,*">
             <VerticalStackLayout Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
-                <Label Text="Register" FontSize="{StaticResource tLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                <Label Text="Register" Style="{x:StaticResource MaterialDisplayMedium}" HorizontalOptions="Center"/>
                 <material:TextField Text="{Binding Email}" Title="Email"/>
                 <material:TextField Text="{Binding Password}" Title="Master Password" IsPassword="True">
                     <material:TextField.Attachments>
@@ -27,10 +27,10 @@
                         <material:TextFieldPasswordShowHideAttachment/>
                     </material:TextField.Attachments>
                 </material:TextField>
-                <Button Text="Register" Command="{Binding RegisterCommand}"/>
+                <Button Text="Register" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer}, Dark={x:StaticResource DarkPrimaryContainer}}" TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer}, Dark={x:StaticResource DarkOnPrimaryContainer}}" Command="{Binding RegisterCommand}"/>
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
-                    <Label Text="Already have an account?" VerticalOptions="Center"/>
-                    <Button Text="Login" Command="{Binding GoToLoginCommand}" BackgroundColor="Transparent" FontSize="{StaticResource tMedium}"/>
+                    <Label Text="Already have an account?" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant}, Dark={x:StaticResource DarkOnSurfaceVariant}}" VerticalOptions="Center"/>
+                    <Button Text="Login" Command="{Binding GoToLoginCommand}" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface}, Dark={x:StaticResource DarkOnSurface}}" BackgroundColor="Transparent" FontSize="{StaticResource tMedium}"/>
                 </HorizontalStackLayout>
                 <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
             </VerticalStackLayout>

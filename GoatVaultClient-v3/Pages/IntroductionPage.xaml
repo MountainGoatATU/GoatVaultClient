@@ -4,7 +4,8 @@
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:GoatVaultClient_v3.ViewModels"
              x:Class="GoatVaultClient_v3.IntroductionPage"
-             x:DataType="vm:IntroductionPageViewModel">
+             x:DataType="vm:IntroductionPageViewModel"
+             BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface} }">
 
     <Grid Padding="30">
         <VerticalStackLayout Spacing="30" VerticalOptions="Center" HorizontalOptions="Center">
@@ -16,8 +17,8 @@
                 <Image Source="vault_icon.png" Aspect="AspectFit"/>
             </material:ButtonView>
 
-            <Label Text="Welcome to Goat Vault!" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" />
-            <Label Text="Securely store and manage all your passwords in one place." FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+            <Label Text="Welcome to Goat Vault!" Style="{x:StaticResource MaterialDisplayLarge}" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Label Text="Securely store and manage all your passwords in one place." Style="{x:StaticResource MaterialBodyMedium}" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
             <material:ButtonView WidthRequest="220" HeightRequest="55" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
                 <material:ButtonView.StrokeShape>

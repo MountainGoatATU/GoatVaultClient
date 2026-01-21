@@ -42,8 +42,7 @@
             <Label Grid.Column="1"
                    Text="{Binding Text, Source={x:Reference this}}"
                    VerticalOptions="Center"
-                   FontSize="14"
-                   TextColor="{AppThemeBinding Light=Black, Dark=White}" 
+                   Style="{x:StaticResource MaterialTitleMedium}"
                    LineBreakMode="TailTruncation"/>
 
 
