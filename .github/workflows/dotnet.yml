@@ -13,28 +13,48 @@ on:
     paths-ignore:
       - "*.md"
 
-jobs:
-  build:
-    runs-on: windows-latest
-    env:
-      PROJECT_PATH: GoatVaultClient-v3  # MAUI project folder
+env: 
+  WORKING_DIRECTORY: 'GoatVaultClient-v3'
 
+jobs:
+  build-android:
+    name: Build Android
+    runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET 9 SDK
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
 
       - name: Install MAUI workload
-        run: dotnet workload install maui
+        run: dotnet workload install maui-android
 
       - name: Restore dependencies
-        run: dotnet restore
-        working-directory: ${{ env.PROJECT_PATH }}
+        run: dotnet restore ${{ env.WORKING_DIRECTORY }}
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-        working-directory: ${{ env.PROJECT_PATH }}
+      - name: Build Android
+        run: dotnet build ${{ env.WORKING_DIRECTORY }}/GoatVaultClient-v3.csproj -c Release -f net9.0-android
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui-windows
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.WORKING_DIRECTORY }}
+
+      - name: Build Windows
+        run: dotnet build ${{ env.WORKING_DIRECTORY }}/GoatVaultClient-v3.csproj -c Release -f net9.0-windows10.0.19041.0
