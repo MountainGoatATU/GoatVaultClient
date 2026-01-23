@@ -48,7 +48,6 @@ jobs:
     - name: Install signing certificate
       run: certutil -user -p ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
         
-
     - name: Publish the project
       run: dotnet publish GoatVaultClient-v3.csproj -c Release -f:net9.0-windows10.0.19041.0 /p:GenerateAppxPackage=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
       working-directory: ${{ env.WORKING_DIRECTORY }}
