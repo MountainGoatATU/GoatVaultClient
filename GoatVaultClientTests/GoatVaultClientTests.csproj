@@ -28,4 +28,10 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <WindowsPackageType>MSIX</WindowsPackageType>
+    <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
 </Project>
