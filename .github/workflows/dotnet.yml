@@ -1,30 +1,59 @@
-name: .NET 8 WPF Build
+name: .NET 9 MAUI Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - unit-testing
+    paths-ignore:
+      - "*.md"
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths-ignore:
+      - "*.md"
+
+env: 
+  WORKING_DIRECTORY: './GoatVaultClient-v3'
 
 jobs:
   build:
     runs-on: windows-latest
-    env:
-      PROJECT_PATH: GoatVaultClient  # WPF project folder
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Setup .NET 8 SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
+    - name: Setup .NET 9 SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
-        working-directory: ${{ env.PROJECT_PATH }}
+    - name: Install MAUI workload
+      run: dotnet workload install maui
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-        working-directory: ${{ env.PROJECT_PATH }}
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    # - name: Run tests
+    #   run: dotnet test GoatVaultClientTests\GoatVaultClientTests.csproj
+
+    - name: Build the project
+      run: dotnet build GoatVaultClient-v3.csproj -c Release -f:net9.0-windows10.0.19041.0
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    - name: Publish the project
+      run: dotnet publish GoatVaultClient-v3.csproj -c Release -f:net9.0-windows10.0.19041.0
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    - name: Zip AppPackages folder
+      run: |
+        powershell -Command "Compress-Archive -Path '${{ env.WORKING_DIRECTORY }}\bin\Release\net9.0-windows10.0.19041.0\win-x64\AppPackages\*' -DestinationPath '${{ env.WORKING_DIRECTORY }}\bin\Release\GoatVaultClient-v3-AppPackages.zip'"
+
+    - name: Upload ZIP Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: GoatVaultClient-v3-AppPackages
+        path: ${{ env.WORKING_DIRECTORY }}/bin/Release/GoatVaultClient-v3-AppPackages.zip
+
