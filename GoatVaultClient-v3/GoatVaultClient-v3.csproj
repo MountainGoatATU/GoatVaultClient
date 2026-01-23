@@ -49,8 +49,18 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.19041.0'">
-    	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
+		<WindowsPackageType>None</WindowsPackageType>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+	<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+	<WindowsPackageType>MSIX</WindowsPackageType>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(TargetFramework)'=='net9.0-windows10.0.19041.0'">
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	</PropertyGroup>
 
 	<ItemGroup>
