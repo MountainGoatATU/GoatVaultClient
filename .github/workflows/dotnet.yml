@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - unit-testing
     paths-ignore:
       - "*.md"
   pull_request:
@@ -26,7 +27,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-          
+
       - name: Install MAUI workload
         run: dotnet workload install maui
 
