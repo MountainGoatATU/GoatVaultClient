@@ -54,6 +54,10 @@
 		<WindowsPackageType>None</WindowsPackageType>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' AND '$(TargetFramework)'=='net9.0-windows10.0.19041.0'">
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
 	<GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
 	<WindowsPackageType>MSIX</WindowsPackageType>
