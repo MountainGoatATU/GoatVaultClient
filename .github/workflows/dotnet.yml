@@ -42,7 +42,7 @@ jobs:
 
     - name: Decode signing certificate
       run: |
-        echo "${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}" > cert.asc
+        echo "${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}" > cert.asc
         certutil -decode cert.asc cert.pfx
 
     - name: Install signing certificate
