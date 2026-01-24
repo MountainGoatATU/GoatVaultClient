@@ -59,9 +59,17 @@ jobs:
       id: extract_version
       shell: pwsh
       run: |
-        $xml = [XML] (Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient-v3.csproj")
-        $version = [Version] $xml.Project.PropertyGroup.ApplicationDisplayVersion
-        echo "version=$($version)" >> $env:GITHUB_OUTPUT
+        $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient-v3.csproj")
+
+        $pg = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
+        $display = $pg.ApplicationDisplayVersion
+
+        $pg2 = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationVersion } | Select-Object -First 1
+        $appVer = $pg2.ApplicationVersion
+
+        $full = "$display.$appVer"
+        
+        "version=$full" >> $env:GITHUB_OUTPUT
 
     - name: Create Tag
       uses: actions/create-release@v1
