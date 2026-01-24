@@ -61,14 +61,8 @@ jobs:
       run: |
         $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient-v3.csproj")
 
-        $pg = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
-        $display = $pg.ApplicationDisplayVersion
-
-        $pg2 = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationVersion } | Select-Object -First 1
-        $appVer = $pg2.ApplicationVersion
-
-        $full = "$display.$appVer"
-
+        $display = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
+        $full = $display.ApplicationDisplayVersion
         "version=$full" >> $env:GITHUB_OUTPUT
 
     - name: Create Tag
