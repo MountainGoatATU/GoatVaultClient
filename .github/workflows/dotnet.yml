@@ -13,6 +13,9 @@ on:
     paths-ignore:
       - "*.md"
 
+permissions:
+  contents: write
+
 env: 
   WORKING_DIRECTORY: './GoatVaultClient-v3'
 
@@ -52,11 +55,29 @@ jobs:
       run: dotnet publish GoatVaultClient-v3.csproj -c Release -f:net9.0-windows10.0.19041.0 /p:GenerateAppxPackage=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
       working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Upload ZIP Artifact
-      uses: actions/upload-artifact@v4
+    - name: Extract version
+      id: extract_version
+      shell: pwsh
+      run: |
+        $xml = [XML] (Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient-v3.csproj")
+        $version = [Version] $xml.Project.PropertyGroup.ApplicationDisplayVersion
+        echo "version=$($version)" >> $env:GITHUB_OUTPUT
+
+    - name: Create Tag
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: GoatVaultClient
-        path: |
-          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/**/*.msix
-          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/**/*.cer
+        tag_name: v${{ steps.extract_version.outputs.version }}
+        release_name: Release v${{ steps.extract_version.outputs.version }}
+        draft: false
+        prerelease: false
+
+    - name: Create Releae
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.extract_version.outputs.version }}
+        files: |
+          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_x64.msix
+          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_x64.cer
 
