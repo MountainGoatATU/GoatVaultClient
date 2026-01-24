@@ -68,18 +68,20 @@ jobs:
         $appVer = $pg2.ApplicationVersion
 
         $full = "$display.$appVer"
-        
+
         "version=$full" >> $env:GITHUB_OUTPUT
 
     - name: Create Tag
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: actions/github-script@v6
       with:
-        tag_name: v${{ steps.extract_version.outputs.version }}
-        release_name: Release v${{ steps.extract_version.outputs.version }}
-        draft: false
-        prerelease: false
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.rest.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: `refs/tags/v${{ steps.extract_version.outputs.version }}`,
+            sha: context.sha
+          });
 
     - name: Create Releae
       uses: softprops/action-gh-release@v1
