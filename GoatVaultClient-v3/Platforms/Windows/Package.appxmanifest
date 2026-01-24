@@ -6,13 +6,13 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
-  <Identity Name="maui-package-name-placeholder" Publisher="GoatVault" Version="0.0.0.0" />
+  <Identity Name="maui-package-name-placeholder" Publisher="GoatVaultClient" Version="0.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="0E544099-27AC-4F06-A39C-886F16F937C9" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>$placeholder$</DisplayName>
-    <PublisherDisplayName>User Name</PublisherDisplayName>
+    <PublisherDisplayName>GoatVaultClient</PublisherDisplayName>
     <Logo>$placeholder$.png</Logo>
   </Properties>
 
