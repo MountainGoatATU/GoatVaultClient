@@ -77,11 +77,22 @@ jobs:
             sha: context.sha
           });
 
+    - name: Rename Auto-Update Installer
+      shell: pwsh
+      run: |
+        Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_x64.msix AutoUpdate.msix
+
+    - name: Rename Certificate
+      shell: pwsh
+      run: |
+        Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_x64.car GoatVaultClient.cer
+
     - name: Create Releae
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ steps.extract_version.outputs.version }}
         files: |
-          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_x64.msix
-          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_x64.cer
+          ${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller
+          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_Test/AutoUpdate.msix
+          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.1_Test/GoatVaultClient.cer
 
