@@ -245,15 +245,18 @@ public partial class MainPageViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task CopyEntry(string password)
+    public async Task CopyEntry()
     {
-        ArgumentNullException.ThrowIfNull(password);
-
         if (SelectedEntry == null)
             return;
 
+        var password = (SelectedEntry as VaultEntryForm)?.Password ?? SelectedEntry.Password;
+
+        if (string.IsNullOrEmpty(password))
+            return;
+
         // Copy to clipboard
-        await Clipboard.Default.SetTextAsync(SelectedEntry.Password);
+        await Clipboard.Default.SetTextAsync(password);
 
         await Task.Delay(10000); // 10 seconds
         await Clipboard.Default.SetTextAsync(""); // Clear clipboard
