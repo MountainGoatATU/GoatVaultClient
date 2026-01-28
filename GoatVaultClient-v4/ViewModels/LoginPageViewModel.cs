@@ -10,32 +10,19 @@ using PasswordGenerator;
 
 namespace GoatVaultClient_v4.ViewModels;
 
-public partial class LoginPageViewModel : BaseViewModel
+public partial class LoginPageViewModel(
+    UserService userService,
+    HttpService httpService,
+    AuthTokenService authTokenService,
+    VaultService vaultService,
+    VaultSessionService vaultSessionService)
+    : BaseViewModel
 {
     // Dependencies
-    private readonly UserService _userService;
-    private readonly HttpService _httpService;
-    private readonly AuthTokenService _authTokenService;
-    private readonly VaultService _vaultService;
-    private readonly VaultSessionService _vaultSessionService;
 
     // Observable Properties
     [ObservableProperty] private string email;
     [ObservableProperty] private string password;
-
-    public LoginPageViewModel(
-        UserService userService,
-        HttpService httpService,
-        AuthTokenService authTokenService,
-        VaultService vaultService,
-        VaultSessionService vaultSessionService)
-    {
-        _userService = userService;
-        _httpService = httpService;
-        _authTokenService = authTokenService;
-        _vaultService = vaultService;
-        _vaultSessionService = vaultSessionService;
-    }
 
     [RelayCommand]
     private async Task Login()
@@ -58,13 +45,13 @@ public partial class LoginPageViewModel : BaseViewModel
 
             // 2. Init Auth
             var initPayload = new AuthInitRequest { Email = Email };
-            var initResponse = await _httpService.PostAsync<AuthInitResponse>(
+            var initResponse = await httpService.PostAsync<AuthInitResponse>(
                 $"{url}/v1/auth/init",
                 initPayload
             );
 
             // 3. Generate Verifier
-            var loginVerifier = _userService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
+            var loginVerifier = userService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
 
             // 4. Verify
             var verifyPayload = new AuthVerifyRequest
@@ -73,43 +60,46 @@ public partial class LoginPageViewModel : BaseViewModel
                 AuthVerifier = loginVerifier
             };
 
-            var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
+            var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
                 $"{url}/v1/auth/verify",
                 verifyPayload
             );
 
-            _authTokenService.SetToken(verifyResponse.AccessToken);
-            _vaultSessionService.MasterPassword = Password;
+            authTokenService.SetToken(verifyResponse.AccessToken);
+            vaultSessionService.MasterPassword = Password;
 
             // 5. Get User Data
-            var userResponse = await _httpService.GetAsync<UserResponse>(
+            var userResponse = await httpService.GetAsync<UserResponse>(
                 $"{url}/v1/users/{initResponse.UserId}"
             );
 
-            _vaultSessionService.CurrentUser = userResponse;
+            vaultSessionService.CurrentUser = userResponse;
 
             // 6. Sync Local DB (Delete old if exists, save new)
-            var existingUser = await _vaultService.LoadUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
+            var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
             if (existingUser != null)
-                await _vaultService.DeleteUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
+                await vaultService.DeleteUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
-            await _vaultService.SaveUserToLocalAsync(new DbModel
+            await vaultService.SaveUserToLocalAsync(new DbModel
             {
-                Id = _vaultSessionService.CurrentUser.Id,
-                Email = _vaultSessionService.CurrentUser.Email,
-                AuthSalt = _vaultSessionService.CurrentUser.AuthSalt,
-                MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled,
-                Vault = _vaultSessionService.CurrentUser.Vault
+                Id = vaultSessionService.CurrentUser.Id,
+                Email = vaultSessionService.CurrentUser.Email,
+                AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
+                MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
+                Vault = vaultSessionService.CurrentUser.Vault
             });
 
             // 7. Decrypt & Store Session
-            _vaultSessionService.DecryptedVault = _vaultService.DecryptVault(_vaultSessionService.CurrentUser.Vault, Password);
+            vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, Password);
 
             // 8. Navigate to App (MainPage)
             // Note: Originally you went to GratitudePage, but for login, MainPage is standard.
             // Using "//MainPage" clears the stack so 'Back' doesn't go to Login.
-            Application.Current.MainPage = new AppShell();
+
+            if (Application.Current != null)
+                Application.Current.MainPage = new AppShell();
+
             await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
@@ -129,6 +119,6 @@ public partial class LoginPageViewModel : BaseViewModel
     [RelayCommand]
     private static async Task GoToRegister()
     {
-        await Shell.Current.GoToAsync($"{nameof(RegisterPage)}");
+        await Shell.Current.GoToAsync(nameof(RegisterPage));
     }
 }

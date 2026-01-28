@@ -9,6 +9,6 @@ public partial class IntroductionPageViewModel : BaseViewModel
     private static async Task GetStarted()
     {
         // Navigate to Register Page
-        await Shell.Current.GoToAsync($"{nameof(RegisterPage)}");
+        await Shell.Current.GoToAsync(nameof(RegisterPage));
     }
 }

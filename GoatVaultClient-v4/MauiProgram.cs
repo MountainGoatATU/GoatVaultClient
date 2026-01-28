@@ -27,6 +27,8 @@ public static class MauiProgram
             .UseMauiCommunityToolkit()
             .UseUraniumUI()
             .UseUraniumUIMaterial()
+            .UseUraniumUIWebComponents()
+            .UseUraniumUIBlurs()
             .ConfigureMopups()
             .ConfigureFonts(fonts =>
             {
@@ -36,6 +38,9 @@ public static class MauiProgram
                 fonts.AddFont("JetBrainsMon-Semibold.ttf", "JetBrainsMonoSemibold");
                 fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular");
                 fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
+                fonts.AddFontAwesomeIconFonts();
+                fonts.AddMaterialSymbolsFonts();
+                fonts.AddFluentIconFonts();
             });
 #if DEBUG
         builder.Logging.AddDebug();

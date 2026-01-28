@@ -10,14 +10,15 @@ using PasswordGenerator;
 
 namespace GoatVaultClient_v4.ViewModels;
 
-public partial class RegisterPageViewModel : BaseViewModel
+public partial class RegisterPageViewModel(
+    UserService userService,
+    HttpService httpService,
+    AuthTokenService authTokenService,
+    VaultService vaultService,
+    VaultSessionService vaultSessionService)
+    : BaseViewModel
 {
     // Services
-    private readonly UserService _userService;
-    private readonly HttpService _httpService;
-    private readonly AuthTokenService _authTokenService;
-    private readonly VaultService _vaultService;
-    private readonly VaultSessionService _vaultSessionService;
 
     // Observable Properties (Bound to Entry fields)
     [ObservableProperty] private string email;
@@ -25,19 +26,6 @@ public partial class RegisterPageViewModel : BaseViewModel
     [ObservableProperty] private string confirmPassword;
 
     // Constructor (Clean Dependency Injection)
-    public RegisterPageViewModel(
-        UserService userService,
-        HttpService httpService,
-        AuthTokenService authTokenService,
-        VaultService vaultService,
-        VaultSessionService vaultSessionService)
-    {
-        _userService = userService;
-        _httpService = httpService;
-        _authTokenService = authTokenService;
-        _vaultService = vaultService;
-        _vaultSessionService = vaultSessionService;
-    }
 
     [RelayCommand]
     private async Task Register()
@@ -65,15 +53,15 @@ public partial class RegisterPageViewModel : BaseViewModel
             IsBusy = true; // Locks UI if you bound ActivityIndicator or buttons
 
             // 2. Prepare Registration Data
-            var registerRequest = _userService.RegisterUser(Email, Password, null);
+            var registerRequest = userService.RegisterUser(Email, Password, null);
 
             // Encrypt vault (Initial empty vault)
-            var vaultPayload = _vaultService.EncryptVault(Password, null);
+            var vaultPayload = vaultService.EncryptVault(Password, null);
             registerRequest.Vault = vaultPayload;
 
             // 3. API: Register
             // Note: Ideally move these URL strings to a Constants file
-            var registerResponse = await _httpService.PostAsync<AuthRegisterResponse>(
+            var registerResponse = await httpService.PostAsync<AuthRegisterResponse>(
                 $"{url}/v1/auth/register",
                 registerRequest
             );
@@ -85,41 +73,41 @@ public partial class RegisterPageViewModel : BaseViewModel
                 AuthVerifier = registerRequest.AuthVerifier
             };
 
-            var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
+            var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
                 $"{url}/v1/auth/verify",
                 verifyRequest
             );
 
-            _authTokenService.SetToken(verifyResponse.AccessToken);
-            _vaultSessionService.MasterPassword = Password;
+            authTokenService.SetToken(verifyResponse.AccessToken);
+            vaultSessionService.MasterPassword = Password;
 
             // 5. API: Get User Profile
-            var userResponse = await _httpService.GetAsync<UserResponse>(
+            var userResponse = await httpService.GetAsync<UserResponse>(
                 $"{url}/v1/users/{registerResponse.Id}"
             );
 
             // Update Singleton User Service
-            _vaultSessionService.CurrentUser = userResponse;
+            vaultSessionService.CurrentUser = userResponse;
 
             // 6. Local Database Logic
             // Check if user exists locally, if so, remove them (fresh start)
-            var existingUser = await _vaultService.LoadUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
+            var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
             if (existingUser != null)
-                await _vaultService.DeleteUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
+                await vaultService.DeleteUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
             // Save new user to SQLite
-            await _vaultService.SaveUserToLocalAsync(new DbModel
+            await vaultService.SaveUserToLocalAsync(new DbModel
             {
-                Id = _vaultSessionService.CurrentUser.Id,
-                Email = _vaultSessionService.CurrentUser.Email,
-                AuthSalt = _vaultSessionService.CurrentUser.AuthSalt,
-                MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled,
-                Vault = _vaultSessionService.CurrentUser.Vault
+                Id = vaultSessionService.CurrentUser.Id,
+                Email = vaultSessionService.CurrentUser.Email,
+                AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
+                MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
+                Vault = vaultSessionService.CurrentUser.Vault
             });
 
             // 7. Decrypt & Store Session in RAM
-            _vaultSessionService.DecryptedVault = _vaultService.DecryptVault(_vaultSessionService.CurrentUser.Vault, Password);
+            vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, Password);
 
             // 8. Navigate
             // Using Shell navigation is standard for MAUI
@@ -132,7 +120,7 @@ public partial class RegisterPageViewModel : BaseViewModel
         {
             await Shell.Current.DisplayAlertAsync("Error", "This email is already registered.", "OK");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             await Shell.Current.GoToAsync($"//{nameof(IntroductionPage)}");
         }
@@ -146,6 +134,6 @@ public partial class RegisterPageViewModel : BaseViewModel
     private static async Task GoToLogin()
     {
         // Navigate back to Login
-        await Shell.Current.GoToAsync($"{nameof(LoginPage)}");
+        await Shell.Current.GoToAsync(nameof(LoginPage));
     }
 }
