@@ -21,6 +21,13 @@ namespace GoatVaultClient_v3.Models
         {
             _passwordStrength = passwordStrength;
             AvailableCategories = categories ?? new List<CategoryItem>();
+
+            IncludeLowercase = true;
+            IncludeUppercase = true;
+            IncludeNumbers = true;
+            IncludeSpecial = true;
+
+            PasswordLength = 16;
         }
 
         [ObservableProperty]
@@ -35,6 +42,21 @@ namespace GoatVaultClient_v3.Models
 
         [ObservableProperty]
         private string password;
+
+        [ObservableProperty]
+        private bool includeLowercase = true;
+
+        [ObservableProperty]
+        private bool includeUppercase = true;
+
+        [ObservableProperty]
+        private bool includeNumbers = true;
+
+        [ObservableProperty]
+        private bool includeSpecial = true;
+
+        [ObservableProperty]
+        private int passwordLength = 16;
 
         partial void OnPasswordChanged(string value)
         {
@@ -55,13 +77,19 @@ namespace GoatVaultClient_v3.Models
         [RelayCommand]
         private void GeneratePassword()
         {
-            var passwordGenerator = new Password();
-            Password = passwordGenerator.IncludeLowercase()
-                                        .IncludeUppercase()
-                                        .IncludeNumeric()
-                                        .IncludeSpecial()
-                                        .LengthRequired(16)
-                                        .Next();
+            if (!IncludeLowercase && !IncludeUppercase && !IncludeNumbers && !IncludeSpecial)
+            {
+                IncludeLowercase = true;
+            }
+
+            var generator = new Password();
+
+            if (IncludeLowercase) generator.IncludeLowercase();
+            if (IncludeUppercase) generator.IncludeUppercase();
+            if (IncludeNumbers) generator.IncludeNumeric();
+            if (IncludeSpecial) generator.IncludeSpecial();
+
+            Password = generator.LengthRequired(PasswordLength).Next();
         }
     }
 }
