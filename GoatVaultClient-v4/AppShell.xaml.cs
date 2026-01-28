@@ -1,10 +1,10 @@
-﻿namespace GoatVaultClient_v4
+﻿namespace GoatVaultClient_v4;
+
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+        Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
     }
 }

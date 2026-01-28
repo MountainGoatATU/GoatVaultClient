@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mopups:PopupPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                  xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+                  xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+                  x:Class="GoatVaultClient_v4.Controls.Popups.AuthorizePopup"
+                  BackgroundColor="#80000000"
+                  CloseWhenBackgroundIsClicked="True">
+
+
+    <Border WidthRequest="350" VerticalOptions="Center" HorizontalOptions="Center" Padding="0" StrokeShape="RoundRectangle 20" BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
+        <Grid RowDefinitions="*, Auto">
+            <ScrollView Grid.Row="0" MaximumHeightRequest="450" VerticalScrollBarVisibility="Default">
+                <VerticalStackLayout Spacing="15" Padding="20">
+                    <Label x:Name="TitleLabel" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
+                        <material:TextField x:Name="InputEntry" Text="{Binding Password}" IsPassword="True" WidthRequest="305">
+                            <material:TextField.Attachments>
+                                <material:TextFieldPasswordShowHideAttachment x:Name="ShowHideAttachment"/>
+                            </material:TextField.Attachments>
+                        </material:TextField>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </ScrollView>
+            <Grid Grid.Row="1" ColumnDefinitions="*,*" Padding="10" ColumnSpacing="10" BackgroundColor="#10000000">
+                <Button x:Name="CancelButton" Text="Cancel" StyleClass="OutlinedButton" Clicked="OnCancelClicked"/>
+                <Button x:Name="SaveButton" Grid.Column="1" StyleClass="FilledButton" Clicked="OnSaveClicked"/>
+            </Grid>
+        </Grid>
+    </Border>
+</mopups:PopupPage>
