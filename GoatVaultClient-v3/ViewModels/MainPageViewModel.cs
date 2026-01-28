@@ -25,15 +25,15 @@ namespace GoatVaultClient_v3.ViewModels
          * Observables
          */
         private List<VaultEntry> _allVaultEntries = new List<VaultEntry>();
+        private List<CategoryItem> _allVaultCategories = new List<CategoryItem>();
         [ObservableProperty]
-        private ObservableCollection<CategoryItem> categories = [];
+        public ObservableCollection<CategoryItem> categories = [];
         [ObservableProperty]
-        private ObservableCollection<VaultEntry> passwords = [];
+        public ObservableCollection<VaultEntry> passwords = [];
         [ObservableProperty]
         private CategoryItem selectedCategory = null;
         [ObservableProperty]
         private VaultEntry selectedEntry = null;
-
         [ObservableProperty]
         private CategoryItem newEntrySelectedCategory;
 
@@ -44,14 +44,8 @@ namespace GoatVaultClient_v3.ViewModels
 
         private bool _passwordsSortAsc = true;
 
+        [ObservableProperty]
         private bool _isPasswordVisible = false;
-
-        public bool IsPasswordVisible
-        {
-            get => _isPasswordVisible;
-            set => SetProperty(ref _isPasswordVisible, value);
-        }
-
 
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
@@ -74,64 +68,102 @@ namespace GoatVaultClient_v3.ViewModels
             if (!Categories.Any() && !Passwords.Any())
             {
                 // TEST DATA IF USER NOT LOGGED IN
-                Categories = _fakeDataSource.GetFolderItems().ToObservableCollection<CategoryItem>();
-                Passwords = _fakeDataSource.GetVaultEntryItems(10).ToObservableCollection<VaultEntry>();
-                _allVaultEntries = Passwords.ToList();
+                // Seeding Categories
+                Categories.Clear();
+                _allVaultCategories = _fakeDataSource.GetFolderItems();
+                // Adding Default Category
+                _allVaultCategories.Add(new CategoryItem { Name = "All" });
+                // Adding private list to observable collection
+                Categories = _allVaultCategories.ToObservableCollection<CategoryItem>();
+                PresortCategories(true);
+
+                // Seeding Passwords
+                Passwords.Clear();
+                _allVaultEntries = _fakeDataSource.GetVaultEntryItems(10);
+                Passwords = _allVaultEntries.ToObservableCollection<VaultEntry>();
+                PresortEntries(true);
             }
-            
+
             if (_vaultSessionService.DecryptedVault != null)
             {
                 if (_vaultSessionService.DecryptedVault.Categories != null)
                 {
                     //Reload Categories
                     Categories.Clear();
-                    Categories = _vaultSessionService.DecryptedVault.Categories
+                    _allVaultCategories.Add(new CategoryItem { Name = "All" });
+                    _allVaultCategories = _vaultSessionService.DecryptedVault.Categories
                         .Select(c => new CategoryItem { Name = c })
-                        .ToObservableCollection();
+                        .ToList();
+                    Categories = _allVaultCategories.ToObservableCollection<CategoryItem>();
+                    PresortCategories(true);
                 }
                 if (_vaultSessionService.DecryptedVault.Entries != null)
                 {
                     // Reload Passwords
+                    Passwords.Clear();
                     _allVaultEntries = _vaultSessionService.DecryptedVault.Entries;
-
-                    ApplyFilter();
+                    Passwords = _allVaultEntries.ToObservableCollection<VaultEntry>();
+                    PresortEntries(true);
                 }
             }
         }
 
-        //The Filter Logic
-        private void ApplyFilter()
+        private void PresortCategories(bool matchUI = false)
         {
-            IEnumerable<VaultEntry> filtered;
-
-            if (SelectedCategory == null)
+            // Toggle sort
+            // matchUI indicates whether to keep the current sort order (true) or toggle it (false)
+            // if the button is clicked, we want to toggle the sort order
+            // if the method is called from filtering, we want to keep the current sort order
+            var sorted = _categoriesSortAsc
+            ? Categories.OrderBy(f => f.Name)
+            : Categories.OrderByDescending(f => f.Name);
+            Categories = sorted.ToObservableCollection<CategoryItem>();
+            if (!matchUI)
             {
-                // If no category selected, show all
-                filtered = _allVaultEntries;
+                _categoriesSortAsc = !_categoriesSortAsc;
             }
-            else
-            {
-                // Assuming VaultEntry has a 'Category' property. 
-                // If not, you will need to add it to your Model.
-                filtered = _allVaultEntries.Where(x => x.Category == SelectedCategory.Name);
-            }
+        }
+        private void PresortEntries(bool matchUI = false)
+        {
+            // Toggle sort order
+            var sorted = _passwordsSortAsc
+                ? Passwords.OrderBy(f => f.Site)
+                : Passwords.OrderByDescending(f => f.Site);
 
-            if (!string.IsNullOrWhiteSpace(SearchText))
-            {
-                filtered = filtered.Where(x => x.Site != null && x.Site.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
-            }
-
-            Passwords = new ObservableCollection<VaultEntry>(filtered);
+            Passwords = sorted.ToObservableCollection<VaultEntry>();
+            _passwordsSortAsc = !_passwordsSortAsc;
         }
 
         partial void OnSelectedCategoryChanged(CategoryItem value)
         {
-            ApplyFilter();
+            if (value.Name == "All")
+            {
+                Passwords = _allVaultEntries.ToObservableCollection<VaultEntry>();
+                PresortEntries(true);
+
+            }
+            else
+            {
+                Passwords = _allVaultEntries
+                    .Where(x => x.Category == value.Name)
+                    .ToObservableCollection<VaultEntry>();
+                PresortEntries(true);
+            }
         }
 
         partial void OnSearchTextChanged(string value)
         {
-            ApplyFilter();
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                Passwords = _allVaultEntries
+                    .Where(x => x.Site != null && x.Site.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                    .ToObservableCollection<VaultEntry>();
+                Categories = _allVaultCategories
+                    .Where(x => x.Name != null && x.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                    .ToObservableCollection<CategoryItem>();
+                PresortCategories(true);
+                PresortEntries(true);
+            }
         }
 
         #endregion
@@ -140,15 +172,9 @@ namespace GoatVaultClient_v3.ViewModels
          * Categories Commands
          */
         [RelayCommand]
-        private void SortCategories()
+        public async Task SortCategories()
         {
-            // Toggle sort order
-            var sorted = _categoriesSortAsc
-                ? Categories.OrderBy(f => f.Name)
-                : Categories.OrderByDescending(f => f.Name);
-
-            Categories = sorted.ToObservableCollection<CategoryItem>();
-            _categoriesSortAsc = !_categoriesSortAsc;
+            PresortCategories();
         }
 
         [RelayCommand]
@@ -160,7 +186,7 @@ namespace GoatVaultClient_v3.ViewModels
             {
                 Categories.Add(result);
             }
-            
+
         }
 
         [RelayCommand]
@@ -174,7 +200,7 @@ namespace GoatVaultClient_v3.ViewModels
             if (result != null)
             {
                 var entries = Passwords.Where(e => e.Category == category.Name);
-                foreach(var e in entries)
+                foreach (var e in entries)
                 {
                     e.Category = result.Name;
                 }
@@ -193,61 +219,10 @@ namespace GoatVaultClient_v3.ViewModels
                 Categories.Remove(category);
             }
         }
-        // 5. ADD: Save Command
-        //[RelayCommand]
-        //private void SaveCategory()
-        //{
-        //    if (string.IsNullOrWhiteSpace(NewCategoryName))
-        //        return;
-
-        //    if (!string.IsNullOrWhiteSpace(_editingCategory.Name))
-        //    {
-        //        // Update existing category
-        //        int index = _vaultSessionService.DecryptedVault.Categories.IndexOf(_editingCategory);
-        //        if (index >= 0)
-        //            _vaultSessionService.DecryptedVault.Categories[index] = NewCategoryName.Trim();
-
-        //        // Update category in existing entries
-        //        foreach (var entry in _vaultSessionService.DecryptedVault.Entries
-        //                     .Where(e => e.Category == _editingCategory))
-        //        {
-        //            entry.Category = NewCategoryName.Trim();
-        //        }
-
-        //        _editingCategory = null;
-        //    }
-        //    else
-        //    {
-        //        if (_vaultSessionService.CurrentUser != null)
-        //        {
-        //            // Add new category
-        //            _vaultSessionService.DecryptedVault.Categories.Add(NewCategoryName.Trim());
-        //        }
-        //        else
-        //        {
-        //            Categories.Add(new CategoryItem { Name = NewCategoryName.Trim() });
-        //        }
-                
-        //    }
-
-        //    // Refresh the UI list
-        //    LoadVaultData();
-
-        //    IsCategoryFormVisible = false;
-        //}
-        /*
-         * Entries Commands
-         */
         [RelayCommand]
-        private void SortEntries(CategoryItem category)
+        public async Task SortEntries()
         {
-            // Toggle sort order
-            var sorted = _passwordsSortAsc
-                ? Passwords.OrderBy(f => f.Site)
-                : Passwords.OrderByDescending(f => f.Site);
-
-            Passwords = sorted.ToObservableCollection<VaultEntry>();
-            _passwordsSortAsc = !_passwordsSortAsc;
+            PresortEntries();
         }
 
         [RelayCommand]
@@ -299,7 +274,7 @@ namespace GoatVaultClient_v3.ViewModels
         [RelayCommand]
         private void EditEntry(VaultEntry entry)
         {
-            
+
         }
 
         [RelayCommand]
@@ -315,27 +290,13 @@ namespace GoatVaultClient_v3.ViewModels
                 Passwords.Remove(selectedEntry);
             }
         }
-
-        [RelayCommand]
-        private void SaveEntry()
-        {
-            
-        }
-
         [RelayCommand]
         private void TogglePasswordVisibility()
         {
             IsPasswordVisible = !IsPasswordVisible;
         }
-
-        [RelayCommand]
-        private async Task GoToEducation()
-        {
-            // Navigate to Education Page
-            await Shell.Current.GoToAsync($"//{nameof(EducationPage)}");
-        }
-        #endregion
     }
+    #endregion
 
     public class EyeIconConverter : IValueConverter
     {
