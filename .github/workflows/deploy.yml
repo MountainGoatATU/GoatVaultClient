@@ -37,11 +37,11 @@ jobs:
         run: dotnet workload install maui
 
       - name: Restore dependencies
-        run: dotnet restore GoatVaultClient-v4.sln
+        run: dotnet restore GoatVaultClient-v4.slnx
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Build the project
-        run: dotnet build GoatVaultClient-v4.sln -c Release
+        run: dotnet build GoatVaultClient-v4.slnx -c Release
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Decode signing certificate
