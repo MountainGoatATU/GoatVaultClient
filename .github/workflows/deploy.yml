@@ -103,7 +103,7 @@ jobs:
       - name: Create Tag
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_PAT }}
           script: |
             github.rest.git.createRef({
               owner: context.repo.owner,
