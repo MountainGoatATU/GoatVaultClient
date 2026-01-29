@@ -3,7 +3,7 @@
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui" 
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="GoatVaultClient.Resources.Styles.MaterialColors"
+    x:Class="GoatVaultClient_v3.Resources.Styles.MaterialColors"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
     <!-- Primary -->
     <Color x:Key="Primary0">#000000</Color>

@@ -1,12 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="GoatVaultClient.Resources.Styles.Dimens">
+             x:Class="GoatVaultClient_v3.Resources.Styles.Dimens">
     
     <!--Corner Radius-->
-    <Thickness x:Key="rSmall">8</Thickness>
-    <Thickness x:Key="rMedium">16</Thickness>
-    <Thickness x:Key="rLarge">24</Thickness>
+    <x:Double x:Key="xSmall">4</x:Double> <!-- TextFields, Item List-->
+    <x:Double x:Key="Small">8</x:Double> <!-- Assist Chip, Menu Item-->
+    <x:Double x:Key="Medium">12</x:Double> <!-- Card -->
+    <x:Double x:Key="Large">16</x:Double> <!-- FAB , Filled Button-->
+    <x:Double x:Key="LargeIncreased">20</x:Double> <!-- Large FAB, Selected Item in List -->
+    <x:Double x:Key="xLarge">28</x:Double> <!-- Extended FAB -->
+    <x:Double x:Key="xLargeIncreased">32</x:Double> <!-- Dialog -->
+    <x:Double x:Key="xxLarge">48</x:Double> <!-- Card Header -->
     <!--Padding-->
     <Thickness x:Key="pContent">4</Thickness>
     <Thickness x:Key="pSmall">8</Thickness>
