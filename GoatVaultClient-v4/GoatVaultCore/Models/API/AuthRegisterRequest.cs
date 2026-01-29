@@ -5,8 +5,8 @@ namespace GoatVaultCore.Models.API;
 
 public class AuthRegisterRequest
 {
-    [JsonPropertyName("email")] public string Email { get; set; }
-    [JsonPropertyName("auth_salt")] public string AuthSalt { get; set; }
-    [JsonPropertyName("auth_verifier")] public string AuthVerifier { get; set; }
-    [JsonPropertyName("vault")] public VaultModel Vault { get; set; }
+    [JsonPropertyName("email")] public required string Email { get; set; }
+    [JsonPropertyName("auth_salt")] public required string AuthSalt { get; set; }
+    [JsonPropertyName("auth_verifier")] public required string AuthVerifier { get; set; }
+    [JsonPropertyName("vault")] public required VaultModel? Vault { get; set; }
 }

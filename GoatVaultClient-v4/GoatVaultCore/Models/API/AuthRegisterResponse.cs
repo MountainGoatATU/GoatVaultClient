@@ -4,6 +4,6 @@ namespace GoatVaultCore.Models.API;
 
 public class AuthRegisterResponse
 {
-    [JsonPropertyName("_id")] public string Id { get; set; }
-    [JsonPropertyName("email")] public string Email { get; set; }
+    [JsonPropertyName("_id")] public required string Id { get; set; }
+    [JsonPropertyName("email")] public required string Email { get; set; }
 }

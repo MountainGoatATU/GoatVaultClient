@@ -8,50 +8,47 @@ namespace GoatVaultClient.ViewModels;
 
 public partial class EducationPageViewModel : BaseViewModel
 {
-    public ObservableCollection<EducationTopic> Topics { get; }
-    [ObservableProperty] private EducationTopic _currentTopic;
-
-    public EducationPageViewModel()
-    {
-        // Define your topics here as you did before
-        Topics =
-        [
-            new EducationTopic
+    public ObservableCollection<EducationTopic> Topics { get; } =
+    [
+        new()
+        {
+            Title = "Introduction", FileName = "Structure.md",
+            Quiz = new QuizData
             {
-                Title = "Introduction", FileName = "Structure.md",
-                Quiz = new QuizData
-                {
-                    Title = "What is the purpose of the education structure?",
-                    Questions =
-                    [
-                        new QuizOption { Text = "To educate the user", IsCorrect = true },
-                        new QuizOption { Text = "To waste users's time", IsCorrect = false },
-                        new QuizOption
-                            { Text = "To provide misleading topics and incorrect information", IsCorrect = false }
-                    ]
-                }
-            },
-
-            new EducationTopic
-            {
-                Title = "Shamir", FileName = "Shamir.md",
-                Quiz = new QuizData
-                {
-                    Title = "What is Shamir Secret Sharing?",
-                    Questions =
-                    [
-                        new QuizOption { Text = "Just some guy telling a secret to his friend", IsCorrect = true },
-                        new QuizOption { Text = "Shamir does have a secret he wants to share", IsCorrect = false },
-                        new QuizOption
-                        {
-                            Text = "A way on how to retrieve passwords from multiple shares by using interpolation",
-                            IsCorrect = false
-                        }
-                    ]
-                }
+                Title = "What is the purpose of the education structure?",
+                Questions =
+                [
+                    new QuizOption { Text = "To educate the user", IsCorrect = true },
+                    new QuizOption { Text = "To waste users's time", IsCorrect = false },
+                    new QuizOption
+                        { Text = "To provide misleading topics and incorrect information", IsCorrect = false }
+                ]
             }
-        ];
-    }
+        },
+
+        new()
+        {
+            Title = "Shamir", FileName = "Shamir.md",
+            Quiz = new QuizData
+            {
+                Title = "What is Shamir Secret Sharing?",
+                Questions =
+                [
+                    new QuizOption { Text = "Just some guy telling a secret to his friend", IsCorrect = true },
+                    new QuizOption { Text = "Shamir does have a secret he wants to share", IsCorrect = false },
+                    new QuizOption
+                    {
+                        Text = "A way on how to retrieve passwords from multiple shares by using interpolation",
+                        IsCorrect = false
+                    }
+                ]
+            }
+        }
+    ];
+
+    [ObservableProperty] private EducationTopic? _currentTopic;
+
+    // Define your topics here as you did before
 
     [RelayCommand]
     public async Task OpenTopicAsync(EducationTopic? topic)

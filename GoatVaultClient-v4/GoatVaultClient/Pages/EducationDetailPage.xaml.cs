@@ -4,16 +4,16 @@ namespace GoatVaultClient.Pages;
 
 public partial class EducationDetailPage : ContentPage
 {
-	public EducationDetailPage(EducationDetailViewModel vm)
-	{
-		InitializeComponent();
+    public EducationDetailPage(EducationDetailViewModel vm)
+    {
+        InitializeComponent();
         BindingContext = vm;
     }
 
     private void OnWebViewNavigating(object sender, WebNavigatingEventArgs e)
     {
         // Check if the navigation is our custom "signal" from the Javascript
-        if (e.Url == null || !e.Url.StartsWith("goatvault://"))
+        if (!e.Url.StartsWith("goatvault://"))
             return;
 
         // 1. Cancel the actual navigation so the WebView doesn't try to load the fake URL

@@ -5,9 +5,9 @@ namespace GoatVaultCore.Models.API;
 
 public class UserResponse
 {
-    [JsonPropertyName("_id")] public string Id { get; set; }
-    [JsonPropertyName("auth_salt")] public string AuthSalt { get; set; }
-    [JsonPropertyName("email")] public string Email { get; set; }
-    [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; set; }
-    [JsonPropertyName("vault")] public VaultModel Vault { get; set; }
+    [JsonPropertyName("_id")] public required string Id { get; set; }
+    [JsonPropertyName("auth_salt")] public required string AuthSalt { get; set; }
+    [JsonPropertyName("email")] public required string Email { get; set; }
+    [JsonPropertyName("mfa_enabled")] public required bool MfaEnabled { get; set; }
+    [JsonPropertyName("vault")] public required VaultModel Vault { get; set; }
 }

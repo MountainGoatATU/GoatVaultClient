@@ -13,12 +13,12 @@ public enum LoginStatus
 
 public interface IUserService
 {
-    AuthRegisterRequest RegisterUser(string email, string password, VaultModel vault);
+    AuthRegisterRequest RegisterUser(string email, string password, VaultModel? vault);
 }
 
 public class UserService : IUserService
 {
-    public AuthRegisterRequest RegisterUser(string email, string masterPassword, VaultModel vault)
+    public AuthRegisterRequest RegisterUser(string email, string masterPassword, VaultModel? vault)
     {
         var authSalt = CryptoService.GenerateAuthSalt();
         var authVerifier = CryptoService.HashPassword(masterPassword, authSalt);

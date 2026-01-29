@@ -5,7 +5,7 @@ namespace GoatVaultCore.Models.API;
 
 public class UserRequest
 {
-    [JsonPropertyName("email")] public string Email { get; set; }
-    [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; set; }
-    [JsonPropertyName("vault")] public VaultModel Vault { get; set; }
+    [JsonPropertyName("email")] public required string Email { get; set; }
+    [JsonPropertyName("mfa_enabled")] public required bool MfaEnabled { get; set; }
+    [JsonPropertyName("vault")] public required VaultModel Vault { get; set; }
 }

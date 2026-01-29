@@ -17,7 +17,8 @@ public partial class UserPageViewModel : BaseViewModel
         if (!await AuthorizeAsync())
             return;
 
-        var popup = new AuthorizePopup(isPassword: false, buttonText: "Save")
+        // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
+        var popup = new AuthorizePopup(isPassword: false/*, buttonText: "Save"*/)
         {
             Title = "Edit Email"
         };
@@ -40,7 +41,11 @@ public partial class UserPageViewModel : BaseViewModel
             return;
         }
 
-        var popup = new AuthorizePopup(isPassword: true, buttonText: "Save");
+        // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
+        var popup = new AuthorizePopup(isPassword: true /*, buttonText: "Save"*/)
+        {
+            Title = "Save"
+        };
         await MopupService.Instance.PushAsync(popup);
 
         var result = await popup.WaitForScan();
@@ -51,7 +56,8 @@ public partial class UserPageViewModel : BaseViewModel
 
     private async Task<bool> AuthorizeAsync()
     {
-        var popup = new AuthorizePopup(isPassword: true, buttonText: "OK")
+        // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
+        var popup = new AuthorizePopup(isPassword: true /*, buttonText: "OK"*/)
         {
             Title = "Authorization"
         };

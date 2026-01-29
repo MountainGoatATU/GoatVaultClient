@@ -23,9 +23,9 @@ public partial class App : Application
         return window;
     }
 
-    private async void Window_Destroying(object sender, EventArgs e)
+    private async void Window_Destroying(object? sender, EventArgs e)
     {
-        if (_sessionService != null && _vaultService != null && _sessionService.DecryptedVault != null && !string.IsNullOrEmpty(_sessionService.MasterPassword))
+        if (_sessionService.DecryptedVault != null && !string.IsNullOrEmpty(_sessionService.MasterPassword))
         {
             await _vaultService.SyncAndCloseAsync(_sessionService.CurrentUser, _sessionService.MasterPassword, _sessionService.DecryptedVault);
         }

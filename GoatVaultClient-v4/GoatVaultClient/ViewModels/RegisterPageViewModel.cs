@@ -21,9 +21,9 @@ public partial class RegisterPageViewModel(
     // Services
 
     // Observable Properties (Bound to Entry fields)
-    [ObservableProperty] private string email;
-    [ObservableProperty] private string password;
-    [ObservableProperty] private string confirmPassword;
+    [ObservableProperty] private string? _email;
+    [ObservableProperty] private string? _password;
+    [ObservableProperty] private string? _confirmPassword;
 
     // Constructor (Clean Dependency Injection)
 
