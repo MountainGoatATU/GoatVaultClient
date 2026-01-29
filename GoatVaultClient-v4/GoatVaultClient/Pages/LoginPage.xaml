@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+             xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+             x:Class="GoatVaultClient.Pages.LoginPage"
+             x:DataType="vm:LoginPageViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
+
+
+    <controls:Component Padding="{StaticResource formPadding}">
+        <VerticalStackLayout VerticalOptions="Center" Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
+            <Label Text="Login" Style="{x:StaticResource MaterialDisplayMedium}" HorizontalOptions="Center" FontAttributes="Bold"/>
+            <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource PrimaryTextField}"/>
+            <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                <material:TextField.Attachments>
+                    <material:TextFieldPasswordShowHideAttachment/>
+                </material:TextField.Attachments>
+            </material:TextField>
+            <Button Text="Login" Command="{Binding LoginCommand}" TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer}, Dark={x:StaticResource DarkOnPrimaryContainer}}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer}, Dark={x:StaticResource DarkPrimaryContainer}}" Style="{StaticResource PrimaryButton}"/>
+            <HorizontalStackLayout HorizontalOptions="Center">
+                <Label Text="Don't have an account yet?" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant}, Dark={x:StaticResource DarkOnSurfaceVariant}}" VerticalOptions="Center"/>
+                <Button Text="Register" Command="{Binding GoToRegisterCommand}" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface}, Dark={x:StaticResource DarkOnSurface}}" FontSize="{StaticResource tMedium}"/>
+            </HorizontalStackLayout>
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
+        </VerticalStackLayout>
+    </controls:Component>
+</ContentPage>

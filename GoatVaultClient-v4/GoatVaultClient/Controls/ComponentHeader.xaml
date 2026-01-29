@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView       
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="GoatVaultClient.Controls.ComponentHeader"
+    x:Name="This">
+    <Grid ColumnDefinitions="Auto, *" VerticalOptions="Center">
+            <Label Text="{Binding Title, Source={x:Reference This}}" 
+                   VerticalTextAlignment="Center"
+                   FontSize="16" 
+                   TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface}, Dark={x:StaticResource DarkOnSurface}}"/>
+            <ContentView Grid.Column="1"
+                     Content="{Binding Actions, Source={x:Reference This}}"
+                     HorizontalOptions="End"
+                     VerticalOptions="Center"
+                     Padding="12" />
+
+    </Grid>
+</ContentView>

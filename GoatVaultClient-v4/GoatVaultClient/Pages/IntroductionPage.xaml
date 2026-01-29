@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+             x:Class="GoatVaultClient.Pages.IntroductionPage"
+             x:DataType="vm:IntroductionPageViewModel"
+             BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface} }">
+
+    <Grid Padding="30">
+        <VerticalStackLayout Spacing="30" VerticalOptions="Center" HorizontalOptions="Center">
+
+            <material:ButtonView WidthRequest="140" HeightRequest="140" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
+                <material:ButtonView.StrokeShape>
+                    <RoundRectangle CornerRadius="70"/>
+                </material:ButtonView.StrokeShape>
+                <Image Source="vault_icon.png" Aspect="AspectFit"/>
+            </material:ButtonView>
+
+            <Label Text="Welcome to Goat Vault!" Style="{x:StaticResource MaterialDisplayLarge}" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Label Text="Securely store and manage all your passwords in one place." Style="{x:StaticResource MaterialBodyMedium}" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+
+            <material:ButtonView WidthRequest="220" HeightRequest="55" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
+                <material:ButtonView.StrokeShape>
+                    <RoundRectangle CornerRadius="27"/>
+                </material:ButtonView.StrokeShape>
+                <Label Text="Get Started" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
+
+                <material:ButtonView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GetStartedCommand}"/>
+                </material:ButtonView.GestureRecognizers>
+            </material:ButtonView>
+
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
