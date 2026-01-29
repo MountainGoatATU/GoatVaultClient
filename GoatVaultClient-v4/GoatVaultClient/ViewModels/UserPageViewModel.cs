@@ -7,11 +7,8 @@ namespace GoatVaultClient.ViewModels
 {
     public partial class UserPageViewModel : BaseViewModel
     {
-        [ObservableProperty]
-        private string email = "user@example.com";
-
-        [ObservableProperty]
-        private string masterPassword = "password123";
+        [ObservableProperty] private string email = "user@example.com";
+        [ObservableProperty]private string masterPassword = "password123";
 
         [RelayCommand]
         private async Task EditEmailAsync()

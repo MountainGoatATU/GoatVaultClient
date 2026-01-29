@@ -19,26 +19,15 @@ namespace GoatVaultClient.ViewModels
          */
         private List<VaultEntry> _allVaultEntries = new List<VaultEntry>();
         private List<CategoryItem> _allVaultCategories = new List<CategoryItem>();
-        [ObservableProperty]
-        public ObservableCollection<CategoryItem> categories = [];
-        [ObservableProperty]
-        public ObservableCollection<VaultEntry> passwords = [];
-        [ObservableProperty]
-        private CategoryItem selectedCategory = null;
-        [ObservableProperty]
-        private VaultEntry selectedEntry = null;
-        [ObservableProperty]
-        private CategoryItem newEntrySelectedCategory;
-
-        [ObservableProperty]
-        private string searchText = null;
-
+        [ObservableProperty] public ObservableCollection<CategoryItem> categories = [];
+        [ObservableProperty] public ObservableCollection<VaultEntry> passwords = [];
+        [ObservableProperty] private CategoryItem selectedCategory = null;
+        [ObservableProperty] private VaultEntry selectedEntry = null;
+        [ObservableProperty] private CategoryItem newEntrySelectedCategory;
+        [ObservableProperty] private string searchText = null;
         private bool _categoriesSortAsc = true;
-
         private bool _passwordsSortAsc = true;
-
-        [ObservableProperty]
-        private bool _isPasswordVisible = false;
+        [ObservableProperty] private bool _isPasswordVisible = false;
 
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
