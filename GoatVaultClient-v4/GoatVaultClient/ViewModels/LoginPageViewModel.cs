@@ -10,7 +10,7 @@ using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultClient.ViewModels;
 
-// TODO: Unused dependency injection
+// TODO: Unused UserService injection
 public partial class LoginPageViewModel(
     /*UserService userService,*/
     HttpService httpService,

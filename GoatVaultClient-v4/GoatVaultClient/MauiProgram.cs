@@ -74,7 +74,7 @@ public static class MauiProgram
         // Test services
         builder.Services.AddSingleton<FakeDataSource>();
 
-        // TODO: Shamir services
+        // TODO: Fix Shamir services
         builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
         // builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
         // builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();

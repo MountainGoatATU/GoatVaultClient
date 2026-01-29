@@ -40,10 +40,10 @@ public class ShamirService(
         {
             var gcd = new ExtendedEuclideanAlgorithm<BigInteger>();
 
-            // TODO: ShamirSecretSharing
+            // TODO: Create Shamir's Secret Sharing instance with BigInteger
             // var combine = new ShamirsSecretSharing<BigInteger>(gcd);
 
-            // TODO: Obsolete
+            // TODO: Obsolete method
             var reconstructedSecret = _reconstructionUseCase.Reconstruction(shareStrings);
 
             var bytes = reconstructedSecret.ToByteArray();
