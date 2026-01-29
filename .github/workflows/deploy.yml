@@ -57,10 +57,12 @@ jobs:
       # Restore dependencies + workloads
       # --------------------------
 
-      - name: Restore dependencies + workloads
-        run: |
-          dotnet restore GoatVaultClient/GoatVaultClient.csproj
-          dotnet workload restore GoatVaultClient/GoatVaultClient.csproj
+      - name: Restore workloads
+        run: dotnet workload restore GoatVaultClient/GoatVaultClient.csproj
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Restore NuGet packages
+        run: dotnet restore GoatVaultClient/GoatVaultClient.csproj
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       # --------------------------
