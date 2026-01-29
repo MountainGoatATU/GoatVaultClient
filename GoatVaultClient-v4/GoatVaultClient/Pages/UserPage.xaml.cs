@@ -1,12 +1,13 @@
-using GoatVaultClient.ViewModels;
+using GoatVaultClient_v3.ViewModels;
 
-namespace GoatVaultClient.Pages;
-
-public partial class UserPage : ContentPage
+namespace GoatVaultClient_v3.Pages
 {
-    public UserPage(UserPageViewModel vm)
+    public partial class UserPage : ContentPage
     {
-        InitializeComponent();
-        BindingContext = vm;
+        public UserPage(UserPageViewModel vm)
+        {
+            InitializeComponent();
+            BindingContext = vm;
+        }
     }
 }

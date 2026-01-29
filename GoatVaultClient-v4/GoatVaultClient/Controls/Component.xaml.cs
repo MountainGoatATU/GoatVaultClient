@@ -1,5 +1,3 @@
-
-using GoatVaultClient.Resources.Styles;
 namespace GoatVaultClient.Controls;
 
 public partial class Component : ContentView
@@ -8,7 +6,7 @@ public partial class Component : ContentView
 	{
 		InitializeComponent();
 
-        if (Application.Current != null && Application.Current.Resources.TryGetValue("componentMarginLarge", out var defaultMargin))
+        if (Application.Current.Resources.TryGetValue("componentMarginLarge", out var defaultMargin))
         {
             BorderMargin = (Thickness)defaultMargin;
         }

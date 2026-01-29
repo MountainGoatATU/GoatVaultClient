@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace GoatVaultClient.Services.API;
+namespace GoatVaultClient.Services;
 
 public interface IHttpService
 {

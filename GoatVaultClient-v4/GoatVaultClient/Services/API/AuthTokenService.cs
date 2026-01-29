@@ -1,4 +1,4 @@
-﻿namespace GoatVaultClient.Services.API;
+﻿namespace GoatVaultClient.Services;
 
 public interface IAuthTokenService
 {

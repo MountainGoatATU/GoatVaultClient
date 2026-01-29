@@ -3,7 +3,7 @@ using System.Text;
 using SecretSharingDotNet.Cryptography;
 using SecretSharingDotNet.Math;
 
-namespace GoatVaultClient.Services.Secrets;
+namespace GoatVaultClient.Services;
 
 public class SecretService(
     IMakeSharesUseCase<BigInteger> makeSharesUseCase,

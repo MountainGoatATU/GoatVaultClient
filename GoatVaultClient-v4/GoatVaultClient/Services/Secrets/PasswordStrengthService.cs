@@ -1,6 +1,6 @@
 ﻿using Zxcvbn;
 
-namespace GoatVaultClient.Services.Secrets;
+namespace GoatVaultClient.Services;
 
 public class PasswordStrengthService
 {

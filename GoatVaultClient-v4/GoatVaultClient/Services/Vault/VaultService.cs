@@ -6,10 +6,9 @@ using Isopoh.Cryptography.Argon2;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using GoatVaultClient.Services.API;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoatVaultClient.Services.Vault;
+namespace GoatVaultClient.Services;
 
 public interface IVaultService
 {

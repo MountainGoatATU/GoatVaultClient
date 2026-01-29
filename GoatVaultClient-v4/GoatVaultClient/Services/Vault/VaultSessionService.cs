@@ -1,7 +1,7 @@
 ﻿using GoatVaultClient.Models.API;
 using GoatVaultClient.Models.Vault;
 
-namespace GoatVaultClient.Services.Vault;
+namespace GoatVaultClient.Services;
 
 public class VaultSessionService
 {

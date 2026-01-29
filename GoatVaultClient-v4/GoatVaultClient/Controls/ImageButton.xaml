@@ -3,8 +3,8 @@
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GoatVaultClient.Controls.ImageButton"
-             x:Name="This">
-    <material:ButtonView WidthRequest="{StaticResource iconDesktopZone}" HeightRequest="{StaticResource iconDesktopZone}" PressedCommand="{Binding Command, Source={x:Reference This}}" BackgroundColor="Transparent">
+             x:Name="this">
+    <material:ButtonView WidthRequest="{StaticResource iconDesktopZone}" HeightRequest="{StaticResource iconDesktopZone}" PressedCommand="{Binding Command, Source={x:Reference this}}" BackgroundColor="Transparent">
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -30,7 +30,7 @@
         </material:ButtonView.StrokeShape>
         <Image VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="{x:StaticResource iconDesktop}" WidthRequest="{x:StaticResource iconDesktop}">
             <Image.Source>
-                <FontImageSource FontFamily="MaterialRounded" Glyph="{Binding IconGlyph, Source={x:Reference This}}" Color="{Binding Color}" Size="{x:StaticResource iconDesktopResolution}"/>
+                <FontImageSource FontFamily="MaterialRounded" Glyph="{Binding IconGlyph, Source={x:Reference this}}" Color="{Binding Color}" Size="{x:StaticResource iconDesktopResolution}"/>
             </Image.Source>
         </Image>
     </material:ButtonView>
