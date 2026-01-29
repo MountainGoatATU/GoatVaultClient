@@ -2,9 +2,6 @@
 using GoatVaultClient.Database;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
-using GoatVaultClient.Services.API;
-using GoatVaultClient.Services.Secrets;
-using GoatVaultClient.Services.Vault;
 using GoatVaultClient.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

@@ -1,6 +1,6 @@
-using GoatVaultClient_v3.ViewModels;
+using GoatVaultClient.ViewModels;
 
-namespace GoatVaultClient_v3.Pages
+namespace GoatVaultClient.Pages
 {
     public partial class UserPage : ContentPage
     {

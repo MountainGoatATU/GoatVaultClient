@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel.DataAnnotations;
 using PasswordGenerator;
-using GoatVaultClient.Services.Secrets;
+using GoatVaultClient.Services;
 
 namespace GoatVaultClient.Models.Vault;
 

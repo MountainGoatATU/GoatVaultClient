@@ -1,14 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient_v3.Controls.Popups;
+using GoatVaultClient.Controls.Popups;
 using Mopups.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace GoatVaultClient_v3.ViewModels
+namespace GoatVaultClient.ViewModels
 {
     public partial class UserPageViewModel : BaseViewModel
     {

@@ -1,9 +1,6 @@
-﻿using System.Diagnostics;
-using GoatVaultClient_v3.Models;
-using GoatVaultClient_v3.Services;
-using GoatVaultClient_v3.ViewModels;
+﻿using GoatVaultClient.ViewModels;
 
-namespace GoatVaultClient_v3
+namespace GoatVaultClient
 {
     public partial class MainPage : ContentPage
     {
