@@ -43,7 +43,7 @@ jobs:
 
       - name: Restore dependencies + workloads
         run: |
-          dotnet restore GoatVaultClient/GoatVaultClient.csproj -f net10.0-windows10.0.19041.0
+          dotnet restore GoatVaultClient/GoatVaultClient.csproj
           dotnet workload restore
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
