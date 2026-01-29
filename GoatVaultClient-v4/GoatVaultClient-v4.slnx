@@ -1,4 +1,6 @@
 <Solution>
-  <Project Path="GoatVaultClient/GoatVaultClient.csproj" />
-  <Project Path="GoatVaultClientTests/GoatVaultClientTests.csproj" />
+  <Project Path="GoatVaultClient/GoatVaultClient.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="GoatVaultClientTests/GoatVaultClientTests.csproj" Id="acd3abf3-9ace-41d8-9db2-a4da65234231" />
 </Solution>
