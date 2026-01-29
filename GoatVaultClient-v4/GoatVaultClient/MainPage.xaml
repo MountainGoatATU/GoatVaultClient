@@ -4,7 +4,7 @@
              xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-             xmlns:models="clr-namespace:GoatVaultClient.Models"
+             xmlns:models="clr-namespace:GoatVaultCore.Models"
              xmlns:controls="clr-namespace:GoatVaultClient.Controls"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              x:Class="GoatVaultClient.MainPage"
