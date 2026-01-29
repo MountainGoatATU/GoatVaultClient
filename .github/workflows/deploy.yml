@@ -70,7 +70,7 @@ jobs:
       # --------------------------
 
       - name: Build the solution
-        run: dotnet build GoatVaultClient/GoatVaultClient.csproj -c ${{ env.CONFIGURATION }} -f ${{ env.TARGET_FRAMEWORK }}
+        run: dotnet build GoatVaultClient/GoatVaultClient.csproj -c ${{ env.CONFIGURATION }} -f ${{ env.TARGET_FRAMEWORK }} /p:RuntimeIdentifier=${{ env.PLATFORM }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       # --------------------------
