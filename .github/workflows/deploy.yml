@@ -54,24 +54,20 @@ jobs:
             ${{ runner.os }}-dotnet-workloads-
 
       # --------------------------
-      # Install MAUI workload if missing
+      # Restore dependencies + workloads
       # --------------------------
 
-      - name: Install MAUI workload
+      - name: Restore dependencies + workloads
         run: |
-          if (-not (dotnet workload list | Select-String "maui")) {
-            dotnet workload install maui
-          }
-
-      # --------------------------
-      # Restore & build solution
-      # --------------------------
-
-      - name: Restore dependencies
-        run: dotnet restore GoatVaultClient-v4.slnx
+          dotnet restore GoatVaultClient-v4.slnx
+          dotnet workload restore
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
-      - name: Build the project
+      # --------------------------
+      # Build the solution
+      # --------------------------
+
+      - name: Build the solution
         run: dotnet build GoatVaultClient-v4.slnx -c Release
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
