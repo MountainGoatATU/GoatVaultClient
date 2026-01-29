@@ -61,6 +61,7 @@ jobs:
 
       - name: Run tests
         run: dotnet test GoatVaultTests/GoatVaultTests.csproj -c Release
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       # --------------------------
       # Decode & install signing certificate
