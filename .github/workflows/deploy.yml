@@ -33,8 +33,39 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      # --------------------------
+      # Cache NuGet packages & MAUI workloads
+      # --------------------------
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.USERPROFILE }}\.nuget\packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Cache .NET workloads
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.USERPROFILE }}\.dotnet\workloads
+          key: ${{ runner.os }}-dotnet-workloads-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-workloads-
+
+      # --------------------------
+      # Install MAUI workload if missing
+      # --------------------------
+
       - name: Install MAUI workload
-        run: dotnet workload install maui
+        run: |
+          if (-not (dotnet workload list | Select-String "maui")) {
+            dotnet workload install maui
+          }
+
+      # --------------------------
+      # Restore & build solution
+      # --------------------------
 
       - name: Restore dependencies
         run: dotnet restore GoatVaultClient-v4.slnx
@@ -44,6 +75,10 @@ jobs:
         run: dotnet build GoatVaultClient-v4.slnx -c Release
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
+      # --------------------------
+      # Decode & install signing certificate
+      # --------------------------
+
       - name: Decode signing certificate
         run: |
           echo "${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}" > cert.asc
@@ -52,9 +87,17 @@ jobs:
       - name: Install signing certificate
         run: certutil -user -p ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
 
+      # --------------------------
+      # Publish client
+      # --------------------------
+
       - name: Publish the client
         run: dotnet publish GoatVaultClient/GoatVaultClient.csproj -c Release -f:net10.0-windows10.0.19041.0 /p:GenerateAppxPackage=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      # --------------------------
+      # Extract version
+      # --------------------------
 
       - name: Extract version
         id: extract_version
@@ -65,6 +108,10 @@ jobs:
           $display = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
           $full = $display.ApplicationDisplayVersion
           "version=$full" >> $env:GITHUB_OUTPUT
+
+      # --------------------------
+      # Create Git tag
+      # --------------------------
 
       - name: Create Tag
         uses: actions/github-script@v6
@@ -78,6 +125,10 @@ jobs:
               sha: context.sha
             });
 
+      # --------------------------
+      # Rename published files
+      # --------------------------
+
       - name: Rename Auto-Update Installer
         shell: pwsh
         run: |
@@ -87,6 +138,10 @@ jobs:
         shell: pwsh
         run: |
           Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient_${{ steps.extract_version.outputs.version }}_Test/GoatVaultClient_${{ steps.extract_version.outputs.version }}_x64.cer GoatVaultClient.cer
+
+      # --------------------------
+      # Create GitHub release
+      # --------------------------
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
