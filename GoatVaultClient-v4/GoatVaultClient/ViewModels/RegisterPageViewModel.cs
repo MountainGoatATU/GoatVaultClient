@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Models;
-using GoatVaultClient.Models.API;
+using GoatVaultCore.Models;
+using GoatVaultCore.Models.API;
 using GoatVaultClient.Pages;
-using GoatVaultClient.Services;
+using GoatVaultClient.Services.Vault;
+using GoatVaultInfrastructure.Services;
+using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultClient.ViewModels;
 

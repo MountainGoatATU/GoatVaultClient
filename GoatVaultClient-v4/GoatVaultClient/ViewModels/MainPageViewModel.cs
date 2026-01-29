@@ -1,13 +1,16 @@
-﻿using System.Collections.ObjectModel;
-using System.Globalization;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultClient.Services.Vault;
+using Mopups.Services;
+using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Maui.Core.Extensions;
 using UraniumUI.Dialogs;
 using UraniumUI.Icons.MaterialSymbols;
-using Mopups.Services;
-using GoatVaultClient.Services;
-using GoatVaultClient.Models.Vault;
+using GoatVaultCore.Models.Vault;
+using GoatVaultInfrastructure.Services;
+using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultClient.ViewModels
 {
@@ -47,7 +50,7 @@ namespace GoatVaultClient.ViewModels
         #endregion
         public MainPageViewModel(VaultService vaultService, HttpService httpService, UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
         {
-            //Dependency Injection
+            // Dependency Injection
             _vaultSessionService = vaultSessionService;
             _fakeDataSource = fakeDataSource;
             _dialogService = dialogService;
@@ -254,19 +257,17 @@ namespace GoatVaultClient.ViewModels
             await Clipboard.Default.SetTextAsync(""); // Clear clipboard
         }
 
-        [RelayCommand]
-        public async Task CreateEntry()
+    [RelayCommand]
+    public async Task CreateEntry()
+    {
+        // Populate the list of category names from your ViewModel
+        var categoriesList = Categories.ToList();
+
+        var formModel = new VaultEntryForm(categoriesList)
         {
-            var passwordService = new PasswordStrengthService();
-
-            // Populate the list of category names from your ViewModel
-            var categoriesList = Categories.ToList();
-
-            var formModel = new VaultEntryForm(passwordService, categoriesList)
-            {
-                // Optional: Set a default selected category
-                Category = Categories.FirstOrDefault()?.Name
-            };
+            // Optional: Set a default selected category
+            Category = Categories.FirstOrDefault()?.Name ?? throw new NullReferenceException()
+        };
 
             // 2. Show the Auto-Generated Dialog
             // UraniumUI reads the [Selectable] attribute and renders a Picker using AvailableCategories
@@ -319,7 +320,7 @@ namespace GoatVaultClient.ViewModels
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool isVisible = (bool)value;
+            var isVisible = (bool)value;
             return isVisible ? MaterialRounded.Visibility_off : MaterialRounded.Visibility;
         }
 

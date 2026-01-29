@@ -1,4 +1,5 @@
-﻿using GoatVaultClient.Services;
+﻿using GoatVaultClient.Services.Vault;
+using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultClient;
 

@@ -66,9 +66,6 @@
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.30" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.2" />
-		<PackageReference Include="MongoDB.Bson" Version="3.6.0" />
-		<PackageReference Include="PasswordGenerator" Version="2.1.0" />
-		<PackageReference Include="SecretSharingDotNet" Version="0.14.0" />
 		<PackageReference Include="UraniumUI" Version="2.14.0" />
 		<PackageReference Include="UraniumUI.Blurs" Version="2.14.0" />
 		<PackageReference Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.14.0" />
@@ -80,11 +77,15 @@
 		<PackageReference Include="UraniumUI.Material" Version="2.14.0" />
 		<PackageReference Include="UraniumUI.Validations.DataAnnotations" Version="2.14.0" />
 		<PackageReference Include="UraniumUI.WebComponents" Version="2.14.0" />
-		<PackageReference Include="zxcvbn-core" Version="8.0.0-beta0002" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Folder Include="Resources\Images\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\GoatVaultCore\GoatVaultCore.csproj" />
+	  <ProjectReference Include="..\GoatVaultInfrastructure\GoatVaultInfrastructure.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

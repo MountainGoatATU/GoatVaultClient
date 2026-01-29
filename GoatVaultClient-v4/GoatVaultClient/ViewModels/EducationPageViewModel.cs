@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Models;
 using System.Collections.ObjectModel;
 using GoatVaultClient.Pages;
+using GoatVaultCore.Models;
 
 namespace GoatVaultClient.ViewModels;
 
