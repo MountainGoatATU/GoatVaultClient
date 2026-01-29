@@ -120,12 +120,16 @@ jobs:
       - name: Rename Auto-Update Installer
         shell: pwsh
         run: |
-          Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient_${{ steps.extract_version.outputs.version }}_Test/GoatVaultClient_${{ steps.extract_version.outputs.version }}_x64.msix AutoUpdate.msix
+          $ver = "${{ steps.extract_version.outputs.version }}"
+          $msix = Get-ChildItem "./GoatVaultClient/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages" -Recurse -Filter "*_${ver}_x64.msix" | Select-Object -First 1
+          Rename-Item $msix.FullName AutoUpdate.msix
 
       - name: Rename Certificate
         shell: pwsh
         run: |
-          Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient_${{ steps.extract_version.outputs.version }}_Test/GoatVaultClient_${{ steps.extract_version.outputs.version }}_x64.cer GoatVaultClient.cer
+          $ver = "${{ steps.extract_version.outputs.version }}"
+          $cer = Get-ChildItem "./GoatVaultClient/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages" -Recurse -Filter "*_${ver}_x64.cer" | Select-Object -First 1
+          Rename-Item $cer.FullName GoatVaultClient.cer
 
       # --------------------------
       # Create GitHub release
