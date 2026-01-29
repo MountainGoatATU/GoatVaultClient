@@ -18,6 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GoatVaultCore\GoatVaultCore.csproj" />
+    <ProjectReference Include="..\GoatVaultInfrastructure\GoatVaultInfrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

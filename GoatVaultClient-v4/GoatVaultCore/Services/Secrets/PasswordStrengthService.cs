@@ -1,14 +1,14 @@
 ﻿using Zxcvbn;
 
-namespace GoatVaultClient.Services.Secrets;
+namespace GoatVaultCore.Services.Secrets;
 
-public static class PasswordCrackInfoService
+public static class PasswordStrengthService
 {
-    public static PasswordCrackInfo Evaluate(string password)
+    public static PasswordStrength Evaluate(string? password)
     {
         if (string.IsNullOrWhiteSpace(password))
         {
-            return new PasswordCrackInfo
+            return new PasswordStrength
             {
                 Score = 0,
                 CrackTimeText = null
@@ -17,7 +17,7 @@ public static class PasswordCrackInfoService
 
         var result = Core.EvaluatePassword(password);
 
-        return new PasswordCrackInfo
+        return new PasswordStrength
         {
             Score = result.Score,
             CrackTimeText = result.CrackTimeDisplay.OfflineSlowHashing1e4PerSecond
@@ -25,7 +25,7 @@ public static class PasswordCrackInfoService
     }
 }
 
-public struct PasswordCrackInfo
+public struct PasswordStrength
 {
     public int Score { get; set; }
     public string? CrackTimeText { get; set; }

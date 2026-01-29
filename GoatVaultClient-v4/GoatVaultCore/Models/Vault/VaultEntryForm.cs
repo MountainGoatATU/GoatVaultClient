@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel.DataAnnotations;
+using GoatVaultCore.Services.Secrets;
 using PasswordGenerator;
-using GoatVaultClient.Services.Secrets;
 
 namespace GoatVaultCore.Models.Vault;
 
@@ -40,7 +40,7 @@ public partial class VaultEntryForm : VaultEntry
             return;
         }
 
-        var result = PasswordCrackInfoService.Evaluate(value);
+        var result = PasswordStrengthService.Evaluate(value);
 
         CrackTime = $"Crack time: {result.CrackTimeText}";
 
