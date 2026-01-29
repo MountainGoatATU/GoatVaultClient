@@ -1,97 +1,98 @@
-name: .NET 9 MAUI Deployment
+name: .NET 10 MAUI Deployment
 
 on:
   push:
     branches:
       - main
+      - refactor-v4
     paths-ignore:
       - "*.md"
   pull_request:
     branches:
       - main
+      - refactor-v4
     paths-ignore:
       - "*.md"
 
 permissions:
   contents: write
 
-env: 
-  WORKING_DIRECTORY: './GoatVaultClient-v3'
+env:
+  WORKING_DIRECTORY: "./GoatVaultClient-v4"
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Setup .NET 9 SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '9.0.x'
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "10.0.x"
 
-    - name: Install MAUI workload
-      run: dotnet workload install maui
+      - name: Install MAUI workload
+        run: dotnet workload install maui
 
-    - name: Restore dependencies
-      run: dotnet restore
-      working-directory: ${{ env.WORKING_DIRECTORY }}
+      - name: Restore dependencies
+        run: dotnet restore GoatVaultClient-v4.sln
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Build the project
-      run: dotnet build GoatVaultClient-v3.csproj -c Release -f:net9.0-windows10.0.19041.0
-      working-directory: ${{ env.WORKING_DIRECTORY }}
+      - name: Build the project
+        run: dotnet build GoatVaultClient-v4.sln -c Release
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Decode signing certificate
-      run: |
-        echo "${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}" > cert.asc
-        certutil -decode cert.asc cert.pfx
+      - name: Decode signing certificate
+        run: |
+          echo "${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}" > cert.asc
+          certutil -decode cert.asc cert.pfx
 
-    - name: Install signing certificate
-      run: certutil -user -p ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
-        
-    - name: Publish the project
-      run: dotnet publish GoatVaultClient-v3.csproj -c Release -f:net9.0-windows10.0.19041.0 /p:GenerateAppxPackage=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
-      working-directory: ${{ env.WORKING_DIRECTORY }}
+      - name: Install signing certificate
+        run: certutil -user -p ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
 
-    - name: Extract version
-      id: extract_version
-      shell: pwsh
-      run: |
-        $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient-v3.csproj")
+      - name: Publish the client
+        run: dotnet publish GoatVaultClient/GoatVaultClient.csproj -c Release -f:net10.0-windows10.0.19041.0 /p:GenerateAppxPackage=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-        $display = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
-        $full = $display.ApplicationDisplayVersion
-        "version=$full" >> $env:GITHUB_OUTPUT
+      - name: Extract version
+        id: extract_version
+        shell: pwsh
+        run: |
+          $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient/GoatVaultClient.csproj")
 
-    - name: Create Tag
-      uses: actions/github-script@v6
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          github.rest.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: `refs/tags/v${{ steps.extract_version.outputs.version }}`,
-            sha: context.sha
-          });
+          $display = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
+          $full = $display.ApplicationDisplayVersion
+          "version=$full" >> $env:GITHUB_OUTPUT
 
-    - name: Rename Auto-Update Installer
-      shell: pwsh
-      run: |
-        Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_x64.msix AutoUpdate.msix
+      - name: Create Tag
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/v${{ steps.extract_version.outputs.version }}`,
+              sha: context.sha
+            });
 
-    - name: Rename Certificate
-      shell: pwsh
-      run: |
-        Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_x64.cer GoatVaultClient.cer
+      - name: Rename Auto-Update Installer
+        shell: pwsh
+        run: |
+          Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient_${{ steps.extract_version.outputs.version }}_Test/GoatVaultClient_${{ steps.extract_version.outputs.version }}_x64.msix AutoUpdate.msix
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v${{ steps.extract_version.outputs.version }}
-        files: |
-          ${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller
-          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_Test/AutoUpdate.msix
-          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_Test/GoatVaultClient.cer
+      - name: Rename Certificate
+        shell: pwsh
+        run: |
+          Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient_${{ steps.extract_version.outputs.version }}_Test/GoatVaultClient_${{ steps.extract_version.outputs.version }}_x64.cer GoatVaultClient.cer
 
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.extract_version.outputs.version }}
+          files: |
+            ${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller
+            ${{ env.WORKING_DIRECTORY }}/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient_${{ steps.extract_version.outputs.version }}_Test/AutoUpdate.msix
+            ${{ env.WORKING_DIRECTORY }}/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient_${{ steps.extract_version.outputs.version }}_Test/GoatVaultClient.cer
