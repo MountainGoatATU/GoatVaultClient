@@ -16,7 +16,7 @@ public partial class UserPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task EditEmailAsync()
     {
-        if (!await AuthorizeAsync()) 
+        if (!await AuthorizeAsync())
             return;
 
         var popup = new AuthorizePopup(title: "Edit Email", isPassword: false, buttonText: "Save");
@@ -58,6 +58,5 @@ public partial class UserPageViewModel : BaseViewModel
         var errorPopup = new IncorrectPasswordPopup();
         await MopupService.Instance.PushAsync(errorPopup);
         return false;
-
     }
 }

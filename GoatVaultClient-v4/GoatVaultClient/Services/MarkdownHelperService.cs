@@ -1,4 +1,4 @@
-﻿using GoatVaultClient.Models;
+﻿using GoatVaultCore.Models;
 using Markdig;
 using System.Text.Json;
 

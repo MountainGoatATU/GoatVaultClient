@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Maui;
-using GoatVaultClient.Database;
+using GoatVaultInfrastructure.Database;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
-using GoatVaultClient.Services.API;
-using GoatVaultClient.Services.Secrets;
-using GoatVaultClient.Services.Vault;
+using GoatVaultInfrastructure.Services.API;
+using GoatVaultCore.Services.Secrets;
+using GoatVaultInfrastructure.Services.Vault;
 using GoatVaultClient.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -12,6 +12,7 @@ using Mopups.Hosting;
 using SecretSharingDotNet.Math;
 using System.Net.Http.Headers;
 using System.Numerics;
+using GoatVaultInfrastructure.Services;
 using UraniumUI;
 using Debug = System.Diagnostics.Debug;
 
@@ -78,7 +79,7 @@ public static class MauiProgram
         // builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
         // builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
 
-        builder.Services.AddTransient<SecretService>();
+        builder.Services.AddTransient<ShamirService>();
 
         // UraniumUI dialogs
         builder.Services.AddMopupsDialogs();

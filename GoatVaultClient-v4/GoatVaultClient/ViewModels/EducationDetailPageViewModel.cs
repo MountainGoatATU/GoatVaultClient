@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using GoatVaultClient.Models;
 using GoatVaultClient.Services;
+using GoatVaultCore.Models;
 
 namespace GoatVaultClient.ViewModels;
 

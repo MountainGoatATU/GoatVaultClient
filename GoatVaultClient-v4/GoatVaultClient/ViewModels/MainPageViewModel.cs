@@ -1,15 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Models.Vault;
-using GoatVaultClient.Services;
-using GoatVaultClient.Services.Secrets;
-using GoatVaultClient.Services.Vault;
+using GoatVaultCore.Models.Vault;
 using Mopups.Services;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Maui.Core.Extensions;
 using GoatVaultClient.Pages;
-using GoatVaultClient.Services.API;
+using GoatVaultInfrastructure.Services;
+using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.Vault;
 using UraniumUI.Dialogs;
 using UraniumUI.Icons.MaterialSymbols;
 
@@ -265,12 +264,10 @@ public partial class MainPageViewModel : ObservableObject
     [RelayCommand]
     public async Task CreateEntry()
     {
-        var passwordService = new PasswordStrengthService();
-
         // Populate the list of category names from your ViewModel
         var categoriesList = Categories.ToList();
 
-        var formModel = new VaultEntryForm(passwordService, categoriesList)
+        var formModel = new VaultEntryForm(categoriesList)
         {
             // Optional: Set a default selected category
             Category = Categories.FirstOrDefault()?.Name ?? throw new NullReferenceException()

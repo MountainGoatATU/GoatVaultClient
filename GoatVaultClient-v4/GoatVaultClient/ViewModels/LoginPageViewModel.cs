@@ -1,12 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Models;
-using GoatVaultClient.Models.API;
 using GoatVaultClient.Pages;
-using GoatVaultClient.Services;
-using GoatVaultClient.Services.API;
-using GoatVaultClient.Services.Vault;
-using PasswordGenerator;
+using GoatVaultCore.Models;
+using GoatVaultCore.Models.API;
+using GoatVaultCore.Services.Secrets;
+using GoatVaultInfrastructure.Services;
+using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultClient.ViewModels;
 
@@ -51,7 +51,7 @@ public partial class LoginPageViewModel(
             );
 
             // 3. Generate Verifier
-            var loginVerifier = userService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
+            var loginVerifier = CryptoService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
 
             // 4. Verify
             var verifyPayload = new AuthVerifyRequest
