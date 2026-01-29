@@ -48,7 +48,7 @@ jobs:
       - name: Cache .NET packages
         uses: actions/cache@v4
         with:
-          path: ~/.nuget/packages
+          path: ${{ github.workspace }}\..\..\.nuget\packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
@@ -70,7 +70,7 @@ jobs:
       # --------------------------
 
       - name: Build the solution
-        run: dotnet build GoatVaultClient/GoatVaultClient.csproj -c ${{ env.CONFIGURATION }} -f ${{ env.TARGET_FRAMEWORK }} --no-restore
+        run: dotnet build GoatVaultClient/GoatVaultClient.csproj -c ${{ env.CONFIGURATION }} -f ${{ env.TARGET_FRAMEWORK }} -r ${{ env.PLATFORM }} --no-restore
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       # --------------------------
