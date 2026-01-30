@@ -4,16 +4,23 @@ using System.Windows.Input;
 
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class AddCategoryPopup : PopupPage
+public partial class SingleInputPopup: PopupPage
 {
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
     private TaskCompletionSource<string?> _tcs = new();
     public Task<string?> WaitForScan() => _tcs.Task;
+    public string? Title { get; set; } = string.Empty;
+    public string? InputFieldTitle { get; set; } = string.Empty;
+    public string? InputFieldText {  get; set; } = string.Empty;
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
-    public AddCategoryPopup()
+    public SingleInputPopup(string title = "", string inputFieldTitle = "", string inputFieldText = "")
 	{
 		InitializeComponent();
+
+        Title = title;
+        InputFieldTitle = inputFieldTitle;
+        InputFieldText = inputFieldText;
 
         AcceptCommand = new Command(OnAccept);
         CancelCommand = new Command(OnCancel);
@@ -23,7 +30,7 @@ public partial class AddCategoryPopup : PopupPage
 
     private async void OnAccept()
     {
-        _tcs.TrySetResult(InputEntry.Text);
+        _tcs.TrySetResult(InputField.Text);
         await MopupService.Instance.PopAsync();
     }
 
