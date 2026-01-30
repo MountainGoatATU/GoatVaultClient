@@ -36,7 +36,7 @@
                     <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sync}" Command="{Binding ViewModel.GeneratePasswordCommand}"/>
                 </HorizontalStackLayout>
                 <VerticalStackLayout Spacing="5" Padding="0,5,0,0">
-                    <Label Text="{Binding ViewModel.CrackTime}" FontAttributes="Bold" TextColor="DarkRed"/>
+                    <Label Text="{Binding ViewModel.CrackTime}" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}"/>
                     <ProgressBar Progress="{Binding ViewModel.CrackProgress}" HeightRequest="10" BackgroundColor="LightGray" ProgressColor="Green"/>
                 </VerticalStackLayout>
                 <VerticalStackLayout Spacing="12" Padding="0,10,0,0">

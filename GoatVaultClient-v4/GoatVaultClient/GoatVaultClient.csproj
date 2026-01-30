@@ -79,6 +79,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Controls\Popups\PromptPopup.xaml.cs">
+	    <DependentUpon>PromptPopup.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <MauiXaml Update="Controls\CategoryItemCell.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -103,7 +109,7 @@
 	  <MauiXaml Update="Controls\Popups\IncorrectPasswordPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Controls\Popups\QuestionPopup.xaml">
+	  <MauiXaml Update="Controls\Popups\PromptPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\Popups\VaultEntryDialog.xaml">
