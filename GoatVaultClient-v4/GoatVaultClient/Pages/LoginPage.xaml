@@ -10,20 +10,48 @@
 
 
     <controls:Component Padding="{StaticResource formPadding}">
-        <VerticalStackLayout VerticalOptions="Center" Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
-            <Label Text="Login" Style="{x:StaticResource MaterialDisplayMedium}" HorizontalOptions="Center" FontAttributes="Bold"/>
-            <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource PrimaryTextField}"/>
-            <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource PrimaryTextField}">
-                <material:TextField.Attachments>
-                    <material:TextFieldPasswordShowHideAttachment/>
-                </material:TextField.Attachments>
-            </material:TextField>
-            <Button Text="Login" Command="{Binding LoginCommand}" TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer}, Dark={x:StaticResource DarkOnPrimaryContainer}}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer}, Dark={x:StaticResource DarkPrimaryContainer}}" Style="{StaticResource PrimaryButton}"/>
-            <HorizontalStackLayout HorizontalOptions="Center">
-                <Label Text="Don't have an account yet?" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant}, Dark={x:StaticResource DarkOnSurfaceVariant}}" VerticalOptions="Center"/>
-                <Button Text="Register" Command="{Binding GoToRegisterCommand}" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface}, Dark={x:StaticResource DarkOnSurface}}" FontSize="{StaticResource tMedium}"/>
-            </HorizontalStackLayout>
-            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
-        </VerticalStackLayout>
+        <Grid RowDefinitions="Auto,*" RowSpacing="{x:StaticResource sContent}">
+            <!-- Connectivity Banner -->
+            <Border Grid.Row="0" 
+                   BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest}, Dark={StaticResource DarkSurfaceContainerLowest}}" 
+                   StrokeThickness="0"
+                    Padding="12,8"
+                   Margin="10,0"
+                   IsVisible="{Binding IsConnected, Converter={StaticResource InvertedBoolConverter}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="{x:StaticResource Small}"/>
+                </Border.StrokeShape>
+                <HorizontalStackLayout Spacing="8">
+                    <Label Text="⚠️" 
+                           Style="{x:StaticResource MaterialLabelMedium}"
+                           VerticalOptions="Center"/>
+                    <Label Text="{Binding ConnectivityMessage}" 
+                           Style="{x:StaticResource MaterialLabelMedium}"
+                           TextColor="{AppThemeBinding Light={StaticResource LightPrimary}, Dark={StaticResource DarkPrimary}}"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+            <!-- Main Login Form -->
+            <VerticalStackLayout VerticalOptions="Center" Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
+                <!-- Login Title-->
+                <Label Text="Login" Style="{x:StaticResource MaterialDisplayMedium}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                <!-- Email Field-->
+                <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource PrimaryTextField}"/>
+                <!-- Password Field-->
+                <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment/>
+                    </material:TextField.Attachments>
+                </material:TextField>
+                <!-- Login Button -->
+                <Button Text="Login" Command="{Binding LoginCommand}" TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer}, Dark={x:StaticResource DarkOnPrimaryContainer}}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer}, Dark={x:StaticResource DarkPrimaryContainer}}" Style="{StaticResource PrimaryButton}"/>
+                <!-- Navigate to Register Page -->
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Label Text="Don't have an account yet?" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant}, Dark={x:StaticResource DarkOnSurfaceVariant}}" VerticalOptions="Center"/>
+                    <Button Text="Register" Command="{Binding GoToRegisterCommand}" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface}, Dark={x:StaticResource DarkOnSurface}}" FontSize="{StaticResource tMedium}"/>
+                </HorizontalStackLayout>
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
+            </VerticalStackLayout>
+        </Grid>
     </controls:Component>
 </ContentPage>

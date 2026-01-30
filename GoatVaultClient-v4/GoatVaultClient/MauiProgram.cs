@@ -70,6 +70,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<AuthTokenService>();
         builder.Services.AddSingleton<VaultSessionService>();
         builder.Services.AddSingleton<MarkdownHelperService>();
+        builder.Services.AddSingleton<ConnectivityService>();
 
         // Test services
         builder.Services.AddSingleton<FakeDataSource>();
