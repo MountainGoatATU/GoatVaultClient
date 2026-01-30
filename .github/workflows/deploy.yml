@@ -41,10 +41,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-          dotnet-quality: 'preview'
+          dotnet-quality: "preview"
 
       # --------------------------
-      # Enable caching for .NET packages
+      # Enable caching for .NET packages and MAUI workloads
       # --------------------------
 
       - name: Cache .NET packages
@@ -54,6 +54,17 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
+
+      - name: Cache MAUI workloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\Microsoft\dotnet\workloads
+            C:\Program Files\dotnet\sdk-manifests
+            C:\Program Files\dotnet\metadata
+          key: ${{ runner.os }}-maui-workloads-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-maui-workloads-
 
       # --------------------------
       # Restore dependencies + workloads
@@ -76,15 +87,16 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       # --------------------------
-      # Run tests
+      # Run tests (only on main branch)
       # --------------------------
 
       - name: Run tests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: dotnet test GoatVaultTests/GoatVaultTests.csproj -c ${{ env.CONFIGURATION }} --logger trx --results-directory ./TestResults
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Upload test results
-        if: always()
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -96,6 +108,7 @@ jobs:
       # --------------------------
 
       - name: Setup signing certificate
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: setup_cert
         run: |
           # Remove PEM headers and newlines if present
@@ -103,14 +116,14 @@ jobs:
           $certContent = $certContent -replace "-----BEGIN CERTIFICATE-----", ""
           $certContent = $certContent -replace "-----END CERTIFICATE-----", ""
           $certContent = $certContent -replace "\s+", ""
-          
+
           $cert = [System.Convert]::FromBase64String($certContent)
           $certPath = "$env:RUNNER_TEMP\cert.pfx"
           [IO.File]::WriteAllBytes($certPath, $cert)
-          
+
           # Import certificate
           certutil -user -p "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}" -Silent -importpfx "$certPath" NoRoot
-          
+
           # Extract publisher name
           $pfxCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}")
           $publisher = $pfxCert.Subject
@@ -123,6 +136,7 @@ jobs:
       # --------------------------
 
       - name: Publish the client
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           dotnet publish GoatVaultClient/GoatVaultClient.csproj `
             -c ${{ env.CONFIGURATION }} `
@@ -139,33 +153,36 @@ jobs:
       # --------------------------
 
       - name: Extract version
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: extract_version
         shell: pwsh
         run: |
           $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient/GoatVaultClient.csproj")
-          $display = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
-          $version = $display.ApplicationDisplayVersion
-          "version=$version" >> $env:GITHUB_OUTPUT
-          Write-Output "Extracted version: $version"
+          $displayVersion = ($xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1).ApplicationDisplayVersion
+          $appVersion = ($xml.Project.PropertyGroup | Where-Object { $_.ApplicationVersion } | Select-Object -First 1).ApplicationVersion
+          $fullVersion = "${displayVersion}.${appVersion}"
+          "version=$fullVersion" >> $env:GITHUB_OUTPUT
+          Write-Output "Extracted full version: $fullVersion (Display: $displayVersion, App: $appVersion)"
 
       # --------------------------
       # Update AppInstaller version
       # --------------------------
 
       - name: Update AppInstaller version
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
         run: |
           $version = "${{ steps.extract_version.outputs.version }}"
           $publisher = "${{ steps.setup_cert.outputs.publisher }}"
           $appInstallerPath = "${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller"
-          
+
           if (Test-Path $appInstallerPath) {
             [xml]$xml = Get-Content $appInstallerPath
-            $xml.AppInstaller.Version = "${version}.0"
-            $xml.AppInstaller.MainPackage.Version = "${version}.0"
+            $xml.AppInstaller.Version = $version
+            $xml.AppInstaller.MainPackage.Version = $version
             $xml.AppInstaller.MainPackage.Publisher = $publisher
             $xml.Save((Resolve-Path $appInstallerPath))
-            Write-Output "Updated AppInstaller to version ${version}.0 with publisher: $publisher"
+            Write-Output "Updated AppInstaller to version $version with publisher: $publisher"
           } else {
             Write-Warning "AppInstaller file not found at: $appInstallerPath"
           }
@@ -175,6 +192,7 @@ jobs:
       # --------------------------
 
       - name: Prepare release artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
         run: |
           $ver = "${{ steps.extract_version.outputs.version }}"
