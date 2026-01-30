@@ -2,12 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
-using GoatVaultClient.Services.Vault;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
+using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
@@ -29,13 +29,18 @@ public partial class LoginPageViewModel(
     [ObservableProperty] private bool _isConnected = true;
     [ObservableProperty] private string _connectivityMessage = string.Empty;
     [ObservableProperty] private string _connectionType = string.Empty;
-
-    public void InitializeConnection()
+    [ObservableProperty] private ObservableCollection<DbModel> _localAccounts = new();
+    [ObservableProperty] private DbModel? _selectedAccount;
+    [ObservableProperty] private bool _hasLocalAccounts;
+    [ObservableProperty] private string? _offlinePassword;
+    public async void Initialize()
     {
         // Get initial state
         UpdateConnectivityState();
         // Subscribe to changes
         connectivityService.ConnectivityChanged += OnConnectivityChanged;
+        // Load local accounts
+        await LoadLocalAccountsAsync();
     }
     public void Cleanup() 
     {
@@ -65,6 +70,27 @@ public partial class LoginPageViewModel(
         ConnectivityMessage = IsConnected
             ? $"Connected via {ConnectionType}"
             : "No internet connection available";
+    }
+
+    private async Task<List<DbModel>> GetAllLocalAccountAsync()
+    {
+        // Retrieve all local accounts from the vault service
+        var dbUsers = await vaultService.LoadAllUsersFromLocalAsync();
+        return dbUsers;
+    }
+    private async Task LoadLocalAccountsAsync()
+    {
+        // Load local accounts from the vault service
+        var accounts = await GetAllLocalAccountAsync();
+        // Update the ObservableCollection
+        LocalAccounts.Clear();
+        // Add accounts to the ObservableCollection
+        foreach (var account in accounts)
+        {
+            LocalAccounts.Add(account);
+        }
+        // Update HasLocalAccounts property
+        HasLocalAccounts = LocalAccounts.Count > 0;
     }
 
     [RelayCommand]
@@ -191,9 +217,133 @@ public partial class LoginPageViewModel(
         }
     }
 
+    // Offline Login Command
     [RelayCommand]
-    private static async Task GoToRegister()
+    private async Task LoginOffline()
     {
+        // Prevent multiple simultaneous logins
+        if (IsBusy)
+            return;
+
+        // Validation
+        if (SelectedAccount == null)
+        {
+            await Shell.Current.DisplayAlertAsync("Error", "Please select an account.", "OK");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(OfflinePassword))
+        {
+            await Shell.Current.DisplayAlertAsync("Error", "Password is required.", "OK");
+            return;
+        }
+
+        try
+        {
+            // Set Busy
+            IsBusy = true;
+
+            // 1. Load the user from local database
+            var dbUser = await vaultService.LoadUserFromLocalAsync(SelectedAccount.Id);
+
+            if (dbUser == null)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", "Account not found in local storage.", "OK");
+                return;
+            }
+
+            // 2. Verify the password locally by generating the auth verifier
+            var loginVerifier = CryptoService.GenerateAuthVerifier(OfflinePassword, dbUser.AuthSalt);
+
+            // 3. Try to decrypt the vault - if this succeeds, password is correct
+            try
+            {
+                var decryptedVault = vaultService.DecryptVault(dbUser.Vault, OfflinePassword);
+
+                // Password is correct!
+                vaultSessionService.MasterPassword = OfflinePassword;
+                vaultSessionService.DecryptedVault = decryptedVault;
+
+                // Set current user in session (convert DbModel to UserResponse format)
+                vaultSessionService.CurrentUser = new UserResponse
+                {
+                    Id = dbUser.Id,
+                    Email = dbUser.Email,
+                    AuthSalt = dbUser.AuthSalt,
+                    MfaEnabled = dbUser.MfaEnabled,
+                    Vault = dbUser.Vault
+                };
+
+                // Navigate to app
+                await NavigateToMainPage();
+            }
+            catch
+            {
+                // Decryption failed - wrong password
+                await Shell.Current.DisplayAlertAsync(
+                    "Error",
+                    "Incorrect password for this account.",
+                    "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Quick login by selecting a local account (online mode)
+    /// This will auto-fill the email field
+    /// </summary>
+    [RelayCommand]
+    private void SelectLocalAccount(DbModel account)
+    {
+        if (!IsConnected)
+        {
+            // In offline mode, use offline login
+            SelectedAccount = account;
+        }
+        else
+        {
+            // In online mode, auto-fill email
+            Email = account.Email;
+            SelectedAccount = null; // Clear selection for online login
+        }
+    }
+
+    private async Task NavigateToMainPage()
+    {
+        if (Application.Current != null)
+            Application.Current.MainPage = new AppShell();
+
+        await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
+    }
+
+    [RelayCommand]
+    private async Task GoToRegister()
+    {
+        if (!IsConnected)
+        {
+            await Shell.Current.DisplayAlertAsync(
+                "No Connection",
+                "Registration requires an internet connection.",
+                "OK");
+            return;
+        }
         await Shell.Current.GoToAsync(nameof(RegisterPage));
+    }
+
+    /// <summary>
+    /// Refresh local accounts list
+    /// </summary>
+    [RelayCommand]
+    private async Task RefreshLocalAccounts()
+    {
+        await LoadLocalAccountsAsync();
     }
 }

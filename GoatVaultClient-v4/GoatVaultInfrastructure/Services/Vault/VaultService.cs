@@ -1,7 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using GoatVaultClient.Services.Vault;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
@@ -177,13 +176,23 @@ public class VaultService(GoatVaultDb goatVaultDb, HttpService httpService, Vaul
         }
     }
     #endregion
+    #region Sync with server
+    public async Task Sync()
+    {
 
+    }
+    #endregion 
     #region Local Storage
     // GET
     public async Task<DbModel?> LoadUserFromLocalAsync(string userId)
     {
         return await goatVaultDb.LocalCopy
             .FirstOrDefaultAsync(u => u.Id == userId);
+    }
+
+    public async Task<List<DbModel>> LoadAllUsersFromLocalAsync()
+    {
+        return await goatVaultDb.LocalCopy.ToListAsync();
     }
 
     // POST
@@ -213,7 +222,6 @@ public class VaultService(GoatVaultDb goatVaultDb, HttpService httpService, Vaul
         }
     }
     #endregion
-
     #region Helper Methods
     private static byte[] GenerateRandomBytes(int length)
     {

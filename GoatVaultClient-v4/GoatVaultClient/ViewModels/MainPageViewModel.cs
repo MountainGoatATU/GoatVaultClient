@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Services.Vault;
 using Mopups.Services;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -34,20 +33,27 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private bool _isPasswordVisible = false;
 
         //Dependency Injection
+        private readonly VaultService _vaultService;
         private readonly VaultSessionService _vaultSessionService;
         private readonly FakeDataSource _fakeDataSource;
         private readonly IDialogService _dialogService;
         #endregion
-        public MainPageViewModel(UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
+        public MainPageViewModel(VaultService vaultService,UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
         {
             //Dependency Injection
+            _vaultService = vaultService;
             _vaultSessionService = vaultSessionService;
             _fakeDataSource = fakeDataSource;
             _dialogService = dialogService;
 
             LoadVaultData();
         }
-
+        #region Async methods
+        private async void InitializeAsync()
+        {
+            
+        }
+        #endregion
         #region Synchronous methods
         public void LoadVaultData()
         {

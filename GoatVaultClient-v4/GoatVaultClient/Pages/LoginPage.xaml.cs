@@ -16,7 +16,7 @@ public partial class LoginPage : ContentPage
     {
         base.OnAppearing();
         //Initialize connectivity monitoring
-        _viewModel.InitializeConnection();
+        _viewModel.Initialize();
     }
     protected override void OnDisappearing()
     {

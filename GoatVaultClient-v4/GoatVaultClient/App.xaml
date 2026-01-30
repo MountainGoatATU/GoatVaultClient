@@ -3,11 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:converters="clr-namespace:GoatVaultClient.Converters"
              xmlns:m="clr-namespace:UraniumUI.Material.Resources;assembly=UraniumUI.Material"
              x:Class="GoatVaultClient.App">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+                    <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
+                </ResourceDictionary>
                 <ResourceDictionary x:Name="appColors" Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary x:Name="appStyles" Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary x:Name="MaterialColors" Source="Resources/Styles/MaterialColors.xaml"/>

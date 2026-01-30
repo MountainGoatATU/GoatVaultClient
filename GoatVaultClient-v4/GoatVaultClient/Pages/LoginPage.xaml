@@ -4,37 +4,106 @@
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
              xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+             xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
              x:Class="GoatVaultClient.Pages.LoginPage"
              x:DataType="vm:LoginPageViewModel"
              BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
 
 
     <controls:Component Padding="{StaticResource formPadding}">
-        <Grid RowDefinitions="Auto,*" RowSpacing="{x:StaticResource sContent}">
-            <!-- Connectivity Banner -->
-            <Border Grid.Row="0" 
-                   BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest}, Dark={StaticResource DarkSurfaceContainerLowest}}" 
-                   StrokeThickness="0"
-                    Padding="12,8"
-                   Margin="10,0"
-                   IsVisible="{Binding IsConnected, Converter={StaticResource InvertedBoolConverter}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="{x:StaticResource Small}"/>
-                </Border.StrokeShape>
-                <HorizontalStackLayout Spacing="8">
-                    <Label Text="⚠️" 
-                           Style="{x:StaticResource MaterialLabelMedium}"
-                           VerticalOptions="Center"/>
-                    <Label Text="{Binding ConnectivityMessage}" 
-                           Style="{x:StaticResource MaterialLabelMedium}"
-                           TextColor="{AppThemeBinding Light={StaticResource LightPrimary}, Dark={StaticResource DarkPrimary}}"
-                           VerticalOptions="Center"/>
-                </HorizontalStackLayout>
-            </Border>
+        <VerticalStackLayout Spacing="{x:StaticResource sContent}">
+            <!-- App Title -->
+            <Label Text="GoatVault" 
+                   Style="{StaticResource MaterialDisplayLarge}" 
+                   HorizontalOptions="Center" 
+                   FontAttributes="Bold"
+                   Margin="0,0,0,20"/>
+            <!-- Saved Accounts Section -->
+            <VerticalStackLayout Spacing="12"
+                                 Grid.Row="0"
+                                 IsVisible="{Binding HasLocalAccounts}"
+                                 WidthRequest="{StaticResource textFieldWidth}">
+
+                <Label Text="Saved Accounts" 
+                           Style="{StaticResource MaterialHeadlineSmall}"
+                           Margin="0,10,0,0"/>
+
+                <CollectionView ItemsSource="{Binding LocalAccounts}"
+                                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:DbModel">
+                            <Border Padding="0" 
+                                        Margin="0,0,0,8"
+                                        StrokeShape="RoundRectangle 12"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceVariant}, Dark={StaticResource DarkSurfaceVariant}}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LoginPageViewModel}}, Path=SelectLocalAccountCommand}"
+                                                            CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Padding="16" Spacing="12">
+                                    <!-- Email -->
+                                    <Label Text="{Binding Email}"
+                                              FontSize="16"
+                                              VerticalOptions="Center"
+                                              TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+            <!-- Offline Login Section (Only visible when offline and account selected) -->
+            <VerticalStackLayout Spacing="{StaticResource formSpacing}"
+                                 IsVisible="{Binding SelectedAccount, Converter={StaticResource IsNotNullConverter}}"
+                                 WidthRequest="{StaticResource textFieldWidth}">
+
+                <Label Text="Offline Login" 
+                       Style="{StaticResource MaterialHeadlineSmall}"
+                       Margin="0,10,0,0"/>
+
+                <Border BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceVariant}, Dark={StaticResource DarkSurfaceVariant}}"
+                        StrokeShape="RoundRectangle 12"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Selected Account:"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant}, Dark={StaticResource DarkOnSurfaceVariant}}"/>
+                        <Label Text="{Binding SelectedAccount.Email}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <material:TextField Title="Password" 
+                                    Text="{Binding OfflinePassword}" 
+                                    IsPassword="True" 
+                                    Style="{StaticResource PrimaryTextField}">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment/>
+                    </material:TextField.Attachments>
+                </material:TextField>
+
+                <Button Text="Login Offline" 
+                        Command="{Binding LoginOfflineCommand}"
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer}, Dark={StaticResource DarkOnSecondaryContainer}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer}, Dark={StaticResource DarkSecondaryContainer}}"
+                        Style="{StaticResource PrimaryButton}"/>
+
+                <Button Text="Cancel"
+                        Command="{Binding Source={x:Reference LoginPageRoot}, Path=BindingContext.ClearSelectionCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"/>
+            </VerticalStackLayout>
             <!-- Main Login Form -->
-            <VerticalStackLayout VerticalOptions="Center" Grid.Row="1" Spacing="{StaticResource formSpacing}" HorizontalOptions="Center" WidthRequest="{StaticResource textFieldWidth}">
+            <VerticalStackLayout VerticalOptions="Center" 
+                                 Grid.Row="0"
+                                 IsVisible="{Binding IsConnected}"
+                                 Spacing="{StaticResource formSpacing}" 
+                                 HorizontalOptions="Center" 
+                                 WidthRequest="{StaticResource textFieldWidth}">
                 <!-- Login Title-->
-                <Label Text="Login" Style="{x:StaticResource MaterialDisplayMedium}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                <Label Text="Login" Style="{x:StaticResource MaterialTitleLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
                 <!-- Email Field-->
                 <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource PrimaryTextField}"/>
                 <!-- Password Field-->
@@ -50,8 +119,9 @@
                     <Label Text="Don't have an account yet?" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant}, Dark={x:StaticResource DarkOnSurfaceVariant}}" VerticalOptions="Center"/>
                     <Button Text="Register" Command="{Binding GoToRegisterCommand}" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface}, Dark={x:StaticResource DarkOnSurface}}" FontSize="{StaticResource tMedium}"/>
                 </HorizontalStackLayout>
-                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
             </VerticalStackLayout>
-        </Grid>
+            <!--Activity Indicator -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
+        </VerticalStackLayout>
     </controls:Component>
 </ContentPage>

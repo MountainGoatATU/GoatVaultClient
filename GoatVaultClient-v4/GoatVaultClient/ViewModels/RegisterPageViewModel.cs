@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultClient.Pages;
-using GoatVaultClient.Services.Vault;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
