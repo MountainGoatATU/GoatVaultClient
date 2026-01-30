@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mopups:PopupPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                  xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+                  xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+                  xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+                  xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+                  xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
+                  xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
+                  x:Class="GoatVaultClient.Controls.Popups.AuthorizePopup"
+                  BackgroundColor="#80000000"
+                  CloseWhenBackgroundIsClicked="True">
+
+
+    <controls:PopupTemplate Title="Authorisation"
+                            FrameWidth="500"
+                            AcceptCommand="{Binding AcceptCommand}"
+                            CancelCommand="{Binding CancelCommand}"
+                            AcceptText="Submit" x:DataType="popups:AuthorizePopup">
+        <VerticalStackLayout>
+            <material:TextField x:Name="InputEntry" Text="{Binding Password}" IsPassword="True" x:DataType="models:PasswordItem">
+                    <material:TextField.Attachments>
+                        <material:TextFieldPasswordShowHideAttachment x:Name="ShowHideAttachment"/>
+                    </material:TextField.Attachments>
+                </material:TextField>
+        </VerticalStackLayout>
+    </controls:PopupTemplate>
+</mopups:PopupPage>
