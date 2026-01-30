@@ -7,16 +7,17 @@ namespace GoatVaultClient.Controls.Popups;
 public partial class AuthorizePopup : PopupPage
 {
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
-    private TaskCompletionSource<string?> _tcs = new();
+    private readonly TaskCompletionSource<string?> _tcs = new();
     public Task<string?> WaitForScan() => _tcs.Task;
-    public string Title { get; set; }
+    public new required string Title { get; set; }
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
 
-    public AuthorizePopup(bool isPassword = true, string buttonText = "OK")
+    // TODO: Unused method parameter
+    public AuthorizePopup(bool isPassword = true/*, string buttonText = "OK"*/)
 	{
 		InitializeComponent();
-        
+
         InputEntry.IsPassword = isPassword;
         ShowHideAttachment.IsVisible = isPassword;
 

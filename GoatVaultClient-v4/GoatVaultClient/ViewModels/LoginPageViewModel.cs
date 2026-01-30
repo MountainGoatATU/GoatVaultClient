@@ -1,14 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Models;
-using GoatVaultClient.Models.API;
 using GoatVaultClient.Pages;
-using GoatVaultClient.Services;
+using GoatVaultClient.Services.Vault;
+using GoatVaultCore.Models;
+using GoatVaultCore.Models.API;
+using GoatVaultCore.Services.Secrets;
+using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultClient.ViewModels;
 
+// TODO: Unused UserService injection
 public partial class LoginPageViewModel(
-    UserService userService,
+    /*UserService userService,*/
     HttpService httpService,
     AuthTokenService authTokenService,
     VaultService vaultService,
@@ -18,8 +22,8 @@ public partial class LoginPageViewModel(
     // Dependencies
 
     // Observable Properties
-    [ObservableProperty] private string email;
-    [ObservableProperty] private string password;
+    [ObservableProperty] private string? _email;
+    [ObservableProperty] private string? _password;
 
     [RelayCommand]
     private async Task Login()
@@ -48,7 +52,7 @@ public partial class LoginPageViewModel(
             );
 
             // 3. Generate Verifier
-            var loginVerifier = userService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
+            var loginVerifier = CryptoService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
 
             // 4. Verify
             var verifyPayload = new AuthVerifyRequest

@@ -1,29 +1,21 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using GoatVaultClient.Models;
 using GoatVaultClient.Services;
+using GoatVaultCore.Models;
 
 namespace GoatVaultClient.ViewModels;
 
 // This attribute maps the navigation parameter "Topic" to the Property "SelectedTopic"
 [QueryProperty(nameof(SelectedTopic), "Topic")]
-public partial class EducationDetailViewModel : BaseViewModel
+public partial class EducationDetailViewModel(MarkdownHelperService markdownHelperService) : BaseViewModel
 {
-    private readonly MarkdownHelperService _markdownHelperService;
-
-    [ObservableProperty] private EducationTopic _selectedTopic;
-    [ObservableProperty] private HtmlWebViewSource _htmlSource;
+    [ObservableProperty] private EducationTopic? _selectedTopic;
+    [ObservableProperty] private HtmlWebViewSource? _htmlSource;
     [ObservableProperty] private bool _isLoading;
 
-    public EducationDetailViewModel(MarkdownHelperService markdownHelperService)
-    {
-        _markdownHelperService = markdownHelperService;
-    }
-
     // Automatically called when SelectedTopic is set by the navigation
-    async partial void OnSelectedTopicChanged(EducationTopic value)
+    async partial void OnSelectedTopicChanged(EducationTopic? value)
     {
-        if (value != null)
-            await LoadTopicAsync(value);
+        if (value != null) await LoadTopicAsync(value);
     }
 
     private async Task LoadTopicAsync(EducationTopic topic)
@@ -31,7 +23,7 @@ public partial class EducationDetailViewModel : BaseViewModel
         try
         {
             IsLoading = true;
-            var htmlContent = await _markdownHelperService.GetHtmlFromAssetAsync(topic.FileName, topic.Quiz);
+            var htmlContent = await markdownHelperService.GetHtmlFromAssetAsync(topic.FileName, topic.Quiz);
 
             var source = new HtmlWebViewSource
             {

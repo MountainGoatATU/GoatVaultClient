@@ -1,20 +1,20 @@
 using System.Windows.Input;
 using Mopups.Services;
 using Mopups.Pages;
-using GoatVaultClient.Models.Vault;
+using GoatVaultCore.Models.Vault;
 
 namespace GoatVaultClient.Controls.Popups;
 
 public partial class VaultEntryDialog : PopupPage
 {
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
-    private TaskCompletionSource<VaultEntryForm> _tcs = new();
-    public Task<VaultEntryForm> WaitForScan() => _tcs.Task;
+    private readonly TaskCompletionSource<VaultEntryForm?> _tcs = new();
+    public Task<VaultEntryForm?> WaitForScan() => _tcs.Task;
     public VaultEntryForm ViewModel { get; }
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
 
-    public VaultEntryDialog(VaultEntryForm vm, string title = "Create New Password")
+    public VaultEntryDialog(VaultEntryForm vm/*, string title = "Create New Password"*/)
     {
         InitializeComponent();
         ViewModel = vm;
@@ -24,7 +24,7 @@ public partial class VaultEntryDialog : PopupPage
 
         if (ViewModel.AvailableCategories != null)
         {
-            CategoryInput.ItemsSource = vm.AvailableCategories.Select(c => c.Name).ToList();
+            CategoryInput.ItemsSource = vm.AvailableCategories.ConvertAll(c => c.Name);
         }
 
         BindingContext = this;

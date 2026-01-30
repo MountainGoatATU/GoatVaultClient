@@ -10,63 +10,70 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private string email = "user@example.com";
         [ObservableProperty]private string masterPassword = "password123";
 
-        [RelayCommand]
-        private async Task EditEmailAsync()
+    [RelayCommand]
+    private async Task EditEmailAsync()
+    {
+        if (!await AuthorizeAsync())
+            return;
+
+        // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
+        var popup = new AuthorizePopup(isPassword: false/*, buttonText: "Save"*/)
         {
-            // Authorize request
-            if (!await AuthorizeAsync())
-            {
-                return;
-            }
-            // Create a AuthorizePopup object
-            var popup = new AuthorizePopup(isPassword: false, buttonText: "Save");
-            // Pushing AuthorizePopup to the MopupService
-            await MopupService.Instance.PushAsync(popup);
-            // Awaiting Result from the popup
-            string? result = await popup.WaitForScan();
-            // If result is not null or whitespace, update the Email property
-            if (!string.IsNullOrWhiteSpace(result))
-                Email = result;
+            Title = "Edit Email"
+        };
+
+        await MopupService.Instance.PushAsync(popup);
+        while (MopupService.Instance.PopupStack.Contains(popup))
+            await Task.Delay(50);
+
+        var result = await popup.WaitForScan();
+
+        if (!string.IsNullOrWhiteSpace(result))
+            Email = result;
+    }
+
+    [RelayCommand]
+    private async Task EditMasterPasswordAsync()
+    {
+        if (!await AuthorizeAsync())
+        {
+            return;
         }
 
-        [RelayCommand]
-        private async Task EditMasterPasswordAsync()
+        // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
+        var popup = new AuthorizePopup(isPassword: true /*, buttonText: "Save"*/)
         {
-            if (!await AuthorizeAsync())
-            {
-                return;
-            }
+            Title = "Save"
+        };
+        await MopupService.Instance.PushAsync(popup);
 
-            var popup = new AuthorizePopup(isPassword: true, buttonText: "Save");
-            await MopupService.Instance.PushAsync(popup);
-            
-            string? result = await popup.WaitForScan();
+        var result = await popup.WaitForScan();
 
-            if (!string.IsNullOrWhiteSpace(result))
-                MasterPassword = result;
-        }
+        if (!string.IsNullOrWhiteSpace(result))
+            MasterPassword = result;
+    }
 
-        private async Task<bool> AuthorizeAsync()
+    private async Task<bool> AuthorizeAsync()
+    {
+        // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
+        var popup = new AuthorizePopup(isPassword: true /*, buttonText: "OK"*/)
         {
-            // Create a AuthorizePopup object
-            var popup = new AuthorizePopup(isPassword: true, buttonText: "OK");
-            // Pushing AuthorizePopup to the MopupService
-            await MopupService.Instance.PushAsync(popup);
-            // Awaiting Result from the popup
-            string? result = await popup.WaitForScan();
-            // If result is null, return false
-            if (result == null)
-                return false;
-            // If result does not match MasterPassword, show IncorrectPasswordPopup and return false
-            if (result != MasterPassword)
-            {
-                await MopupService.Instance.PopAllAsync();
-                var errorPopup = new IncorrectPasswordPopup();
-                await MopupService.Instance.PushAsync(errorPopup);
-                return false;
-            }
+            Title = "Authorization"
+        };
 
+        await MopupService.Instance.PushAsync(popup);
+
+        while (MopupService.Instance.PopupStack.Contains(popup))
+            await Task.Delay(50);
+
+        var result = await popup.WaitForScan();
+
+        if (result == MasterPassword)
             return true;
-        }
+
+        var errorPopup = new IncorrectPasswordPopup();
+        await MopupService.Instance.PushAsync(errorPopup);
+        return false;
+
     }
 }

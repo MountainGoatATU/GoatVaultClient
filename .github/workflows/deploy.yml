@@ -1,97 +1,201 @@
-name: .NET 9 MAUI Deployment
+name: .NET 10 MAUI Deployment
 
 on:
   push:
     branches:
       - main
+      - refactor-v4
     paths-ignore:
       - "*.md"
   pull_request:
     branches:
       - main
+      - refactor-v4
     paths-ignore:
       - "*.md"
 
 permissions:
   contents: write
 
-env: 
-  WORKING_DIRECTORY: './GoatVaultClient-v3'
+env:
+  WORKING_DIRECTORY: "./GoatVaultClient-v4"
+  DOTNET_VERSION: "10.0.x"
+  TARGET_FRAMEWORK: "net10.0-windows10.0.19041.0"
+  PLATFORM: "win-x64"
+  CONFIGURATION: "Release"
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # --------------------------
+      # Setup environment
+      # --------------------------
 
-    - name: Setup .NET 9 SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '9.0.x'
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install MAUI workload
-      run: dotnet workload install maui
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-quality: 'preview'
 
-    - name: Restore dependencies
-      run: dotnet restore
-      working-directory: ${{ env.WORKING_DIRECTORY }}
+      # --------------------------
+      # Enable caching for .NET packages
+      # --------------------------
 
-    - name: Build the project
-      run: dotnet build GoatVaultClient-v3.csproj -c Release -f:net9.0-windows10.0.19041.0
-      working-directory: ${{ env.WORKING_DIRECTORY }}
+      - name: Cache .NET packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}\..\..\.nuget\packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-    - name: Decode signing certificate
-      run: |
-        echo "${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}" > cert.asc
-        certutil -decode cert.asc cert.pfx
+      # --------------------------
+      # Restore dependencies + workloads
+      # --------------------------
 
-    - name: Install signing certificate
-      run: certutil -user -p ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
-        
-    - name: Publish the project
-      run: dotnet publish GoatVaultClient-v3.csproj -c Release -f:net9.0-windows10.0.19041.0 /p:GenerateAppxPackage=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
-      working-directory: ${{ env.WORKING_DIRECTORY }}
+      - name: Restore workloads
+        run: dotnet workload restore GoatVaultClient/GoatVaultClient.csproj
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Extract version
-      id: extract_version
-      shell: pwsh
-      run: |
-        $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient-v3.csproj")
+      - name: Restore NuGet packages
+        run: dotnet restore GoatVaultClient/GoatVaultClient.csproj
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-        $display = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
-        $full = $display.ApplicationDisplayVersion
-        "version=$full" >> $env:GITHUB_OUTPUT
+      # --------------------------
+      # Build the solution
+      # --------------------------
 
-    - name: Create Tag
-      uses: actions/github-script@v6
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          github.rest.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: `refs/tags/v${{ steps.extract_version.outputs.version }}`,
-            sha: context.sha
-          });
+      - name: Build the solution
+        run: dotnet build GoatVaultClient/GoatVaultClient.csproj -c ${{ env.CONFIGURATION }} -f ${{ env.TARGET_FRAMEWORK }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Rename Auto-Update Installer
-      shell: pwsh
-      run: |
-        Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_x64.msix AutoUpdate.msix
+      # --------------------------
+      # Run tests
+      # --------------------------
 
-    - name: Rename Certificate
-      shell: pwsh
-      run: |
-        Rename-Item ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_Test/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_x64.cer GoatVaultClient.cer
+      - name: Run tests
+        run: dotnet test GoatVaultTests/GoatVaultTests.csproj -c ${{ env.CONFIGURATION }} --no-build --logger trx --results-directory ./TestResults
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v${{ steps.extract_version.outputs.version }}
-        files: |
-          ${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller
-          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_Test/AutoUpdate.msix
-          ${{ env.WORKING_DIRECTORY }}/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/GoatVaultClient-v3_${{ steps.extract_version.outputs.version }}.0_Test/GoatVaultClient.cer
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ${{ env.WORKING_DIRECTORY }}/TestResults/*.trx
+          retention-days: 30
 
+      # --------------------------
+      # Decode & install signing certificate
+      # --------------------------
+
+      - name: Setup signing certificate
+        run: |
+          $cert = [System.Convert]::FromBase64String("${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}")
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\cert.pfx", $cert)
+          certutil -user -p ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }} -Silent -importpfx "$env:RUNNER_TEMP\cert.pfx" NoRoot
+        shell: pwsh
+
+      # --------------------------
+      # Publish client
+      # --------------------------
+
+      - name: Publish the client
+        run: |
+          dotnet publish GoatVaultClient/GoatVaultClient.csproj `
+            -c ${{ env.CONFIGURATION }} `
+            -f ${{ env.TARGET_FRAMEWORK }} `
+            -r ${{ env.PLATFORM }} `
+            --no-build `
+            /p:GenerateAppxPackage=true `
+            /p:AppxPackageSigningEnabled=true `
+            /p:PackageCertificateThumbprint=${{ secrets.WINDOWS_CERTIFICATE_THUMBPRINT }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      # --------------------------
+      # Extract version
+      # --------------------------
+
+      - name: Extract version
+        id: extract_version
+        shell: pwsh
+        run: |
+          $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient/GoatVaultClient.csproj")
+          $display = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
+          $version = $display.ApplicationDisplayVersion
+          "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Output "Extracted version: $version"
+
+      # --------------------------
+      # Prepare release artifacts
+      # --------------------------
+
+      - name: Prepare release artifacts
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.extract_version.outputs.version }}"
+          $packagesDir = "GoatVaultClient/bin/${{ env.CONFIGURATION }}/${{ env.TARGET_FRAMEWORK }}/${{ env.PLATFORM }}/AppPackages"
+
+          # Find and rename files
+          $msix = Get-ChildItem $packagesDir -Recurse -Filter "*_${ver}_x64.msix" | Select-Object -First 1
+          $cer = Get-ChildItem $packagesDir -Recurse -Filter "*_${ver}_x64.cer" | Select-Object -First 1
+
+          if ($msix) {
+            Copy-Item $msix.FullName -Destination "$packagesDir/AutoUpdate.msix"
+            Write-Output "Copied MSIX: $($msix.FullName)"
+          }
+
+          if ($cer) {
+            Copy-Item $cer.FullName -Destination "$packagesDir/GoatVaultClient.cer"
+            Write-Output "Copied CER: $($cer.FullName)"
+          }
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      # --------------------------
+      # Create Git tag
+      # --------------------------
+
+      - name: Create Tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const tagName = `refs/tags/v${{ steps.extract_version.outputs.version }}`;
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: tagName,
+                sha: context.sha
+              });
+              console.log(`Created tag: ${tagName}`);
+            } catch (error) {
+              if (error.status === 422) {
+                console.log(`Tag ${tagName} already exists, skipping...`);
+              } else {
+                throw error;
+              }
+            }
+
+      # --------------------------
+      # Create GitHub release
+      # --------------------------
+
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.extract_version.outputs.version }}
+          fail_on_unmatched_files: true
+          files: |
+            ${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller
+            ${{ env.WORKING_DIRECTORY }}/GoatVaultClient/bin/${{ env.CONFIGURATION }}/${{ env.TARGET_FRAMEWORK }}/${{ env.PLATFORM }}/AppPackages/AutoUpdate.msix
+            ${{ env.WORKING_DIRECTORY }}/GoatVaultClient/bin/${{ env.CONFIGURATION }}/${{ env.TARGET_FRAMEWORK }}/${{ env.PLATFORM }}/AppPackages/GoatVaultClient.cer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}

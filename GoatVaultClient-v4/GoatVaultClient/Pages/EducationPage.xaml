@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-             xmlns:models="clr-namespace:GoatVaultClient.Models"
+             xmlns:models1="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
              x:Class="GoatVaultClient.Pages.EducationPage"
              x:DataType="vm:EducationPageViewModel"
              Title="EducationMenuPage">
@@ -12,7 +12,7 @@
                 SelectionChangedCommand="{Binding OpenTopicCommand}"
                 SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}">
         <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="models:EducationTopic">
+            <DataTemplate x:DataType="models1:EducationTopic">
                 <Border Padding="20" Margin="10,5" StrokeShape="RoundRectangle 10" BackgroundColor="White">
                     <Label Text="{Binding Title}" TextColor="#512BD4" FontAttributes="Bold" />
                 </Border>

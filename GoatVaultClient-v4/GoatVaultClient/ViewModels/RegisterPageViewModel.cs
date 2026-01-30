@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Models;
-using GoatVaultClient.Models.API;
+using GoatVaultCore.Models;
+using GoatVaultCore.Models.API;
 using GoatVaultClient.Pages;
-using GoatVaultClient.Services;
+using GoatVaultClient.Services.Vault;
+using GoatVaultInfrastructure.Services;
+using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultClient.ViewModels;
 
@@ -18,9 +21,9 @@ public partial class RegisterPageViewModel(
     // Services
 
     // Observable Properties (Bound to Entry fields)
-    [ObservableProperty] private string email;
-    [ObservableProperty] private string password;
-    [ObservableProperty] private string confirmPassword;
+    [ObservableProperty] private string? _email;
+    [ObservableProperty] private string? _password;
+    [ObservableProperty] private string? _confirmPassword;
 
     // Constructor (Clean Dependency Injection)
 
