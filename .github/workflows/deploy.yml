@@ -96,6 +96,7 @@ jobs:
       # --------------------------
 
       - name: Setup signing certificate
+        id: setup_cert
         run: |
           # Remove PEM headers and newlines if present
           $certContent = "${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}"
@@ -104,8 +105,17 @@ jobs:
           $certContent = $certContent -replace "\s+", ""
           
           $cert = [System.Convert]::FromBase64String($certContent)
-          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\cert.pfx", $cert)
-          certutil -user -p ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }} -Silent -importpfx "$env:RUNNER_TEMP\cert.pfx" NoRoot
+          $certPath = "$env:RUNNER_TEMP\cert.pfx"
+          [IO.File]::WriteAllBytes($certPath, $cert)
+          
+          # Import certificate
+          certutil -user -p "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}" -Silent -importpfx "$certPath" NoRoot
+          
+          # Extract publisher name
+          $pfxCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}")
+          $publisher = $pfxCert.Subject
+          Write-Output "publisher=$publisher" >> $env:GITHUB_OUTPUT
+          Write-Output "Extracted publisher: $publisher"
         shell: pwsh
 
       # --------------------------
@@ -137,6 +147,28 @@ jobs:
           $version = $display.ApplicationDisplayVersion
           "version=$version" >> $env:GITHUB_OUTPUT
           Write-Output "Extracted version: $version"
+
+      # --------------------------
+      # Update AppInstaller version
+      # --------------------------
+
+      - name: Update AppInstaller version
+        shell: pwsh
+        run: |
+          $version = "${{ steps.extract_version.outputs.version }}"
+          $publisher = "${{ steps.setup_cert.outputs.publisher }}"
+          $appInstallerPath = "${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller"
+          
+          if (Test-Path $appInstallerPath) {
+            [xml]$xml = Get-Content $appInstallerPath
+            $xml.AppInstaller.Version = "${version}.0"
+            $xml.AppInstaller.MainPackage.Version = "${version}.0"
+            $xml.AppInstaller.MainPackage.Publisher = $publisher
+            $xml.Save((Resolve-Path $appInstallerPath))
+            Write-Output "Updated AppInstaller to version ${version}.0 with publisher: $publisher"
+          } else {
+            Write-Warning "AppInstaller file not found at: $appInstallerPath"
+          }
 
       # --------------------------
       # Prepare release artifacts

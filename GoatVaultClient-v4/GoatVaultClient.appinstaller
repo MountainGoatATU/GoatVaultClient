@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AppInstaller xmlns="http://schemas.microsoft.com/appx/appinstaller/2018" Version="0.4.2.0" Uri="https://github.com/MountainGoatATU/GoatVaultClient/releases/latest/download/GoatVaultClient.appinstaller">
+	<MainPackage Name="com.mountaingoat.goatvaultclient" Publisher="CN=User Name" Version="0.4.2.0" ProcessorArchitecture="x64" Uri="https://github.com/MountainGoatATU/GoatVaultClient/releases/latest/download/AutoUpdate.msix" />
+	<UpdateSettings>
+		<OnLaunch HoursBetweenUpdateChecks="0" />
+	</UpdateSettings>
+</AppInstaller>
