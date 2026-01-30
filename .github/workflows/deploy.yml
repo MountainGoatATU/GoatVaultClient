@@ -180,18 +180,24 @@ jobs:
           $ver = "${{ steps.extract_version.outputs.version }}"
           $packagesDir = "GoatVaultClient/bin/${{ env.PLATFORM }}/${{ env.CONFIGURATION }}/${{ env.TARGET_FRAMEWORK }}/${{ env.RUNTIME_IDENTIFIER }}/AppPackages"
 
-          # Find and rename files
-          $msix = Get-ChildItem $packagesDir -Recurse -Filter "*_${ver}_x64.msix" | Select-Object -First 1
-          $cer = Get-ChildItem $packagesDir -Recurse -Filter "*_${ver}_x64.cer" | Select-Object -First 1
+          # Find and rename files (search pattern includes wildcard for ApplicationVersion)
+          $msix = Get-ChildItem $packagesDir -Recurse -Filter "*.msix" | Where-Object { $_.Name -like "*_${ver}*_x64.msix" } | Select-Object -First 1
+          $cer = Get-ChildItem $packagesDir -Recurse -Filter "*.cer" | Where-Object { $_.Name -like "*_${ver}*_x64.cer" } | Select-Object -First 1
 
           if ($msix) {
             Copy-Item $msix.FullName -Destination "$packagesDir/AutoUpdate.msix"
             Write-Output "Copied MSIX: $($msix.FullName)"
+          } else {
+            Write-Error "MSIX file not found matching pattern: *_${ver}*_x64.msix"
+            exit 1
           }
 
           if ($cer) {
             Copy-Item $cer.FullName -Destination "$packagesDir/GoatVaultClient.cer"
             Write-Output "Copied CER: $($cer.FullName)"
+          } else {
+            Write-Error "CER file not found matching pattern: *_${ver}*_x64.cer"
+            exit 1
           }
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
