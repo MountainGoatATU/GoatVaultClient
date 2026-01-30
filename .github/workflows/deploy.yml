@@ -59,7 +59,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ${{ env.LOCALAPPDATA }}\Microsoft\dotnet\workloads
+            ~\AppData\Local\Microsoft\dotnet\workloads
+            C:\Program Files\dotnet\sdk-manifests
+            C:\Program Files\dotnet\metadata
           key: ${{ runner.os }}-maui-workloads-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-maui-workloads-
