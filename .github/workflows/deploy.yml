@@ -143,10 +143,11 @@ jobs:
         shell: pwsh
         run: |
           $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient/GoatVaultClient.csproj")
-          $display = $xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1
-          $version = $display.ApplicationDisplayVersion
-          "version=$version" >> $env:GITHUB_OUTPUT
-          Write-Output "Extracted version: $version"
+          $displayVersion = ($xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1).ApplicationDisplayVersion
+          $appVersion = ($xml.Project.PropertyGroup | Where-Object { $_.ApplicationVersion } | Select-Object -First 1).ApplicationVersion
+          $fullVersion = "${displayVersion}.${appVersion}"
+          "version=$fullVersion" >> $env:GITHUB_OUTPUT
+          Write-Output "Extracted full version: $fullVersion (Display: $displayVersion, App: $appVersion)"
 
       # --------------------------
       # Update AppInstaller version
@@ -161,11 +162,11 @@ jobs:
           
           if (Test-Path $appInstallerPath) {
             [xml]$xml = Get-Content $appInstallerPath
-            $xml.AppInstaller.Version = "${version}.0"
-            $xml.AppInstaller.MainPackage.Version = "${version}.0"
+            $xml.AppInstaller.Version = $version
+            $xml.AppInstaller.MainPackage.Version = $version
             $xml.AppInstaller.MainPackage.Publisher = $publisher
             $xml.Save((Resolve-Path $appInstallerPath))
-            Write-Output "Updated AppInstaller to version ${version}.0 with publisher: $publisher"
+            Write-Output "Updated AppInstaller to version $version with publisher: $publisher"
           } else {
             Write-Warning "AppInstaller file not found at: $appInstallerPath"
           }
