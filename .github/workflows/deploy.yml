@@ -97,7 +97,13 @@ jobs:
 
       - name: Setup signing certificate
         run: |
-          $cert = [System.Convert]::FromBase64String("${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}")
+          # Remove PEM headers and newlines if present
+          $certContent = "${{ secrets.SIGNING_CERTIFICATE_BASE64_CONTENT }}"
+          $certContent = $certContent -replace "-----BEGIN CERTIFICATE-----", ""
+          $certContent = $certContent -replace "-----END CERTIFICATE-----", ""
+          $certContent = $certContent -replace "\s+", ""
+          
+          $cert = [System.Convert]::FromBase64String($certContent)
           [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\cert.pfx", $cert)
           certutil -user -p ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }} -Silent -importpfx "$env:RUNNER_TEMP\cert.pfx" NoRoot
         shell: pwsh
