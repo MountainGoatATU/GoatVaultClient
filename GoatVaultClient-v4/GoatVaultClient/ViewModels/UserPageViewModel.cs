@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Models.API;
+using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using Mopups.Services;
@@ -42,7 +43,8 @@ namespace GoatVaultClient.ViewModels
             if (!await AuthorizeAsync())
                 return;
 
-            var popup = new AuthorizePopup(isPassword: false)
+            // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
+            var popup = new AuthorizePopup(isPassword: false /*, buttonText: "OK"*/)
             {
                 Title = "Edit Email"
             };
@@ -77,7 +79,8 @@ namespace GoatVaultClient.ViewModels
                 return;
             }
 
-            var popup = new AuthorizePopup(isPassword: true)
+            // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
+            var popup = new AuthorizePopup(isPassword: true /*, buttonText: "OK"*/)
             {
                 Title = "Save"
             };
@@ -98,19 +101,45 @@ namespace GoatVaultClient.ViewModels
             };
 
             await MopupService.Instance.PushAsync(popup);
+            var enteredPassword = await popup.WaitForScan();
 
-            while (MopupService.Instance.PopupStack.Contains(popup))
-                await Task.Delay(50);
+            // If the user cancelled or provided an empty password, do nothing
+            if (string.IsNullOrWhiteSpace(enteredPassword))
+                return false;
 
-            var result = await popup.WaitForScan();
+            try
+            {
+                // Same flow as login
+                var initPayload = new AuthInitRequest { Email = Email };
+                var initResponse = await _httpService.PostAsync<AuthInitResponse>(
+                    "https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/auth/init",
+                    initPayload
+                );
 
-            if (result == MasterPassword)
+                var verifier = CryptoService.GenerateAuthVerifier(enteredPassword, initResponse.AuthSalt);
+
+                var verifyPayload = new AuthVerifyRequest
+                {
+                    UserId = Guid.Parse(initResponse.UserId),
+                    AuthVerifier = verifier
+                };
+
+                var verifyResponse = await _httpService.PostAsync<AuthVerifyResponse>(
+                    "https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/auth/verify",
+                    verifyPayload
+                );
+
+                // Save the new token and password
+                _authTokenService.SetToken(verifyResponse.AccessToken);
+                MasterPassword = enteredPassword;
+
                 return true;
-
-            var errorPopup = new IncorrectPasswordPopup();
-            await MopupService.Instance.PushAsync(errorPopup);
-            return false;
-
+            }
+            catch
+            {
+                await MopupService.Instance.PushAsync(new IncorrectPasswordPopup());
+                return false;
+            }
         }
     }
 }
