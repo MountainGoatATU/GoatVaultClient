@@ -11,23 +11,26 @@ namespace GoatVaultClient.ViewModels
 {
     public partial class UserPageViewModel : BaseViewModel
     {
-        [ObservableProperty] private string email = "";
-        [ObservableProperty] private string masterPassword = "";
+        [ObservableProperty] private string email;
+        [ObservableProperty] private string masterPassword;
 
         // Services
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
         private readonly VaultSessionService _vaultSessionService;
+        private readonly VaultService _vaultService;
 
         // Constructor
         public UserPageViewModel(
             HttpService httpService,
             AuthTokenService authTokenService,
-            VaultSessionService vaultSessionService)
+            VaultSessionService vaultSessionService,
+            VaultService vaultService)
         {
             _httpService = httpService;
             _authTokenService = authTokenService;
             _vaultSessionService = vaultSessionService;
+            _vaultService = vaultService;
 
             // Initialize properties from current session
             if (_vaultSessionService.CurrentUser != null)
@@ -40,6 +43,11 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task EditEmailAsync()
         {
+            var user = _vaultSessionService.CurrentUser;
+            if (user == null)
+                return;
+
+            // Authorize the user before allowing email change
             if (!await AuthorizeAsync())
                 return;
 
@@ -48,27 +56,54 @@ namespace GoatVaultClient.ViewModels
             {
                 Title = "Edit Email"
             };
-            
             await MopupService.Instance.PushAsync(popup);
-            while (MopupService.Instance.PopupStack.Contains(popup))
-                await Task.Delay(50);
-
             var newEmail = await popup.WaitForScan();
-
             // If the user cancelled or provided an empty email, do nothing
-            if (string.IsNullOrWhiteSpace(newEmail)) return;
+            if (string.IsNullOrWhiteSpace(newEmail) || newEmail == user.Email)
+                return;
 
-            var payload = new UserUpdateRequest { Email = newEmail };
-            var userId = _vaultSessionService.CurrentUser.Id;
+            var oldEmail = user.Email;
 
-            // Send PATCH request to update email
-            var updatedUser = await _httpService.PatchAsync<UserResponse>(
-                $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{userId}",
-                payload
-            );
+            // Update local database
+            var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
+            if (dbUser != null)
+            {
+                dbUser.Email = newEmail;
+                await _vaultService.UpdateUserInLocalAsync(dbUser);
+            }
 
-            Email = updatedUser.Email;
-            _vaultSessionService.CurrentUser = updatedUser;
+            // Update Server
+            try
+            {
+                var request = new UserRequest
+                {
+                    Email = newEmail,
+                    MfaEnabled = user.MfaEnabled,
+                    Vault = user.Vault
+                };
+
+                var updatedUser = await _httpService.PatchAsync<UserResponse>(
+                    $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
+                    request
+                );
+
+                // Update session a UI
+                _vaultSessionService.CurrentUser.Email = updatedUser.Email;
+                Email = updatedUser.Email;
+
+                await Shell.Current.DisplayAlert("Success", "Email updated successfully.", "OK");
+            }
+            catch (Exception ex)
+            {
+                // Revert local change on failure
+                if (dbUser != null)
+                {
+                    dbUser.Email = oldEmail;
+                    await _vaultService.UpdateUserInLocalAsync(dbUser);
+                }
+
+                await Shell.Current.DisplayAlert("Error", $"Failed to update email: {ex.Message}", "OK");
+            }
         }
 
         [RelayCommand]
@@ -129,7 +164,7 @@ namespace GoatVaultClient.ViewModels
                     verifyPayload
                 );
 
-                // Save the new token and password
+                // Save the new token and password ?
                 _authTokenService.SetToken(verifyResponse.AccessToken);
                 MasterPassword = enteredPassword;
 
