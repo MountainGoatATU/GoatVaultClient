@@ -55,7 +55,6 @@ namespace GoatVaultClient.ViewModels
             var authorized = await AuthorizeAsync(enteredPassword);
             if (!authorized)
             {
-                await Shell.Current.DisplayAlert("Error", "Incorrect password.", "OK");
                 return;
             }
 
@@ -116,11 +115,8 @@ namespace GoatVaultClient.ViewModels
         // Method to show popup and get user input
         private async Task<string?> PromptUserAsync(string title, bool isPassword)
         {
-            var popup = new AuthorizePopup(isPassword: isPassword)
-            {
-                Title = title
-            };
-
+            var popup = new AuthorizePopup(title, isPassword: isPassword);
+            
             await MopupService.Instance.PushAsync(popup);
             var result = await popup.WaitForScan();
 

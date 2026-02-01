@@ -8,19 +8,8 @@ namespace GoatVaultClient.Controls.Popups;
 public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
 {
     public string title = "Authorization";
-    public new string Title
-    {
-        get => title;
-        set
-        {
-            if (title != value)
-            {
-                title = value;
-                OnPropertyChanged(nameof(Title));
-            }
-        }
-    }
-
+    public string Title { get; set; }
+    
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
     private readonly TaskCompletionSource<string?> _tcs = new();
     public Task<string?> WaitForScan() => _tcs.Task;
@@ -28,10 +17,11 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
     public ICommand CancelCommand { get; private set; }
 
     // TODO: Unused method parameter
-    public AuthorizePopup(bool isPassword = true/*, string buttonText = "OK"*/)
+    public AuthorizePopup(string title, bool isPassword = true/*, string buttonText = "OK"*/)
 	{
 		InitializeComponent();
 
+        Title = title;
         InputEntry.IsPassword = isPassword;
         ShowHideAttachment.IsVisible = isPassword;
 
