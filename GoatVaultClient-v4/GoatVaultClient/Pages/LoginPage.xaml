@@ -40,13 +40,25 @@
                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LoginPageViewModel}}, Path=SelectLocalAccountCommand}"
                                                             CommandParameter="{Binding .}"/>
                                 </Border.GestureRecognizers>
-                                <HorizontalStackLayout Padding="16" Spacing="12">
+                                <Grid Padding="16" ColumnDefinitions="*,Auto">
                                     <!-- Email -->
-                                    <Label Text="{Binding Email}"
+                                    <Label Text="{Binding Email}" 
                                               FontSize="16"
                                               VerticalOptions="Center"
                                               TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"/>
-                                </HorizontalStackLayout>
+
+                                    <!-- Remove Button -->
+                                    <Label Text="✖"
+                                           FontSize="18"
+                                           VerticalOptions="Center"
+                                           HorizontalOptions="End"
+                                           Grid.Column="1"> 
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LoginPageViewModel}}, Path=RemoveOfflineAccountCommand}"
+                                              CommandParameter="{Binding .}"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
