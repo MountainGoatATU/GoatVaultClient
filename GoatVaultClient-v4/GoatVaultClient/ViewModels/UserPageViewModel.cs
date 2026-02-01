@@ -12,7 +12,6 @@ namespace GoatVaultClient.ViewModels
     public partial class UserPageViewModel : BaseViewModel
     {
         [ObservableProperty] private string email;
-        [ObservableProperty] private string masterPassword;
 
         // Services
         private readonly HttpService _httpService;
@@ -36,7 +35,6 @@ namespace GoatVaultClient.ViewModels
             if (_vaultSessionService.CurrentUser != null)
             {
                 Email = _vaultSessionService.CurrentUser.Email;
-                MasterPassword = _vaultSessionService.MasterPassword;
             }
         }
 
@@ -91,7 +89,11 @@ namespace GoatVaultClient.ViewModels
                 _vaultSessionService.CurrentUser.Email = updatedUser.Email;
                 Email = updatedUser.Email;
 
-                await Shell.Current.DisplayAlert("Success", "Email updated successfully.", "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Success",
+                    body: $"Email updated successfully.",
+                    aText: "OK"
+                ));
             }
             catch (Exception ex)
             {
@@ -102,7 +104,11 @@ namespace GoatVaultClient.ViewModels
                     await _vaultService.UpdateUserInLocalAsync(dbUser);
                 }
 
-                await Shell.Current.DisplayAlert("Error", $"Failed to update email: {ex.Message}", "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: $"Failed to update email: {ex.Message}",
+                    aText: "OK"
+                ));
             }
         }
 
@@ -125,13 +131,9 @@ namespace GoatVaultClient.ViewModels
 
         private async Task<bool> AuthorizeAsync(string? enteredPassword = null)
         {
+            
             if (string.IsNullOrWhiteSpace(enteredPassword))
-            {
-                // Prompt password if not provided
-                enteredPassword = await PromptUserAsync("Authorization", true);
-                if (string.IsNullOrWhiteSpace(enteredPassword))
-                    return false;
-            }
+                return false;
 
             try
             {
@@ -157,13 +159,16 @@ namespace GoatVaultClient.ViewModels
 
                 // Save the new token and password ?
                 _authTokenService.SetToken(verifyResponse.AccessToken);
-                MasterPassword = enteredPassword;
 
                 return true;
             }
             catch
             {
-                await MopupService.Instance.PushAsync(new IncorrectPasswordPopup());
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: $"Incorrect password.",
+                    aText: "OK"
+                ));
                 return false;
             }
         }
