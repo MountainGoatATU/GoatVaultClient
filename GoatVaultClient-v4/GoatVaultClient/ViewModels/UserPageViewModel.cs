@@ -47,23 +47,24 @@ namespace GoatVaultClient.ViewModels
             if (user == null)
                 return;
 
-            // Authorize the user before allowing email change
-            if (!await AuthorizeAsync())
-                return;
+            // Ask for current password
+            var enteredPassword = await PromptUserAsync("Confirm Password", true);
+            if (enteredPassword == null) return;
 
-            // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
-            var popup = new AuthorizePopup(isPassword: false /*, buttonText: "OK"*/)
+            // Verify with server
+            var authorized = await AuthorizeAsync(enteredPassword);
+            if (!authorized)
             {
-                Title = "Edit Email"
-            };
-            await MopupService.Instance.PushAsync(popup);
-            var newEmail = await popup.WaitForScan();
-            // If the user cancelled or provided an empty email, do nothing
-            if (string.IsNullOrWhiteSpace(newEmail) || newEmail == user.Email)
+                await Shell.Current.DisplayAlert("Error", "Incorrect password.", "OK");
                 return;
+            }
+
+            // Ask for new email
+            var newEmail = await PromptUserAsync("Enter new email", false);
+            if (string.IsNullOrWhiteSpace(newEmail) || newEmail == user.Email) return;
 
             var oldEmail = user.Email;
-
+            
             // Update local database
             var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
             if (dbUser != null)
@@ -109,38 +110,32 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task EditMasterPasswordAsync()
         {
-            if (!await AuthorizeAsync())
-            {
-                return;
-            }
-
-            // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
-            var popup = new AuthorizePopup(isPassword: true /*, buttonText: "OK"*/)
-            {
-                Title = "Save"
-            };
-            await MopupService.Instance.PushAsync(popup);
-
-            var result = await popup.WaitForScan();
-
-            if (!string.IsNullOrWhiteSpace(result))
-                MasterPassword = result;
+            // Not implemented yet
         }
 
-        private async Task<bool> AuthorizeAsync()
+        // Method to show popup and get user input
+        private async Task<string?> PromptUserAsync(string title, bool isPassword)
         {
-            // TODO: AuthorizePopup does not have a parameter named 'buttonText'?
-            var popup = new AuthorizePopup(isPassword: true /*, buttonText: "OK"*/)
+            var popup = new AuthorizePopup(isPassword: isPassword)
             {
-                Title = "Authorization"
+                Title = title
             };
 
             await MopupService.Instance.PushAsync(popup);
-            var enteredPassword = await popup.WaitForScan();
+            var result = await popup.WaitForScan();
 
-            // If the user cancelled or provided an empty password, do nothing
+            return string.IsNullOrWhiteSpace(result) ? null : result;
+        }
+
+        private async Task<bool> AuthorizeAsync(string? enteredPassword = null)
+        {
             if (string.IsNullOrWhiteSpace(enteredPassword))
-                return false;
+            {
+                // Prompt password if not provided
+                enteredPassword = await PromptUserAsync("Authorization", true);
+                if (string.IsNullOrWhiteSpace(enteredPassword))
+                    return false;
+            }
 
             try
             {
