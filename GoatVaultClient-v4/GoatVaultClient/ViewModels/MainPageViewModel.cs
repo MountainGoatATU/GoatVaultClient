@@ -34,6 +34,7 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private bool _isPasswordVisible = false;
         [ObservableProperty] private double vaultScore;
         [ObservableProperty] private string goatComment = "";
+        [ObservableProperty] private bool isGoatCommentVisible = false;
 
         // Random comments
         private readonly List<string> goatTips = new List<string>
@@ -67,16 +68,31 @@ namespace GoatVaultClient.ViewModels
         private void StartRandomGoatComments()
         {
             var random = new Random();
-
             var timer = Application.Current.Dispatcher.CreateTimer();
-            timer.Interval = TimeSpan.FromSeconds(20);
+
+            int counter = 0;
+            timer.Interval = TimeSpan.FromSeconds(1);
+
             timer.Tick += (s, e) =>
             {
-                GoatComment = goatTips[random.Next(goatTips.Count)];
+                counter++;
+
+                if (counter % 10 == 0) // Every 10 seconds show a comment
+                {
+                    GoatComment = goatTips[random.Next(goatTips.Count)];
+                    IsGoatCommentVisible = true;
+                }
+                else if (counter % 10 == 5) // Disapear after 5 seconds
+                {
+                    IsGoatCommentVisible = false;
+                    GoatComment = "";
+                }
+
+                if (counter >= 10) counter = 0; // Reset counter
             };
             timer.Start();
-
         }
+
         #region Async methods
         private async void InitializeAsync()
         {
