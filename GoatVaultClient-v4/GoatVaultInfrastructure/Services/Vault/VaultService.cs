@@ -8,17 +8,20 @@ using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services.API;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace GoatVaultInfrastructure.Services.Vault;
+
 
 public interface IVaultService
 {
     VaultModel EncryptVault(string password, VaultData vaultData);
     VaultData DecryptVault(VaultModel vault, string password);
     Task SyncAndCloseAsync(UserResponse currentUser, string password, VaultData vaultData);
+    Task SaveVaultAsync(UserResponse currentUser, string password, VaultData vaultData);
 }
 
-public class VaultService(GoatVaultDb goatVaultDb, HttpService httpService, VaultSessionService vaultSessionService) : IVaultService
+public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, HttpService httpService, VaultSessionService vaultSessionService) : IVaultService
 {
     // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
     private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
@@ -120,6 +123,14 @@ public class VaultService(GoatVaultDb goatVaultDb, HttpService httpService, Vaul
 
     public async Task SyncAndCloseAsync(UserResponse? user, string password, VaultData? vaultData)
     {
+        SaveVaultAsync(user, password, vaultData);
+
+        vaultSessionService.Lock();
+    }
+    public async Task SaveVaultAsync (UserResponse? user, string password, VaultData? vaultData)
+    {
+        var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
+
         if (user == null || string.IsNullOrEmpty(password) || vaultData == null)
             return;
 
@@ -153,10 +164,9 @@ public class VaultService(GoatVaultDb goatVaultDb, HttpService httpService, Vaul
                 // Update local Vault
                 existingUser.Vault = dbModel.Vault;
                 goatVaultDb.LocalCopy.Update(existingUser);
-
                 // Sync with server
                 var userResponse = await httpService.PatchAsync<UserResponse>(
-                $"http://127.0.0.1:8000/v1/users/{vaultSessionService.CurrentUser?.Id}",
+                $"{url}v1/users/{ vaultSessionService.CurrentUser?.Id}",
                 userRequest
             );
             }
@@ -167,8 +177,6 @@ public class VaultService(GoatVaultDb goatVaultDb, HttpService httpService, Vaul
             }
 
             await goatVaultDb.SaveChangesAsync();
-            // Lock the vault session
-            vaultSessionService.Lock();
         }
         catch (Exception ex)
         {

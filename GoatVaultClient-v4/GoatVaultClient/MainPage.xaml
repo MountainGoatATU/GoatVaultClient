@@ -14,59 +14,30 @@
     <VerticalStackLayout>
         <!-- Sync Status Bar -->
         <controls:Component BorderMargin="24,8,24,0">
-            <Grid ColumnDefinitions="Auto,*,Auto" 
-                  Padding="12,8"
-                  BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurfaceContainer}, Dark={x:StaticResource DarkSurfaceContainer}}"
-                  RowSpacing="0">
-
-                <!-- Sync Icon -->
-                <Image Grid.Column="0" 
-                       Source="{Binding SyncButtonIcon}"
-                       WidthRequest="20"
-                       HeightRequest="20"
-                       VerticalOptions="Center"
-                       Margin="0,0,8,0">
-                    <Image.Triggers>
-                        <DataTrigger TargetType="Image" Binding="{Binding IsSyncing}" Value="True">
-                            <DataTrigger.EnterActions>
-                                <!--<Trigger>
-                                    --><!-- Add rotation animation here if desired --><!--
-                                </Trigger>-->
-                            </DataTrigger.EnterActions>
-                        </DataTrigger>
-                    </Image.Triggers>
-                </Image>
-
-                <!-- Status Text -->
-                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                    <Label Text="{Binding SyncStatusText}"
-                           FontSize="14"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface}, Dark={x:StaticResource DarkOnSurface}}"/>
-                    <Label Text="{Binding LastSyncTime, StringFormat='Last sync: {0}'}"
-                           FontSize="12"
-                           TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant}, Dark={x:StaticResource DarkOnSurfaceVariant}}"
-                           IsVisible="{Binding LastSyncTime, Converter={StaticResource StringNotEmptyConverter}}"/>
-                </VerticalStackLayout>
-
-                <!-- Sync Button -->
-                <Button Grid.Column="2"
+            <!-- Sync Button -->
+            <Button Grid.Column="2"
                         Text="Sync Now"
-                        Command="{Binding SyncVaultCommand}"
-                        IsEnabled="{Binding IsSyncing, Converter={StaticResource InvertedBoolConverter}}"
+                        Command="{Binding ManualSyncCommand}"
+                        IsEnabled="{Binding isSyncing}"
                         BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimary}, Dark={x:StaticResource DarkPrimary}}"
                         TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimary}, Dark={x:StaticResource DarkOnPrimary}}"
                         CornerRadius="8"
                         Padding="16,8"
                         FontSize="14"
                         FontAttributes="Bold">
-                    <Button.Triggers>
-                        <DataTrigger TargetType="Button" Binding="{Binding HasUnsavedChanges}" Value="True">
-                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource LightSecondary}, Dark={x:StaticResource DarkSecondary}}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
-            </Grid>
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding HasUnsavedChanges}" Value="True">
+                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource LightSecondary}, Dark={x:StaticResource DarkSecondary}}" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+        </controls:Component>
+        <controls:Component BorderMargin="24,8,24,0">
+            <ActivityIndicator IsRunning="{Binding isBusy}" 
+                               IsVisible="{Binding isBusy}" 
+                               Color="{StaticResource Primary}" 
+                               HeightRequest="16" 
+                               WidthRequest="16"/>
         </controls:Component>
         <controls:Component BorderMargin="24,0,24,0">
             <SearchBar Placeholder="Search passwords..." Text="{Binding SearchText}" HeightRequest="48" />

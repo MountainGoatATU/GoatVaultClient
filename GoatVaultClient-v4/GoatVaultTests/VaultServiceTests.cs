@@ -9,6 +9,7 @@ public class VaultServiceTests
     {
         // Arrange
         var vaultService = new VaultService(
+            configuration: null,
             goatVaultDb: null,
             httpService: null,
             vaultSessionService: null
