@@ -33,7 +33,18 @@ namespace GoatVaultClient.ViewModels
         private bool _passwordsSortAsc = true;
         [ObservableProperty] private bool _isPasswordVisible = false;
         [ObservableProperty] private double vaultScore;
+        [ObservableProperty] private string goatComment = "";
 
+        // Random comments
+        private readonly List<string> goatTips = new List<string>
+        {
+            "Tip: Change your password regularly!",
+            "Tip: Avoid using the same password twice.",
+            "Tip: Enable two-factor authentication.",
+            "Tip: Your Vault score is low, check weak passwords.",
+            "Tip: Keep backup keys handy.",
+            "Tip: Consider using a passphrase instead of a single word."
+        };
         //Dependency Injection
         private readonly VaultService _vaultService;
         private readonly VaultSessionService _vaultSessionService;
@@ -49,6 +60,22 @@ namespace GoatVaultClient.ViewModels
             _dialogService = dialogService;
 
             LoadVaultData();
+
+            StartRandomGoatComments();
+        }
+
+        private void StartRandomGoatComments()
+        {
+            var random = new Random();
+
+            var timer = Application.Current.Dispatcher.CreateTimer();
+            timer.Interval = TimeSpan.FromSeconds(20);
+            timer.Tick += (s, e) =>
+            {
+                GoatComment = goatTips[random.Next(goatTips.Count)];
+            };
+            timer.Start();
+
         }
         #region Async methods
         private async void InitializeAsync()

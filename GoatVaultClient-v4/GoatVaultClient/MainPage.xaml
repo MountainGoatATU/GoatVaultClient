@@ -4,14 +4,13 @@
              xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-             xmlns:models="clr-namespace:GoatVaultCore.Models"
              xmlns:controls="clr-namespace:GoatVaultClient.Controls"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="GoatVaultClient.MainPage"
              BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
 
-
+    
     <VerticalStackLayout>
         <controls:Component BorderMargin="24,0,24,0">
             <SearchBar Placeholder="Search passwords..." Text="{Binding SearchText}" HeightRequest="48" />
@@ -86,14 +85,25 @@
                 </controls:EntryDetailView>
             </controls:Component>
         </Grid>
-        <skia:SKLottieView
-    x:Name="GoatMascot"
-    Source="goat.json"
-    RepeatCount="-1"
-    HorizontalOptions="End"
-    VerticalOptions="End"
-    HeightRequest="120"
-    WidthRequest="120"
-    Margin="32"/>
+        <Grid>
+            <!-- Goat Lottie animation -->
+            <skia:SKLottieView
+                x:Name="GoatMascot"
+                Source="goat.json"
+                RepeatCount="-1"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                HeightRequest="120"
+                WidthRequest="120"
+                Margin="16"/>
+            <!-- Speech bubble above the goat -->
+            <StackLayout HorizontalOptions="End" VerticalOptions="End" Margin="16,0,16,136" Spacing="0">
+                <Border BackgroundColor="White" StrokeShape="RoundRectangle 12" Padding="12" Shadow="True" HorizontalOptions="End">
+                    <Label Text="{Binding GoatComment}" TextColor="Black" FontAttributes="Bold" LineBreakMode="WordWrap" MaxLines="3"/>
+                </Border>
+                <!-- Small triangle pointing to the goat -->
+                <BoxView WidthRequest="12" HeightRequest="12" BackgroundColor="White" Rotation="45" HorizontalOptions="End" Margin="0,-8,16,0"/>
+            </StackLayout>
+        </Grid>
     </VerticalStackLayout>
 </ContentPage>
