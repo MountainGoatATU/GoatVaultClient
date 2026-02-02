@@ -7,6 +7,7 @@
              xmlns:models="clr-namespace:GoatVaultCore.Models"
              xmlns:controls="clr-namespace:GoatVaultClient.Controls"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="GoatVaultClient.MainPage"
              BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
 
@@ -85,5 +86,14 @@
                 </controls:EntryDetailView>
             </controls:Component>
         </Grid>
+        <skia:SKLottieView
+    x:Name="GoatMascot"
+    Source="goat.json"
+    RepeatCount="-1"
+    HorizontalOptions="End"
+    VerticalOptions="End"
+    HeightRequest="120"
+    WidthRequest="120"
+    Margin="32"/>
     </VerticalStackLayout>
 </ContentPage>

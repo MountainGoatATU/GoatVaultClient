@@ -174,9 +174,10 @@ namespace GoatVaultClient.ViewModels
             }
         }
 
-        private void CalculateVaultScore()
-        {
-            VaultScore = VaultScoreCalculatorService.CalculateScore(Passwords);
-        }
+        //private void CalculateVaultScore()
+        //{
+        //    VaultScore = VaultScoreCalculatorService.CalculateScore();
+        //}
+
     }
 }
