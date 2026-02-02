@@ -177,10 +177,6 @@ public class VaultService(GoatVaultDb goatVaultDb, HttpService httpService, Vaul
     }
     #endregion
     #region Sync with server
-    public async Task Sync()
-    {
-
-    }
     #endregion 
     #region Local Storage
     // GET
