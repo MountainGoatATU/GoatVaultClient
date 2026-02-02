@@ -11,6 +11,7 @@ using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.Vault;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultClient.Controls.Popups;
+using GoatVaultCore.Services.Secrets;
 
 namespace GoatVaultClient.ViewModels
 {
@@ -31,6 +32,7 @@ namespace GoatVaultClient.ViewModels
         private bool _categoriesSortAsc = true;
         private bool _passwordsSortAsc = true;
         [ObservableProperty] private bool _isPasswordVisible = false;
+        [ObservableProperty] private double vaultScore;
 
         //Dependency Injection
         private readonly VaultService _vaultService;
@@ -38,7 +40,7 @@ namespace GoatVaultClient.ViewModels
         private readonly FakeDataSource _fakeDataSource;
         private readonly IDialogService _dialogService;
         #endregion
-        public MainPageViewModel(VaultService vaultService,UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
+        public MainPageViewModel(VaultService vaultService, UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
         {
             //Dependency Injection
             _vaultService = vaultService;
@@ -51,7 +53,7 @@ namespace GoatVaultClient.ViewModels
         #region Async methods
         private async void InitializeAsync()
         {
-            
+
         }
         #endregion
         #region Synchronous methods
@@ -162,6 +164,11 @@ namespace GoatVaultClient.ViewModels
             }
             PresortCategories(true);
             PresortEntries(true);
+        }
+
+        private void CalculateVaultScore()
+        {
+            VaultScore = VaultScoreCalculatorService.CalculateScore(Passwords);
         }
 
         #endregion
@@ -275,13 +282,14 @@ namespace GoatVaultClient.ViewModels
 
             _allVaultEntries.Add(formModel);
             LoadVaultData();
+            CalculateVaultScore();
         }
 
         [RelayCommand]
         private async Task EditEntry()
         {
             // Safe check
-            if (SelectedEntry == null)  
+            if (SelectedEntry == null)
                 return;
             // Populate the list of category names from your ViewModel
             var categoriesList = Categories.ToList();
@@ -314,6 +322,7 @@ namespace GoatVaultClient.ViewModels
                 Category = formModel.Category
             };
             LoadVaultData();
+            CalculateVaultScore();
         }
         [RelayCommand]
         public async Task DeleteEntry()
@@ -331,6 +340,7 @@ namespace GoatVaultClient.ViewModels
             if (response)
             {
                 Passwords.Remove(SelectedEntry);
+                CalculateVaultScore();
             }
         }
 

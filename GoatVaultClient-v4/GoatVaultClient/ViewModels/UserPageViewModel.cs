@@ -12,6 +12,7 @@ namespace GoatVaultClient.ViewModels
     public partial class UserPageViewModel : BaseViewModel
     {
         [ObservableProperty] private string email;
+        [ObservableProperty] private double vaultScore;
 
         // Services
         private readonly HttpService _httpService;
@@ -171,6 +172,11 @@ namespace GoatVaultClient.ViewModels
                 ));
                 return false;
             }
+        }
+
+        private void CalculateVaultScore()
+        {
+            VaultScore = VaultScoreCalculatorService.CalculateScore(Passwords);
         }
     }
 }

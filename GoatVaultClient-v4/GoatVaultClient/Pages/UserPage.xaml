@@ -13,12 +13,20 @@
 
     <controls:Component Padding="{StaticResource pLarge}">
         <VerticalStackLayout Spacing="40">
-            <material:ButtonView WidthRequest="140" HeightRequest="140" HorizontalOptions="Center" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
-                <material:ButtonView.StrokeShape>
-                    <RoundRectangle CornerRadius="70"/>
-                </material:ButtonView.StrokeShape>
-                <Label FontFamily="MaterialRounded" Text="{x:Static m:MaterialRounded.Account_circle}" FontSize="72" HorizontalOptions="Center" VerticalOptions="Center"/>
-            </material:ButtonView>
+            <!-- Vault Score Section -->
+            <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                <Label Text="Vault Score" FontAttributes="Bold" FontSize="24" HorizontalOptions="Center"/>
+                <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="1000" HeightRequest="150" WidthRequest="150">
+                    <lvc:PieChart.Series>
+                        <lvc:SeriesCollection>
+                            <!-- Should be bind to real value -->
+                            <lvc:XamlGaugeSeries GaugeValue="560" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
+                            <lvc:XamlGaugeBackgroundSeries MaxRadialColumnWidth="50" Fill="LightGray"/>
+                        </lvc:SeriesCollection>
+                    </lvc:PieChart.Series>
+                </lvc:PieChart>
+            </VerticalStackLayout>
+            <!-- User Info Section -->
             <VerticalStackLayout Spacing="20" Padding="10">
                 <Grid ColumnDefinitions="200,*,Auto">
                     <Label Text="Email" FontAttributes="Bold" VerticalOptions="Center"/>
@@ -30,14 +38,6 @@
                     <material:TextField Grid.Column="1" Text="********" IsPassword="True" IsEnabled="False"/>
                     <controls:ImageButton Grid.Column="2" IconGlyph="{x:Static m:MaterialRounded.Edit}" Command="{Binding EditMasterPasswordCommand}"/>
                 </Grid>
-                <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="1000" HeightRequest="250" WidthRequest="250">
-                    <lvc:PieChart.Series>
-                        <lvc:SeriesCollection>
-                            <lvc:XamlGaugeSeries GaugeValue="560" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
-                            <lvc:XamlGaugeBackgroundSeries MaxRadialColumnWidth="50" Fill="LightGray"/>
-                        </lvc:SeriesCollection>
-                    </lvc:PieChart.Series>
-                </lvc:PieChart>
             </VerticalStackLayout>
         </VerticalStackLayout>
     </controls:Component>
