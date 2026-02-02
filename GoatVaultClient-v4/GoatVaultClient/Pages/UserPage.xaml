@@ -6,6 +6,7 @@
              xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
              xmlns:controls="clr-namespace:GoatVaultClient.Controls"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
              x:Class="GoatVaultClient.Pages.UserPage"
              x:DataType="vm:UserPageViewModel"
              BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
@@ -29,6 +30,14 @@
                     <material:TextField Grid.Column="1" Text="********" IsPassword="True" IsEnabled="False"/>
                     <controls:ImageButton Grid.Column="2" IconGlyph="{x:Static m:MaterialRounded.Edit}" Command="{Binding EditMasterPasswordCommand}"/>
                 </Grid>
+                <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="1000" HeightRequest="250" WidthRequest="250">
+                    <lvc:PieChart.Series>
+                        <lvc:SeriesCollection>
+                            <lvc:XamlGaugeSeries GaugeValue="560" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
+                            <lvc:XamlGaugeBackgroundSeries MaxRadialColumnWidth="50" Fill="LightGray"/>
+                        </lvc:SeriesCollection>
+                    </lvc:PieChart.Series>
+                </lvc:PieChart>
             </VerticalStackLayout>
         </VerticalStackLayout>
     </controls:Component>

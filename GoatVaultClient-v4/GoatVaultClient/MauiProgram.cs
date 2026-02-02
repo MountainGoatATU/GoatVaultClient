@@ -15,6 +15,8 @@ using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using UraniumUI;
 using Debug = System.Diagnostics.Debug;
+using SkiaSharp.Views.Maui.Controls.Hosting;
+using LiveChartsCore.SkiaSharpView.Maui;
 
 namespace GoatVaultClient;
 
@@ -30,6 +32,8 @@ public static class MauiProgram
             .UseUraniumUIMaterial()
             .UseUraniumUIBlurs()
             .ConfigureMopups()
+            .UseSkiaSharp()
+            .UseLiveCharts()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
