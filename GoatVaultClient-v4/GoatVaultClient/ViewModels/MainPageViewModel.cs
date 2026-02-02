@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui.Core.Extensions;
+﻿using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -33,19 +34,34 @@ namespace GoatVaultClient.ViewModels
         private bool _passwordsSortAsc = true;
         [ObservableProperty] private bool _isPasswordVisible = false;
 
+        // Sync-related properties
+        [ObservableProperty] private bool _hasUnsavedChanges = false;
+        [ObservableProperty] private bool _isSyncing = false;
+        [ObservableProperty] private string _lastSyncTime = "Never";
+        [ObservableProperty] private string _syncButtonIcon = MaterialRounded.Cloud_upload;
+        [ObservableProperty] private string _syncStatusText = "All changes saved";
+
         //Dependency Injection
-        private readonly VaultService _vaultService;
         private readonly VaultSessionService _vaultSessionService;
         private readonly FakeDataSource _fakeDataSource;
         private readonly IDialogService _dialogService;
+        private readonly SyncingService _syncingService;
         #endregion
-        public MainPageViewModel(VaultService vaultService,UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
+        public MainPageViewModel(SyncingService syncingService,UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
         {
             //Dependency Injection
-            _vaultService = vaultService;
+            _syncingService = syncingService;
             _vaultSessionService = vaultSessionService;
             _fakeDataSource = fakeDataSource;
             _dialogService = dialogService;
+
+            // Subscribe to syncing service events
+            _syncingService.SyncCompleted += OnSyncCompleted;
+            _syncingService.UnsavedChangesChanged += OnUnsavedChangesChanged;
+            _syncingService.SyncingStateChanged += OnSyncingStateChanged;
+
+            // Start auto-sync
+            _syncingService.StartAutoSync();
 
             LoadVaultData();
         }
@@ -91,7 +107,82 @@ namespace GoatVaultClient.ViewModels
             Passwords = _allVaultEntries.ToObservableCollection();
             PresortEntries(true);
         }
+        private void UpdateSyncStatus()
+        {
+            if (IsSyncing)
+            {
+                SyncStatusText = "Syncing...";
+                SyncButtonIcon = MaterialRounded.Cloud_sync;
+            }
+            else if (HasUnsavedChanges)
+            {
+                SyncStatusText = "Unsaved changes";
+                SyncButtonIcon = MaterialRounded.Cloud_upload;
+            }
+            else
+            {
+                SyncStatusText = "All changes saved";
+                SyncButtonIcon = MaterialRounded.Cloud_done;
+            }
 
+            if (_syncingService.LastSyncTime != DateTime.MinValue)
+            {
+                var timeSinceSync = DateTime.UtcNow - _syncingService.LastSyncTime;
+                if (timeSinceSync.TotalMinutes < 1)
+                {
+                    LastSyncTime = "Just now";
+                }
+                else if (timeSinceSync.TotalHours < 1)
+                {
+                    LastSyncTime = $"{(int)timeSinceSync.TotalMinutes}m ago";
+                }
+                else if (timeSinceSync.TotalDays < 1)
+                {
+                    LastSyncTime = $"{(int)timeSinceSync.TotalHours}h ago";
+                }
+                else
+                {
+                    LastSyncTime = _syncingService.LastSyncTime.ToLocalTime().ToString("MMM dd, HH:mm");
+                }
+            }
+        }
+        #region Sync event handlers
+        private void OnSyncCompleted(object? sender, SyncCompletedEventArgs e)
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                UpdateSyncStatus();
+
+                // Only show toast for manual syncs or failed auto-syncs
+                if (e.Result.SyncType == SyncType.Manual || !e.Result.Success)
+                {
+                    var message = e.Result.Message;
+                    var duration = e.Result.Success ? ToastDuration.Short : ToastDuration.Long;
+
+                    //var toast = Toast.Make(message, duration);
+                    //await toast.Show();
+                }
+            });
+        }
+
+        private void OnUnsavedChangesChanged(object? sender, bool hasChanges)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                HasUnsavedChanges = hasChanges;
+                UpdateSyncStatus();
+            });
+        }
+
+        private void OnSyncingStateChanged(object? sender, bool isSyncing)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                IsSyncing = isSyncing;
+                UpdateSyncStatus();
+            });
+        }
+        #endregion
         private void PresortCategories(bool matchUi = false)
         {
             // Toggle sort - matchUI indicates whether to keep the current sort order (true) or toggle it (false)
@@ -164,6 +255,15 @@ namespace GoatVaultClient.ViewModels
         #endregion
 
         #region Commands
+        /*
+         * Sync commands
+         */
+        [RelayCommand]
+        public async Task SyncVault()
+        {
+            var result = await _syncingService.SyncNowAsync();
+            // Toast is already shown by the event handler
+        }
 
         /*
          * Categories Commands
@@ -185,18 +285,27 @@ namespace GoatVaultClient.ViewModels
 
             if (result != null)
             {
-                var exists = Categories.Any(c => c.Name.Equals(result, StringComparison.OrdinalIgnoreCase));
+                var exists = _allVaultCategories.Any(c => c.Name.Equals(result, StringComparison.OrdinalIgnoreCase));
 
                 if (!exists)
                 {
+                    // Create temp Category
                     var temp = new CategoryItem { Name = result };
-                    Categories.Add(temp);
+                    // Add it to global list
+                    _allVaultCategories.Add(temp);
+                    // Sort to match UI
+                    PresortCategories(true);
+                    // Update categories
+                    Categories = _allVaultCategories.ToObservableCollection();
+                    // Mark as changed
+                    _syncingService.MarkAsChanged();
                 }
                 else
                 {
                     // Implement Error dialog or toast
                 }
             }
+            
         }
 
         [RelayCommand]
@@ -241,6 +350,8 @@ namespace GoatVaultClient.ViewModels
                         }
                     }
                         category.Name = response;
+                    // Mark as changed 
+                    _syncingService.MarkAsChanged();
                 }
             }
         }
@@ -280,9 +391,15 @@ namespace GoatVaultClient.ViewModels
                             _allVaultEntries.Remove(pwd);
                         }
                     }
-                    
                 }
-                _allVaultCategories.Remove(target);
+                // Remove from UI
+                Categories.Remove(target);
+                // Remove from list
+                _allVaultCategories.Remove(category);
+                // Set selected category
+                SelectedCategory = _allVaultCategories.Find(c => c.Name == "All");
+                // Mark as changed
+                _syncingService.MarkAsChanged();
             }
         }
 
@@ -305,12 +422,12 @@ namespace GoatVaultClient.ViewModels
         public async Task CreateEntry()
         {
             // Populate the list of category names from your ViewModel
-            var categoriesList = Categories.ToList();
+            var categoriesList = _allVaultCategories.ToList();
 
             var formModel = new VaultEntryForm(categoriesList)
             {
                 // Optional: Set a default selected category
-                Category = Categories.FirstOrDefault()?.Name ?? throw new NullReferenceException()
+                Category = _allVaultCategories.FirstOrDefault()?.Name ?? throw new NullReferenceException()
             };
 
             // 2. Show the Auto-Generated Dialog
@@ -325,9 +442,22 @@ namespace GoatVaultClient.ViewModels
             {
                 return;
             }
-
-            _allVaultEntries.Add(formModel);
-            LoadVaultData();
+            var newEntry = new VaultEntry
+            {
+                UserName = formModel.UserName,
+                Site = formModel.Site,
+                Password = formModel.Password,
+                Description = formModel.Description,
+                Category = formModel.Category
+            };
+            // Add to list
+            _allVaultEntries.Add(newEntry);
+            // Sort to match UI
+            PresortEntries(true);
+            // Update UI
+            Passwords = _allVaultEntries.ToObservableCollection();
+            // Mark as changed 
+            _syncingService.MarkAsChanged();
         }
 
         [RelayCommand]
@@ -367,7 +497,8 @@ namespace GoatVaultClient.ViewModels
                 Description = formModel.Description,
                 Category = formModel.Category
             };
-            LoadVaultData();
+            // Mark as changed
+            _syncingService.MarkAsChanged();
         }
         [RelayCommand]
         public async Task DeleteEntry(VaultEntry entry)
@@ -386,9 +517,12 @@ namespace GoatVaultClient.ViewModels
             if (response)
             {
                 _allVaultEntries.Remove(target);
-
+                Passwords.Remove(target);
             }
-            LoadVaultData();
+            // Sort
+            PresortEntries(true);
+            // Mark as changed
+            _syncingService.MarkAsChanged();
         }
 
         [RelayCommand]
