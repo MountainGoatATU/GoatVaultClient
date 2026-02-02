@@ -74,7 +74,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<VaultSessionService>();
         builder.Services.AddSingleton<MarkdownHelperService>();
         builder.Services.AddSingleton<ConnectivityService>();
-        builder.Services.AddSingleton<SyncingService>();
 
         // Test services
         builder.Services.AddSingleton<FakeDataSource>();
