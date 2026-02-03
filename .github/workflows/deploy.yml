@@ -73,7 +73,7 @@ jobs:
           $config = @{
             GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
-          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.json"
+          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.WORKING_DIRECTORY }}/appsettings.json"
           
       - name: Create appsettings.dev.json
         if: needs.determine-environment.outputs.environment == 'dev'
@@ -82,7 +82,7 @@ jobs:
           $config = @{
             GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
-          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.dev.json"
+          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.WORKING_DIRECTORY }}/appsettings.dev.json"
 
       - name: Create appsettings.prod.json
         if: needs.determine-environment.outputs.environment == 'prod'
@@ -91,7 +91,7 @@ jobs:
           $config = @{
             GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
-          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.prod.json"
+          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.WORKING_DIRECTORY }}/appsettings.prod.json"
       # --------------------------
       # Enable caching for .NET packages and MAUI workloads
       # --------------------------
