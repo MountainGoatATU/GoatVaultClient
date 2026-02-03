@@ -20,9 +20,7 @@ on:
         required: true
         default: 'dev'
         type: choice
-        options:
-          - dev
-          - prod
+        options: ['prod', 'dev']
 
 permissions:
   contents: write
@@ -37,7 +35,7 @@ env:
 
 jobs:
 
-determine-environment:
+  determine-environment:
     runs-on: ubuntu-latest
     outputs:
       environment: ${{ steps.set-env.outputs.environment }}
@@ -68,17 +66,6 @@ determine-environment:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           dotnet-quality: "preview"
-          
-      - name: Determine environment
-        id: set-env
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo "environment=prod" >> $GITHUB_OUTPUT
-          else
-            echo "environment=dev" >> $GITHUB_OUTPUT
-          fi
 
       - name: Create appsettings.dev.json
         if: needs.determine-environment.outputs.environment == 'dev'
