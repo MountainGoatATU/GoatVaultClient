@@ -13,6 +13,16 @@ on:
       - refactor-v4
     paths-ignore:
       - "*.md"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
 
 permissions:
   contents: write
@@ -26,9 +36,25 @@ env:
   CONFIGURATION: "Release"
 
 jobs:
+
+determine-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+    steps:
+      - name: Determine environment
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
   build:
     runs-on: windows-latest
-
+    
     steps:
       # --------------------------
       # Setup environment
@@ -42,6 +68,35 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           dotnet-quality: "preview"
+          
+      - name: Determine environment
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create appsettings.dev.json
+        if: needs.determine-environment.outputs.environment == 'dev'
+        run: |
+          cat > ${{ env.WORKING_DIRECTORY }}/appsettings.dev.json << 'EOF'
+          {
+           "GOATVAULT_SERVER_BASE_URL": "https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com"
+          }
+          EOF
+
+      - name: Create appsettings.prod.json
+        if: needs.determine-environment.outputs.environment == 'prod'
+        run: |
+          cat > ${{ env.WORKING_DIRECTORY }}/appsettings.prod.json << 'EOF'
+          {
+            "GOATVAULT_SERVER_BASE_URL": "http://localhost:8000/"
+          }
+          EOF
 
       # --------------------------
       # Enable caching for .NET packages and MAUI workloads
