@@ -73,7 +73,7 @@ jobs:
           $config = @{
             GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
-          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.WORKING_DIRECTORY }}/appsettings.json"
+          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.WORKING_DIRECTORY }}/GoatVaultClient/appsettings.json"
           
       - name: Create appsettings.dev.json
         if: needs.determine-environment.outputs.environment == 'dev'
