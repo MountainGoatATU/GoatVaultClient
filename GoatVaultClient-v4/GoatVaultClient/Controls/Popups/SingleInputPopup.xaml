@@ -5,18 +5,18 @@
                   xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
                   xmlns:controls="clr-namespace:GoatVaultClient.Controls"
                   xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-                  x:Class="GoatVaultClient.Controls.Popups.AddCategoryPopup"
+                  x:Class="GoatVaultClient.Controls.Popups.SingleInputPopup"
                   BackgroundColor="#80000000"
                   CloseWhenBackgroundIsClicked="True">
 
 
-    <controls:PopupTemplate Title="Create Category"
+    <controls:PopupTemplate Title="{Binding Title}"
                             FrameWidth="500"
                             AcceptCommand="{Binding AcceptCommand}"
                             CancelCommand="{Binding CancelCommand}"
                             AcceptText="Save">
         <VerticalStackLayout>
-            <material:TextField x:Name="InputEntry" Title="Category Name">
+            <material:TextField x:Name="InputField" Title="{Binding InputFieldTitle}" Text="{Binding InputFieldText}">
             </material:TextField>
         </VerticalStackLayout>
     </controls:PopupTemplate>

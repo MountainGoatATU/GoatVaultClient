@@ -397,3 +397,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/GoatVaultClient-v4/GoatVaultClient/appsettings.prod.json
+/GoatVaultClient-v4/GoatVaultClient/appsettings.json
+/GoatVaultClient-v4/GoatVaultClient/appsettings.dev.json
