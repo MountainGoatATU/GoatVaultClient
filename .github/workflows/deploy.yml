@@ -71,7 +71,7 @@ jobs:
         shell: pwsh
         run: |
           $config = @{
-            "GOATVAULT_SERVER_BASE_URL":"${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
+            GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
           $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.json"
           
@@ -80,7 +80,7 @@ jobs:
         shell: pwsh
         run: |
           $config = @{
-            "GOATVAULT_SERVER_BASE_URL":"${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
+            GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
           $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.dev.json"
 
@@ -89,7 +89,7 @@ jobs:
         shell: pwsh
         run: |
           $config = @{
-            "GOATVAULT_SERVER_BASE_URL":"${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
+            GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
           $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.prod.json"
       # --------------------------
