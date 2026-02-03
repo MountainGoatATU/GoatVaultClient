@@ -67,19 +67,9 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           dotnet-quality: "preview"
 
-      - name: Create appsettings.dev.json
-        if: needs.determine-environment.outputs.environment == 'dev'
+      - name: Create appsettings.json
         run: |
-          cat > ${{ env.WORKING_DIRECTORY }}/appsettings.dev.json << 'EOF'
-          {
-           "GOATVAULT_SERVER_BASE_URL": "https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com"
-          }
-          EOF
-
-      - name: Create appsettings.prod.json
-        if: needs.determine-environment.outputs.environment == 'prod'
-        run: |
-          cat > ${{ env.WORKING_DIRECTORY }}/appsettings.prod.json << 'EOF'
+          cat > ${{ env.WORKING_DIRECTORY }}/appsettings.json << 'EOF'
           {
             "GOATVAULT_SERVER_BASE_URL": "http://localhost:8000/"
           }
