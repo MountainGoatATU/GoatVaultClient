@@ -324,6 +324,18 @@ public partial class LoginPageViewModel(
         }
     }
 
+    [RelayCommand]
+    private async Task RemoveOfflineAccount(DbModel account)
+    {
+        if (account == null) return;
+
+        // Remove from local database
+        await vaultService.DeleteUserFromLocalAsync(account.Id);
+
+        // Remove from ObservableCollection
+        LocalAccounts.Remove(account);
+    }
+
     private async Task NavigateToMainPage()
     {
         if (Application.Current != null)

@@ -1,23 +1,27 @@
-using System.Windows.Input;
 using Mopups.Pages;
 using Mopups.Services;
+using System.ComponentModel;
+using System.Windows.Input;
 
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class AuthorizePopup : PopupPage
+public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
 {
+    public string title = "Authorization";
+    public string Title { get; set; }
+    
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
     private readonly TaskCompletionSource<string?> _tcs = new();
     public Task<string?> WaitForScan() => _tcs.Task;
-    public new required string Title { get; set; }
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
 
     // TODO: Unused method parameter
-    public AuthorizePopup(bool isPassword = true/*, string buttonText = "OK"*/)
+    public AuthorizePopup(string title, bool isPassword = true/*, string buttonText = "OK"*/)
 	{
 		InitializeComponent();
 
+        Title = title;
         InputEntry.IsPassword = isPassword;
         ShowHideAttachment.IsVisible = isPassword;
 

@@ -13,6 +13,12 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using UraniumUI.Dialogs;
 using UraniumUI.Icons.MaterialSymbols;
+using GoatVaultCore.Models.Vault;
+using GoatVaultInfrastructure.Services;
+using GoatVaultInfrastructure.Services.Vault;
+using GoatVaultInfrastructure.Services.API;
+using GoatVaultClient.Controls.Popups;
+using GoatVaultCore.Services.Secrets;
 
 namespace GoatVaultClient.ViewModels
 {
@@ -33,17 +39,30 @@ namespace GoatVaultClient.ViewModels
         private bool _categoriesSortAsc = true;
         private bool _passwordsSortAsc = true;
         [ObservableProperty] private bool _isPasswordVisible = false;
+        [ObservableProperty] private double vaultScore;
+        [ObservableProperty] private string goatComment = "";
+        [ObservableProperty] private bool isGoatCommentVisible = false;
 
         // UI Properties for the Sync Status Component
         [ObservableProperty] private bool _isSyncing = false;
 
+        // Random comments
+        private readonly List<string> goatTips = new List<string>
+        {
+            "Tip: Change your password regularly!",
+            "Tip: Avoid using the same password twice.",
+            "Tip: Enable two-factor authentication.",
+            "Tip: Your Vault score is low, check weak passwords.",
+            "Tip: Keep backup keys handy.",
+            "Tip: Consider using a passphrase instead of a single word."
+        };
         //Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
         private readonly FakeDataSource _fakeDataSource;
         private readonly IDialogService _dialogService;
         private readonly VaultService _vaultService;
         #endregion
-        public MainPageViewModel(VaultService vaultService,UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
+        public MainPageViewModel(VaultService vaultService, UserService userService, VaultSessionService vaultSessionService, FakeDataSource fakeDataSource, IDialogService dialogService)
         {
             //Dependency Injection
             _vaultService = vaultService;
@@ -52,8 +71,43 @@ namespace GoatVaultClient.ViewModels
             _dialogService = dialogService;
 
             LoadVaultData();
+
+            StartRandomGoatComments();
         }
+
+        private void StartRandomGoatComments()
+        {
+            var random = new Random();
+            var timer = Application.Current.Dispatcher.CreateTimer();
+
+            int counter = 0;
+            timer.Interval = TimeSpan.FromSeconds(1);
+
+            timer.Tick += (s, e) =>
+            {
+                counter++;
+
+                if (counter % 10 == 0) // Every 10 seconds show a comment
+                {
+                    GoatComment = goatTips[random.Next(goatTips.Count)];
+                    IsGoatCommentVisible = true;
+                }
+                else if (counter % 10 == 5) // Disapear after 5 seconds
+                {
+                    IsGoatCommentVisible = false;
+                    GoatComment = "";
+                }
+
+                if (counter >= 10) counter = 0; // Reset counter
+            };
+            timer.Start();
+        }
+
         #region Async methods
+        private async void InitializeAsync()
+        {
+
+        }
         #endregion
         #region Synchronous methods
         public void LoadVaultData()
@@ -164,6 +218,12 @@ namespace GoatVaultClient.ViewModels
             PresortCategories(true);
             PresortEntries(true);
         }
+
+        private void CalculateVaultScore()
+        {
+            VaultScore = VaultScoreCalculatorService.CalculateScore(Passwords);
+        }
+
         #endregion
 
         #region Commands
@@ -378,6 +438,10 @@ namespace GoatVaultClient.ViewModels
             PresortEntries(true);
             // Update UI
             Passwords = _allVaultEntries.ToObservableCollection();
+
+            _allVaultEntries.Add(formModel);
+            LoadVaultData();
+            CalculateVaultScore();
         }
 
         [RelayCommand]
@@ -417,6 +481,8 @@ namespace GoatVaultClient.ViewModels
                 Description = formModel.Description,
                 Category = formModel.Category
             };
+            LoadVaultData();
+            CalculateVaultScore();
         }
         [RelayCommand]
         public async Task DeleteEntry(VaultEntry entry)

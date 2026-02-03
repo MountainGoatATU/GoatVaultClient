@@ -9,6 +9,27 @@ namespace GoatVaultClient
         {
             InitializeComponent();
             BindingContext = viewModel;
+
+            GoatBubbleStack.Opacity = 0; // Start hidden
+
+            if (BindingContext is MainPageViewModel vm)
+            {
+                vm.PropertyChanged += async (sender, args) =>
+                {
+                    if (args.PropertyName == nameof(vm.IsGoatCommentVisible))
+                    {
+                        // Fade in and out 0.3 s
+                        if (vm.IsGoatCommentVisible)
+                        {
+                            await GoatBubbleStack.FadeTo(1, 300);
+                        }
+                        else
+                        {
+                            await GoatBubbleStack.FadeTo(0, 300);
+                        }
+                    }
+                };
+            }
         }
 
         protected override void OnAppearing()

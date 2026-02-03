@@ -12,7 +12,7 @@
                   CloseWhenBackgroundIsClicked="True">
 
 
-    <controls:PopupTemplate Title="Authorisation"
+    <controls:PopupTemplate Title="{Binding Title}"
                             FrameWidth="500"
                             AcceptCommand="{Binding AcceptCommand}"
                             CancelCommand="{Binding CancelCommand}"
