@@ -68,13 +68,30 @@ jobs:
           dotnet-quality: "preview"
 
       - name: Create appsettings.json
+        shell: pwsh
         run: |
-          cat > ${{ env.WORKING_DIRECTORY }}/appsettings.json << 'EOF'
-          {
-            "GOATVAULT_SERVER_BASE_URL": "http://localhost:8000/"
+          $config = @{
+            "GOATVAULT_SERVER_BASE_URL":"${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
-          EOF
+          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.json"
+          
+      - name: Create appsettings.dev.json
+        if: needs.determine-environment.outputs.environment == 'dev'
+        shell: pwsh
+        run: |
+          $config = @{
+            "GOATVAULT_SERVER_BASE_URL":"${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
+          }
+          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.dev.json"
 
+      - name: Create appsettings.prod.json
+        if: needs.determine-environment.outputs.environment == 'prod'
+        shell: pwsh
+        run: |
+          $config = @{
+            "GOATVAULT_SERVER_BASE_URL":"${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
+          }
+          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.APPSETTINGS_PATH }}/appsettings.prod.json"
       # --------------------------
       # Enable caching for .NET packages and MAUI workloads
       # --------------------------
