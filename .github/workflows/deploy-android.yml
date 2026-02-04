@@ -1,4 +1,4 @@
-name: .NET 10 MAUI Deployment - Android
+name: .NET 10 MAUI Android Build (Windows)
 
 on:
   push:
@@ -11,9 +11,6 @@ on:
       - android-deployment
     paths-ignore:
       - "*.md"
-      
-permissions:
-  contents: write
 
 env:
   WORKING_DIRECTORY: "./GoatVaultClient-v4"
@@ -22,93 +19,70 @@ env:
   CONFIGURATION: "Release"
 
 jobs:
-   android-build:
-    runs-on: ubuntu-latest
+  build-android:
+    runs-on: windows-latest
 
     steps:
-    # --------------------------
-    # Checkout repository
-    # --------------------------
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      # --------------------------
+      # Checkout repository
+      # --------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # --------------------------
-    # Setup .NET SDK
-    # --------------------------
-    - name: Setup .NET 10 SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        dotnet-quality: "preview"
+      # --------------------------
+      # Setup .NET SDK
+      # --------------------------
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-quality: "preview"
 
-   # --------------------------
-   # Enable caching for .NET packages and MAUI workloads
-   # --------------------------
+      # --------------------------
+      # Install MAUI workloads
+      # --------------------------
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
 
-    - name: Cache .NET packages
-      uses: actions/cache@v4
-      with:
-          path: ${{ github.workspace }}\..\..\.nuget\packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+      # --------------------------
+      # Restore dependencies
+      # --------------------------
+      - name: Restore NuGet packages
+        run: dotnet restore GoatVaultClient/GoatVaultClient.csproj
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Cache MAUI workloads
-      uses: actions/cache@v4
-      with:
-          path: |
-            ~\AppData\Local\Microsoft\dotnet\workloads
-            C:\Program Files\dotnet\sdk-manifests
-            C:\Program Files\dotnet\metadata
-          key: ${{ runner.os }}-maui-workloads-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-maui-workloads-
+      # --------------------------
+      # Decode Android keystore from secrets
+      # --------------------------
+      - name: Decode Android keystore
+        run: |
+          $keystorePath = "${{ env.WORKING_DIRECTORY }}\index.keystore"
+          [System.IO.File]::WriteAllBytes($keystorePath, [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
+        shell: pwsh
 
-    # --------------------------
-    # Restore dependencies + workloads
-    # --------------------------
+      # --------------------------
+      # Build & sign Android MAUI app
+      # --------------------------
+      - name: Build Android MAUI app
+        run: |
+          dotnet publish GoatVaultClient/GoatVaultClient.csproj `
+            -f ${{ env.TARGET_FRAMEWORK }} `
+            -c ${{ env.CONFIGURATION }} `
+            -o "${{ env.WORKING_DIRECTORY }}\android-build" `
+            -p:AndroidKeyStore=true `
+            -p:AndroidSigningKeyStore="${{ env.WORKING_DIRECTORY }}\index.keystore" `
+            -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
+            -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
+            -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        shell: pwsh
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
-    - name: Restore workloads
-      run: dotnet workload restore GoatVaultClient/GoatVaultClient.csproj
-      working-directory: ${{ env.WORKING_DIRECTORY }}
-
-    # --------------------------
-    # Restore only Android workloads & NuGet packages
-    # --------------------------
-    - name: Restore Android dependencies
-      run: dotnet msbuild GoatVaultClient/GoatVaultClient.csproj /t:Restore /p:TargetFramework=net10.0-android
-      working-directory: ${{ env.WORKING_DIRECTORY }}
-
-    # --------------------------
-    # Decode keystore file from secrets
-    # --------------------------
-    - name: Decode Android keystore
-      run: |
-        echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > index.keystore
-
-    # --------------------------
-    # Build & sign Android app
-    # --------------------------
-    - name: Build & sign Android MAUI app
-      run: |
-        dotnet msbuild GoatVaultClient/GoatVaultClient.csproj \
-          /t:Publish \
-          /p:Configuration=Release \
-          /p:TargetFramework=net10.0-android \
-          /p:AndroidKeyStore=true \
-          /p:AndroidSigningKeyStore=${{ github.workspace }}/appalchemy.keystore \
-          /p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} \
-          /p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} \
-          /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }} \
-          /p:OutputPath=${{ github.workspace }}/android-build
-      working-directory: ${{ env.WORKING_DIRECTORY }}
-
-    # --------------------------
-    # Upload APK/AAB artifact
-    # --------------------------
-    - name: Upload Android build artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-app
-        path: android-build/**
-        retention-days: 30
+      # --------------------------
+      # Upload APK/AAB artifact
+      # --------------------------
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app
+          path: ${{ env.WORKING_DIRECTORY }}\android-build\**
+          retention-days: 30
