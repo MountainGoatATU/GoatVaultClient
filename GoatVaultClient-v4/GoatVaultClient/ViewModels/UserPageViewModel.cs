@@ -2,10 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Models.API;
+using GoatVaultCore.Models.Vault;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using Mopups.Services;
+using PasswordGenerator;
 
 namespace GoatVaultClient.ViewModels
 {
@@ -116,7 +118,71 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task EditMasterPasswordAsync()
         {
-            // Not implemented yet
+            var user = _vaultSessionService.CurrentUser;
+            if (user == null)
+                return;
+
+            // Ask for current password
+            var password = await PromptUserAsync("Confirm Password", true);
+            if (password == null) return;
+
+            // Verify with server
+            var authorized = await AuthorizeAsync(password);
+            if (!authorized)
+            {
+                return;
+            }
+
+            // Ask for new password
+            var newPassword = await PromptUserAsync("Enter new master password", true);
+            if (string.IsNullOrWhiteSpace(newPassword))
+                return;
+
+            // Re-encrypt vault with new password
+            var newVaultModel = _vaultService.EncryptVault(newPassword, _vaultSessionService.DecryptedVault);
+
+            // Update server
+            try
+            {
+                var request = new UserRequest
+                {
+                    Email = user.Email,
+                    MfaEnabled = user.MfaEnabled,
+                    Vault = user.Vault
+                };
+                var updatedUser = await _httpService.PatchAsync<UserResponse>(
+                    $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
+                    request
+                );
+            }
+            catch (Exception ex)
+            {
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: $"Failed to update master password: {ex.Message}",
+                    aText: "OK"
+                ));
+                return;
+            }
+
+            // Update local database
+            var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
+            if (dbUser != null)
+            {
+                dbUser.Vault = newVaultModel;
+                await _vaultService.UpdateUserInLocalAsync(dbUser);
+            }
+
+            // Update local sesion
+            _vaultSessionService.CurrentUser.Vault = newVaultModel;
+            _vaultSessionService.MasterPassword = newPassword;
+
+            // Confirmation
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Success",
+                body: "Master password updated successfully.",
+                aText: "OK"
+            ));
         }
 
         // Method to show popup and get user input
