@@ -76,7 +76,7 @@ jobs:
     # Restore only Android workloads & NuGet packages
     # --------------------------
     - name: Restore Android dependencies
-      run: dotnet restore GoatVaultClient/GoatVaultClient.csproj
+      run: dotnet msbuild GoatVaultClient/GoatVaultClient.csproj /t:Restore /p:TargetFramework=net10.0-android
       working-directory: ${{ env.WORKING_DIRECTORY }}
 
     # --------------------------
