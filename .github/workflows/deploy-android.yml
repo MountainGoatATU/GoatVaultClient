@@ -42,15 +42,33 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         dotnet-quality: "preview"
 
-    # --------------------------
-    # Install MAUI workloads
-    # --------------------------
-    - name: Install MAUI workload
-      run: dotnet workload install maui-android
+   # --------------------------
+   # Enable caching for .NET packages and MAUI workloads
+   # --------------------------
+
+    - name: Cache .NET packages
+      uses: actions/cache@v4
+      with:
+          path: ${{ github.workspace }}\..\..\.nuget\packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+    - name: Cache MAUI workloads
+      uses: actions/cache@v4
+      with:
+          path: |
+            ~\AppData\Local\Microsoft\dotnet\workloads
+            C:\Program Files\dotnet\sdk-manifests
+            C:\Program Files\dotnet\metadata
+          key: ${{ runner.os }}-maui-workloads-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-maui-workloads-
 
     # --------------------------
-    # Restore dependencies
+    # Restore dependencies + workloads
     # --------------------------
+
     - name: Restore workloads
       run: dotnet workload restore GoatVaultClient/GoatVaultClient.csproj
       working-directory: ${{ env.WORKING_DIRECTORY }}
