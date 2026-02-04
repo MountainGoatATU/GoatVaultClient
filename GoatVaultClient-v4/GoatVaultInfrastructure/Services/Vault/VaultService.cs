@@ -123,11 +123,11 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
 
     public async Task SyncAndCloseAsync(UserResponse? user, string password, VaultData? vaultData)
     {
-        SaveVaultAsync(user, password, vaultData);
-
+        await SaveVaultAsync(user, password, vaultData);
         vaultSessionService.Lock();
     }
-    public async Task SaveVaultAsync (UserResponse? user, string password, VaultData? vaultData)
+
+    public async Task SaveVaultAsync(UserResponse? user, string password, VaultData? vaultData)
     {
         var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
 
@@ -138,51 +138,74 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
         {
             // Encrypt the vault data
             var encryptedModel = EncryptVault(password, vaultData);
+            var now = DateTime.UtcNow;
 
-            // Model for local DB
-            var dbModel = new DbModel
-            {
-                Id = user.Id,
-                Email = user.Email,
-                AuthSalt = user.AuthSalt,
-                MfaEnabled = user.MfaEnabled,
-                Vault = encryptedModel,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            // Model for server sync
-            var userRequest = new UserRequest
-            {
-                Email = user.Email,
-                MfaEnabled = user.MfaEnabled,
-                Vault = encryptedModel
-            };
-
+            // Check if user exists in local DB
             var existingUser = await goatVaultDb.LocalCopy.FirstOrDefaultAsync(u => u.Id == user.Id);
+
             if (existingUser != null)
             {
-                // Update local Vault
-                existingUser.Vault = dbModel.Vault;
+                // Update existing user
+                existingUser.Vault = encryptedModel;
+                existingUser.UpdatedAt = now;
+                existingUser.Email = user.Email;
+                existingUser.MfaEnabled = user.MfaEnabled;
                 goatVaultDb.LocalCopy.Update(existingUser);
-                // Sync with server
-                var userResponse = await httpService.PatchAsync<UserResponse>(
-                $"{url}v1/users/{ vaultSessionService.CurrentUser?.Id}",
-                userRequest
-            );
             }
             else
             {
-                // Create local vault
+                // Create new user in local DB
+                var dbModel = new DbModel
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    AuthSalt = user.AuthSalt,
+                    MfaEnabled = user.MfaEnabled,
+                    Vault = encryptedModel,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = now
+                };
                 goatVaultDb.LocalCopy.Add(dbModel);
             }
 
+            // Save to local database first
             await goatVaultDb.SaveChangesAsync();
+
+            // Then try to sync with server if online
+            try
+            {
+                var userRequest = new UserRequest
+                {
+                    Email = user.Email,
+                    MfaEnabled = user.MfaEnabled,
+                    Vault = encryptedModel
+                };
+
+                var userResponse = await httpService.PatchAsync<UserResponse>(
+                    $"{url}v1/users/{user.Id}",
+                    userRequest
+                );
+
+                // Update local with server timestamps after successful sync
+                if (existingUser != null)
+                {
+                    existingUser.UpdatedAt = userResponse.UpdatedAt;
+                    await goatVaultDb.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                // If server sync fails, that's okay - we have it saved locally
+                System.Diagnostics.Debug.WriteLine($"Server sync failed (offline mode): {ex.Message}");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error syncing on close: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error saving vault: {ex}");
+            throw;
         }
     }
+
     #endregion
     #region Sync with server
     #endregion 

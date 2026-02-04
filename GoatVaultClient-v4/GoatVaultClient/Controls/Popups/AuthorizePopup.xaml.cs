@@ -9,7 +9,7 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
 {
     public string title = "Authorization";
     public string Title { get; set; }
-    
+
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
     private readonly TaskCompletionSource<string?> _tcs = new();
     public Task<string?> WaitForScan() => _tcs.Task;

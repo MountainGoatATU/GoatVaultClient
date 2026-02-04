@@ -30,20 +30,32 @@ public partial class LoginPageViewModel(
     [ObservableProperty] private bool _isConnected = true;
     [ObservableProperty] private string _connectivityMessage = string.Empty;
     [ObservableProperty] private string _connectionType = string.Empty;
-    [ObservableProperty] private ObservableCollection<DbModel> _localAccounts = new();
+    [ObservableProperty] private ObservableCollection<DbModel> _localAccounts = [];
     [ObservableProperty] private DbModel? _selectedAccount;
     [ObservableProperty] private bool _hasLocalAccounts;
     [ObservableProperty] private string? _offlinePassword;
     public async void Initialize()
     {
-        // Get initial state
-        UpdateConnectivityState();
-        // Subscribe to changes
-        connectivityService.ConnectivityChanged += OnConnectivityChanged;
-        // Load local accounts
-        await LoadLocalAccountsAsync();
+        try
+        {
+            // Get initial state
+            UpdateConnectivityState();
+
+            // Subscribe to changes
+            connectivityService.ConnectivityChanged += OnConnectivityChanged;
+
+            // Load local accounts
+            await LoadLocalAccountsAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error during initialization: {ex}");
+            // Set defaults in case of error
+            HasLocalAccounts = false;
+            LocalAccounts.Clear();
+        }
     }
-    public void Cleanup() 
+    public void Cleanup()
     {
         connectivityService.ConnectivityChanged -= OnConnectivityChanged;
     }
@@ -83,13 +95,16 @@ public partial class LoginPageViewModel(
     {
         // Load local accounts from the vault service
         var accounts = await GetAllLocalAccountAsync();
+
         // Update the ObservableCollection
         LocalAccounts.Clear();
+
         // Add accounts to the ObservableCollection
         foreach (var account in accounts)
         {
             LocalAccounts.Add(account);
         }
+
         // Update HasLocalAccounts property
         HasLocalAccounts = LocalAccounts.Count > 0;
     }
@@ -99,13 +114,14 @@ public partial class LoginPageViewModel(
     {
         // Use GetSection and check for null or empty value to avoid CS8600
         var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
-        string? url = urlSection.Value;
+        var url = urlSection.Value;
+
         if (string.IsNullOrWhiteSpace(url))
         {
             await Shell.Current.DisplayAlertAsync("Configuration Error", "Server base URL is not configured.", "OK");
             return;
-        }  
-        
+        }
+
         // Prevent multiple simultaneous logins
         if (IsBusy)
             return;
@@ -116,6 +132,7 @@ public partial class LoginPageViewModel(
             await Shell.Current.DisplayAlertAsync("No Connection", "Please check your internet connection and try again.", "OK");
             return;
         }
+
         // Validation
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
         {
@@ -128,9 +145,9 @@ public partial class LoginPageViewModel(
             // Set Busy
             IsBusy = true;
 
-            //Double-check connectivity before network call
+            // Double-check connectivity before network call
             var hasConnection = await connectivityService.CheckConnectivityAsync();
-            if (!hasConnection) 
+            if (!hasConnection)
             {
                 await Shell.Current.DisplayAlertAsync(
                     "Connection Error",
@@ -163,16 +180,23 @@ public partial class LoginPageViewModel(
             vaultSessionService.MasterPassword = Password;
 
             // 5. Get User Data
+            System.Diagnostics.Debug.WriteLine("Step 4: Fetching user data");
             var userResponse = await httpService.GetAsync<UserResponse>(
                 $"{url}v1/users/{initResponse.UserId}"
             );
+            System.Diagnostics.Debug.WriteLine("User data fetched successfully");
 
             vaultSessionService.CurrentUser = userResponse;
+
             // 6. Sync Local DB (Delete old if exists, save new)
+            System.Diagnostics.Debug.WriteLine("Step 5: Syncing local database");
             var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
             if (existingUser != null)
+            {
+                System.Diagnostics.Debug.WriteLine("Deleting existing local user");
                 await vaultService.DeleteUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
+            }
 
             await vaultService.SaveUserToLocalAsync(new DbModel
             {
@@ -180,44 +204,68 @@ public partial class LoginPageViewModel(
                 Email = vaultSessionService.CurrentUser.Email,
                 AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
                 MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
-                Vault = vaultSessionService.CurrentUser.Vault
+                Vault = vaultSessionService.CurrentUser.Vault,
+                CreatedAt = userResponse.CreatedAt,
+                UpdatedAt = userResponse.UpdatedAt
             });
+            System.Diagnostics.Debug.WriteLine("Local database synced");
 
             // 7. Decrypt & Store Session
+            System.Diagnostics.Debug.WriteLine("Step 6: Decrypting vault");
             vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, Password);
+            System.Diagnostics.Debug.WriteLine("Vault decrypted successfully");
 
             // 8. Navigate to App (MainPage)
-            // Note: Originally you went to GratitudePage, but for login, MainPage is standard.
-            // Using "//MainPage" clears the stack so 'Back' doesn't go to Login.
-
             if (Application.Current != null)
                 Application.Current.MainPage = new AppShell();
 
             await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
         }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await Shell.Current.DisplayAlertAsync("Login Failed", "Invalid email or password. Please try again.", "OK");
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await Shell.Current.DisplayAlertAsync("Account Not Found", "No account found with this email address.", "OK");
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            await Shell.Current.DisplayAlertAsync("Invalid Request", "Please check your email and password.", "OK");
+        }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
             await Shell.Current.DisplayAlertAsync("Error", "This email is already registered.", "OK");
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException httpEx)
         {
-            // Network-related errors
+            // Other HTTP errors - show the actual error message from server
             await Shell.Current.DisplayAlertAsync(
                 "Connection Error",
-                "Unable to connect to the server. Please check your internet connection.",
+                $"Unable to connect to the server. {httpEx.Message}",
                 "OK");
         }
-        catch (TaskCanceledException)
+        catch (TimeoutException)
         {
-            // Timeout errors
             await Shell.Current.DisplayAlertAsync(
                 "Timeout",
-                "The request timed out. Please try again.",
+                "The request timed out. Please check your internet connection and try again.",
+                "OK");
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("decrypt"))
+        {
+            await Shell.Current.DisplayAlertAsync(
+                "Decryption Error",
+                "Unable to decrypt your vault. This may indicate a data corruption issue.",
                 "OK");
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            System.Diagnostics.Debug.WriteLine($"Login error: {ex}");
+            await Shell.Current.DisplayAlertAsync(
+                "Error",
+                "An unexpected error occurred. Please try again later.",
+                "OK");
         }
         finally
         {
@@ -279,7 +327,9 @@ public partial class LoginPageViewModel(
                     Email = dbUser.Email,
                     AuthSalt = dbUser.AuthSalt,
                     MfaEnabled = dbUser.MfaEnabled,
-                    Vault = dbUser.Vault
+                    Vault = dbUser.Vault,
+                    CreatedAt = dbUser.CreatedAt,
+                    UpdatedAt = dbUser.UpdatedAt
                 };
 
                 // Navigate to app
@@ -306,7 +356,7 @@ public partial class LoginPageViewModel(
 
     /// <summary>
     /// Quick login by selecting a local account (online mode)
-    /// This will auto-fill the email field
+    /// This will autofill the email field
     /// </summary>
     [RelayCommand]
     private void SelectLocalAccount(DbModel account)
@@ -325,7 +375,7 @@ public partial class LoginPageViewModel(
     }
 
     [RelayCommand]
-    private async Task RemoveOfflineAccount(DbModel account)
+    private async Task RemoveOfflineAccount(DbModel? account)
     {
         if (account == null) return;
 

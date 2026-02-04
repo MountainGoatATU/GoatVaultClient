@@ -12,12 +12,22 @@ public partial class LoginPage : ContentPage
         _viewModel = vm;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        //Initialize connectivity monitoring
-        _viewModel.Initialize();
+        try
+        {
+            // Initialize connectivity monitoring
+            _viewModel.Initialize();
+        }
+        catch (Exception ex)
+        {
+            // Log the error for debugging
+            System.Diagnostics.Debug.WriteLine($"Error initializing login page: {ex}");
+            await DisplayAlertAsync("Error", "Failed to initialize login page. Please restart the application.", "OK");
+        }
     }
+
     protected override void OnDisappearing()
     {
         base.OnDisappearing();

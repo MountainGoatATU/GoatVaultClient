@@ -59,7 +59,6 @@ public partial class RegisterPageViewModel(
             registerRequest.Vault = vaultPayload;
 
             // 3. API: Register
-            // Note: Ideally move these URL strings to a Constants file
             var registerResponse = await httpService.PostAsync<AuthRegisterResponse>(
                 $"{url}/v1/auth/register",
                 registerRequest
@@ -89,7 +88,6 @@ public partial class RegisterPageViewModel(
             vaultSessionService.CurrentUser = userResponse;
 
             // 6. Local Database Logic
-            // Check if user exists locally, if so, remove them (fresh start)
             var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
             if (existingUser != null)
@@ -102,26 +100,47 @@ public partial class RegisterPageViewModel(
                 Email = vaultSessionService.CurrentUser.Email,
                 AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
                 MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
-                Vault = vaultSessionService.CurrentUser.Vault
+                Vault = vaultSessionService.CurrentUser.Vault,
+                CreatedAt = vaultSessionService.CurrentUser.CreatedAt,
+                UpdatedAt = vaultSessionService.CurrentUser.UpdatedAt
             });
 
             // 7. Decrypt & Store Session in RAM
             vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, Password);
 
             // 8. Navigate
-            // Using Shell navigation is standard for MAUI
             await Shell.Current.GoToAsync(nameof(GratitudePage));
-
-            // If not using Shell routes, use: 
-            // await Application.Current.MainPage.Navigation.PushAsync(new GratitudePage(...));
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
-            await Shell.Current.DisplayAlertAsync("Error", "This email is already registered.", "OK");
+            await Shell.Current.DisplayAlertAsync("Email Already Registered",
+                "An account with this email already exists. Please use a different email or try logging in.", "OK");
         }
-        catch (Exception)
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            await Shell.Current.GoToAsync($"//{nameof(IntroductionPage)}");
+            await Shell.Current.DisplayAlertAsync("Invalid Input",
+                "Please check your email format and password requirements.", "OK");
+        }
+        catch (HttpRequestException httpEx)
+        {
+            // Other HTTP errors
+            System.Diagnostics.Debug.WriteLine($"Registration HTTP error: {httpEx}");
+            await Shell.Current.DisplayAlertAsync("Registration Failed",
+                $"Unable to complete registration. {httpEx.Message}", "OK");
+        }
+        catch (TimeoutException)
+        {
+            await Shell.Current.DisplayAlertAsync(
+                "Timeout",
+                "The registration request timed out. Please check your internet connection and try again.",
+                "OK");
+        }
+        catch (Exception ex)
+        {
+            // Log the error and show user-friendly message
+            System.Diagnostics.Debug.WriteLine($"Registration error: {ex}");
+            await Shell.Current.DisplayAlertAsync("Error",
+                "An unexpected error occurred during registration. Please try again later.", "OK");
         }
         finally
         {
