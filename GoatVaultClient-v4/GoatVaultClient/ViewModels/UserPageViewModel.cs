@@ -360,21 +360,50 @@ namespace GoatVaultClient.ViewModels
                 IsBusy = true;
 
                 // Ask for current password
+                System.Diagnostics.Debug.WriteLine("Prompting for password");
                 var enteredPassword = await PromptUserAsync("Confirm Password", true);
-                if (enteredPassword == null) return;
-
-                // Verify with server
-                var authorized = await AuthorizeAsync(enteredPassword);
-                if (!authorized)
+                if (enteredPassword == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("Password prompt cancelled");
                     return;
                 }
 
-                // Ask for new email
-                var newEmail = await PromptUserAsync("Enter new email", false);
-                if (string.IsNullOrWhiteSpace(newEmail) || newEmail == user.Email) return;
+                System.Diagnostics.Debug.WriteLine("Verifying password");
+                // Verify password
+                var authorized = await AuthorizeAsync(enteredPassword);
+                if (!authorized)
+                {
+                    System.Diagnostics.Debug.WriteLine("Authorization failed");
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine("Password verified");
+
+                // Small delay to ensure popup is fully dismissed
+                await Task.Delay(300);
+
+                // Ask for new email using DisplayPromptAsync instead of custom popup
+                System.Diagnostics.Debug.WriteLine("Prompting for new email");
+                var newEmail = await Shell.Current.DisplayPromptAsync(
+                    "Change Email",
+                    "Enter your new email address:",
+                    "Save",
+                    "Cancel",
+                    placeholder: "user@example.com",
+                    keyboard: Keyboard.Email
+                );
+
+                System.Diagnostics.Debug.WriteLine($"New email received: '{newEmail}'");
+
+                if (string.IsNullOrWhiteSpace(newEmail) || newEmail == user.Email)
+                {
+                    System.Diagnostics.Debug.WriteLine("Email unchanged or cancelled");
+                    return;
+                }
 
                 var oldEmail = user.Email;
+
+                System.Diagnostics.Debug.WriteLine($"Updating email from '{oldEmail}' to '{newEmail}'");
 
                 // Update Server
                 var request = new UserRequest
@@ -389,17 +418,22 @@ namespace GoatVaultClient.ViewModels
                     request
                 );
 
+                System.Diagnostics.Debug.WriteLine("Server updated successfully");
+
                 // Update local database
                 var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
                 if (dbUser != null)
                 {
                     dbUser.Email = newEmail;
                     await _vaultService.UpdateUserInLocalAsync(dbUser);
+                    System.Diagnostics.Debug.WriteLine("Local database updated");
                 }
 
                 // Update session and UI
                 _vaultSessionService.CurrentUser.Email = updatedUser.Email;
                 Email = updatedUser.Email;
+
+                System.Diagnostics.Debug.WriteLine("Session updated");
 
                 await Shell.Current.DisplayAlertAsync(
                     "Success",
@@ -420,6 +454,7 @@ namespace GoatVaultClient.ViewModels
             }
         }
 
+
         [RelayCommand]
         private async Task EditMasterPasswordAsync()
         {
@@ -427,68 +462,100 @@ namespace GoatVaultClient.ViewModels
             if (user == null)
                 return;
 
-            // Ask for current password
-            var password = await PromptUserAsync("Confirm Password", true);
-            if (password == null) return;
-
-            // Verify with server
-            var authorized = await AuthorizeAsync(password);
-            if (!authorized)
-            {
-                return;
-            }
-
-            // Ask for new password
-            var newPassword = await PromptUserAsync("Enter new master password", true);
-            if (string.IsNullOrWhiteSpace(newPassword))
-                return;
-
-            // Re-encrypt vault with new password
-            var newVaultModel = _vaultService.EncryptVault(newPassword, _vaultSessionService.DecryptedVault);
-
-            // Update server
             try
             {
+                IsBusy = true;
+
+                // Ask for current password
+                System.Diagnostics.Debug.WriteLine("Prompting for current password");
+                var password = await PromptUserAsync("Confirm Password", true);
+                if (password == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Password prompt cancelled");
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine("Verifying password");
+                // Verify password
+                var authorized = await AuthorizeAsync(password);
+                if (!authorized)
+                {
+                    System.Diagnostics.Debug.WriteLine("Authorization failed");
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine("Password verified, waiting before next prompt");
+
+                // Small delay to ensure first popup is fully dismissed
+                await Task.Delay(300);
+
+                // Ask for new password
+                System.Diagnostics.Debug.WriteLine("Prompting for new password");
+                var newPassword = await PromptUserAsync("Enter new master password", true);
+
+                System.Diagnostics.Debug.WriteLine($"New password received: {(string.IsNullOrWhiteSpace(newPassword) ? "NULL/EMPTY" : "OK")}");
+
+                if (string.IsNullOrWhiteSpace(newPassword))
+                {
+                    System.Diagnostics.Debug.WriteLine("New password is empty, cancelling");
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine("Re-encrypting vault with new password");
+                // Re-encrypt vault with new password
+                var newVaultModel = _vaultService.EncryptVault(newPassword, _vaultSessionService.DecryptedVault);
+
+                // Update server
+                System.Diagnostics.Debug.WriteLine("Updating server");
                 var request = new UserRequest
                 {
                     Email = user.Email,
                     MfaEnabled = user.MfaEnabled,
-                    Vault = user.Vault
+                    Vault = newVaultModel  // Use the NEW encrypted vault!
                 };
+
                 var updatedUser = await _httpService.PatchAsync<UserResponse>(
                     $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
                     request
                 );
+
+                System.Diagnostics.Debug.WriteLine("Server updated successfully");
+
+                // Update local database
+                var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
+                if (dbUser != null)
+                {
+                    dbUser.Vault = newVaultModel;
+                    await _vaultService.UpdateUserInLocalAsync(dbUser);
+                    System.Diagnostics.Debug.WriteLine("Local database updated");
+                }
+
+                // Update session
+                _vaultSessionService.CurrentUser.Vault = newVaultModel;
+                _vaultSessionService.MasterPassword = newPassword;
+
+                System.Diagnostics.Debug.WriteLine("Session updated with new password");
+
+                // Confirmation
+                await Shell.Current.DisplayAlertAsync(
+                    "Success",
+                    "Master password updated successfully.",
+                    "OK");
             }
             catch (Exception ex)
             {
-                await MopupService.Instance.PushAsync(new PromptPopup(
-                    title: "Error",
-                    body: $"Failed to update master password: {ex.Message}",
-                    aText: "OK"
-                ));
-                return;
+                System.Diagnostics.Debug.WriteLine($"Error updating master password: {ex}");
+                await Shell.Current.DisplayAlertAsync(
+                    "Error",
+                    $"Failed to update master password: {ex.Message}",
+                    "OK");
             }
-
-            // Update local database
-            var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
-            if (dbUser != null)
+            finally
             {
-                dbUser.Vault = newVaultModel;
-                await _vaultService.UpdateUserInLocalAsync(dbUser);
+                IsBusy = false;
             }
-
-            // Update local session
-            _vaultSessionService.CurrentUser.Vault = newVaultModel;
-            _vaultSessionService.MasterPassword = newPassword;
-
-            // Confirmation
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                title: "Success",
-                body: "Master password updated successfully.",
-                aText: "OK"
-            ));
         }
+
 
         // Method to show popup and get user input
         private async Task<string?> PromptUserAsync(string title, bool isPassword)

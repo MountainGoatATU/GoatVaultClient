@@ -102,22 +102,22 @@ public static class MauiProgram
         }
 
         // Register pages
-        builder.Services.AddSingleton<MainPageViewModel>();
-        builder.Services.AddSingleton<MainPage>();
-        builder.Services.AddSingleton<IntroductionPageViewModel>();
-        builder.Services.AddSingleton<IntroductionPage>();
-        builder.Services.AddSingleton<RegisterPageViewModel>();
-        builder.Services.AddSingleton<RegisterPage>();
-        builder.Services.AddSingleton<LoginPageViewModel>();
-        builder.Services.AddSingleton<LoginPage>();
-        builder.Services.AddSingleton<GratitudePageViewModel>();
-        builder.Services.AddSingleton<GratitudePage>();
-        builder.Services.AddSingleton<EducationPageViewModel>();
-        builder.Services.AddSingleton<EducationPage>();
-        builder.Services.AddSingleton<EducationDetailViewModel>();
-        builder.Services.AddSingleton<EducationDetailPage>();
-        builder.Services.AddSingleton<UserPageViewModel>();
-        builder.Services.AddSingleton<UserPage>();
+        builder.Services.AddTransient<MainPageViewModel>();
+        builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<IntroductionPageViewModel>();
+        builder.Services.AddTransient<IntroductionPage>();
+        builder.Services.AddTransient<RegisterPageViewModel>();
+        builder.Services.AddTransient<RegisterPage>();
+        builder.Services.AddTransient<LoginPageViewModel>();
+        builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<GratitudePageViewModel>();
+        builder.Services.AddTransient<GratitudePage>();
+        builder.Services.AddTransient<EducationPageViewModel>();
+        builder.Services.AddTransient<EducationPage>();
+        builder.Services.AddTransient<EducationDetailViewModel>();
+        builder.Services.AddTransient<EducationDetailPage>();
+        builder.Services.AddTransient<UserPageViewModel>();
+        builder.Services.AddTransient<UserPage>();
 
         // Build the app
         var app = builder.Build();
