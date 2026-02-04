@@ -89,17 +89,18 @@ jobs:
     # --------------------------
     # Build & sign Android app
     # --------------------------
-    - name: Build Android MAUI app
+    - name: Build & sign Android MAUI app
       run: |
-        dotnet publish GoatVaultClient/GoatVaultClient.csproj \
-          -f ${{ env.TARGET_FRAMEWORK }} \
-          -c ${{ env.CONFIGURATION }} \
-          -o ${{ github.workspace }}/android-build \
-          -p:AndroidKeyStore=true \
-          -p:AndroidSigningKeyStore=index.keystore \
-          -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} \
-          -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} \
-          -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        dotnet msbuild GoatVaultClient/GoatVaultClient.csproj \
+          /t:Publish \
+          /p:Configuration=Release \
+          /p:TargetFramework=net10.0-android \
+          /p:AndroidKeyStore=true \
+          /p:AndroidSigningKeyStore=${{ github.workspace }}/appalchemy.keystore \
+          /p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} \
+          /p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} \
+          /p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }} \
+          /p:OutputPath=${{ github.workspace }}/android-build
       working-directory: ${{ env.WORKING_DIRECTORY }}
 
     # --------------------------
