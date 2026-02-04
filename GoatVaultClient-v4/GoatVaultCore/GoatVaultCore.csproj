@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
+    <PackageReference Include="Otp.NET" Version="1.4.1" />
     <PackageReference Include="PasswordGenerator" Version="2.1.0" />
     <PackageReference Include="SecretSharingDotNet" Version="0.14.0" />
     <PackageReference Include="zxcvbn-core" Version="8.0.0-beta0002" />

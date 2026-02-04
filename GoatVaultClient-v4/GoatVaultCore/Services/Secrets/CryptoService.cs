@@ -46,4 +46,33 @@ public static class CryptoService
 
         return Convert.ToBase64String(hash.Buffer);
     }
+
+    public static byte[] GenerateRandomBytes(int length)
+    {
+        var bytes = new byte[length];
+        Rng.GetBytes(bytes);
+        return bytes;
+    }
+
+    public static byte[] DeriveKey(string password, byte[] salt)
+    {
+        // Derive 32-byte key using Argon2id
+        var passwordBytes = Encoding.UTF8.GetBytes(password);
+        var config = new Argon2Config
+        {
+            Type = Argon2Type.DataIndependentAddressing,
+            Version = Argon2Version.Nineteen,
+            TimeCost = 10,
+            MemoryCost = 32768,
+            Lanes = 5,
+            Threads = Environment.ProcessorCount,
+            Password = passwordBytes,
+            Salt = salt,
+            HashLength = 32
+        };
+
+        using var argon2 = new Argon2(config);
+        using var hash = argon2.Hash();
+        return (byte[])hash.Buffer.Clone();
+    }
 }

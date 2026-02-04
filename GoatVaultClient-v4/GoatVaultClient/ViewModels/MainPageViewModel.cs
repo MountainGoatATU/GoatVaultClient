@@ -38,6 +38,9 @@ namespace GoatVaultClient.ViewModels
         // UI Properties for the Sync Status Component
         [ObservableProperty] private bool _isSyncing = false;
 
+        // TOTP timer
+        private IDispatcherTimer? _totpTimer;
+
         // Random comments
         private readonly List<string> _goatTips =
         [
@@ -66,7 +69,66 @@ namespace GoatVaultClient.ViewModels
 
             LoadVaultData();
 
+            StartTotpTimer();
             StartRandomGoatComments();
+        }
+
+        private void StartTotpTimer()
+        {
+            // Update TOTP codes every second
+            _totpTimer = Application.Current?.Dispatcher.CreateTimer();
+
+            if (_totpTimer != null)
+            {
+                _totpTimer.Interval = TimeSpan.FromSeconds(1);
+                _totpTimer.Tick += (s, e) =>
+                {
+                    UpdateTotpCodes();
+                };
+                _totpTimer.Start();
+            }
+        }
+
+        private void UpdateTotpCodes()
+        {
+            if (SelectedEntry == null || !SelectedEntry.HasMfa ||
+                string.IsNullOrWhiteSpace(SelectedEntry.MfaSecret))
+            {
+                return;
+            }
+
+            try
+            {
+                var (code, secondsRemaining) = TotpService.GenerateCodeWithTime(SelectedEntry.MfaSecret);
+                SelectedEntry.CurrentTotpCode = code;
+                SelectedEntry.TotpTimeRemaining = secondsRemaining;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error generating TOTP: {ex.Message}");
+                SelectedEntry.CurrentTotpCode = "ERROR";
+                SelectedEntry.TotpTimeRemaining = 0;
+            }
+        }
+
+        partial void OnSelectedEntryChanged(VaultEntry? value)
+        {
+            // Update TOTP immediately when entry is selected
+            if (value is { HasMfa: true } && !string.IsNullOrWhiteSpace(value.MfaSecret))
+            {
+                UpdateTotpCodes();
+            }
+        }
+
+        [RelayCommand]
+        private async Task CopyTotpCode()
+        {
+            if (SelectedEntry == null || string.IsNullOrWhiteSpace(SelectedEntry.CurrentTotpCode))
+                return;
+
+            await Clipboard.Default.SetTextAsync(SelectedEntry.CurrentTotpCode);
+            await Task.Delay(10000); // 10 seconds
+            await Clipboard.Default.SetTextAsync(""); // Clear clipboard
         }
 
         private void StartRandomGoatComments()
@@ -455,7 +517,9 @@ namespace GoatVaultClient.ViewModels
                 Site = formModel.Site,
                 Password = formModel.Password,
                 Description = formModel.Description,
-                Category = formModel.Category
+                Category = formModel.Category,
+                MfaSecret = formModel.MfaSecret,
+                HasMfa = formModel.HasMfa
             };
 
             // Add to local list
@@ -496,7 +560,9 @@ namespace GoatVaultClient.ViewModels
                 Site = target.Site,
                 Password = target.Password,
                 Description = target.Description,
-                Category = target.Category
+                Category = target.Category,
+                MfaSecret = target.MfaSecret,
+                HasMfa = target.HasMfa
             };
 
             // Create the dialog
@@ -522,7 +588,9 @@ namespace GoatVaultClient.ViewModels
                     Site = formModel.Site,
                     Password = formModel.Password,
                     Description = formModel.Description,
-                    Category = formModel.Category
+                    Category = formModel.Category,
+                    MfaSecret = formModel.MfaSecret,
+                    HasMfa = formModel.HasMfa
                 };
             }
 

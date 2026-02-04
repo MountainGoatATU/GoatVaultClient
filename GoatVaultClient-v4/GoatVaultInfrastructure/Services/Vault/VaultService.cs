@@ -4,6 +4,7 @@ using System.Text.Json;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services.API;
 using Isopoh.Cryptography.Argon2;
@@ -23,9 +24,6 @@ public interface IVaultService
 
 public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, HttpService httpService, VaultSessionService vaultSessionService) : IVaultService
 {
-    // Create a single, static, RandomNumberGenerator instance to be used throughout the application.
-    private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -49,14 +47,14 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
             Entries = []
         };
 
-        var vaultSalt = GenerateRandomBytes(16);
-        var key = DeriveKey(masterPassword, vaultSalt);
+        var vaultSalt = CryptoService.GenerateRandomBytes(16);
+        var key = CryptoService.DeriveKey(masterPassword, vaultSalt);
 
         var vaultJson = JsonSerializer.Serialize(vaultData, JsonOptions);
         var plaintextBytes = Encoding.UTF8.GetBytes(vaultJson);
 
         // Encrypt using AES-256-GCM
-        var nonce = GenerateRandomBytes(12);
+        var nonce = CryptoService.GenerateRandomBytes(12);
         var ciphertext = new byte[plaintextBytes.Length];
         var authTag = new byte[16];
 
@@ -91,7 +89,7 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
             var authTag = Convert.FromBase64String(payload.AuthTag ?? throw new Exception());
 
             // Derive encryption key
-            var key = DeriveKey(password, vaultSalt);
+            var key = CryptoService.DeriveKey(password, vaultSalt);
 
             // Decrypt
             var decryptedBytes = new byte[ciphertext.Length];
@@ -208,7 +206,9 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
 
     #endregion
     #region Sync with server
+    // TODO: Sync with server
     #endregion 
+
     #region Local Storage
     // GET
     public async Task<DbModel?> LoadUserFromLocalAsync(string userId)
@@ -247,36 +247,6 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
             goatVaultDb.LocalCopy.Remove(user);
             await goatVaultDb.SaveChangesAsync();
         }
-    }
-    #endregion
-    #region Helper Methods
-    private static byte[] GenerateRandomBytes(int length)
-    {
-        var bytes = new byte[length];
-        Rng.GetBytes(bytes);
-        return bytes;
-    }
-
-    private static byte[] DeriveKey(string password, byte[] salt)
-    {
-        // Derive 32-byte key using Argon2id
-        var passwordBytes = Encoding.UTF8.GetBytes(password);
-        var config = new Argon2Config
-        {
-            Type = Argon2Type.DataIndependentAddressing,
-            Version = Argon2Version.Nineteen,
-            TimeCost = 10,
-            MemoryCost = 32768,
-            Lanes = 5,
-            Threads = Environment.ProcessorCount,
-            Password = passwordBytes,
-            Salt = salt,
-            HashLength = 32
-        };
-
-        using var argon2 = new Argon2(config);
-        using var hash = argon2.Hash();
-        return (byte[])hash.Buffer.Clone();
     }
     #endregion
 }
