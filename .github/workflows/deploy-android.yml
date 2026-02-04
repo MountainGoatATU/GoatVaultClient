@@ -25,7 +25,6 @@ jobs:
    android-build:
     runs-on: ubuntu-latest
 
-
     steps:
     # --------------------------
     # Checkout repository
@@ -72,9 +71,12 @@ jobs:
     - name: Restore workloads
       run: dotnet workload restore GoatVaultClient/GoatVaultClient.csproj
       working-directory: ${{ env.WORKING_DIRECTORY }}
-
-    - name: Restore NuGet packages
-      run: dotnet restore GoatVaultClient/GoatVaultClient.csproj
+      
+    # --------------------------
+    # Restore only Android workloads & NuGet packages
+    # --------------------------
+    - name: Restore Android dependencies
+      run: dotnet restore GoatVaultClient/GoatVaultClient.csproj -f ${{ env.TARGET_FRAMEWORK }}
       working-directory: ${{ env.WORKING_DIRECTORY }}
 
     # --------------------------
