@@ -122,9 +122,9 @@ jobs:
           dotnet publish GoatVaultClient/GoatVaultClient.csproj `
             -f ${{ env.TARGET_FRAMEWORK }} `
             -c ${{ env.CONFIGURATION }} `
-            -o "${{ env.WORKING_DIRECTORY }}\android-build" `
+            -o "android-build" `
             -p:AndroidKeyStore=true `
-            -p:AndroidSigningKeyStore="${{ env.WORKING_DIRECTORY }}\index.keystore" `
+            -p:AndroidSigningKeyStore="index.keystore" `
             -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
             -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
             -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
