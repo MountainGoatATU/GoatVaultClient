@@ -35,6 +35,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           dotnet-quality: "preview"
+
+      - name: Create appsettings.json
+        shell: pwsh
+        run: |
+          $config = @{
+            GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
+          }
+          $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.WORKING_DIRECTORY }}/GoatVaultClient/appsettings.json"
           
       # --------------------------
       # Enable caching for .NET packages and MAUI workloads
