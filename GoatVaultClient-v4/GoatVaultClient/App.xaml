@@ -12,6 +12,7 @@
                 <ResourceDictionary>
                     <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
                     <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
+                    <converters:EyeIconConverter x:Key="EyeIconConverter"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Name="appColors" Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary x:Name="appStyles" Source="Resources/Styles/Styles.xaml" />

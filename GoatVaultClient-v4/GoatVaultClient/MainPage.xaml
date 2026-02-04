@@ -6,6 +6,7 @@
              xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
              xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
              xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+             xmlns:converters="clr-namespace:GoatVaultClient.Converters"
              xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="GoatVaultClient.MainPage"
@@ -92,6 +93,7 @@
                     </CollectionView>
                 </VerticalStackLayout>
             </controls:Component>
+            <!-- Passsword Entries List -->
             <controls:Component Grid.Row="1" Grid.Column="1">
                 <VerticalStackLayout>
                     <controls:ComponentHeader Title="Passwords">
@@ -139,6 +141,7 @@
                     </CollectionView>
                 </VerticalStackLayout>
             </controls:Component>
+            <!-- Password Entry Details View -->
             <controls:Component Grid.Row="1" Grid.Column="2" BorderMargin="0">
                 <controls:EntryDetailView Grid.Column="2" 
                       BindingContext="{Binding SelectedEntry}">

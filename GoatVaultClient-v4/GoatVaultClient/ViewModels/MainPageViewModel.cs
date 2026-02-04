@@ -438,9 +438,9 @@ namespace GoatVaultClient.ViewModels
             PresortEntries(true);
             // Update UI
             Passwords = _allVaultEntries.ToObservableCollection();
-
-            _allVaultEntries.Add(formModel);
+            // Load the data again to ensure consistency
             LoadVaultData();
+            // Recalculate Vault Score
             CalculateVaultScore();
         }
 
@@ -514,22 +514,5 @@ namespace GoatVaultClient.ViewModels
         }
 
         #endregion
-    }
-
-    public class EyeIconConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is bool isVisible)
-            {
-                return isVisible ? MaterialRounded.Visibility_off : MaterialRounded.Visibility;
-            }
-            return MaterialRounded.Visibility;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

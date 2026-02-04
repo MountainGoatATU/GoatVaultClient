@@ -117,9 +117,9 @@
                 <!-- Login Title-->
                 <Label Text="Login" Style="{x:StaticResource MaterialTitleLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
                 <!-- Email Field-->
-                <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource PrimaryTextField}"/>
+                <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource Entry}"/>
                 <!-- Password Field-->
-                <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource PrimaryTextField}">
+                <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource Entry}">
                     <material:TextField.Attachments>
                         <material:TextFieldPasswordShowHideAttachment/>
                     </material:TextField.Attachments>
