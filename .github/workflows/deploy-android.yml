@@ -110,8 +110,12 @@ jobs:
 
       - name: Decode Android keystore
         run: |
-          $keystorePath = "${{ env.WORKING_DIRECTORY }}\index.keystore"
+          $keystorePath = "${{ env.WORKING_DIRECTORY }}\GoatVaultClient\index.keystore"
           [System.IO.File]::WriteAllBytes($keystorePath, [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
+        shell: pwsh
+
+      - name: Verify keystore file
+        run: dir ${{ env.WORKING_DIRECTORY }}\GoatVaultClient\
         shell: pwsh
 
       # --------------------------
