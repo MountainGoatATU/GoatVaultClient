@@ -21,68 +21,77 @@ env:
 jobs:
   build-android:
     runs-on: windows-latest
-
+    
     steps:
       # --------------------------
-      # Checkout repository
+      # Setup environment
       # --------------------------
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --------------------------
-      # Setup .NET SDK
-      # --------------------------
       - name: Setup .NET 10 SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           dotnet-quality: "preview"
+          
+      # --------------------------
+      # Enable caching for .NET packages and MAUI workloads
+      # --------------------------
+
+      - name: Cache .NET packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}\..\..\.nuget\packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Cache MAUI workloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\Microsoft\dotnet\workloads
+            C:\Program Files\dotnet\sdk-manifests
+            C:\Program Files\dotnet\metadata
+          key: ${{ runner.os }}-maui-workloads-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-maui-workloads-
 
       # --------------------------
-      # Install MAUI workloads
+      # Restore dependencies + workloads
       # --------------------------
-      - name: Install MAUI Android workload
-        run: dotnet workload install maui-android
 
-      # --------------------------
-      # Restore dependencies
-      # --------------------------
+      - name: Restore workloads
+        run: dotnet workload restore GoatVaultClient/GoatVaultClient.csproj
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
       - name: Restore NuGet packages
         run: dotnet restore GoatVaultClient/GoatVaultClient.csproj
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       # --------------------------
-      # Decode Android keystore from secrets
+      # Build the solution
       # --------------------------
-      - name: Decode Android keystore
-        run: |
-          $keystorePath = "${{ env.WORKING_DIRECTORY }}\index.keystore"
-          [System.IO.File]::WriteAllBytes($keystorePath, [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
-        shell: pwsh
 
-      # --------------------------
-      # Build & sign Android MAUI app
-      # --------------------------
-      - name: Build Android MAUI app
-        run: |
-          dotnet publish GoatVaultClient/GoatVaultClient.csproj `
-            -f ${{ env.TARGET_FRAMEWORK }} `
-            -c ${{ env.CONFIGURATION }} `
-            -o "${{ env.WORKING_DIRECTORY }}\android-build" `
-            -p:AndroidKeyStore=true `
-            -p:AndroidSigningKeyStore="${{ env.WORKING_DIRECTORY }}\index.keystore" `
-            -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
-            -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
-            -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-        shell: pwsh
+      - name: Build the solution
+        run: dotnet build GoatVaultClient/GoatVaultClient.csproj -c ${{ env.CONFIGURATION }} -f ${{ env.TARGET_FRAMEWORK }} --no-restore
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       # --------------------------
-      # Upload APK/AAB artifact
+      # Run tests (only on main branch)
       # --------------------------
-      - name: Upload Android artifact
+
+      - name: Run tests
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: dotnet test GoatVaultTests/GoatVaultTests.csproj -c ${{ env.CONFIGURATION }} --logger trx --results-directory ./TestResults
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Upload test results
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: android-app
-          path: ${{ env.WORKING_DIRECTORY }}\android-build\**
+          name: test-results
+          path: ${{ env.WORKING_DIRECTORY }}/TestResults/*.trx
           retention-days: 30
