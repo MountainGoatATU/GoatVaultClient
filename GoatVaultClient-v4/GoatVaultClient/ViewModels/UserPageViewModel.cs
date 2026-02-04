@@ -53,7 +53,11 @@ namespace GoatVaultClient.ViewModels
             if (user == null)
             {
                 System.Diagnostics.Debug.WriteLine("User is null");
-                await Shell.Current.DisplayAlertAsync("Error", "No user logged in.", "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: "No user logged in.",
+                    aText: "OK"
+                ));
                 return;
             }
 
@@ -84,6 +88,9 @@ namespace GoatVaultClient.ViewModels
 
                 System.Diagnostics.Debug.WriteLine("Authorization successful");
 
+                // Wait for password popup to fully dismiss
+                await Task.Delay(300);
+
                 // Generate new TOTP secret
                 System.Diagnostics.Debug.WriteLine("Generating TOTP secret");
                 var secretBytes = KeyGeneration.GenerateRandomKey(20); // 160 bits
@@ -101,6 +108,9 @@ namespace GoatVaultClient.ViewModels
                 // Show QR code and secret to user
                 await ShowMfaSetupDialog();
 
+                // Small delay before verification code prompt
+                await Task.Delay(300);
+
                 // Ask user to enter a code to verify they've set it up
                 System.Diagnostics.Debug.WriteLine("Prompting for verification code");
                 var verificationCode = await PromptUserAsync("Enter 6-digit code from authenticator app", false);
@@ -108,10 +118,11 @@ namespace GoatVaultClient.ViewModels
                 if (string.IsNullOrWhiteSpace(verificationCode))
                 {
                     System.Diagnostics.Debug.WriteLine("Verification cancelled");
-                    await Shell.Current.DisplayAlertAsync(
-                        "Setup Cancelled",
-                        "MFA setup was cancelled.",
-                        "OK");
+                    await MopupService.Instance.PushAsync(new PromptPopup(
+                        title: "Setup Cancelled",
+                        body: "MFA setup was cancelled.",
+                        aText: "OK"
+                    ));
                     return;
                 }
 
@@ -123,26 +134,45 @@ namespace GoatVaultClient.ViewModels
 
                 if (!isValid)
                 {
-                    await Shell.Current.DisplayAlertAsync(
-                        "Invalid Code",
-                        "The code you entered is incorrect. Please try again.",
-                        "OK");
+                    await MopupService.Instance.PushAsync(new PromptPopup(
+                        title: "Invalid Code",
+                        body: "The code you entered is incorrect. Please try again.",
+                        aText: "OK"
+                    ));
                     return;
                 }
 
                 System.Diagnostics.Debug.WriteLine("Code verified, updating server...");
+
+                var authSaltBytes = Convert.FromBase64String(user.AuthSalt);
+                var authVerifier = CryptoService.HashPassword(password, authSaltBytes);
+
+                System.Diagnostics.Debug.WriteLine($"DEBUG MFA Enable - About to PATCH:");
+                System.Diagnostics.Debug.WriteLine($"  auth_salt: {user.AuthSalt}");
+                System.Diagnostics.Debug.WriteLine($"  auth_verifier: {authVerifier}");
+                System.Diagnostics.Debug.WriteLine($"  email: {user.Email}");
+                System.Diagnostics.Debug.WriteLine($"  mfa_enabled: true");
+                System.Diagnostics.Debug.WriteLine($"  mfa_secret: {secret}");
+                System.Diagnostics.Debug.WriteLine($"  vault keys: {user.Vault != null}");
 
                 // Update server with MFA enabled and secret
                 var updatedUser = await _httpService.PatchAsync<UserResponse>(
                     $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
                     new
                     {
+                        auth_salt = user.AuthSalt,
+                        auth_verifier = authVerifier,
+                        email = user.Email,
+                        vault = user.Vault,
                         mfa_enabled = true,
                         mfa_secret = secret
                     }
                 );
 
-                System.Diagnostics.Debug.WriteLine("Server updated successfully");
+                System.Diagnostics.Debug.WriteLine($"DEBUG MFA Enable - Server response:");
+                System.Diagnostics.Debug.WriteLine($"  mfa_enabled: {updatedUser.MfaEnabled}");
+                System.Diagnostics.Debug.WriteLine($"  mfa_secret: {updatedUser.MfaSecret}");
+
 
                 // Update local database
                 var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
@@ -156,28 +186,32 @@ namespace GoatVaultClient.ViewModels
 
                 // Update session
                 _vaultSessionService.CurrentUser.MfaEnabled = true;
+                _vaultSessionService.CurrentUser.MfaSecret = secret;
                 MfaEnabled = true;
 
                 System.Diagnostics.Debug.WriteLine("MFA enabled successfully!");
 
-                await Shell.Current.DisplayAlertAsync(
-                    "MFA Enabled",
-                    "Two-factor authentication has been successfully enabled for your account.",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "MFA Enabled",
+                    body: "Two-factor authentication has been successfully enabled for your account.",
+                    aText: "OK"
+                ));
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error enabling MFA: {ex}");
-                await Shell.Current.DisplayAlertAsync(
-                    "Error",
-                    $"Failed to enable MFA: {ex.Message}",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: $"Failed to enable MFA: {ex.Message}",
+                    aText: "OK"
+                ));
             }
             finally
             {
                 IsBusy = false;
             }
         }
+
 
         [RelayCommand]
         private async Task DisableMfaAsync()
@@ -187,7 +221,14 @@ namespace GoatVaultClient.ViewModels
             var user = _vaultSessionService.CurrentUser;
             if (user == null)
             {
-                await Shell.Current.DisplayAlertAsync("Error", "No user logged in.", "OK");
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await MopupService.Instance.PushAsync(new PromptPopup(
+                        title: "Error",
+                        body: "No user logged in.",
+                        aText: "OK"
+                    ));
+                });
                 return;
             }
 
@@ -196,19 +237,41 @@ namespace GoatVaultClient.ViewModels
                 IsBusy = true;
 
                 // Confirm action
-                var confirm = await Shell.Current.DisplayAlertAsync(
-                    "Disable MFA",
-                    "Are you sure you want to disable two-factor authentication?",
-                    "Disable",
-                    "Cancel");
+                bool confirm = false;
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    var confirmPopup = new PromptPopup(
+                        title: "Disable MFA",
+                        body: "Are you sure you want to disable two-factor authentication?",
+                        aText: "Disable",
+                        cText: "Cancel"
+                    );
+                    await MopupService.Instance.PushAsync(confirmPopup);
+                    confirm = await confirmPopup.WaitForScan();
+                });
 
                 if (!confirm)
+                {
+                    IsBusy = false;
                     return;
+                }
+
+                // Wait for confirmation popup to fully close
+                await Task.Delay(500);
 
                 // Ask for current password
                 System.Diagnostics.Debug.WriteLine("Prompting for password");
-                var password = await PromptUserAsync("Confirm Password", true);
-                if (password == null) return;
+                string? password = null;
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    password = await PromptUserAsync("Confirm Password", true);
+                });
+
+                if (password == null)
+                {
+                    IsBusy = false;
+                    return;
+                }
 
                 // Verify locally
                 System.Diagnostics.Debug.WriteLine("Verifying password locally");
@@ -216,27 +279,31 @@ namespace GoatVaultClient.ViewModels
                 if (!authorized)
                 {
                     System.Diagnostics.Debug.WriteLine("Local password verification failed");
+                    IsBusy = false;
                     return;
                 }
 
                 System.Diagnostics.Debug.WriteLine("Password verified");
 
+                // Small delay before next prompt
+                await Task.Delay(300);
+
                 // Ask for current MFA code to verify
                 System.Diagnostics.Debug.WriteLine("Prompting for MFA code");
-                var mfaCode = await Shell.Current.DisplayPromptAsync(
-                    "MFA Code Required",
-                    "Enter your current 6-digit MFA code to confirm:",
-                    "Verify",
-                    "Cancel",
-                    placeholder: "000000",
-                    maxLength: 6,
-                    keyboard: Keyboard.Numeric
-                );
+                string? mfaCode = null;
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    var mfaPopup = new AuthorizePopup("Enter your current 6-digit MFA code", isPassword: false);
+                    await MopupService.Instance.PushAsync(mfaPopup);
+                    mfaCode = await mfaPopup.WaitForScan();
+                });
+
                 System.Diagnostics.Debug.WriteLine($"MFA code returned: '{mfaCode}' (length: {mfaCode?.Length ?? 0})");
 
                 if (string.IsNullOrWhiteSpace(mfaCode))
                 {
                     System.Diagnostics.Debug.WriteLine("MFA code prompt cancelled or empty");
+                    IsBusy = false;
                     return;
                 }
 
@@ -246,10 +313,15 @@ namespace GoatVaultClient.ViewModels
                 if (dbUser == null || string.IsNullOrWhiteSpace(dbUser.MfaSecret))
                 {
                     System.Diagnostics.Debug.WriteLine("MFA secret not found in local DB");
-                    await Shell.Current.DisplayAlertAsync(
-                        "Error",
-                        "MFA secret not found. Please try logging out and back in.",
-                        "OK");
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await MopupService.Instance.PushAsync(new PromptPopup(
+                            title: "Error",
+                            body: "MFA secret not found. Please try logging out and back in.",
+                            aText: "OK"
+                        ));
+                    });
+                    IsBusy = false;
                     return;
                 }
 
@@ -259,28 +331,38 @@ namespace GoatVaultClient.ViewModels
                 if (!isValidCode)
                 {
                     System.Diagnostics.Debug.WriteLine("Invalid MFA code");
-                    await Shell.Current.DisplayAlertAsync(
-                        "Invalid Code",
-                        "The MFA code you entered is incorrect. Please try again.",
-                        "OK");
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await MopupService.Instance.PushAsync(new PromptPopup(
+                            title: "Invalid Code",
+                            body: "The MFA code you entered is incorrect. Please try again.",
+                            aText: "OK"
+                        ));
+                    });
+                    IsBusy = false;
                     return;
                 }
 
                 System.Diagnostics.Debug.WriteLine("MFA code verified successfully");
 
+                // Generate auth_verifier from current password for backend
+                var authSaltBytes = Convert.FromBase64String(user.AuthSalt);
+                var authVerifier = CryptoService.HashPassword(password, authSaltBytes);
+
                 // Update server with MFA disabled
-                // We need to include the MFA code in the request or header
                 System.Diagnostics.Debug.WriteLine("Sending PATCH request to disable MFA");
 
-                // First, set the MFA code in the Authorization header for this request
-                // (assuming your backend checks the X-MFA-Code header)
                 var updatedUser = await _httpService.PatchAsync<UserResponse>(
                     $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
                     new
                     {
+                        auth_salt = user.AuthSalt,
+                        auth_verifier = authVerifier,
+                        email = user.Email,
+                        vault = user.Vault,
                         mfa_enabled = false,
                         mfa_secret = (string?)null,
-                        mfa_code = mfaCode  // Include in request body
+                        mfa_code = mfaCode
                     }
                 );
 
@@ -295,23 +377,34 @@ namespace GoatVaultClient.ViewModels
 
                 // Update session
                 _vaultSessionService.CurrentUser.MfaEnabled = false;
+                _vaultSessionService.CurrentUser.MfaSecret = null;
                 MfaEnabled = false;
-                MfaSecret = null;
 
-                System.Diagnostics.Debug.WriteLine("Session updated");
+                System.Diagnostics.Debug.WriteLine("MFA disabled successfully!");
 
-                await Shell.Current.DisplayAlertAsync(
-                    "MFA Disabled",
-                    "Two-factor authentication has been disabled for your account.",
-                    "OK");
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await MopupService.Instance.PushAsync(new PromptPopup(
+                        title: "MFA Disabled",
+                        body: "Two-factor authentication has been successfully disabled.",
+                        aText: "OK"
+                    ));
+                });
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error disabling MFA: {ex}");
-                await Shell.Current.DisplayAlertAsync(
-                    "Error",
-                    $"Failed to disable MFA: {ex.Message}",
-                    "OK");
+                System.Diagnostics.Debug.WriteLine($"Exception type: {ex.GetType().Name}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await MopupService.Instance.PushAsync(new PromptPopup(
+                        title: "Error",
+                        body: $"Failed to disable MFA: {ex.Message}",
+                        aText: "OK"
+                    ));
+                });
             }
             finally
             {
@@ -330,17 +423,23 @@ namespace GoatVaultClient.ViewModels
                           $"• Microsoft Authenticator\n" +
                           $"• Authy";
 
-            await Shell.Current.DisplayAlertAsync(
-                "Setup MFA",
-                message,
-                "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Setup MFA",
+                body: message,
+                aText: "OK"
+            ));
+
+            // Small delay
+            await Task.Delay(300);
 
             // Copy secret to clipboard for easy entry
             await Clipboard.Default.SetTextAsync(MfaSecret ?? "");
-            await Shell.Current.DisplayAlertAsync(
-                "Secret Copied",
-                "The secret has been copied to your clipboard.",
-                "OK");
+
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Secret Copied",
+                body: "The secret has been copied to your clipboard.",
+                aText: "OK"
+            ));
         }
 
         [RelayCommand]
@@ -351,7 +450,11 @@ namespace GoatVaultClient.ViewModels
             var user = _vaultSessionService.CurrentUser;
             if (user == null)
             {
-                await Shell.Current.DisplayAlertAsync("Error", "No user logged in.", "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: "No user logged in.",
+                    aText: "OK"
+                ));
                 return;
             }
 
@@ -377,21 +480,14 @@ namespace GoatVaultClient.ViewModels
                     return;
                 }
 
-                System.Diagnostics.Debug.WriteLine("Password verified");
+                System.Diagnostics.Debug.WriteLine("Password verified, waiting before next prompt");
 
-                // Small delay to ensure popup is fully dismissed
+                // Small delay to ensure first popup is fully dismissed
                 await Task.Delay(300);
 
-                // Ask for new email using DisplayPromptAsync instead of custom popup
+                // Ask for new email
                 System.Diagnostics.Debug.WriteLine("Prompting for new email");
-                var newEmail = await Shell.Current.DisplayPromptAsync(
-                    "Change Email",
-                    "Enter your new email address:",
-                    "Save",
-                    "Cancel",
-                    placeholder: "user@example.com",
-                    keyboard: Keyboard.Email
-                );
+                var newEmail = await PromptUserAsync("Enter new email", false);
 
                 System.Diagnostics.Debug.WriteLine($"New email received: '{newEmail}'");
 
@@ -435,25 +531,26 @@ namespace GoatVaultClient.ViewModels
 
                 System.Diagnostics.Debug.WriteLine("Session updated");
 
-                await Shell.Current.DisplayAlertAsync(
-                    "Success",
-                    "Email updated successfully.",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Success",
+                    body: "Email updated successfully.",
+                    aText: "OK"
+                ));
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error updating email: {ex}");
-                await Shell.Current.DisplayAlertAsync(
-                    "Error",
-                    $"Failed to update email: {ex.Message}",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: $"Failed to update email: {ex.Message}",
+                    aText: "OK"
+                ));
             }
             finally
             {
                 IsBusy = false;
             }
         }
-
 
         [RelayCommand]
         private async Task EditMasterPasswordAsync()
@@ -505,13 +602,22 @@ namespace GoatVaultClient.ViewModels
                 // Re-encrypt vault with new password
                 var newVaultModel = _vaultService.EncryptVault(newPassword, _vaultSessionService.DecryptedVault);
 
-                // Update server
-                System.Diagnostics.Debug.WriteLine("Updating server");
-                var request = new UserRequest
+                System.Diagnostics.Debug.WriteLine("Generating new auth credentials");
+                // Generate new authentication credentials
+                var newAuthSalt = CryptoService.GenerateAuthSalt();
+                var newAuthVerifier = CryptoService.HashPassword(newPassword, newAuthSalt);
+                var newAuthSaltBase64 = Convert.ToBase64String(newAuthSalt);
+
+                // Update server with new vault AND new auth credentials
+                System.Diagnostics.Debug.WriteLine("Updating server with new vault and auth credentials");
+                var request = new
                 {
-                    Email = user.Email,
-                    MfaEnabled = user.MfaEnabled,
-                    Vault = newVaultModel  // Use the NEW encrypted vault!
+                    auth_salt = newAuthSaltBase64,
+                    auth_verifier = newAuthVerifier,
+                    email = user.Email,
+                    mfa_enabled = user.MfaEnabled,
+                    mfa_secret = user.MfaEnabled ? _vaultSessionService.CurrentUser?.MfaSecret : null,
+                    vault = newVaultModel
                 };
 
                 var updatedUser = await _httpService.PatchAsync<UserResponse>(
@@ -525,30 +631,35 @@ namespace GoatVaultClient.ViewModels
                 var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
                 if (dbUser != null)
                 {
+                    dbUser.AuthSalt = newAuthSaltBase64;
                     dbUser.Vault = newVaultModel;
+                    dbUser.MfaSecret = user.MfaEnabled ? _vaultSessionService.CurrentUser?.MfaSecret : null;
                     await _vaultService.UpdateUserInLocalAsync(dbUser);
                     System.Diagnostics.Debug.WriteLine("Local database updated");
                 }
 
                 // Update session
+                _vaultSessionService.CurrentUser.AuthSalt = newAuthSaltBase64;
                 _vaultSessionService.CurrentUser.Vault = newVaultModel;
                 _vaultSessionService.MasterPassword = newPassword;
 
-                System.Diagnostics.Debug.WriteLine("Session updated with new password");
+                System.Diagnostics.Debug.WriteLine("Session updated with new password and auth credentials");
 
                 // Confirmation
-                await Shell.Current.DisplayAlertAsync(
-                    "Success",
-                    "Master password updated successfully.",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Success",
+                    body: "Master password updated successfully. You can now login with your new password.",
+                    aText: "OK"
+                ));
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error updating master password: {ex}");
-                await Shell.Current.DisplayAlertAsync(
-                    "Error",
-                    $"Failed to update master password: {ex.Message}",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: $"Failed to update master password: {ex.Message}",
+                    aText: "OK"
+                ));
             }
             finally
             {
@@ -585,7 +696,6 @@ namespace GoatVaultClient.ViewModels
             }
         }
 
-
         private async Task<bool> AuthorizeAsync(string? enteredPassword = null)
         {
             if (string.IsNullOrWhiteSpace(enteredPassword))
@@ -603,10 +713,11 @@ namespace GoatVaultClient.ViewModels
                 if (enteredPassword != _vaultSessionService.MasterPassword)
                 {
                     System.Diagnostics.Debug.WriteLine("Password does not match stored master password");
-                    await Shell.Current.DisplayAlertAsync(
-                        "Incorrect Password",
-                        "The password you entered is incorrect. Please try again.",
-                        "OK");
+                    await MopupService.Instance.PushAsync(new PromptPopup(
+                        title: "Incorrect Password",
+                        body: "The password you entered is incorrect. Please try again.",
+                        aText: "OK"
+                    ));
                     return false;
                 }
 
@@ -617,14 +728,14 @@ namespace GoatVaultClient.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Authorization failed with exception: {ex}");
-                await Shell.Current.DisplayAlertAsync(
-                    "Error",
-                    $"An error occurred during authorization: {ex.Message}",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: $"An error occurred during authorization: {ex.Message}",
+                    aText: "OK"
+                ));
                 return false;
             }
         }
-
 
         [RelayCommand]
         private async Task LogoutAsync()
@@ -633,11 +744,14 @@ namespace GoatVaultClient.ViewModels
             {
                 IsBusy = true;
 
-                var confirm = await Shell.Current.DisplayAlertAsync(
-                    "Logout",
-                    "Are you sure you want to logout? All changes will be saved.",
-                    "Logout",
-                    "Cancel");
+                var confirmPopup = new PromptPopup(
+                    title: "Logout",
+                    body: "Are you sure you want to logout? All changes will be saved.",
+                    aText: "Logout",
+                    cText: "Cancel"
+                );
+                await MopupService.Instance.PushAsync(confirmPopup);
+                var confirm = await confirmPopup.WaitForScan();
 
                 if (!confirm)
                     return;
@@ -676,7 +790,11 @@ namespace GoatVaultClient.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error during logout: {ex}");
-                await Shell.Current.DisplayAlertAsync("Error", "Failed to logout properly. Please try again.", "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: "Failed to logout properly. Please try again.",
+                    aText: "OK"
+                ));
             }
             finally
             {
@@ -684,9 +802,4 @@ namespace GoatVaultClient.ViewModels
             }
         }
     }
-
-    // private void CalculateVaultScore()
-    // {
-    //     VaultScore = VaultScoreCalculatorService.CalculateScore();
-    // }
 }

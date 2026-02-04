@@ -176,6 +176,7 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
                 {
                     Email = user.Email,
                     MfaEnabled = user.MfaEnabled,
+                    MfaSecret = user.MfaSecret,
                     Vault = encryptedModel
                 };
 
@@ -207,7 +208,7 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
     #endregion
     #region Sync with server
     // TODO: Sync with server
-    #endregion 
+    #endregion
 
     #region Local Storage
     // GET

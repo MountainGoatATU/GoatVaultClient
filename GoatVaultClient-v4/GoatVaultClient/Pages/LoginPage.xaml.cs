@@ -1,4 +1,6 @@
+using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.ViewModels;
+using Mopups.Services;
 
 namespace GoatVaultClient.Pages;
 
@@ -24,7 +26,11 @@ public partial class LoginPage : ContentPage
         {
             // Log the error for debugging
             System.Diagnostics.Debug.WriteLine($"Error initializing login page: {ex}");
-            await DisplayAlertAsync("Error", "Failed to initialize login page. Please restart the application.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "Failed to initialize login page. Please restart the application.",
+                aText: "OK"
+            ));
         }
     }
 

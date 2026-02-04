@@ -1,11 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultClient.Controls.Popups;
+using GoatVaultClient.Pages;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
-using GoatVaultClient.Pages;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
+using Mopups.Services;
 
 namespace GoatVaultClient.ViewModels;
 
@@ -37,13 +39,21 @@ public partial class RegisterPageViewModel(
         // 1. Validation
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
         {
-            await Shell.Current.DisplayAlertAsync("Error", "Email and password are required.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "Email and password are required.",
+                aText: "OK"
+            ));
             return;
         }
 
         if (Password != ConfirmPassword)
         {
-            await Shell.Current.DisplayAlertAsync("Error", "Passwords do not match.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "Passwords do not match.",
+                aText: "OK"
+            ));
             return;
         }
 
@@ -100,6 +110,7 @@ public partial class RegisterPageViewModel(
                 Email = vaultSessionService.CurrentUser.Email,
                 AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
                 MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
+                MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
                 Vault = vaultSessionService.CurrentUser.Vault,
                 CreatedAt = vaultSessionService.CurrentUser.CreatedAt,
                 UpdatedAt = vaultSessionService.CurrentUser.UpdatedAt
@@ -113,34 +124,47 @@ public partial class RegisterPageViewModel(
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
-            await Shell.Current.DisplayAlertAsync("Email Already Registered",
-                "An account with this email already exists. Please use a different email or try logging in.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Email Already Registered",
+                body: "An account with this email already exists. Please use a different email or try logging in.",
+                aText: "OK"
+            ));
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            await Shell.Current.DisplayAlertAsync("Invalid Input",
-                "Please check your email format and password requirements.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Invalid Input",
+                body: "Please check your email format and password requirements.",
+                aText: "OK"
+            ));
         }
         catch (HttpRequestException httpEx)
         {
             // Other HTTP errors
             System.Diagnostics.Debug.WriteLine($"Registration HTTP error: {httpEx}");
-            await Shell.Current.DisplayAlertAsync("Registration Failed",
-                $"Unable to complete registration. {httpEx.Message}", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Registration Failed",
+                body: $"Unable to complete registration. {httpEx.Message}",
+                aText: "OK"
+            ));
         }
         catch (TimeoutException)
         {
-            await Shell.Current.DisplayAlertAsync(
-                "Timeout",
-                "The registration request timed out. Please check your internet connection and try again.",
-                "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Timeout",
+                body: "The registration request timed out. Please check your internet connection and try again.",
+                aText: "OK"
+            ));
         }
         catch (Exception ex)
         {
             // Log the error and show user-friendly message
             System.Diagnostics.Debug.WriteLine($"Registration error: {ex}");
-            await Shell.Current.DisplayAlertAsync("Error",
-                "An unexpected error occurred during registration. Please try again later.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "An unexpected error occurred during registration. Please try again later.",
+                aText: "OK"
+            ));
         }
         finally
         {

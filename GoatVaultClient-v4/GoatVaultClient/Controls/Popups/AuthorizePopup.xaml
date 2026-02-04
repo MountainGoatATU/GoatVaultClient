@@ -18,11 +18,7 @@
         <VerticalStackLayout>
             <material:TextField x:Name="InputEntry" 
                                 Title="Enter value"
-                                IsPassword="True">
-                <material:TextField.Attachments>
-                    <material:TextFieldPasswordShowHideAttachment x:Name="ShowHideAttachment"/>
-                </material:TextField.Attachments>
-            </material:TextField>
+                                IsPassword="False"/>
         </VerticalStackLayout>
     </controls:PopupTemplate>
 </mopups:PopupPage>

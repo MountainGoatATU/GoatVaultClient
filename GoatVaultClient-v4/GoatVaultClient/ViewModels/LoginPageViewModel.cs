@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultCore.Models;
@@ -8,6 +9,7 @@ using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
+using Mopups.Services;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
@@ -34,6 +36,7 @@ public partial class LoginPageViewModel(
     [ObservableProperty] private DbModel? _selectedAccount;
     [ObservableProperty] private bool _hasLocalAccounts;
     [ObservableProperty] private string? _offlinePassword;
+
     public async void Initialize()
     {
         try
@@ -55,10 +58,12 @@ public partial class LoginPageViewModel(
             LocalAccounts.Clear();
         }
     }
+
     public void Cleanup()
     {
         connectivityService.ConnectivityChanged -= OnConnectivityChanged;
     }
+
     private void OnConnectivityChanged(object? sender, bool isConnected)
     {
         UpdateConnectivityState();
@@ -67,13 +72,15 @@ public partial class LoginPageViewModel(
         {
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                await Shell.Current.DisplayAlertAsync(
-                    "Connection Lost",
-                    "Your internet connection was lost.",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Connection Lost",
+                    body: "Your internet connection was lost.",
+                    aText: "OK"
+                ));
             });
         }
     }
+
     private void UpdateConnectivityState()
     {
         var networkInfo = connectivityService.GetNetworkInfo();
@@ -91,6 +98,7 @@ public partial class LoginPageViewModel(
         var dbUsers = await vaultService.LoadAllUsersFromLocalAsync();
         return dbUsers;
     }
+
     private async Task LoadLocalAccountsAsync()
     {
         // Load local accounts from the vault service
@@ -118,7 +126,11 @@ public partial class LoginPageViewModel(
 
         if (string.IsNullOrWhiteSpace(url))
         {
-            await Shell.Current.DisplayAlertAsync("Configuration Error", "Server base URL is not configured.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Configuration Error",
+                body: "Server base URL is not configured.",
+                aText: "OK"
+            ));
             return;
         }
 
@@ -129,14 +141,22 @@ public partial class LoginPageViewModel(
         // Check connectivity
         if (!IsConnected)
         {
-            await Shell.Current.DisplayAlertAsync("No Connection", "Please check your internet connection and try again.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "No Connection",
+                body: "Please check your internet connection and try again.",
+                aText: "OK"
+            ));
             return;
         }
 
         // Validation
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
         {
-            await Shell.Current.DisplayAlertAsync("Error", "Email and password are required.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "Email and password are required.",
+                aText: "OK"
+            ));
             return;
         }
 
@@ -149,10 +169,11 @@ public partial class LoginPageViewModel(
             var hasConnection = await connectivityService.CheckConnectivityAsync();
             if (!hasConnection)
             {
-                await Shell.Current.DisplayAlertAsync(
-                    "Connection Error",
-                    "Unable to verify internet connection.",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Connection Error",
+                    body: "Unable to verify internet connection.",
+                    aText: "OK"
+                ));
                 return;
             }
 
@@ -173,15 +194,10 @@ public partial class LoginPageViewModel(
             {
                 System.Diagnostics.Debug.WriteLine("MFA is enabled, prompting for code");
 
-                // Prompt user for MFA code
-                mfaCode = await Shell.Current.DisplayPromptAsync(
-                    "Two-Factor Authentication",
-                    "Enter your 6-digit authenticator code:",
-                    "Verify",
-                    "Cancel",
-                    placeholder: "000000",
-                    maxLength: 6,
-                    keyboard: Keyboard.Numeric);
+                // Prompt user for MFA code using custom popup
+                var mfaPopup = new AuthorizePopup("Enter your 6-digit authenticator code", isPassword: false);
+                await MopupService.Instance.PushAsync(mfaPopup);
+                mfaCode = await mfaPopup.WaitForScan();
 
                 if (string.IsNullOrWhiteSpace(mfaCode))
                 {
@@ -233,6 +249,7 @@ public partial class LoginPageViewModel(
                 Email = vaultSessionService.CurrentUser.Email,
                 AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
                 MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
+                MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
                 Vault = vaultSessionService.CurrentUser.Vault,
                 CreatedAt = userResponse.CreatedAt,
                 UpdatedAt = userResponse.UpdatedAt
@@ -252,49 +269,69 @@ public partial class LoginPageViewModel(
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            await Shell.Current.DisplayAlertAsync("Login Failed", "Invalid email or password. Please try again.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Login Failed",
+                body: "Invalid email or password. Please try again.",
+                aText: "OK"
+            ));
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            await Shell.Current.DisplayAlertAsync("Account Not Found", "No account found with this email address.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Account Not Found",
+                body: "No account found with this email address.",
+                aText: "OK"
+            ));
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            await Shell.Current.DisplayAlertAsync("Invalid Request", "Please check your email and password.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Invalid Request",
+                body: "Please check your email and password.",
+                aText: "OK"
+            ));
         }
         catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
-            await Shell.Current.DisplayAlertAsync("Error", "This email is already registered.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "This email is already registered.",
+                aText: "OK"
+            ));
         }
         catch (HttpRequestException httpEx)
         {
             // Other HTTP errors - show the actual error message from server
-            await Shell.Current.DisplayAlertAsync(
-                "Connection Error",
-                $"Unable to connect to the server. {httpEx.Message}",
-                "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Connection Error",
+                body: $"Unable to connect to the server. {httpEx.Message}",
+                aText: "OK"
+            ));
         }
         catch (TimeoutException)
         {
-            await Shell.Current.DisplayAlertAsync(
-                "Timeout",
-                "The request timed out. Please check your internet connection and try again.",
-                "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Timeout",
+                body: "The request timed out. Please check your internet connection and try again.",
+                aText: "OK"
+            ));
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("decrypt"))
         {
-            await Shell.Current.DisplayAlertAsync(
-                "Decryption Error",
-                "Unable to decrypt your vault. This may indicate a data corruption issue.",
-                "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Decryption Error",
+                body: "Unable to decrypt your vault. This may indicate a data corruption issue.",
+                aText: "OK"
+            ));
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Login error: {ex}");
-            await Shell.Current.DisplayAlertAsync(
-                "Error",
-                "An unexpected error occurred. Please try again later.",
-                "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "An unexpected error occurred. Please try again later.",
+                aText: "OK"
+            ));
         }
         finally
         {
@@ -313,13 +350,21 @@ public partial class LoginPageViewModel(
         // Validation
         if (SelectedAccount == null)
         {
-            await Shell.Current.DisplayAlertAsync("Error", "Please select an account.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "Please select an account.",
+                aText: "OK"
+            ));
             return;
         }
 
         if (string.IsNullOrWhiteSpace(OfflinePassword))
         {
-            await Shell.Current.DisplayAlertAsync("Error", "Password is required.", "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "Password is required.",
+                aText: "OK"
+            ));
             return;
         }
 
@@ -333,7 +378,11 @@ public partial class LoginPageViewModel(
 
             if (dbUser == null)
             {
-                await Shell.Current.DisplayAlertAsync("Error", "Account not found in local storage.", "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: "Account not found in local storage.",
+                    aText: "OK"
+                ));
                 return;
             }
 
@@ -356,6 +405,7 @@ public partial class LoginPageViewModel(
                     Email = dbUser.Email,
                     AuthSalt = dbUser.AuthSalt,
                     MfaEnabled = dbUser.MfaEnabled,
+                    MfaSecret = dbUser.MfaSecret,
                     Vault = dbUser.Vault,
                     CreatedAt = dbUser.CreatedAt,
                     UpdatedAt = dbUser.UpdatedAt
@@ -367,15 +417,20 @@ public partial class LoginPageViewModel(
             catch
             {
                 // Decryption failed - wrong password
-                await Shell.Current.DisplayAlertAsync(
-                    "Error",
-                    "Incorrect password for this account.",
-                    "OK");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: "Incorrect password for this account.",
+                    aText: "OK"
+                ));
             }
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: ex.Message,
+                aText: "OK"
+            ));
         }
         finally
         {
@@ -428,10 +483,11 @@ public partial class LoginPageViewModel(
     {
         if (!IsConnected)
         {
-            await Shell.Current.DisplayAlertAsync(
-                "No Connection",
-                "Registration requires an internet connection.",
-                "OK");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "No Connection",
+                body: "Registration requires an internet connection.",
+                aText: "OK"
+            ));
             return;
         }
         await Shell.Current.GoToAsync(nameof(RegisterPage));
@@ -441,8 +497,5 @@ public partial class LoginPageViewModel(
     /// Refresh local accounts list
     /// </summary>
     [RelayCommand]
-    private async Task RefreshLocalAccounts()
-    {
-        await LoadLocalAccountsAsync();
-    }
+    private async Task RefreshLocalAccounts() => await LoadLocalAccountsAsync();
 }
