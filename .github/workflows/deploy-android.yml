@@ -103,3 +103,40 @@ jobs:
           name: test-results
           path: ${{ env.WORKING_DIRECTORY }}/TestResults/*.trx
           retention-days: 30
+
+      # --------------------------
+      # Prepare Android keystore
+      # --------------------------
+
+      - name: Decode Android keystore
+        run: |
+          $keystorePath = "${{ env.WORKING_DIRECTORY }}\index.keystore"
+          [System.IO.File]::WriteAllBytes($keystorePath, [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
+        shell: pwsh
+
+      # --------------------------
+      # Build & sign Android MAUI app
+      # --------------------------
+      - name: Build Android MAUI app
+        run: |
+          dotnet publish GoatVaultClient/GoatVaultClient.csproj `
+            -f ${{ env.TARGET_FRAMEWORK }} `
+            -c ${{ env.CONFIGURATION }} `
+            -o "${{ env.WORKING_DIRECTORY }}\android-build" `
+            -p:AndroidKeyStore=true `
+            -p:AndroidSigningKeyStore="${{ env.WORKING_DIRECTORY }}\index.keystore" `
+            -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
+            -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
+            -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        shell: pwsh
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      # --------------------------
+      # Upload APK/AAB artifact
+      # --------------------------
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app
+          path: ${{ env.WORKING_DIRECTORY }}\android-build\**
+          retention-days: 30
