@@ -164,22 +164,51 @@ public partial class LoginPageViewModel(
             );
 
             // 3. Generate Verifier
+            System.Diagnostics.Debug.WriteLine("Step 2: Generating auth verifier");
             var loginVerifier = CryptoService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
 
-            // 4. Verify
+            // 4. Check if MFA is required
+            string? mfaCode = null;
+            if (initResponse.MfaEnabled)
+            {
+                System.Diagnostics.Debug.WriteLine("MFA is enabled, prompting for code");
+
+                // Prompt user for MFA code
+                mfaCode = await Shell.Current.DisplayPromptAsync(
+                    "Two-Factor Authentication",
+                    "Enter your 6-digit authenticator code:",
+                    "Verify",
+                    "Cancel",
+                    placeholder: "000000",
+                    maxLength: 6,
+                    keyboard: Keyboard.Numeric);
+
+                if (string.IsNullOrWhiteSpace(mfaCode))
+                {
+                    System.Diagnostics.Debug.WriteLine("MFA code entry cancelled");
+                    return;
+                }
+            }
+
+            // 5. Verify with MFA code if required
+            System.Diagnostics.Debug.WriteLine("Step 3: Calling auth/verify");
             var verifyPayload = new AuthVerifyRequest
             {
                 UserId = Guid.Parse(initResponse.UserId),
-                AuthVerifier = loginVerifier
+                AuthVerifier = loginVerifier,
+                MfaCode = mfaCode // Will be null if MFA not enabled
             };
+
             var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
                 $"{url}v1/auth/verify",
                 verifyPayload
             );
+            System.Diagnostics.Debug.WriteLine("Auth verify successful");
+
             authTokenService.SetToken(verifyResponse.AccessToken);
             vaultSessionService.MasterPassword = Password;
 
-            // 5. Get User Data
+            // 6. Get User Data
             System.Diagnostics.Debug.WriteLine("Step 4: Fetching user data");
             var userResponse = await httpService.GetAsync<UserResponse>(
                 $"{url}v1/users/{initResponse.UserId}"
@@ -188,7 +217,7 @@ public partial class LoginPageViewModel(
 
             vaultSessionService.CurrentUser = userResponse;
 
-            // 6. Sync Local DB (Delete old if exists, save new)
+            // 7. Sync Local DB (Delete old if exists, save new)
             System.Diagnostics.Debug.WriteLine("Step 5: Syncing local database");
             var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
@@ -210,12 +239,12 @@ public partial class LoginPageViewModel(
             });
             System.Diagnostics.Debug.WriteLine("Local database synced");
 
-            // 7. Decrypt & Store Session
+            // 8. Decrypt & Store Session
             System.Diagnostics.Debug.WriteLine("Step 6: Decrypting vault");
             vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, Password);
             System.Diagnostics.Debug.WriteLine("Vault decrypted successfully");
 
-            // 8. Navigate to App (MainPage)
+            // 9. Navigate to App (MainPage)
             if (Application.Current != null)
                 Application.Current.MainPage = new AppShell();
 

@@ -14,6 +14,8 @@
                     <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
                     <converters:TimeToProgressConverter x:Key="TimeToProgressConverter"/>
                     <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+                    <converters:BoolToMfaStatusConverter x:Key="BoolToMfaStatusConverter"/>
+                    <converters:BoolToMfaButtonTextConverter x:Key="BoolToMfaButtonTextConverter"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Name="appColors" Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary x:Name="appStyles" Source="Resources/Styles/Styles.xaml" />

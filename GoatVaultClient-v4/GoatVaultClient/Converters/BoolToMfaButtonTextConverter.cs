@@ -2,18 +2,16 @@
 
 namespace GoatVaultClient.Converters;
 
-public class BoolToColorConverter : IValueConverter
+public class BoolToMfaButtonTextConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is bool boolValue)
+        if (value is bool isEnabled)
         {
-            return boolValue
-                ? Color.FromArgb("#4CAF50") // Green for enabled/valid
-                : Color.FromArgb("#F44336"); // Red for disabled/invalid
+            return isEnabled ? "Disable MFA" : "Enable MFA";
         }
 
-        return Colors.Gray;
+        return "Enable MFA";
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

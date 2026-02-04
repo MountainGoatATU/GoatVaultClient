@@ -16,19 +16,33 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
 
-    // TODO: Unused method parameter
-    public AuthorizePopup(string title, bool isPassword = true/*, string buttonText = "OK"*/)
-	{
-		InitializeComponent();
+    public AuthorizePopup(string title, bool isPassword = true)
+    {
+        InitializeComponent();
+
+        System.Diagnostics.Debug.WriteLine($"AuthorizePopup Constructor - Title: '{title}', IsPassword: {isPassword}");
 
         Title = title;
-        InputEntry.IsPassword = isPassword;
-        ShowHideAttachment.IsVisible = isPassword;
+
+        // Set password mode and attachment visibility
+        ShowHideAttachment?.IsVisible = isPassword;
+
+        if (InputEntry != null)
+        {
+            InputEntry.IsPassword = isPassword;
+            // Set keyboard type for numeric input when not password
+            if (!isPassword)
+            {
+                InputEntry.Keyboard = Keyboard.Numeric;
+            }
+        }
 
         AcceptCommand = new Command(OnAccept);
         CancelCommand = new Command(OnCancel);
 
         BindingContext = this;
+
+        System.Diagnostics.Debug.WriteLine("AuthorizePopup initialized");
     }
 
     private async void OnAccept()
