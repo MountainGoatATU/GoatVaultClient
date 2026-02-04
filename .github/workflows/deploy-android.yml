@@ -71,12 +71,12 @@ jobs:
     - name: Restore workloads
       run: dotnet workload restore GoatVaultClient/GoatVaultClient.csproj
       working-directory: ${{ env.WORKING_DIRECTORY }}
-      
+
     # --------------------------
     # Restore only Android workloads & NuGet packages
     # --------------------------
     - name: Restore Android dependencies
-      run: dotnet restore GoatVaultClient/GoatVaultClient.csproj -f ${{ env.TARGET_FRAMEWORK }}
+      run: dotnet restore GoatVaultClient/GoatVaultClient.csproj
       working-directory: ${{ env.WORKING_DIRECTORY }}
 
     # --------------------------
