@@ -7,13 +7,14 @@ using GoatVaultCore.Models.API;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
+using Microsoft.Extensions.Configuration;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
 // TODO: Unused UserService injection
 public partial class LoginPageViewModel(
-    /*UserService userService,*/
+    IConfiguration configuration,
     HttpService httpService,
     AuthTokenService authTokenService,
     VaultService vaultService,
@@ -96,7 +97,14 @@ public partial class LoginPageViewModel(
     [RelayCommand]
     private async Task Login()
     {
-        const string url = "https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com";
+        // Use GetSection and check for null or empty value to avoid CS8600
+        var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
+        string? url = urlSection.Value;
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            await Shell.Current.DisplayAlertAsync("Configuration Error", "Server base URL is not configured.", "OK");
+            return;
+        }  
         
         // Prevent multiple simultaneous logins
         if (IsBusy)
@@ -134,7 +142,7 @@ public partial class LoginPageViewModel(
             // 2. Init Auth
             var initPayload = new AuthInitRequest { Email = Email };
             var initResponse = await httpService.PostAsync<AuthInitResponse>(
-                $"{url}/v1/auth/init",
+                $"{url}v1/auth/init",
                 initPayload
             );
 
@@ -148,7 +156,7 @@ public partial class LoginPageViewModel(
                 AuthVerifier = loginVerifier
             };
             var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
-                $"{url}/v1/auth/verify",
+                $"{url}v1/auth/verify",
                 verifyPayload
             );
             authTokenService.SetToken(verifyResponse.AccessToken);
@@ -156,7 +164,7 @@ public partial class LoginPageViewModel(
 
             // 5. Get User Data
             var userResponse = await httpService.GetAsync<UserResponse>(
-                $"{url}/v1/users/{initResponse.UserId}"
+                $"{url}v1/users/{initResponse.UserId}"
             );
 
             vaultSessionService.CurrentUser = userResponse;

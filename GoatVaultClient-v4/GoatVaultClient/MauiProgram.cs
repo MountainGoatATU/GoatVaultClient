@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui;
+﻿    using CommunityToolkit.Maui;
 using GoatVaultInfrastructure.Database;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
@@ -15,6 +15,8 @@ using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using UraniumUI;
 using Debug = System.Diagnostics.Debug;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using LiveChartsCore.SkiaSharpView.Maui;
 
@@ -50,6 +52,8 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+        // appsettings configuration
+        builder.AddAppSettings();
 
         // Setup SQLite local database
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "localVaultTest.db");
@@ -117,5 +121,30 @@ public static class MauiProgram
 
         // Done!
         return builder.Build();
+    }
+    private static void AddJsonSettings(this MauiAppBuilder builder, string fileName)
+    {
+        using Stream stream = Assembly
+            .GetExecutingAssembly()
+            .GetManifestResourceStream($"GoatVaultClient.{fileName}");
+        if (stream != null)
+        {
+            IConfigurationRoot config = new ConfigurationBuilder()
+                .AddJsonStream(stream)
+                .Build();
+            builder.Configuration.AddConfiguration(config);
+        }
+    }
+    private static void AddAppSettings(this MauiAppBuilder builder)
+    {
+        builder.AddJsonSettings("appsettings.json");
+#if DEBUG
+        builder.AddJsonSettings("appsettings.dev.json");
+#endif
+
+#if !DEBUG
+        builder.AddJsonSettings("appsettings.prod.json");
+#endif
+
     }
 }
