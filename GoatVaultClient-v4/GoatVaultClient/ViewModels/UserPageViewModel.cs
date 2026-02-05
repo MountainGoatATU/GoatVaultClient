@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Models.API;
@@ -23,18 +23,21 @@ namespace GoatVaultClient.ViewModels
         private readonly AuthTokenService _authTokenService;
         private readonly VaultSessionService _vaultSessionService;
         private readonly VaultService _vaultService;
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
 
         // Constructor
         public UserPageViewModel(
             HttpService httpService,
             AuthTokenService authTokenService,
             VaultSessionService vaultSessionService,
-            VaultService vaultService)
+            VaultService vaultService,
+            Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             _httpService = httpService;
             _authTokenService = authTokenService;
             _vaultSessionService = vaultSessionService;
             _vaultService = vaultService;
+            _configuration = configuration;
 
             // Initialize properties from current session
             if (_vaultSessionService.CurrentUser == null)
@@ -151,22 +154,28 @@ namespace GoatVaultClient.ViewModels
                 System.Diagnostics.Debug.WriteLine($"  auth_salt: {user.AuthSalt}");
                 System.Diagnostics.Debug.WriteLine($"  auth_verifier: {authVerifier}");
                 System.Diagnostics.Debug.WriteLine($"  email: {user.Email}");
-                System.Diagnostics.Debug.WriteLine($"  mfa_enabled: true");
+                System.Diagnostics.Debug.WriteLine($"  mfa_enabled: {user.MfaEnabled}");
                 System.Diagnostics.Debug.WriteLine($"  mfa_secret: {secret}");
                 System.Diagnostics.Debug.WriteLine($"  vault keys: {user.Vault != null}");
 
+                var baseUrl = _configuration["GOATVAULT_SERVER_BASE_URL"];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    throw new Exception("Server base URL not configured");
+                }
+
                 // Update server with MFA enabled and secret
+                var request = new UserRequest
+                {
+                    Email = user.Email,
+                    MfaEnabled = true,
+                    MfaSecret = secret,
+                    Vault = user.Vault
+                };
+
                 var updatedUser = await _httpService.PatchAsync<UserResponse>(
-                    $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
-                    new
-                    {
-                        auth_salt = user.AuthSalt,
-                        auth_verifier = authVerifier,
-                        email = user.Email,
-                        vault = user.Vault,
-                        mfa_enabled = true,
-                        mfa_secret = secret
-                    }
+                    $"{baseUrl}v1/users/{user.Id}",
+                    request
                 );
 
                 System.Diagnostics.Debug.WriteLine($"DEBUG MFA Enable - Server response:");
@@ -352,8 +361,14 @@ namespace GoatVaultClient.ViewModels
                 // Update server with MFA disabled
                 System.Diagnostics.Debug.WriteLine("Sending PATCH request to disable MFA");
 
+                var baseUrl = _configuration["GOATVAULT_SERVER_BASE_URL"];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    throw new Exception("Server base URL not configured");
+                }
+
                 var updatedUser = await _httpService.PatchAsync<UserResponse>(
-                    $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
+                    $"{baseUrl}v1/users/{user.Id}",
                     new
                     {
                         auth_salt = user.AuthSalt,
@@ -501,6 +516,12 @@ namespace GoatVaultClient.ViewModels
 
                 System.Diagnostics.Debug.WriteLine($"Updating email from '{oldEmail}' to '{newEmail}'");
 
+                var baseUrl = _configuration["GOATVAULT_SERVER_BASE_URL"];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    throw new Exception("Server base URL not configured");
+                }
+
                 // Update Server
                 var request = new UserRequest
                 {
@@ -510,7 +531,7 @@ namespace GoatVaultClient.ViewModels
                 };
 
                 var updatedUser = await _httpService.PatchAsync<UserResponse>(
-                    $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
+                    $"{baseUrl}v1/users/{user.Id}",
                     request
                 );
 
@@ -610,6 +631,13 @@ namespace GoatVaultClient.ViewModels
 
                 // Update server with new vault AND new auth credentials
                 System.Diagnostics.Debug.WriteLine("Updating server with new vault and auth credentials");
+
+                var baseUrl = _configuration["GOATVAULT_SERVER_BASE_URL"];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    throw new Exception("Server base URL not configured");
+                }
+
                 var request = new
                 {
                     auth_salt = newAuthSaltBase64,
@@ -621,7 +649,7 @@ namespace GoatVaultClient.ViewModels
                 };
 
                 var updatedUser = await _httpService.PatchAsync<UserResponse>(
-                    $"https://y9ok4f5yja.execute-api.eu-west-1.amazonaws.com/v1/users/{user.Id}",
+                    $"{baseUrl}v1/users/{user.Id}",
                     request
                 );
 

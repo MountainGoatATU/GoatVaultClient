@@ -1,4 +1,5 @@
-﻿using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.API;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
 using System.Net;
@@ -30,7 +31,10 @@ public class HttpServiceTests
         _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
         _httpClient = new HttpClient(_mockHttpMessageHandler.Object);
         var authTokenService = new AuthTokenService();
-        _httpService = new HttpService(_httpClient, authTokenService);
+        var mockConfig = new Mock<IConfiguration>();
+        mockConfig.Setup(c => c.GetSection("GOATVAULT_SERVER_BASE_URL").Value).Returns("https://api.example.com/");
+
+        _httpService = new HttpService(_httpClient, authTokenService, mockConfig.Object);
     }
 
     [Fact]
@@ -132,7 +136,10 @@ public class HttpServiceTests
         var authTokenService = new AuthTokenService();
         authTokenService.SetToken(token);
 
-        var httpService = new HttpService(_httpClient, authTokenService);
+        var mockConfig = new Mock<IConfiguration>();
+        mockConfig.Setup(c => c.GetSection("GOATVAULT_SERVER_BASE_URL").Value).Returns("https://api.example.com/");
+
+        var httpService = new HttpService(_httpClient, authTokenService, mockConfig.Object);
 
         HttpRequestMessage? capturedRequest = null;
 

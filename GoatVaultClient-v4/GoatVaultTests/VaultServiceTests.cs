@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Models.Vault;
 using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -31,7 +31,7 @@ public class VaultServiceTests
         const string password = "StrongPassword123!";
         var vaultData = new VaultData
         {
-            Categories = ["Work", "Personal"],
+            Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }],
             Entries =
             [
                 new VaultEntry
@@ -84,7 +84,7 @@ public class VaultServiceTests
         const string password = "StrongPassword123!";
         var originalData = new VaultData
         {
-            Categories = ["Work", "Personal", "Finance"],
+            Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }, new CategoryItem { Name = "Finance" }],
             Entries =
             [
                 new VaultEntry
@@ -120,7 +120,7 @@ public class VaultServiceTests
         const string wrongPassword = "WrongPassword123!";
         var vaultData = new VaultData
         {
-            Categories = ["Work"],
+            Categories = [new CategoryItem { Name = "Work" }],
             Entries = []
         };
 
@@ -157,7 +157,7 @@ public class VaultServiceTests
         const string password = "SuperSecurePassword!@#123";
         var complexData = new VaultData
         {
-            Categories = ["Work", "Personal", "Finance", "Social Media", "Entertainment"],
+            Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }, new CategoryItem { Name = "Finance" }, new CategoryItem { Name = "Social Media" }, new CategoryItem { Name = "Entertainment" }],
             Entries =
             [
                 new VaultEntry

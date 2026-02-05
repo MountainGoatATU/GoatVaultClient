@@ -9,6 +9,8 @@ using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
 using System.Collections.ObjectModel;
+using Mopups.Services;
+using GoatVaultClient.Controls.Popups;
 
 namespace GoatVaultClient.ViewModels;
 
@@ -16,7 +18,11 @@ namespace GoatVaultClient.ViewModels;
 public partial class LoginPageViewModel(
     IAuthenticationService authenticationService,
     VaultService vaultService,
-    ConnectivityService connectivityService)
+    ConnectivityService connectivityService,
+    IConfiguration configuration,
+    HttpService httpService,
+    AuthTokenService authTokenService,
+    VaultSessionService vaultSessionService)
     : BaseViewModel
 {
     // Dependencies
@@ -74,7 +80,7 @@ public partial class LoginPageViewModel(
         LocalAccounts.Clear();
         LocalAccounts = await authenticationService.GetAllLocalAccountsAsync()
             .ContinueWith(t => new ObservableCollection<DbModel>(t.Result));
-        if (LocalAccounts.Count() != 0)
+        if (LocalAccounts.Count != 0)
         {
             HasLocalAccounts = true;
         }

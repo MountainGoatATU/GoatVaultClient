@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Models.API;
+using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
 using GoatVaultInfrastructure.Services.Vault;
 
@@ -42,7 +42,7 @@ public class VaultSessionServiceTests
         var service = new VaultSessionService();
         var vaultData = new VaultData
         {
-            Categories = ["Work", "Personal"],
+            Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }],
             Entries = []
         };
 

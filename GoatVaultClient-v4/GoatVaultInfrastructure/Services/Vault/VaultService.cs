@@ -148,6 +148,7 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
                 Email = user.Email,
                 AuthSalt = user.AuthSalt,
                 MfaEnabled = user.MfaEnabled,
+                MfaSecret = user.MfaSecret,
                 Vault = encryptedModel,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -157,6 +158,7 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
             {
                 Email = user.Email,
                 MfaEnabled = user.MfaEnabled,
+                MfaSecret = user.MfaSecret,
                 Vault = encryptedModel
             };
 
