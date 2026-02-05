@@ -12,142 +12,143 @@
              x:Class="GoatVaultClient.MainPage"
              BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
 
+    <Grid>
+        <VerticalStackLayout>
 
-    <VerticalStackLayout>
+            <HorizontalStackLayout HorizontalOptions="End">
+                <Label Text="Hello" 
+                           Style="{StaticResource MaterialLabelSmall}" 
+                           FontAttributes="Bold"
+                           VerticalOptions="Center"/>
+                <Label Text="Last Sync Time: 00:00:00" 
+                           Style="{StaticResource MaterialLabelSmall}" 
+                           VerticalOptions="Center"
+                           Margin="12,0,0,0"/>
+                <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Refresh}"
+                                          Command="{Binding RefreshCommand}"
+                                          Color="{AppThemeBinding Light={StaticResource LightSecondary}, Dark={StaticResource DarkSecondary}}"
+                                          VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+            <controls:Component BorderMargin="24,0,24,0">
+                <SearchBar Placeholder="Search passwords..." Text="{Binding SearchText}" HeightRequest="48" />
+            </controls:Component>
+            <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto, 0.5*, 0.5*" Margin="{StaticResource layoutMargin}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
 
-        <HorizontalStackLayout HorizontalOptions="End">
-            <Label Text="Hello" 
-                       Style="{StaticResource MaterialLabelSmall}" 
-                       FontAttributes="Bold"
-                       VerticalOptions="Center"/>
-            <Label Text="Last Sync Time: 00:00:00" 
-                       Style="{StaticResource MaterialLabelSmall}" 
-                       VerticalOptions="Center"
-                       Margin="12,0,0,0"/>
-            <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Refresh}"
-                                      Command="{Binding RefreshCommand}"
-                                      Color="{AppThemeBinding Light={StaticResource LightSecondary}, Dark={StaticResource DarkSecondary}}"
-                                      VerticalOptions="Center"/>
-        </HorizontalStackLayout>
-        <controls:Component BorderMargin="24,0,24,0">
-            <SearchBar Placeholder="Search passwords..." Text="{Binding SearchText}" HeightRequest="48" />
-        </controls:Component>
-        <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto, 0.5*, 0.5*" Margin="{StaticResource layoutMargin}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
-            
-            <!-- Categories List-->
-            <controls:Component Grid.Row="1" Grid.Column="0" >
-                <VerticalStackLayout>
-                    <controls:ComponentHeader Title="Categories">
-                        <controls:ComponentHeader.Actions>
-                            <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
-                                <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sort}"
-                                              Command="{Binding SortCategoriesCommand}"/>
-                                <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Add}"
-                                              Command="{Binding CreateCategoryCommand}"/>
-                            </HorizontalStackLayout>
-                        </controls:ComponentHeader.Actions>
-                    </controls:ComponentHeader >
-                    <CollectionView x:Name="CategoriesCollection" ItemsSource="{Binding Categories}" SelectionMode="Single" SelectedItem="{Binding SelectedCategory}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="{x:StaticResource sContent}" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <controls:CategoryItemCell Text="{Binding Name}"
-                                                   IconGlyph="{x:Static m:MaterialRounded.Folder}"         
-                                                   ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}">
-                                    <!-- Context Menu-->
-                                    <FlyoutBase.ContextFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem Text="Edit"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
-                                                            CommandParameter="{Binding .}">
-                                                <MenuFlyoutItem.IconImageSource>
-                                                    <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Edit}" Color="{StaticResource Primary}"/>
-                                                </MenuFlyoutItem.IconImageSource>
-                                            </MenuFlyoutItem>
+                <!-- Categories List-->
+                <controls:Component Grid.Row="1" Grid.Column="0" >
+                    <VerticalStackLayout>
+                        <controls:ComponentHeader Title="Categories">
+                            <controls:ComponentHeader.Actions>
+                                <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
+                                    <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sort}"
+                                                  Command="{Binding SortCategoriesCommand}"/>
+                                    <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Add}"
+                                                  Command="{Binding CreateCategoryCommand}"/>
+                                </HorizontalStackLayout>
+                            </controls:ComponentHeader.Actions>
+                        </controls:ComponentHeader >
+                        <CollectionView x:Name="CategoriesCollection" ItemsSource="{Binding Categories}" SelectionMode="Single" SelectedItem="{Binding SelectedCategory}">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="{x:StaticResource sContent}" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <controls:CategoryItemCell Text="{Binding Name}"
+                                                       IconGlyph="{x:Static m:MaterialRounded.Folder}"         
+                                                       ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}">
+                                        <!-- Context Menu-->
+                                        <FlyoutBase.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="Edit"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
+                                                                CommandParameter="{Binding .}">
+                                                    <MenuFlyoutItem.IconImageSource>
+                                                        <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Edit}" Color="{StaticResource Primary}"/>
+                                                    </MenuFlyoutItem.IconImageSource>
+                                                </MenuFlyoutItem>
 
-                                            <MenuFlyoutItem Text="Delete"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}"
-                                                            CommandParameter="{Binding .}">
-                                                <MenuFlyoutItem.IconImageSource>
-                                                    <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Delete}" Color="{StaticResource Error}"/>
-                                                </MenuFlyoutItem.IconImageSource>
-                                            </MenuFlyoutItem>
-                                        </MenuFlyout>
-                                    </FlyoutBase.ContextFlyout>
-                                </controls:CategoryItemCell>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-            </controls:Component>
-            <!-- Passsword Entries List -->
-            <controls:Component Grid.Row="1" Grid.Column="1">
-                <VerticalStackLayout>
-                    <controls:ComponentHeader Title="Passwords">
-                        <controls:ComponentHeader.Actions>
-                            <HorizontalStackLayout Spacing="{x:StaticResource sContent}"
-                                           VerticalOptions="Center">
-                                <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sort}"
-                                              Command="{Binding SortEntriesCommand}"/>
-                                <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Add}"
-                                              Command="{Binding CreateEntryCommand}"/>
-                            </HorizontalStackLayout>
-                        </controls:ComponentHeader.Actions>
-                    </controls:ComponentHeader>
-                    <CollectionView x:Name="EntriesCollection" ItemsSource="{Binding Passwords}" SelectionMode="Single" SelectedItem="{Binding SelectedEntry}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="{x:StaticResource sContent}" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <controls:CategoryItemCell Text="{Binding Site}"
-                                   IconGlyph="{x:Static m:MaterialRounded.Key}"         
-                                   ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}">
-                                    <!-- Context Menu-->
-                                    <FlyoutBase.ContextFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem Text="Edit"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
-                                                            CommandParameter="{Binding .}">
-                                                <MenuFlyoutItem.IconImageSource>
-                                                    <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Edit}" Color="{StaticResource Primary}"/>
-                                                </MenuFlyoutItem.IconImageSource>
-                                            </MenuFlyoutItem>
-                                            <MenuFlyoutItem Text="Delete"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
-                                                                  CommandParameter="{Binding .}">
-                                                <MenuFlyoutItem.IconImageSource>
-                                                    <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Delete}" Color="{StaticResource Error}"/>
-                                                </MenuFlyoutItem.IconImageSource>
-                                            </MenuFlyoutItem>
-                                        </MenuFlyout>
-                                    </FlyoutBase.ContextFlyout>
-                                </controls:CategoryItemCell>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-            </controls:Component>
-            <!-- Password Entry Details View -->
-            <controls:Component Grid.Row="1" 
-                                Grid.Column="2" 
-                                BorderMargin="0"
-                                IsVisible="{Binding SelectedEntry, Converter={StaticResource IsNotNullConverter}}">
-                <controls:EntryDetailView Grid.Column="2" 
-                      BindingContext="{Binding SelectedEntry}">
-                    <controls:EntryDetailView.Triggers>
-                        <DataTrigger TargetType="controls:EntryDetailView" 
-                             Binding="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectedEntry}"
-                             Value="{x:Null}">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
-                    </controls:EntryDetailView.Triggers>
-                </controls:EntryDetailView>
-            </controls:Component>
-        </Grid>
-        <Grid>
+                                                <MenuFlyoutItem Text="Delete"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}"
+                                                                CommandParameter="{Binding .}">
+                                                    <MenuFlyoutItem.IconImageSource>
+                                                        <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Delete}" Color="{StaticResource Error}"/>
+                                                    </MenuFlyoutItem.IconImageSource>
+                                                </MenuFlyoutItem>
+                                            </MenuFlyout>
+                                        </FlyoutBase.ContextFlyout>
+                                    </controls:CategoryItemCell>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </controls:Component>
+                <!-- Passsword Entries List -->
+                <controls:Component Grid.Row="1" Grid.Column="1">
+                    <VerticalStackLayout>
+                        <controls:ComponentHeader Title="Passwords">
+                            <controls:ComponentHeader.Actions>
+                                <HorizontalStackLayout Spacing="{x:StaticResource sContent}"
+                                               VerticalOptions="Center">
+                                    <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sort}"
+                                                  Command="{Binding SortEntriesCommand}"/>
+                                    <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Add}"
+                                                  Command="{Binding CreateEntryCommand}"/>
+                                </HorizontalStackLayout>
+                            </controls:ComponentHeader.Actions>
+                        </controls:ComponentHeader>
+                        <CollectionView x:Name="EntriesCollection" ItemsSource="{Binding Passwords}" SelectionMode="Single" SelectedItem="{Binding SelectedEntry}">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="{x:StaticResource sContent}" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <controls:CategoryItemCell Text="{Binding Site}"
+                                       IconGlyph="{x:Static m:MaterialRounded.Key}"         
+                                       ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}">
+                                        <!-- Context Menu-->
+                                        <FlyoutBase.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="Edit"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
+                                                                CommandParameter="{Binding .}">
+                                                    <MenuFlyoutItem.IconImageSource>
+                                                        <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Edit}" Color="{StaticResource Primary}"/>
+                                                    </MenuFlyoutItem.IconImageSource>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem Text="Delete"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
+                                                                      CommandParameter="{Binding .}">
+                                                    <MenuFlyoutItem.IconImageSource>
+                                                        <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Delete}" Color="{StaticResource Error}"/>
+                                                    </MenuFlyoutItem.IconImageSource>
+                                                </MenuFlyoutItem>
+                                            </MenuFlyout>
+                                        </FlyoutBase.ContextFlyout>
+                                    </controls:CategoryItemCell>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </controls:Component>
+                <!-- Password Entry Details View -->
+                <controls:Component Grid.Row="1" 
+                                    Grid.Column="2" 
+                                    BorderMargin="0"
+                                    IsVisible="{Binding SelectedEntry, Converter={StaticResource IsNotNullConverter}}">
+                    <controls:EntryDetailView Grid.Column="2" 
+                          BindingContext="{Binding SelectedEntry}">
+                        <controls:EntryDetailView.Triggers>
+                            <DataTrigger TargetType="controls:EntryDetailView" 
+                                 Binding="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectedEntry}"
+                                 Value="{x:Null}">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                        </controls:EntryDetailView.Triggers>
+                    </controls:EntryDetailView>
+                </controls:Component>
+            </Grid>
+        </VerticalStackLayout>
+        <AbsoluteLayout InputTransparent="True" Margin="20">
             <!-- Goat Lottie animation -->
             <skia:SKLottieView
                 x:Name="GoatMascot"
@@ -157,15 +158,16 @@
                 VerticalOptions="End"
                 HeightRequest="120"
                 WidthRequest="120"
-                Margin="16"/>
+                AbsoluteLayout.LayoutBounds="1,1,120,120"
+                AbsoluteLayout.LayoutFlags="PositionProportional"/>
             <!-- Speech bubble above the goat -->
-            <StackLayout x:Name="GoatBubbleStack" HorizontalOptions="End" VerticalOptions="End" Margin="16,0,16,136" Spacing="0" Opacity="0">
-                <Border BackgroundColor="White" StrokeShape="RoundRectangle 12" Padding="12" Shadow="True" HorizontalOptions="End">
+            <StackLayout x:Name="GoatBubbleStack" Spacing="0" Opacity="0" Orientation="Vertical" AbsoluteLayout.LayoutBounds="1,0.8,AutoSize,AutoSize" AbsoluteLayout.LayoutFlags="PositionProportional">
+                <Border BackgroundColor="White" StrokeShape="RoundRectangle 12" Padding="12" HorizontalOptions="End">
                     <Label Text="{Binding GoatComment}" TextColor="Black" FontAttributes="Bold" LineBreakMode="WordWrap" MaxLines="3"/>
                 </Border>
                 <!-- Small triangle pointing to the goat -->
                 <BoxView WidthRequest="12" HeightRequest="12" BackgroundColor="White" Rotation="45" HorizontalOptions="End" Margin="0,-8,16,0"/>
             </StackLayout>
-        </Grid>
-    </VerticalStackLayout>
+        </AbsoluteLayout>
+    </Grid>
 </ContentPage>
