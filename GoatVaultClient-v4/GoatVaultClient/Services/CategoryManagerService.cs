@@ -7,8 +7,6 @@ namespace GoatVaultClient.Services;
 
 public class CategoryManagerService(VaultSessionService vaultSessionService)
 {
-    private readonly VaultSessionService _vaultSessionService = vaultSessionService;
-
     public async Task<bool> CreateCategoryAsync(IEnumerable<CategoryItem> existingCategories)
     {
         var popup = new SingleInputPopup("Create Category", "Category Name", "");
@@ -27,7 +25,7 @@ public class CategoryManagerService(VaultSessionService vaultSessionService)
             var temp = new CategoryItem { Name = result };
 
             // Add to global list
-            _vaultSessionService.DecryptedVault?.Categories.Add(temp);
+            vaultSessionService.DecryptedVault?.Categories.Add(temp);
             return true;
         }
         else
@@ -37,12 +35,12 @@ public class CategoryManagerService(VaultSessionService vaultSessionService)
         }
     }
 
-    public async Task<bool> EditCategoryAsync(CategoryItem target)
+    public async Task<bool> EditCategoryAsync(CategoryItem? target)
     {
         if (target == null) return false;
 
         // Find the index of the category in the vault
-        var categories = _vaultSessionService.DecryptedVault?.Categories;
+        var categories = vaultSessionService.DecryptedVault?.Categories;
         if (categories == null) return false;
 
         var index = categories.IndexOf(target);
@@ -64,7 +62,7 @@ public class CategoryManagerService(VaultSessionService vaultSessionService)
 
         // Check if any passwords use this category
         // We check the source of truth
-        var vaultEntries = _vaultSessionService.DecryptedVault?.Entries;
+        var vaultEntries = vaultSessionService.DecryptedVault?.Entries;
         if (vaultEntries == null) return false;
 
         var hasDependentPasswords = vaultEntries.Any(c => c.Category == oldName);
@@ -100,7 +98,7 @@ public class CategoryManagerService(VaultSessionService vaultSessionService)
         return true;
     }
 
-    public async Task<bool> DeleteCategoryAsync(CategoryItem target)
+    public async Task<bool> DeleteCategoryAsync(CategoryItem? target)
     {
         if (target == null) return false;
 
@@ -115,10 +113,10 @@ public class CategoryManagerService(VaultSessionService vaultSessionService)
 
         if (!response) return false;
 
-        var vaultEntries = _vaultSessionService.DecryptedVault?.Entries;
-        var categories = _vaultSessionService.DecryptedVault?.Categories;
-        
-        if (vaultEntries != null && vaultEntries.Any(c => c.Category == target.Name))
+        var vaultEntries = vaultSessionService.DecryptedVault?.Entries;
+        var categories = vaultSessionService.DecryptedVault?.Categories;
+
+        if (vaultEntries?.Any(c => c.Category == target.Name) == true)
         {
             // Wait before pushing another dialog
             while (MopupService.Instance.PopupStack.Contains(categoryPopup))

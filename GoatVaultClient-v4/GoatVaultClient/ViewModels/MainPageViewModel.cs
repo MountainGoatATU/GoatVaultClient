@@ -1,13 +1,10 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Models.Vault;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.Vault;
-using Mopups.Services;
 using System.Collections.ObjectModel;
-using UraniumUI.Dialogs;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultClient.Services;
 
@@ -19,8 +16,8 @@ namespace GoatVaultClient.ViewModels
         /*
          * Observables
          */
-        [ObservableProperty] public ObservableCollection<CategoryItem> categories = [];
-        [ObservableProperty] public ObservableCollection<VaultEntry> passwords = [];
+        [ObservableProperty] private ObservableCollection<CategoryItem> categories = [];
+        [ObservableProperty] private ObservableCollection<VaultEntry> passwords = [];
         [ObservableProperty] private CategoryItem? selectedCategory = null;
         [ObservableProperty] private VaultEntry? selectedEntry = null;
         [ObservableProperty] private string? searchText = null;
@@ -45,7 +42,7 @@ namespace GoatVaultClient.ViewModels
         private readonly TotpManagerService _totpManagerService;
         private readonly CategoryManagerService _categoryManagerService;
         private readonly VaultEntryManagerService _vaultEntryManagerService;
-        private readonly VaultFilterService _vaultFilterService;
+
         #endregion
         public MainPageViewModel(
             VaultSessionService vaultSessionService,
@@ -54,8 +51,7 @@ namespace GoatVaultClient.ViewModels
             GoatTipsService goatTipsService,
             TotpManagerService totpManagerService,
             CategoryManagerService categoryManagerService,
-            VaultEntryManagerService vaultEntryManagerService,
-            VaultFilterService vaultFilterService)
+            VaultEntryManagerService vaultEntryManagerService)
         {
             // Dependency Injection
             _vaultSessionService = vaultSessionService;
@@ -65,7 +61,6 @@ namespace GoatVaultClient.ViewModels
             _totpManagerService = totpManagerService;
             _categoryManagerService = categoryManagerService;
             _vaultEntryManagerService = vaultEntryManagerService;
-            _vaultFilterService = vaultFilterService;
 
             LoadVaultData();
 
@@ -154,8 +149,8 @@ namespace GoatVaultClient.ViewModels
                 _categoriesSortAsc = !_categoriesSortAsc;
             }
 
-            Categories = _vaultFilterService.FilterAndSortCategories(
-                Categories, 
+            Categories = VaultFilterService.FilterAndSortCategories(
+                Categories,
                 SearchText,
                 _categoriesSortAsc);
         }
@@ -167,10 +162,10 @@ namespace GoatVaultClient.ViewModels
                 _passwordsSortAsc = !_passwordsSortAsc;
             }
 
-            Passwords = _vaultFilterService.FilterAndSortEntries(
-                Passwords, 
-                null, 
-                null, 
+            Passwords = VaultFilterService.FilterAndSortEntries(
+                Passwords,
+                null,
+                null,
                 _passwordsSortAsc);
         }
 
@@ -184,7 +179,7 @@ namespace GoatVaultClient.ViewModels
             }
             else
             {
-                Passwords = _vaultFilterService.FilterAndSortEntries(
+                Passwords = VaultFilterService.FilterAndSortEntries(
                     _allVaultEntries,
                     null, // SearchText is cleared above
                     value?.Name,
@@ -197,13 +192,13 @@ namespace GoatVaultClient.ViewModels
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 // Filter Categories
-                Categories = _vaultFilterService.FilterAndSortCategories(
+                Categories = VaultFilterService.FilterAndSortCategories(
                     _allVaultCategories, // Filter from ALL
                     SearchText,
                     _categoriesSortAsc);
 
                 // Filter Passwords
-                Passwords = _vaultFilterService.FilterAndSortEntries(
+                Passwords = VaultFilterService.FilterAndSortEntries(
                     _allVaultEntries, // Filter from ALL
                     SearchText,
                     SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name,
@@ -232,8 +227,10 @@ namespace GoatVaultClient.ViewModels
         {
             // Indicate syncing
             IsSyncing = true;
+
             // Save to local and server
             await _syncingService.Save(Categories, Passwords, _vaultSessionService.CurrentUser);
+
             // Reset syncing indicator
             IsSyncing = false;
         }
@@ -259,7 +256,7 @@ namespace GoatVaultClient.ViewModels
         }
 
         [RelayCommand]
-        public async Task EditCategory(CategoryItem category)
+        private async Task EditCategory(CategoryItem category)
         {
             var target = category ?? SelectedCategory;
             var changed = await _categoryManagerService.EditCategoryAsync(target);
@@ -292,7 +289,7 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task CopyEntry()
         {
-            await _vaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry);
+            await VaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry);
         }
 
         [RelayCommand]

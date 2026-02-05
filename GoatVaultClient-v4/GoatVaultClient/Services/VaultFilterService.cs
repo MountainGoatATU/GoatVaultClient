@@ -4,14 +4,14 @@ using GoatVaultCore.Models.Vault;
 
 namespace GoatVaultClient.Services;
 
-public class VaultFilterService
+public static class VaultFilterService
 {
-    public ObservableCollection<CategoryItem> FilterAndSortCategories(
+    public static ObservableCollection<CategoryItem> FilterAndSortCategories(
         IEnumerable<CategoryItem> allCategories,
         string? searchText,
         bool sortAsc)
     {
-        IEnumerable<CategoryItem> query = allCategories;
+        var query = allCategories;
 
         if (!string.IsNullOrWhiteSpace(searchText))
         {
@@ -25,13 +25,13 @@ public class VaultFilterService
         return query.ToObservableCollection();
     }
 
-    public ObservableCollection<VaultEntry> FilterAndSortEntries(
+    public static ObservableCollection<VaultEntry> FilterAndSortEntries(
         IEnumerable<VaultEntry> allEntries,
         string? searchText,
         string? categoryFilter,
         bool sortAsc)
     {
-        IEnumerable<VaultEntry> query = allEntries;
+        var query = allEntries;
 
         if (!string.IsNullOrWhiteSpace(searchText))
         {

@@ -20,7 +20,7 @@
                        Style="{StaticResource MaterialLabelSmall}" 
                        FontAttributes="Bold"
                        VerticalOptions="Center"/>
-            <Label Text="Last Sync Time: 11:22:56" 
+            <Label Text="Last Sync Time: 00:00:00" 
                        Style="{StaticResource MaterialLabelSmall}" 
                        VerticalOptions="Center"
                        Margin="12,0,0,0"/>

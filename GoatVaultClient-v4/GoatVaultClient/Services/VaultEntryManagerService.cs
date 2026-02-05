@@ -5,15 +5,8 @@ using Mopups.Services;
 
 namespace GoatVaultClient.Services;
 
-public class VaultEntryManagerService
+public class VaultEntryManagerService(VaultSessionService vaultSessionService)
 {
-    private readonly VaultSessionService _vaultSessionService;
-
-    public VaultEntryManagerService(VaultSessionService vaultSessionService)
-    {
-        _vaultSessionService = vaultSessionService;
-    }
-
     public async Task<bool> CreateEntryAsync(IEnumerable<CategoryItem> categories)
     {
         var categoriesList = categories.ToList();
@@ -48,17 +41,17 @@ public class VaultEntryManagerService
         };
 
         // Add to list
-        _vaultSessionService.DecryptedVault?.Entries.Add(newEntry);
+        vaultSessionService.DecryptedVault?.Entries.Add(newEntry);
 
         return true;
     }
 
-    public async Task<bool> EditEntryAsync(VaultEntry target, IEnumerable<CategoryItem> categories)
+    public async Task<bool> EditEntryAsync(VaultEntry? target, IEnumerable<CategoryItem> categories)
     {
         if (target == null) return false;
 
         // Find the index of the entry in the vault
-        var entries = _vaultSessionService.DecryptedVault?.Entries;
+        var entries = vaultSessionService.DecryptedVault?.Entries;
         if (entries == null) return false;
 
         var index = entries.IndexOf(target);
@@ -106,7 +99,7 @@ public class VaultEntryManagerService
         return true;
     }
 
-    public async Task<bool> DeleteEntryAsync(VaultEntry target)
+    public async Task<bool> DeleteEntryAsync(VaultEntry? target)
     {
         if (target == null) return false;
 
@@ -120,21 +113,20 @@ public class VaultEntryManagerService
         var response = await dialog.WaitForScan();
 
         // Act based on the response
-        if (response)
-        {
-            _vaultSessionService.DecryptedVault?.Entries.Remove(target);
-            return true;
-        }
+        if (!response)
+            return false;
 
-        return false;
+        vaultSessionService.DecryptedVault?.Entries.Remove(target);
+        return true;
+
     }
 
-    public async Task CopyEntryPasswordAsync(VaultEntry target)
+    public static async Task CopyEntryPasswordAsync(VaultEntry? target)
     {
         if (target == null) return;
 
         await Clipboard.Default.SetTextAsync(target.Password);
-        
+
         // Clear clipboard after 10 seconds (fire and forget task, but handled safely)
         _ = Task.Run(async () =>
         {

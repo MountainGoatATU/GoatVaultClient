@@ -70,7 +70,7 @@ public class TotpManagerService
             return;
 
         await Clipboard.Default.SetTextAsync(entry.CurrentTotpCode);
-        
+
         // Clear clipboard after 10 seconds (fire and forget task, but handled safely)
         _ = Task.Run(async () =>
         {
