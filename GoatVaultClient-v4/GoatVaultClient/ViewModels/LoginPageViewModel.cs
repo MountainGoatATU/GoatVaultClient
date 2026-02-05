@@ -1,6 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultCore.Models;
@@ -9,18 +8,14 @@ using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
-using Mopups.Services;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
 // TODO: Unused UserService injection
 public partial class LoginPageViewModel(
-    IConfiguration configuration,
-    HttpService httpService,
-    AuthTokenService authTokenService,
+    IAuthenticationService authenticationService,
     VaultService vaultService,
-    VaultSessionService vaultSessionService,
     ConnectivityService connectivityService)
     : BaseViewModel
 {
@@ -32,38 +27,23 @@ public partial class LoginPageViewModel(
     [ObservableProperty] private bool _isConnected = true;
     [ObservableProperty] private string _connectivityMessage = string.Empty;
     [ObservableProperty] private string _connectionType = string.Empty;
-    [ObservableProperty] private ObservableCollection<DbModel> _localAccounts = [];
+    [ObservableProperty] private ObservableCollection<DbModel> _localAccounts = new();
     [ObservableProperty] private DbModel? _selectedAccount;
     [ObservableProperty] private bool _hasLocalAccounts;
     [ObservableProperty] private string? _offlinePassword;
-
     public async void Initialize()
     {
-        try
-        {
-            // Get initial state
-            UpdateConnectivityState();
-
-            // Subscribe to changes
-            connectivityService.ConnectivityChanged += OnConnectivityChanged;
-
-            // Load local accounts
-            await LoadLocalAccountsAsync();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error during initialization: {ex}");
-            // Set defaults in case of error
-            HasLocalAccounts = false;
-            LocalAccounts.Clear();
-        }
+        // Get initial state
+        UpdateConnectivityState();
+        // Subscribe to changes
+        connectivityService.ConnectivityChanged += OnConnectivityChanged;
+        // Load local accounts
+        await LoadLocalAccountsAsync();
     }
-
     public void Cleanup()
     {
         connectivityService.ConnectivityChanged -= OnConnectivityChanged;
     }
-
     private void OnConnectivityChanged(object? sender, bool isConnected)
     {
         UpdateConnectivityState();
@@ -72,15 +52,13 @@ public partial class LoginPageViewModel(
         {
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                await MopupService.Instance.PushAsync(new PromptPopup(
-                    title: "Connection Lost",
-                    body: "Your internet connection was lost.",
-                    aText: "OK"
-                ));
+                await Shell.Current.DisplayAlertAsync(
+                    "Connection Lost",
+                    "Your internet connection was lost.",
+                    "OK");
             });
         }
     }
-
     private void UpdateConnectivityState()
     {
         var networkInfo = connectivityService.GetNetworkInfo();
@@ -91,30 +69,15 @@ public partial class LoginPageViewModel(
             ? $"Connected via {ConnectionType}"
             : "No internet connection available";
     }
-
-    private async Task<List<DbModel>> GetAllLocalAccountAsync()
-    {
-        // Retrieve all local accounts from the vault service
-        var dbUsers = await vaultService.LoadAllUsersFromLocalAsync();
-        return dbUsers;
-    }
-
     private async Task LoadLocalAccountsAsync()
     {
-        // Load local accounts from the vault service
-        var accounts = await GetAllLocalAccountAsync();
-
-        // Update the ObservableCollection
         LocalAccounts.Clear();
-
-        // Add accounts to the ObservableCollection
-        foreach (var account in accounts)
+        LocalAccounts = await authenticationService.GetAllLocalAccountsAsync()
+            .ContinueWith(t => new ObservableCollection<DbModel>(t.Result));
+        if (LocalAccounts.Count() != 0)
         {
-            LocalAccounts.Add(account);
+            HasLocalAccounts = true;
         }
-
-        // Update HasLocalAccounts property
-        HasLocalAccounts = LocalAccounts.Count > 0;
     }
 
     [RelayCommand]
@@ -346,91 +309,14 @@ public partial class LoginPageViewModel(
         // Prevent multiple simultaneous logins
         if (IsBusy)
             return;
-
-        // Validation
-        if (SelectedAccount == null)
-        {
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                title: "Error",
-                body: "Please select an account.",
-                aText: "OK"
-            ));
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(OfflinePassword))
-        {
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                title: "Error",
-                body: "Password is required.",
-                aText: "OK"
-            ));
-            return;
-        }
-
         try
         {
             // Set Busy
             IsBusy = true;
-
-            // 1. Load the user from local database
-            var dbUser = await vaultService.LoadUserFromLocalAsync(SelectedAccount.Id);
-
-            if (dbUser == null)
-            {
-                await MopupService.Instance.PushAsync(new PromptPopup(
-                    title: "Error",
-                    body: "Account not found in local storage.",
-                    aText: "OK"
-                ));
-                return;
-            }
-
-            // 2. Verify the password locally by generating the auth verifier
-            var loginVerifier = CryptoService.GenerateAuthVerifier(OfflinePassword, dbUser.AuthSalt);
-
-            // 3. Try to decrypt the vault - if this succeeds, password is correct
-            try
-            {
-                var decryptedVault = vaultService.DecryptVault(dbUser.Vault, OfflinePassword);
-
-                // Password is correct!
-                vaultSessionService.MasterPassword = OfflinePassword;
-                vaultSessionService.DecryptedVault = decryptedVault;
-
-                // Set current user in session (convert DbModel to UserResponse format)
-                vaultSessionService.CurrentUser = new UserResponse
-                {
-                    Id = dbUser.Id,
-                    Email = dbUser.Email,
-                    AuthSalt = dbUser.AuthSalt,
-                    MfaEnabled = dbUser.MfaEnabled,
-                    MfaSecret = dbUser.MfaSecret,
-                    Vault = dbUser.Vault,
-                    CreatedAt = dbUser.CreatedAt,
-                    UpdatedAt = dbUser.UpdatedAt
-                };
-
-                // Navigate to app
-                await NavigateToMainPage();
-            }
-            catch
-            {
-                // Decryption failed - wrong password
-                await MopupService.Instance.PushAsync(new PromptPopup(
-                    title: "Error",
-                    body: "Incorrect password for this account.",
-                    aText: "OK"
-                ));
-            }
-        }
-        catch (Exception ex)
-        {
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                title: "Error",
-                body: ex.Message,
-                aText: "OK"
-            ));
+            // Attempt Login offline
+            await authenticationService.LoginOfflineAsync(Email, OfflinePassword, SelectedAccount);
+            // Navigate to app
+            await NavigateToMainPage();
         }
         finally
         {
@@ -440,7 +326,7 @@ public partial class LoginPageViewModel(
 
     /// <summary>
     /// Quick login by selecting a local account (online mode)
-    /// This will autofill the email field
+    /// This will auto-fill the email field
     /// </summary>
     [RelayCommand]
     private void SelectLocalAccount(DbModel account)
@@ -459,7 +345,7 @@ public partial class LoginPageViewModel(
     }
 
     [RelayCommand]
-    private async Task RemoveOfflineAccount(DbModel? account)
+    private async Task RemoveOfflineAccount(DbModel account)
     {
         if (account == null) return;
 
@@ -483,11 +369,10 @@ public partial class LoginPageViewModel(
     {
         if (!IsConnected)
         {
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                title: "No Connection",
-                body: "Registration requires an internet connection.",
-                aText: "OK"
-            ));
+            await Shell.Current.DisplayAlertAsync(
+                "No Connection",
+                "Registration requires an internet connection.",
+                "OK");
             return;
         }
         await Shell.Current.GoToAsync(nameof(RegisterPage));
@@ -497,5 +382,8 @@ public partial class LoginPageViewModel(
     /// Refresh local accounts list
     /// </summary>
     [RelayCommand]
-    private async Task RefreshLocalAccounts() => await LoadLocalAccountsAsync();
+    private async Task RefreshLocalAccounts()
+    {
+        await LoadLocalAccountsAsync();
+    }
 }

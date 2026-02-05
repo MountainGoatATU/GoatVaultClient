@@ -1,4 +1,5 @@
-﻿using GoatVaultCore.Models.API;
+﻿using GoatVaultCore.Models;
+using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
 
 namespace GoatVaultInfrastructure.Services.Vault;

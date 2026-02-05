@@ -16,6 +16,7 @@
                     <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
                     <converters:BoolToMfaStatusConverter x:Key="BoolToMfaStatusConverter"/>
                     <converters:BoolToMfaButtonTextConverter x:Key="BoolToMfaButtonTextConverter"/>
+                    <converters:EyeIconConverter x:Key="EyeIconConverter"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Name="appColors" Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary x:Name="appStyles" Source="Resources/Styles/Styles.xaml" />

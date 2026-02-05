@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui;
 using GoatVaultInfrastructure.Database;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
@@ -79,6 +79,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<VaultSessionService>();
         builder.Services.AddSingleton<MarkdownHelperService>();
         builder.Services.AddSingleton<ConnectivityService>();
+        builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+        builder.Services.AddSingleton<ISyncingService, SyncingService>();
 
         // Test services
         builder.Services.AddSingleton<FakeDataSource>();
@@ -89,6 +91,7 @@ public static class MauiProgram
         // builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
 
         builder.Services.AddTransient<ShamirService>();
+
 
         // UraniumUI dialogs
         builder.Services.AddMopupsDialogs();

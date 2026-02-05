@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using Microsoft.Extensions.Configuration;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -14,7 +15,7 @@ public interface IHttpService
 }
 
 // Use of primary constructor to inject HttpClient dependency
-public class HttpService(HttpClient client, AuthTokenService authTokenService) : IHttpService
+public class HttpService(HttpClient client, AuthTokenService authTokenService, IConfiguration configuration) : IHttpService
 {
     private readonly HttpClient _client = client;
     private readonly AuthTokenService _authTokenService = authTokenService;
