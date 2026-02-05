@@ -1,10 +1,14 @@
-﻿using GoatVaultCore.Models;
-using GoatVaultCore.Models.API;
+﻿using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
 
 namespace GoatVaultInfrastructure.Services.Vault;
 
-public class VaultSessionService
+public interface IVaultSessionService
+{
+    void Lock();
+}
+
+public class VaultSessionService : IVaultSessionService
 {
     public VaultData? DecryptedVault { get; set; } = null;
     public UserResponse? CurrentUser { get; set; } = null;
