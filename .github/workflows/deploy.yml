@@ -4,13 +4,12 @@ on:
   push:
     branches:
       - main
-      - refactor-v4
+      - android-deployment
     paths-ignore:
       - "*.md"
   pull_request:
     branches:
       - main
-      - refactor-v4
     paths-ignore:
       - "*.md"
       
@@ -21,6 +20,7 @@ env:
   WORKING_DIRECTORY: "./GoatVaultClient-v4"
   DOTNET_VERSION: "10.0.x"
   TARGET_FRAMEWORK: "net10.0-windows10.0.19041.0"
+  TARGET_FRAMEWORK_MOBILE: "net10.0-android"
   PLATFORM: "x64"
   RUNTIME_IDENTIFIER: "win-x64"
   CONFIGURATION: "Release"
@@ -259,6 +259,53 @@ jobs:
       # Create GitHub release
       # --------------------------
 
+      # --------------------------
+      # Prepare Android keystore
+      # --------------------------
+
+      - name: Decode Android keystore
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          $keystorePath = "${{ env.WORKING_DIRECTORY }}\GoatVaultClient\index.keystore"
+          [System.IO.File]::WriteAllBytes($keystorePath, [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
+        shell: pwsh
+
+      # --------------------------
+      # Build & sign Android MAUI app
+      # --------------------------
+
+      - name: Build Android MAUI app
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          dotnet publish GoatVaultClient/GoatVaultClient.csproj `
+            -f ${{ env.TARGET_FRAMEWORK_MOBILE }} `
+            -c ${{ env.CONFIGURATION }} `
+            -o "android-build" `
+            -p:AndroidPackageFormat=apk `
+            -p:AndroidKeyStore=true `
+            -p:AndroidSigningKeyStore="index.keystore" `
+            -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
+            -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }} `
+            -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        shell: pwsh
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      # --------------------------
+      # Upload APK artifact
+      # --------------------------
+
+      - name: Upload Android artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: ${{ env.WORKING_DIRECTORY }}\android-build\**\*.apk
+          retention-days: 30
+
+      # --------------------------
+      # Create GitHub release with all artifacts
+      # --------------------------
+
       - name: Create Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
@@ -269,5 +316,6 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller
             ${{ env.WORKING_DIRECTORY }}/GoatVaultClient/bin/${{ env.PLATFORM }}/${{ env.CONFIGURATION }}/${{ env.TARGET_FRAMEWORK }}/${{ env.RUNTIME_IDENTIFIER }}/AppPackages/AutoUpdate.msix
             ${{ env.WORKING_DIRECTORY }}/GoatVaultClient/bin/${{ env.PLATFORM }}/${{ env.CONFIGURATION }}/${{ env.TARGET_FRAMEWORK }}/${{ env.RUNTIME_IDENTIFIER }}/AppPackages/GoatVaultClient.cer
+            ${{ env.WORKING_DIRECTORY }}/android-build/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
