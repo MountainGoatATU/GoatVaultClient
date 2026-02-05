@@ -5,9 +5,16 @@ using SecretSharingDotNet.Math;
 
 namespace GoatVaultCore.Services.Secrets;
 
+public interface IShamirService
+{
+    List<string> CreateSecret(int threshold, int totalShares, string phrase);
+    string ReconstructSecret(string[] shareStrings);
+}
+
 public class ShamirService(
     IMakeSharesUseCase<BigInteger> makeSharesUseCase,
     IReconstructionUseCase<BigInteger> reconstructionUseCase)
+    : IShamirService
 {
     private readonly IMakeSharesUseCase<BigInteger> _makeSharesUseCase = makeSharesUseCase;
     private readonly IReconstructionUseCase<BigInteger> _reconstructionUseCase = reconstructionUseCase;

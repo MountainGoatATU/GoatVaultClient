@@ -29,27 +29,31 @@ namespace GoatVaultClient.Services
         {
             // Get server URL from configuration
             var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
+
             // Ensure user is logged in
             if (vaultSessionService.CurrentUser == null && vaultSessionService.DecryptedVault == null)
                 throw new InvalidOperationException("No user is currently logged in.");
+
             try
             {
                 var localCopy = vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
-                //Pull the server stored vault
+
+                // Pull the server stored vault
                 var userResponse = await httpService.GetAsync<UserResponse>(
                 $"{url}v1/users/{vaultSessionService.CurrentUser.Id}"
                 );
+
                 // Validating server response
                 if (userResponse == null || localCopy == null)
                     throw new InvalidOperationException("Failed to retrieve user data to compare");
-                //Compare timestamps
-                int compareResult = DateTime.Compare(localCopy.Result.UpdatedAt, userResponse.UpdatedAt);
+
+                // Compare timestamps
+                var compareResult = DateTime.Compare(localCopy.Result.UpdatedAt, userResponse.UpdatedAt);
                 if (compareResult == 0)
                     return; // Synced
                 else if (compareResult > 0)
                 {
                     // Local is newer
-
                 }
                 else
                 {

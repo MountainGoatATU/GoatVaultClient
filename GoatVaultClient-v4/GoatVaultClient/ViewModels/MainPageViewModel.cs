@@ -21,10 +21,10 @@ namespace GoatVaultClient.ViewModels
          */
         [ObservableProperty] public ObservableCollection<CategoryItem> categories = [];
         [ObservableProperty] public ObservableCollection<VaultEntry> passwords = [];
-        [ObservableProperty] private CategoryItem selectedCategory = null;
-        [ObservableProperty] private VaultEntry selectedEntry = null;
-        [ObservableProperty] private CategoryItem newEntrySelectedCategory;
-        [ObservableProperty] private string searchText = null;
+        [ObservableProperty] private CategoryItem? selectedCategory = null;
+        [ObservableProperty] private VaultEntry? selectedEntry = null;
+        [ObservableProperty] private CategoryItem? newEntrySelectedCategory;
+        [ObservableProperty] private string? searchText = null;
         private bool _categoriesSortAsc = true;
         private bool _passwordsSortAsc = true;
         private List<VaultEntry> _allVaultEntries = new();
