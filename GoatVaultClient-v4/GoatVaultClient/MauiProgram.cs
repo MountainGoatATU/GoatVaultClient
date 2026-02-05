@@ -104,6 +104,12 @@ public static class MauiProgram
             db.Database.EnsureCreated();
         }
 
+        builder.Services.AddSingleton<GoatTipsService>();
+        builder.Services.AddSingleton<TotpManagerService>();
+        builder.Services.AddSingleton<CategoryManagerService>();
+        builder.Services.AddSingleton<VaultEntryManagerService>();
+        builder.Services.AddSingleton<VaultFilterService>();
+
         // Register pages
         builder.Services.AddTransient<MainPageViewModel>();
         builder.Services.AddTransient<MainPage>();
