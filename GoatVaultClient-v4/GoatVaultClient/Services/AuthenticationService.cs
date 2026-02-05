@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Models;
+using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
@@ -9,9 +9,9 @@ namespace GoatVaultClient.Services
 {
     public interface IAuthenticationService
     {
-        public Task LoginAsync(string email, string password);
+        public Task<bool> LoginAsync(string email, string password, Func<Task<string?>> mfaCodeProvider);
         public Task LoginOfflineAsync (string email, string password, DbModel selectedAccount);
-        public Task RegisterAsync(string email, string password, string cofirmPassword);
+        public Task RegisterAsync(string email, string password, string confirmPassword);
         public Task<bool> LogoutAsync();
         public Task<bool> LogoutOfflineAsync();
         public Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);
@@ -28,23 +28,25 @@ namespace GoatVaultClient.Services
         VaultSessionService vaultSessionService
         ) : IAuthenticationService
     {
-        public async Task LoginAsync(string email, string password)
+        public async Task<bool> LoginAsync(string email, string password, Func<Task<string?>> mfaCodeProvider)
         {
             // Validation
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 await Shell.Current.DisplayAlertAsync("Error", "Email and password are required.", "OK");
-                return;
+                return false;
             }
             try
             {
                 // Use GetSection and check for null or empty value to avoid CS8600
                 var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
-                string? url = urlSection.Value;
+                var url = urlSection.Value;
                 if (string.IsNullOrWhiteSpace(url))
                 {
-                    return;
+                    await Shell.Current.DisplayAlertAsync("Configuration Error", "Server base URL is not configured.", "OK");
+                    return false;
                 }
+
                 // Double-check connectivity before network call
                 var hasConnection = await connectivityService.CheckConnectivityAsync();
                 if (!hasConnection)
@@ -53,7 +55,7 @@ namespace GoatVaultClient.Services
                         "Connection Error",
                         "Unable to verify internet connection.",
                         "OK");
-                    return;
+                    return false;
                 }
 
                 // Init Auth
@@ -66,16 +68,38 @@ namespace GoatVaultClient.Services
                 // Generate Verifier
                 var loginVerifier = CryptoService.GenerateAuthVerifier(password, initResponse.AuthSalt);
 
+                // Check if MFA is required
+                string? mfaCode = null;
+                if (initResponse.MfaEnabled)
+                {
+                    if (mfaCodeProvider == null)
+                    {
+                        // Should not happen if VM provides it
+                        throw new InvalidOperationException("MFA is enabled but no code provider was supplied.");
+                    }
+
+                    mfaCode = await mfaCodeProvider();
+
+                    if (string.IsNullOrWhiteSpace(mfaCode))
+                    {
+                        // User cancelled MFA prompt
+                        return false;
+                    }
+                }
+
                 // Verify
                 var verifyPayload = new AuthVerifyRequest
                 {
                     UserId = Guid.Parse(initResponse.UserId),
-                    AuthVerifier = loginVerifier
+                    AuthVerifier = loginVerifier,
+                    MfaCode = mfaCode
                 };
+
                 var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
                     $"{url}v1/auth/verify",
                     verifyPayload
                 );
+
                 authTokenService.SetToken(verifyResponse.AccessToken);
                 vaultSessionService.MasterPassword = password;
 
@@ -87,19 +111,53 @@ namespace GoatVaultClient.Services
                 // Set the current user
                 vaultSessionService.CurrentUser = userResponse;
 
+                // Sync Local DB (Delete old if exists, save new)
+                var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
+
+                if (existingUser != null)
+                {
+                    await vaultService.DeleteUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
+                }
+
+                await vaultService.SaveUserToLocalAsync(new DbModel
+                {
+                    Id = vaultSessionService.CurrentUser.Id,
+                    Email = vaultSessionService.CurrentUser.Email,
+                    AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
+                    MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
+                    MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
+                    Vault = vaultSessionService.CurrentUser.Vault,
+                    CreatedAt = userResponse.CreatedAt,
+                    UpdatedAt = userResponse.UpdatedAt
+                });
+
                 // Decrypt & Store Session
                 vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, password);
+
+                return true;
+            }
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await Shell.Current.DisplayAlertAsync("Login Failed", "Invalid email or password (or MFA code). Please try again.", "OK");
+            }
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                await Shell.Current.DisplayAlertAsync("Account Not Found", "No account found with this email address.", "OK");
+            }
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                await Shell.Current.DisplayAlertAsync("Invalid Request", "Please check your email and password.", "OK");
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
                 await Shell.Current.DisplayAlertAsync("Error", "This email is already registered.", "OK");
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException httpEx)
             {
                 // Network-related errors
                 await Shell.Current.DisplayAlertAsync(
                     "Connection Error",
-                    "Unable to connect to the server. Please check your internet connection.",
+                    $"Unable to connect to the server. {httpEx.Message}",
                     "OK");
             }
             catch (TaskCanceledException)
@@ -110,12 +168,21 @@ namespace GoatVaultClient.Services
                     "The request timed out. Please try again.",
                     "OK");
             }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("decrypt"))
+            {
+                await Shell.Current.DisplayAlertAsync(
+                    "Decryption Error",
+                    "Unable to decrypt your vault. This may indicate a data corruption issue.",
+                    "OK");
+            }
             catch (Exception ex)
             {
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
+
+            return false;
         }
-        public async Task LoginOfflineAsync(string email, string password, DbModel selectedAccount)
+        public async Task LoginOfflineAsync(string email, string password, DbModel? selectedAccount)
         {
             // Validation
             if (selectedAccount == null)
@@ -196,7 +263,7 @@ namespace GoatVaultClient.Services
             {
                 // Use GetSection and check for null or empty value to avoid CS8600
                 var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
-                string? url = urlSection.Value;
+                var url = urlSection.Value;
                 if (string.IsNullOrWhiteSpace(url))
                 {
                     return;

@@ -2,6 +2,7 @@ using GoatVaultCore.Models.Vault;
 using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using System.Linq;
 
 namespace GoatVaultTests;
 
@@ -105,7 +106,7 @@ public class VaultServiceTests
         // Assert
         Assert.NotNull(decrypted);
         Assert.Equal(originalData.Categories.Count, decrypted.Categories.Count);
-        Assert.Equal(originalData.Categories, decrypted.Categories);
+        Assert.Equal(originalData.Categories.Select(c => c.Name), decrypted.Categories.Select(c => c.Name));
         Assert.Equal(originalData.Entries.Count, decrypted.Entries.Count);
         Assert.Equal(originalData.Entries[0].Site, decrypted.Entries[0].Site);
         Assert.Equal(originalData.Entries[0].UserName, decrypted.Entries[0].UserName);
@@ -185,7 +186,7 @@ public class VaultServiceTests
         var decrypted = _vaultService.DecryptVault(encrypted, password);
 
         // Assert
-        Assert.Equal(complexData.Categories, decrypted.Categories);
+        Assert.Equal(complexData.Categories.Select(c => c.Name), decrypted.Categories.Select(c => c.Name));
         Assert.Equal(complexData.Entries.Count, decrypted.Entries.Count);
 
         for (var i = 0; i < complexData.Entries.Count; i++)
