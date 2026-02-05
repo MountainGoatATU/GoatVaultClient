@@ -2,7 +2,7 @@
 
 **GoatVault** is a secure, cross-platform password manager built with **.NET MAUI**.
 
-## 🏗 Architecture
+## Architecture
 
 The project follows the **MVVM (Model-View-ViewModel)** architectural pattern, leveraging the **CommunityToolkit.Mvvm** for efficient state management and data binding.
 
@@ -10,7 +10,7 @@ The project follows the **MVVM (Model-View-ViewModel)** architectural pattern, l
 *   **`GoatVaultCore`**: The domain layer containing models.
 *   **`GoatVaultInfrastructure`**: The service layer handling data, encryption, and networking.
 
-## 💻 Getting Started
+## Getting Started
 
 ### Prerequisites
 *   [.NET 10 SDK](https://dotnet.microsoft.com/download) (or later)
