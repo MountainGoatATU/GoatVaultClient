@@ -125,8 +125,9 @@ jobs:
         run: |
           dotnet publish GoatVaultClient/GoatVaultClient.csproj `
             -f ${{ env.TARGET_FRAMEWORK }} `
-            -c ${{ env.CONFIGURATION }} `
+            -c ${{ env.CONFIGURATION }}\android-apk `
             -o "android-build" `
+            -p:AndroidPackageFormat=apk `
             -p:AndroidKeyStore=true `
             -p:AndroidSigningKeyStore="index.keystore" `
             -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} `
@@ -141,6 +142,6 @@ jobs:
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-app
-          path: ${{ env.WORKING_DIRECTORY }}\android-build\**
+          name: android-apk
+          path: ${{ env.WORKING_DIRECTORY }}\android-build\**\*.apk
           retention-days: 30
