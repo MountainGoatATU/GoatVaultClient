@@ -4,16 +4,14 @@ on:
   push:
     branches:
       - main
-      - refactor-v4
     paths-ignore:
       - "*.md"
   pull_request:
     branches:
       - main
-      - refactor-v4
     paths-ignore:
       - "*.md"
-      
+
 permissions:
   contents: write
 
@@ -26,10 +24,9 @@ env:
   CONFIGURATION: "Release"
 
 jobs:
-
   build:
     runs-on: windows-latest
-    
+
     steps:
       # --------------------------
       # Setup environment
@@ -51,7 +48,7 @@ jobs:
             GOATVAULT_SERVER_BASE_URL="${{ secrets.GOATVAULT_SERVER_BASE_URL }}";
           }
           $config | ConvertTo-Json -Depth 10 | Set-Content -Path "${{ env.WORKING_DIRECTORY }}/GoatVaultClient/appsettings.json"
-          
+
       # --------------------------
       # Enable caching for .NET packages and MAUI workloads
       # --------------------------
