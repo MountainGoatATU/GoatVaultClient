@@ -7,16 +7,17 @@
                   xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
                   x:Class="GoatVaultClient.Controls.Popups.PromptPopup"
                   BackgroundColor="#80000000"
-                  CloseWhenBackgroundIsClicked="True">
-
+                  CloseWhenBackgroundIsClicked="False">
 
     <controls:PopupTemplate Title="{Binding Title}"
                             FrameWidth="500"
                             AcceptCommand="{Binding AcceptCommand}"
                             CancelCommand="{Binding CancelCommand}"
-                            AcceptText="{Binding AcceptText}">
+                            AcceptText="{Binding AcceptText}"
+                            CancelText="{Binding CancelText}">
         <VerticalStackLayout>
-            <Label Text="{Binding Body}" />
+            <Label Text="{Binding Body}" 
+                   LineBreakMode="WordWrap"/>
         </VerticalStackLayout>
     </controls:PopupTemplate>
 </mopups:PopupPage>

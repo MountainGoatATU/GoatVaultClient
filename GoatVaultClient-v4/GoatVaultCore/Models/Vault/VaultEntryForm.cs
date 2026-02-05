@@ -19,6 +19,19 @@ public partial class VaultEntryForm : VaultEntry
         IncludeSpecial = true;
 
         PasswordLength = 16;
+
+        PropertyChanged += (s, e) =>
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(MfaSecret):
+                    ValidateMfaSecret();
+                    break;
+                case nameof(Password):
+                    EvaluatePasswordStrength();
+                    break;
+            }
+        };
     }
 
     [ObservableProperty] [property: Required] private List<CategoryItem> _availableCategories;
@@ -31,20 +44,49 @@ public partial class VaultEntryForm : VaultEntry
     [ObservableProperty] private bool _includeSpecial = true;
     [ObservableProperty] private int _passwordLength = 16;
 
-    partial void OnPasswordChanged(string value)
+    // MFA validation property
+    [ObservableProperty] private bool _isMfaSecretValid;
+    [ObservableProperty] private string? _mfaValidationMessage;
+
+    private void EvaluatePasswordStrength()
     {
-        if (string.IsNullOrWhiteSpace(value))
+        if (string.IsNullOrWhiteSpace(Password))
         {
             CrackTime = null;
             CrackProgress = 0;
             return;
         }
 
-        var result = PasswordStrengthService.Evaluate(value);
+        var result = PasswordStrengthService.Evaluate(Password);
 
         CrackTime = $"Crack time: {result.CrackTimeText}";
 
         CrackProgress = result.Score / 4.0;
+    }
+
+    private void ValidateMfaSecret()
+    {
+        // Validate MFA secret
+        if (string.IsNullOrWhiteSpace(MfaSecret))
+        {
+            HasMfa = false;
+            IsMfaSecretValid = false;
+            MfaValidationMessage = null;
+            return;
+        }
+
+        IsMfaSecretValid = TotpService.IsValidSecret(MfaSecret);
+
+        if (IsMfaSecretValid)
+        {
+            HasMfa = true;
+            MfaValidationMessage = "✓ Valid MFA secret";
+        }
+        else
+        {
+            HasMfa = false;
+            MfaValidationMessage = "✗ Invalid MFA secret (must be Base32)";
+        }
     }
 
     [RelayCommand]

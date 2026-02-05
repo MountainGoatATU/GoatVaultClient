@@ -6,23 +6,19 @@
                   xmlns:controls="clr-namespace:GoatVaultClient.Controls"
                   xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
                   xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
-                  xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
                   x:Class="GoatVaultClient.Controls.Popups.AuthorizePopup"
                   BackgroundColor="#80000000"
-                  CloseWhenBackgroundIsClicked="True">
-
+                  CloseWhenBackgroundIsClicked="False">
 
     <controls:PopupTemplate Title="{Binding Title}"
                             FrameWidth="500"
                             AcceptCommand="{Binding AcceptCommand}"
                             CancelCommand="{Binding CancelCommand}"
-                            AcceptText="Submit" x:DataType="popups:AuthorizePopup">
+                            AcceptText="Submit">
         <VerticalStackLayout>
-            <material:TextField x:Name="InputEntry" Text="{Binding Password}" IsPassword="True" x:DataType="models:PasswordItem">
-                    <material:TextField.Attachments>
-                        <material:TextFieldPasswordShowHideAttachment x:Name="ShowHideAttachment"/>
-                    </material:TextField.Attachments>
-                </material:TextField>
+            <material:TextField x:Name="InputEntry" 
+                                Title="Enter value"
+                                IsPassword="False"/>
         </VerticalStackLayout>
     </controls:PopupTemplate>
 </mopups:PopupPage>

@@ -29,7 +29,7 @@ public class DbModel
         set => VaultJson = JsonSerializer.Serialize(value);
     }
 
-    [JsonPropertyName("created_at")] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    [JsonPropertyName("created_at")] public DateTime CreatedAt { get; set; }
 
-    [JsonPropertyName("updated_at")] public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    [JsonPropertyName("updated_at")] public DateTime UpdatedAt { get; set; }
 }

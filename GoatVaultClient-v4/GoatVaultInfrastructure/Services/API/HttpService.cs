@@ -45,7 +45,7 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, I
             {
                 string json;
 
-                // Don’t double serialize if payload is already a string
+                // Don't double serialize if payload is already a string
                 if (payload is string jsonString)
                     json = jsonString;
                 else
@@ -59,9 +59,36 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, I
             if (!response.IsSuccessStatusCode)
             {
                 var errorBody = await response.Content.ReadAsStringAsync();
-                // Throw an exception with details about the error
+
+                // Try to extract a meaningful error message from the response
+                string errorMessage;
+                try
+                {
+                    // Try to parse as JSON and extract message
+                    var errorJson = JsonSerializer.Deserialize<JsonElement>(errorBody);
+                    if (errorJson.TryGetProperty("message", out var msgProperty))
+                    {
+                        errorMessage = msgProperty.GetString() ?? errorBody;
+                    }
+                    else if (errorJson.TryGetProperty("error", out var errProperty))
+                    {
+                        errorMessage = errProperty.GetString() ?? errorBody;
+                    }
+                    else
+                    {
+                        errorMessage = errorBody;
+                    }
+                }
+                catch
+                {
+                    errorMessage = errorBody;
+                }
+
+                // Throw HttpRequestException with StatusCode preserved
                 throw new HttpRequestException(
-                    $"HTTP {(int)response.StatusCode} ({response.StatusCode}) error calling {url}: {errorBody}");
+                    errorMessage,
+                    null,
+                    response.StatusCode);
             }
 
             // Read the response content as a string
@@ -76,17 +103,17 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, I
         catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
         {
             // A TaskCanceledException without user cancellation => timeout
-            throw new TimeoutException($"Request to {url} timed out after {_client.Timeout.TotalSeconds} seconds.", ex);
+            throw new TimeoutException($"Request timed out after {_client.Timeout.TotalSeconds} seconds.", ex);
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException)
         {
-            // Network or protocol errors
-            throw new InvalidOperationException($"Error performing HTTP request to {url}.", ex);
+            // Re-throw HttpRequestException to preserve StatusCode
+            throw;
         }
         catch (Exception ex)
         {
-            // Unexpected errors
-            throw new Exception($"Unexpected error while sending request to {url}.", ex);
+            // Unexpected errors - provide generic message without exposing URL
+            throw new Exception("Unexpected error while sending request.", ex);
         }
     }
 

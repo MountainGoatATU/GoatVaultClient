@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
@@ -83,17 +83,218 @@ public partial class LoginPageViewModel(
     [RelayCommand]
     private async Task Login()
     {
-        // Prevent multiple simultaneous logins   
+        // Use GetSection and check for null or empty value to avoid CS8600
+        var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
+        var url = urlSection.Value;
+
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Configuration Error",
+                body: "Server base URL is not configured.",
+                aText: "OK"
+            ));
+            return;
+        }
+
+        // Prevent multiple simultaneous logins
         if (IsBusy)
             return;
+
+        // Check connectivity
+        if (!IsConnected)
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "No Connection",
+                body: "Please check your internet connection and try again.",
+                aText: "OK"
+            ));
+            return;
+        }
+
+        // Validation
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "Email and password are required.",
+                aText: "OK"
+            ));
+            return;
+        }
+
         try
         {
             // Set Busy
             IsBusy = true;
-            // 1. Attempt online login
-            await authenticationService.LoginAsync(Email, Password);
-            // 2. On success, navigate to main page
-            await NavigateToMainPage();
+
+            // Double-check connectivity before network call
+            var hasConnection = await connectivityService.CheckConnectivityAsync();
+            if (!hasConnection)
+            {
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Connection Error",
+                    body: "Unable to verify internet connection.",
+                    aText: "OK"
+                ));
+                return;
+            }
+
+            // 2. Init Auth
+            var initPayload = new AuthInitRequest { Email = Email };
+            var initResponse = await httpService.PostAsync<AuthInitResponse>(
+                $"{url}v1/auth/init",
+                initPayload
+            );
+
+            // 3. Generate Verifier
+            System.Diagnostics.Debug.WriteLine("Step 2: Generating auth verifier");
+            var loginVerifier = CryptoService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
+
+            // 4. Check if MFA is required
+            string? mfaCode = null;
+            if (initResponse.MfaEnabled)
+            {
+                System.Diagnostics.Debug.WriteLine("MFA is enabled, prompting for code");
+
+                // Prompt user for MFA code using custom popup
+                var mfaPopup = new AuthorizePopup("Enter your 6-digit authenticator code", isPassword: false);
+                await MopupService.Instance.PushAsync(mfaPopup);
+                mfaCode = await mfaPopup.WaitForScan();
+
+                if (string.IsNullOrWhiteSpace(mfaCode))
+                {
+                    System.Diagnostics.Debug.WriteLine("MFA code entry cancelled");
+                    return;
+                }
+            }
+
+            // 5. Verify with MFA code if required
+            System.Diagnostics.Debug.WriteLine("Step 3: Calling auth/verify");
+            var verifyPayload = new AuthVerifyRequest
+            {
+                UserId = Guid.Parse(initResponse.UserId),
+                AuthVerifier = loginVerifier,
+                MfaCode = mfaCode // Will be null if MFA not enabled
+            };
+
+            var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
+                $"{url}v1/auth/verify",
+                verifyPayload
+            );
+            System.Diagnostics.Debug.WriteLine("Auth verify successful");
+
+            authTokenService.SetToken(verifyResponse.AccessToken);
+            vaultSessionService.MasterPassword = Password;
+
+            // 6. Get User Data
+            System.Diagnostics.Debug.WriteLine("Step 4: Fetching user data");
+            var userResponse = await httpService.GetAsync<UserResponse>(
+                $"{url}v1/users/{initResponse.UserId}"
+            );
+            System.Diagnostics.Debug.WriteLine("User data fetched successfully");
+
+            vaultSessionService.CurrentUser = userResponse;
+
+            // 7. Sync Local DB (Delete old if exists, save new)
+            System.Diagnostics.Debug.WriteLine("Step 5: Syncing local database");
+            var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
+
+            if (existingUser != null)
+            {
+                System.Diagnostics.Debug.WriteLine("Deleting existing local user");
+                await vaultService.DeleteUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
+            }
+
+            await vaultService.SaveUserToLocalAsync(new DbModel
+            {
+                Id = vaultSessionService.CurrentUser.Id,
+                Email = vaultSessionService.CurrentUser.Email,
+                AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
+                MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
+                MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
+                Vault = vaultSessionService.CurrentUser.Vault,
+                CreatedAt = userResponse.CreatedAt,
+                UpdatedAt = userResponse.UpdatedAt
+            });
+            System.Diagnostics.Debug.WriteLine("Local database synced");
+
+            // 8. Decrypt & Store Session
+            System.Diagnostics.Debug.WriteLine("Step 6: Decrypting vault");
+            vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, Password);
+            System.Diagnostics.Debug.WriteLine("Vault decrypted successfully");
+
+            // 9. Navigate to App (MainPage)
+            if (Application.Current != null)
+                Application.Current.MainPage = new AppShell();
+
+            await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Login Failed",
+                body: "Invalid email or password. Please try again.",
+                aText: "OK"
+            ));
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Account Not Found",
+                body: "No account found with this email address.",
+                aText: "OK"
+            ));
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Invalid Request",
+                body: "Please check your email and password.",
+                aText: "OK"
+            ));
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "This email is already registered.",
+                aText: "OK"
+            ));
+        }
+        catch (HttpRequestException httpEx)
+        {
+            // Other HTTP errors - show the actual error message from server
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Connection Error",
+                body: $"Unable to connect to the server. {httpEx.Message}",
+                aText: "OK"
+            ));
+        }
+        catch (TimeoutException)
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Timeout",
+                body: "The request timed out. Please check your internet connection and try again.",
+                aText: "OK"
+            ));
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("decrypt"))
+        {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Decryption Error",
+                body: "Unable to decrypt your vault. This may indicate a data corruption issue.",
+                aText: "OK"
+            ));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Login error: {ex}");
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Error",
+                body: "An unexpected error occurred. Please try again later.",
+                aText: "OK"
+            ));
         }
         finally
         {

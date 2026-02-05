@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Maui.Core;
-using CommunityToolkit.Maui.Core.Extensions;
-using CommunityToolkit.Maui.Views;
+﻿using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Controls.Popups;
@@ -10,6 +8,7 @@ using GoatVaultInfrastructure.Services.Vault;
 using Mopups.Services;
 using System.Collections.ObjectModel;
 using UraniumUI.Dialogs;
+using UraniumUI.Icons.MaterialSymbols;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultClient.Services;
 
@@ -38,17 +37,22 @@ namespace GoatVaultClient.ViewModels
         // UI Properties for the Sync Status Component
         [ObservableProperty] private bool _isSyncing = false;
 
+        // TOTP timer
+        private IDispatcherTimer? _totpTimer;
+
         // Random comments
-        private readonly List<string> goatTips = new List<string>
-        {
+        private readonly List<string> _goatTips =
+        [
             "Tip: Change your password regularly!",
             "Tip: Avoid using the same password twice.",
             "Tip: Enable two-factor authentication.",
             "Tip: Your Vault score is low, check weak passwords.",
             "Tip: Keep backup keys handy.",
             "Tip: Consider using a passphrase instead of a single word."
-        };
-        //Dependency Injection
+        ];
+
+        // Dependency Injection
+        // TODO: Unused parameters
         private readonly VaultSessionService _vaultSessionService;
         private readonly FakeDataSource _fakeDataSource;
         private readonly IDialogService _dialogService;
@@ -62,11 +66,77 @@ namespace GoatVaultClient.ViewModels
             IDialogService dialogService,
             ISyncingService syncingService)
         {
-            //Dependency Injection
+            // Dependency Injection
             _vaultService = vaultService;
             _vaultSessionService = vaultSessionService;
             _fakeDataSource = fakeDataSource;
             _dialogService = dialogService;
+
+            LoadVaultData();
+
+            StartTotpTimer();
+            StartRandomGoatComments();
+        }
+
+        private void StartTotpTimer()
+        {
+            // Update TOTP codes every second
+            _totpTimer = Application.Current?.Dispatcher.CreateTimer();
+
+            if (_totpTimer != null)
+            {
+                _totpTimer.Interval = TimeSpan.FromSeconds(1);
+                _totpTimer.Tick += (s, e) =>
+                {
+                    UpdateTotpCodes();
+                };
+                _totpTimer.Start();
+            }
+        }
+
+        private void UpdateTotpCodes()
+        {
+            if (SelectedEntry == null || !SelectedEntry.HasMfa ||
+                string.IsNullOrWhiteSpace(SelectedEntry.MfaSecret))
+            {
+                return;
+            }
+
+            try
+            {
+                var (code, secondsRemaining) = TotpService.GenerateCodeWithTime(SelectedEntry.MfaSecret);
+                SelectedEntry.CurrentTotpCode = code;
+                SelectedEntry.TotpTimeRemaining = secondsRemaining;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error generating TOTP: {ex.Message}");
+                SelectedEntry.CurrentTotpCode = "ERROR";
+                SelectedEntry.TotpTimeRemaining = 0;
+            }
+        }
+
+        partial void OnSelectedEntryChanged(VaultEntry? value)
+        {
+            // Update TOTP immediately when entry is selected
+            if (value is { HasMfa: true } && !string.IsNullOrWhiteSpace(value.MfaSecret))
+            {
+                UpdateTotpCodes();
+            }
+        }
+
+        [RelayCommand]
+        private async Task CopyTotpCode()
+        {
+            if (SelectedEntry == null || string.IsNullOrWhiteSpace(SelectedEntry.CurrentTotpCode))
+                return;
+
+            await Clipboard.Default.SetTextAsync(SelectedEntry.CurrentTotpCode);
+            await Task.Delay(10000); // 10 seconds
+            await Clipboard.Default.SetTextAsync(""); // Clear clipboard
+        }
+
+        private void StartRandomGoatComments()
             _syncingService = syncingService;
         }
 
@@ -75,22 +145,25 @@ namespace GoatVaultClient.ViewModels
             var random = new Random();
             var timer = Application.Current.Dispatcher.CreateTimer();
 
-            int counter = 0;
+            var counter = 0;
             timer.Interval = TimeSpan.FromSeconds(1);
 
             timer.Tick += (s, e) =>
             {
                 counter++;
 
-                if (counter % 10 == 0) // Every 10 seconds show a comment
+                switch (counter % 10)
                 {
-                    GoatComment = goatTips[random.Next(goatTips.Count)];
-                    IsGoatCommentVisible = true;
-                }
-                else if (counter % 10 == 5) // Disapear after 5 seconds
-                {
-                    IsGoatCommentVisible = false;
-                    GoatComment = "";
+                    // Every 10 seconds show a comment
+                    case 0:
+                        GoatComment = _goatTips[random.Next(_goatTips.Count)];
+                        IsGoatCommentVisible = true;
+                        break;
+                    // Disappear after 5 seconds
+                    case 5:
+                        IsGoatCommentVisible = false;
+                        GoatComment = "";
+                        break;
                 }
 
                 if (counter >= 10) counter = 0; // Reset counter
@@ -134,6 +207,7 @@ namespace GoatVaultClient.ViewModels
             // Recalculate Vault Score
             CalculateVaultScore();
         }
+
         private void PresortCategories(bool matchUi = false)
         {
             // Toggle sort - matchUI indicates whether to keep the current sort order (true) or toggle it (false)
@@ -143,9 +217,11 @@ namespace GoatVaultClient.ViewModels
             {
                 _categoriesSortAsc = !_categoriesSortAsc;
             }
+
             var sorted = _categoriesSortAsc
                 ? Categories.OrderBy(f => f.Name)
                 : Categories.OrderByDescending(f => f.Name);
+
             Categories = sorted.ToObservableCollection<CategoryItem>();
         }
 
@@ -159,6 +235,7 @@ namespace GoatVaultClient.ViewModels
             {
                 _passwordsSortAsc = !_passwordsSortAsc;
             }
+
             var sorted = _passwordsSortAsc
                 ? Passwords.OrderBy(f => f.Site)
                 : Passwords.OrderByDescending(f => f.Site);
@@ -169,6 +246,7 @@ namespace GoatVaultClient.ViewModels
         partial void OnSelectedCategoryChanged(CategoryItem? value)
         {
             SearchText = "";
+
             if (value?.Name == "All")
             {
                 ReloadVaultData();
@@ -251,19 +329,29 @@ namespace GoatVaultClient.ViewModels
                 {
                     // Create temp Category
                     var temp = new CategoryItem { Name = result };
-                    // Add it to global list
+
+                    // Add to global list
                     _vaultSessionService.DecryptedVault.Categories.Add(temp);
+                  
+                    // Update the session vault data
+                    _vaultSessionService.DecryptedVault?.Categories = _allVaultCategories
+                        .Where(c => c.Name != "All")
+                        .Select(c => c.Name)
+                        .ToList();
+
                     // Sort to match UI
                     PresortCategories(true);
+
                     // Update categories
+                    Categories = _allVaultCategories.ToObservableCollection();
+
                     ReloadVaultData();
                 }
                 else
                 {
-                    // Implement Error dialog or toast
+                    // TODO: Implement error dialog or toast
                 }
             }
-
         }
 
         [RelayCommand]
@@ -283,10 +371,13 @@ namespace GoatVaultClient.ViewModels
 
             // Creating new prompt dialog
             var categoryPopup = new SingleInputPopup("Edit Category", "Category", category.Name);
+          
             // Push the dialog to MopupService
             await MopupService.Instance.PushAsync(categoryPopup);
+          
             // Wait for the response
             var response = await categoryPopup.WaitForScan();
+          
             // Act based on the response
             if (response != string.Empty)
             {
@@ -297,16 +388,28 @@ namespace GoatVaultClient.ViewModels
                         await Task.Delay(50);
                     // Asking user to reassign the passwords
                     var promptPopup = new PromptPopup("Reassign Passwords", $"Do you want to reassign passwords from \"{target.Name}\" to \"{response}\"?", "Accept");
+
                     // Displaying dialog
                     await MopupService.Instance.PushAsync(promptPopup);
+
                     // Waiting for the response 
                     var promptResponse = await promptPopup.WaitForScan();
+                    var passwords = _allVaultEntries.Where(c => c.Category == target.Name).ToList();
+                    if (promptResponse)
+                    {
+                        foreach (var pwd in passwords)
+                        {
+                            pwd.Category = response;
+                        }
+                    }
+                    else
 
                     var vaultEntries = _vaultSessionService.DecryptedVault.Entries;
                     foreach (var pwd in vaultEntries.Where(c => c.Category == oldName))
                     {
                         pwd.Category = promptResponse ? response : string.Empty;
                     }
+                    category.Name = response;
 
                     // Update the category name in place using the index
                     _vaultSessionService.DecryptedVault.Categories[index].Name = response;
@@ -319,15 +422,20 @@ namespace GoatVaultClient.ViewModels
         private async Task DeleteCategory(CategoryItem category)
         {
             var target = category ?? SelectedCategory;
+
             // Safe check
             if (target == null)
                 return;
+
             // Creating new prompt dialog
             var categoryPopup = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the \"{target.Name}\" category?", "Delete");
+
             // Push the dialog to MopupService
             await MopupService.Instance.PushAsync(categoryPopup);
+
             // Wait for the response
             var response = await categoryPopup.WaitForScan();
+
             // Act based on the response
             if (response)
             {
@@ -336,10 +444,13 @@ namespace GoatVaultClient.ViewModels
                     // Wait before pushing another dialog
                     while (MopupService.Instance.PopupStack.Contains(categoryPopup))
                         await Task.Delay(50);
+
                     // Asking user to delete the passwords assign to the deleting category
                     var promptPopup = new PromptPopup("Delete Passwords", $"Do you want to delete all passwords from \"{category.Name}\"?", "Delete");
+
                     // Displaying dialog
                     await MopupService.Instance.PushAsync(promptPopup);
+
                     // Waiting for the response 
                     var promptResponse = await promptPopup.WaitForScan();
                     var passwords = Passwords.Where(c => c.Category == target.Name).ToList();
@@ -351,22 +462,27 @@ namespace GoatVaultClient.ViewModels
                         }
                     }
                 }
+              
+                // Remove from UI
+                Categories.Remove(target);
+
                 // Remove category
                 _vaultSessionService.DecryptedVault.Categories.Remove(target);
+              
                 // Set selected category
                 SelectedCategory = null;
             }
         }
 
         [RelayCommand]
-        public async Task SortEntries()
+        private async Task SortEntries()
         {
             PresortEntries();
         }
 
         // TODO: Unused method parameter
         [RelayCommand]
-        public async Task CopyEntry(/*string password*/)
+        private async Task CopyEntry(/*string password*/)
         {
             await Clipboard.Default.SetTextAsync(SelectedEntry?.Password);  // Copy to clipboard
             await Task.Delay(10000);  // 10 seconds
@@ -374,7 +490,7 @@ namespace GoatVaultClient.ViewModels
         }
 
         [RelayCommand]
-        public async Task CreateEntry()
+        private async Task CreateEntry()
         {
             // Populate the list of category names from your ViewModel
             var categoriesList = Categories.ToList();
@@ -382,6 +498,11 @@ namespace GoatVaultClient.ViewModels
             var formModel = new VaultEntryForm(categoriesList)
             {
                 // Optional: Set a default selected category
+                Category = Categories.FirstOrDefault()?.Name ?? throw new NullReferenceException()
+            };
+
+            // Show the Auto-Generated Dialog
+            var dialog = new VaultEntryDialog(formModel);
                 Category = Categories.FirstOrDefault()?.Name ?? throw new NullReferenceException()
             };
 
@@ -397,25 +518,38 @@ namespace GoatVaultClient.ViewModels
             {
                 return;
             }
+
             var newEntry = new VaultEntry
             {
                 UserName = formModel.UserName,
                 Site = formModel.Site,
                 Password = formModel.Password,
                 Description = formModel.Description,
-                Category = formModel.Category
+                Category = formModel.Category,
+                MfaSecret = formModel.MfaSecret,
+                HasMfa = formModel.HasMfa
             };
+
+            // Update session vault data
+            _vaultSessionService.DecryptedVault?.Entries = _allVaultEntries;
+
             // Add to list
             _vaultSessionService.DecryptedVault.Entries.Add(newEntry);
+
             // Sort to match UI
             PresortEntries(true);
+
             // Update UI
+            Passwords = _allVaultEntries.ToObservableCollection();
+            CalculateVaultScore();
             ReloadVaultData();
         }
 
         [RelayCommand]
         private async Task EditEntry()
         {
+            var target = entry ?? SelectedEntry;
+
             // Safe check
             if (SelectedEntry == null)
                 return;
@@ -440,18 +574,45 @@ namespace GoatVaultClient.ViewModels
                 Site = target.Site,
                 Password = target.Password,
                 Description = target.Description,
-                Category = target.Category
+                Category = target.Category,
+                MfaSecret = target.MfaSecret,
+                HasMfa = target.HasMfa
             };
+
             // Create the dialog
-            var dialog = new Controls.Popups.VaultEntryDialog(formModel);
+            var dialog = new VaultEntryDialog(formModel);
+
             // Push the dialog to MopupService
             await MopupService.Instance.PushAsync(dialog);
             await dialog.WaitForScan();
+
             // Simple validation
             if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
             {
                 return;
             }
+
+            // Find and update the entry in the list
+            var entryIndex = _allVaultEntries.IndexOf(target);
+            if (entryIndex >= 0)
+            {
+                _allVaultEntries[entryIndex] = new VaultEntry
+                {
+                    UserName = formModel.UserName,
+                    Site = formModel.Site,
+                    Password = formModel.Password,
+                    Description = formModel.Description,
+                    Category = formModel.Category,
+                    MfaSecret = formModel.MfaSecret,
+                    HasMfa = formModel.HasMfa
+                };
+            }
+
+            // Update the session vault data
+            _vaultSessionService.DecryptedVault?.Entries = _allVaultEntries;
+
+            CalculateVaultScore();
+
             // Update Selected Entry
             target.UserName = formModel.UserName;
             target.Site = formModel.Site;
@@ -461,25 +622,33 @@ namespace GoatVaultClient.ViewModels
 
             ReloadVaultData();
         }
+
         [RelayCommand]
-        public async Task DeleteEntry(VaultEntry entry)
+        private async Task DeleteEntry(VaultEntry entry)
         {
             var target = entry ?? SelectedEntry;
+
             // Safe check
-            if (SelectedEntry == null)
+            if (target == null)
                 return;
+
             // Creating new prompt dialog
             var dialog = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the password for \"{target.Site}\"?", "Delete");
+
             // Push the dialog to MopupService
             await MopupService.Instance.PushAsync(dialog);
+
             // Wait for the response
             var response = await dialog.WaitForScan();
+
             // Act based on the response
             if (response)
             {
                 _vaultSessionService.DecryptedVault.Entries.Remove(target);
             }
+          
             // Update UI
+            CalculateVaultScore();
             ReloadVaultData();
         }
 

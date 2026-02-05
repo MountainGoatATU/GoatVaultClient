@@ -27,16 +27,17 @@ public class ConnectivityService : IDisposable
         var wasConnected = IsConnected;
         IsConnected = e.NetworkAccess == NetworkAccess.Internet;
 
-        if (wasConnected != IsConnected)
-        {
-            Debug.WriteLine($"Connectivity changed: {IsConnected}");
-            ConnectivityChanged?.Invoke(this, IsConnected);
-        }
+        if (wasConnected == IsConnected)
+            return;
+
+        Debug.WriteLine($"Connectivity changed: {IsConnected}");
+        ConnectivityChanged?.Invoke(this, IsConnected);
     }
 
     /// <summary>
     /// Check if there is internet connectivity
     /// </summary>
+    /// TODO: No await operators
     public async Task<bool> CheckConnectivityAsync()
     {
         try
@@ -45,14 +46,9 @@ public class ConnectivityService : IDisposable
             IsConnected = networkAccess == NetworkAccess.Internet;
 
             // Optional: Perform actual network test
-            if (IsConnected)
-            {
-                // You could add a ping test here to verify actual internet access
-                // vs just network connection
-                return true;
-            }
-
-            return false;
+            return IsConnected;
+            // You could add a ping test here to verify actual internet access
+            // vs just network connection
         }
         catch (Exception ex)
         {
@@ -94,7 +90,7 @@ public class NetworkInfo
 {
     public bool IsConnected { get; set; }
     public NetworkAccess NetworkAccess { get; set; }
-    public List<ConnectionProfile> ConnectionProfiles { get; set; } = new();
+    public List<ConnectionProfile> ConnectionProfiles { get; set; } = [];
 
     public string GetConnectionType()
     {
@@ -104,9 +100,8 @@ public class NetworkInfo
             return "Cellular";
         if (ConnectionProfiles.Contains(ConnectionProfile.Ethernet))
             return "Ethernet";
-        if (ConnectionProfiles.Contains(ConnectionProfile.Bluetooth))
-            return "Bluetooth";
-
-        return "Unknown";
+        return ConnectionProfiles.Contains(ConnectionProfile.Bluetooth)
+            ? "Bluetooth"
+            : "Unknown";
     }
 }

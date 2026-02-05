@@ -23,11 +23,13 @@
 
             <VerticalStackLayout Spacing="15" Margin="15">
 
+                <!-- Username -->
                 <VerticalStackLayout>
                     <Label Text="USERNAME" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"/>
                     <Label Text="{Binding UserName}" FontSize="16" FontAttributes="Bold"/>
                 </VerticalStackLayout>
 
+                <!-- Password -->
                 <VerticalStackLayout>
                     <Label Text="PASSWORD" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"/>
                     <Grid ColumnDefinitions="*, Auto, Auto">
@@ -54,11 +56,44 @@
                     </Grid>
                 </VerticalStackLayout>
 
+                <!-- MFA -->
+                <VerticalStackLayout IsVisible="{Binding HasMfa}">
+                    <Label Text="MFA CODE (TOTP)" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"/>
+                    <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10">
+                        <Label Grid.Column="0"
+                               Text="{Binding CurrentTotpCode, TargetNullValue='------'}" 
+                               FontSize="24" 
+                               FontFamily="JetBrainsMonoRegular"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+
+                        <ProgressBar Grid.Column="1"
+                                     Progress="{Binding TotpTimeRemaining, Converter={StaticResource TimeToProgressConverter}}"
+                                     HeightRequest="6"
+                                     VerticalOptions="Center"
+                                     ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+
+                        <Label Grid.Column="2"
+                               Text="{Binding TotpTimeRemaining, StringFormat='{0}s'}"
+                               FontSize="14"
+                               VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"/>
+
+                        <controls:ImageButton Grid.Column="3"
+                                              IconGlyph="{x:Static m:MaterialRounded.Content_copy}"
+                                              ToolTipProperties.Text="Copy TOTP Code"
+                                              Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyTotpCodeCommand}"/>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- Category -->
                 <VerticalStackLayout>
                     <Label Text="CATEGORY" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"/>
                     <Label Text="{Binding Category}" FontSize="16"/>
                 </VerticalStackLayout>
 
+                <!-- Description -->
                 <VerticalStackLayout>
                     <Label Text="DESCRIPTION" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"/>
                     <Label Text="{Binding Description}" FontSize="14"/>

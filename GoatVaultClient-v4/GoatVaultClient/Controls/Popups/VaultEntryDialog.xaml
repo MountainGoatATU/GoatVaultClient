@@ -16,17 +16,41 @@
                         CancelCommand="{Binding CancelCommand}"
                         AcceptText="Save">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{x:StaticResource formSpacing}">
+
             <VerticalStackLayout Grid.Column="0" Spacing="{x:StaticResource formSpacing}">
+                <!-- Site Field -->
                 <material:TextField Title="Site" Text="{Binding ViewModel.Site}"/>
+
+                <!-- Username Field -->
                 <material:TextField Title="Username" Text="{Binding ViewModel.UserName}"/>
+
+                <!-- MFA Secret Field -->
+                <VerticalStackLayout Spacing="5">
+                    <material:TextField Title="MFA Secret (Optional)" 
+                                        Text="{Binding ViewModel.MfaSecret}">
+                        <material:TextField.Attachments>
+                            <material:TextFieldPasswordShowHideAttachment/>
+                        </material:TextField.Attachments>
+                    </material:TextField>
+                    <Label Text="{Binding ViewModel.MfaValidationMessage}" 
+                           FontSize="12"
+                           IsVisible="{Binding ViewModel.MfaValidationMessage, Converter={StaticResource IsNotNullConverter}}"
+                           TextColor="{Binding ViewModel.IsMfaSecretValid, Converter={StaticResource BoolToColorConverter}}"/>
+                </VerticalStackLayout>
+
+                <!-- Description Field -->
+                <material:TextField Title="Description (Optional)" Text="{Binding ViewModel.Description}"/>
+
+                <!-- Category Dropdown Field -->
                 <material:AutoCompleteTextField x:Name="CategoryInput"
                             Title="Category"
                             Text="{Binding ViewModel.Category}"
                             AllowClear="True"/>
-
-                <material:TextField Title="Description" Text="{Binding ViewModel.Description}"/>
             </VerticalStackLayout>
+
             <VerticalStackLayout Grid.Column="1" Spacing="{x:StaticResource formSpacing}">
+
+                <!-- Password Field -->
                 <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
                     <material:TextField Title="Password" Text="{Binding ViewModel.Password}" IsPassword="True" WidthRequest="250">
                         <material:TextField.Attachments>
@@ -35,11 +59,16 @@
                     </material:TextField>
                     <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sync}" Command="{Binding ViewModel.GeneratePasswordCommand}"/>
                 </HorizontalStackLayout>
+
+                <!-- Crack Time Progress Bar -->
                 <VerticalStackLayout Spacing="5" Padding="0,5,0,0">
                     <Label Text="{Binding ViewModel.CrackTime}" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}"/>
                     <ProgressBar Progress="{Binding ViewModel.CrackProgress}" HeightRequest="10" BackgroundColor="LightGray" ProgressColor="Green"/>
                 </VerticalStackLayout>
+
                 <VerticalStackLayout Spacing="12" Padding="0,10,0,0">
+
+                    <!-- Password Length Slider -->
                     <Grid ColumnDefinitions="*,Auto">
                         <VerticalStackLayout>
                             <Label Text="Length"/>
@@ -47,18 +76,26 @@
                         </VerticalStackLayout>
                         <Slider Grid.Column="1" Minimum="5" Maximum="128" WidthRequest="140" Value="{Binding ViewModel.PasswordLength}"/>
                     </Grid>
+
+                    <!-- Include Lowercase Characters -->
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Text="Include lowercase (a–z)"  VerticalOptions="Center"/>
                         <CheckBox  Grid.Column="1"  IsChecked="{Binding ViewModel.IncludeLowercase}"/>
                     </Grid>
+
+                    <!-- Include Uppercase Characters -->
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Text="Include uppercase (A–Z)" VerticalOptions="Center"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding ViewModel.IncludeUppercase}"/>
                     </Grid>
+
+                    <!-- Include Numbers -->
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Text="Include numbers (0–9)" VerticalOptions="Center"/>
                         <CheckBox  Grid.Column="1" IsChecked="{Binding ViewModel.IncludeNumbers}"/>
                     </Grid>
+
+                    <!-- Include Special Characters -->
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Text="Include special characters" VerticalOptions="Center"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding ViewModel.IncludeSpecial}"/>

@@ -1,4 +1,4 @@
-﻿    using CommunityToolkit.Maui;
+using CommunityToolkit.Maui;
 using GoatVaultInfrastructure.Database;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
@@ -52,7 +52,7 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-        // appsettings configuration
+        // App settings configuration
         builder.AddAppSettings();
 
         // Setup SQLite local database
@@ -92,6 +92,7 @@ public static class MauiProgram
 
         builder.Services.AddTransient<ShamirService>();
 
+
         // UraniumUI dialogs
         builder.Services.AddMopupsDialogs();
         builder.Services.AddCommunityToolkitDialogs();
@@ -104,49 +105,64 @@ public static class MauiProgram
         }
 
         // Register pages
-        builder.Services.AddSingleton<MainPageViewModel>();
-        builder.Services.AddSingleton<MainPage>();
-        builder.Services.AddSingleton<IntroductionPageViewModel>();
-        builder.Services.AddSingleton<IntroductionPage>();
-        builder.Services.AddSingleton<RegisterPageViewModel>();
-        builder.Services.AddSingleton<RegisterPage>();
-        builder.Services.AddSingleton<LoginPageViewModel>();
-        builder.Services.AddSingleton<LoginPage>();
-        builder.Services.AddSingleton<GratitudePageViewModel>();
-        builder.Services.AddSingleton<GratitudePage>();
-        builder.Services.AddSingleton<EducationPageViewModel>();
-        builder.Services.AddSingleton<EducationPage>();
-        builder.Services.AddSingleton<EducationDetailViewModel>();
-        builder.Services.AddSingleton<EducationDetailPage>();
-        builder.Services.AddSingleton<UserPageViewModel>();
-        builder.Services.AddSingleton<UserPage>();
+        builder.Services.AddTransient<MainPageViewModel>();
+        builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<IntroductionPageViewModel>();
+        builder.Services.AddTransient<IntroductionPage>();
+        builder.Services.AddTransient<RegisterPageViewModel>();
+        builder.Services.AddTransient<RegisterPage>();
+        builder.Services.AddTransient<LoginPageViewModel>();
+        builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<GratitudePageViewModel>();
+        builder.Services.AddTransient<GratitudePage>();
+        builder.Services.AddTransient<EducationPageViewModel>();
+        builder.Services.AddTransient<EducationPage>();
+        builder.Services.AddTransient<EducationDetailViewModel>();
+        builder.Services.AddTransient<EducationDetailPage>();
+        builder.Services.AddTransient<UserPageViewModel>();
+        builder.Services.AddTransient<UserPage>();
+
+        // Build the app
+        var app = builder.Build();
+
+        // Initialize database after app is built
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<GoatVaultDb>();
+            db.Database.EnsureCreated();
+            Debug.WriteLine("Database initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error initializing database: {ex}");
+        }
 
         // Done!
-        return builder.Build();
+        return app;
+
+
     }
-    private static void AddJsonSettings(this MauiAppBuilder builder, string fileName)
+    extension(MauiAppBuilder builder)
     {
-        using Stream stream = Assembly
-            .GetExecutingAssembly()
-            .GetManifestResourceStream($"GoatVaultClient.{fileName}");
-        if (stream != null)
+        private void AddJsonSettings(string fileName)
         {
-            IConfigurationRoot config = new ConfigurationBuilder()
+            using var stream = Assembly
+                .GetExecutingAssembly()
+                .GetManifestResourceStream($"GoatVaultClient.{fileName}");
+
+            if (stream == null)
+                return;
+
+            var config = new ConfigurationBuilder()
                 .AddJsonStream(stream)
                 .Build();
             builder.Configuration.AddConfiguration(config);
         }
-    }
-    private static void AddAppSettings(this MauiAppBuilder builder)
-    {
-        builder.AddJsonSettings("appsettings.json");
-#if DEBUG
-        builder.AddJsonSettings("appsettings.dev.json");
-#endif
 
-#if !DEBUG
-        builder.AddJsonSettings("appsettings.prod.json");
-#endif
-
+        private void AddAppSettings()
+        {
+            builder.AddJsonSettings("appsettings.json");
+        }
     }
 }

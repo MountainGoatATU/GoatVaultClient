@@ -67,4 +67,48 @@ public class CryptoServiceTests
         Assert.NotNull(salt);
         Assert.Equal(16, salt.Length);
     }
+
+    [Fact]
+    public void GenerateAuthSalt_MultipleCalls_ReturnsDifferentSalts()
+    {
+        // Act
+        var salt1 = CryptoService.GenerateAuthSalt();
+        var salt2 = CryptoService.GenerateAuthSalt();
+        var salt3 = CryptoService.GenerateAuthSalt();
+
+        // Assert
+        Assert.NotEqual(salt1, salt2);
+        Assert.NotEqual(salt2, salt3);
+        Assert.NotEqual(salt1, salt3);
+    }
+
+    [Fact]
+    public void GenerateAuthVerifier_WithInvalidBase64Salt_ThrowsException()
+    {
+        // Arrange
+        const string password = "ValidPassword123!";
+        const string invalidSalt = "Not-Valid-Base64!!!";
+
+        // Act & Assert
+        Assert.ThrowsAny<Exception>(() =>
+            CryptoService.GenerateAuthVerifier(password, invalidSalt));
+    }
+
+    [Fact]
+    public void GenerateAuthVerifier_ReturnsBase64EncodedString()
+    {
+        // Arrange
+        const string password = "TestPassword123!";
+        var salt = CreateDeterministicBase64Salt();
+
+        // Act
+        var verifier = CryptoService.GenerateAuthVerifier(password, salt);
+
+        // Assert
+        Assert.NotEmpty(verifier);
+
+        // Should be valid Base64
+        var decoded = Convert.FromBase64String(verifier);
+        Assert.NotEmpty(decoded);
+    }
 }
