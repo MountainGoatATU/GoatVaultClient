@@ -1,35 +1,36 @@
-﻿using GoatVaultClient.ViewModels;
+﻿using GoatVaultClient.Services;
+using GoatVaultClient.ViewModels;
 using Microsoft.Maui.Controls;
 
 namespace GoatVaultClient
 {
     public partial class MainPage : ContentPage
     {
+        private GoatTipsService _goatTipsService;
+
         public MainPage(MainPageViewModel viewModel)
         {
             InitializeComponent();
             BindingContext = viewModel;
 
-            GoatBubbleStack.Opacity = 0; // Start hidden
+            _goatTipsService = viewModel.GoatTipsService;
 
-            if (BindingContext is MainPageViewModel vm)
+            viewModel.PropertyChanged += async (s, e) =>
             {
-                vm.PropertyChanged += async (sender, args) =>
+                if (e.PropertyName == nameof(viewModel.IsGoatCommentVisible))
                 {
-                    if (args.PropertyName != nameof(vm.IsGoatCommentVisible)) 
-                        return;
-
-                    // Fade in and out 0.3 s
-                    if (vm.IsGoatCommentVisible)
+                    if (viewModel.IsGoatCommentVisible)
                     {
-                        await GoatBubbleStack.FadeTo(1, 300);
+                        GoatBubbleStack.Opacity = 1;
+                        GoatMascot.Opacity = 1;
                     }
                     else
                     {
-                        await GoatBubbleStack.FadeTo(0, 300);
+                        GoatBubbleStack.Opacity = 0;
+                        GoatMascot.Opacity = 0;
                     }
-                };
-            }
+                }
+            };
         }
 
         protected override void OnAppearing()

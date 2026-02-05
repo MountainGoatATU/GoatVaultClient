@@ -42,6 +42,7 @@ namespace GoatVaultClient.ViewModels
         private readonly TotpManagerService _totpManagerService;
         private readonly CategoryManagerService _categoryManagerService;
         private readonly VaultEntryManagerService _vaultEntryManagerService;
+        public GoatTipsService GoatTipsService => _goatTipsService;
 
         #endregion
         public MainPageViewModel(

@@ -148,7 +148,7 @@
                 </controls:Component>
             </Grid>
         </VerticalStackLayout>
-        <AbsoluteLayout InputTransparent="True" Margin="20">
+        <AbsoluteLayout InputTransparent="True" Margin="20" x:Name="GoatContainer">
             <!-- Goat Lottie animation -->
             <skia:SKLottieView
                 x:Name="GoatMascot"
