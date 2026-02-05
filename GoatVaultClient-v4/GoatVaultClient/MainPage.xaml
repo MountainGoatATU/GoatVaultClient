@@ -12,40 +12,29 @@
              x:Class="GoatVaultClient.MainPage"
              BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
 
-    
+
     <VerticalStackLayout>
-        <!-- Sync Status Bar -->
-        <controls:Component BorderMargin="24,8,24,0">
-            <!-- Sync Button -->
-            <Button Grid.Column="2"
-                        Text="Sync Now"
-                        Command="{Binding ManualSyncCommand}"
-                        IsEnabled="{Binding isSyncing}"
-                        BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimary}, Dark={x:StaticResource DarkPrimary}}"
-                        TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimary}, Dark={x:StaticResource DarkOnPrimary}}"
-                        CornerRadius="8"
-                        Padding="16,8"
-                        FontSize="14"
-                        FontAttributes="Bold">
-                <Button.Triggers>
-                    <DataTrigger TargetType="Button" Binding="{Binding HasUnsavedChanges}" Value="True">
-                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource LightSecondary}, Dark={x:StaticResource DarkSecondary}}" />
-                    </DataTrigger>
-                </Button.Triggers>
-            </Button>
-        </controls:Component>
-        <controls:Component BorderMargin="24,8,24,0">
-            <ActivityIndicator IsRunning="{Binding isBusy}" 
-                               IsVisible="{Binding isBusy}" 
-                               Color="{StaticResource Primary}" 
-                               HeightRequest="16" 
-                               WidthRequest="16"/>
-        </controls:Component>
+
+        <HorizontalStackLayout HorizontalOptions="End">
+            <Label Text="Hello" 
+                       Style="{StaticResource MaterialLabelSmall}" 
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"/>
+            <Label Text="Last Sync Time: 11:22:56" 
+                       Style="{StaticResource MaterialLabelSmall}" 
+                       VerticalOptions="Center"
+                       Margin="12,0,0,0"/>
+            <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Refresh}"
+                                      Command="{Binding RefreshCommand}"
+                                      Color="{AppThemeBinding Light={StaticResource LightSecondary}, Dark={StaticResource DarkSecondary}}"
+                                      VerticalOptions="Center"/>
+        </HorizontalStackLayout>
         <controls:Component BorderMargin="24,0,24,0">
             <SearchBar Placeholder="Search passwords..." Text="{Binding SearchText}" HeightRequest="48" />
         </controls:Component>
-        <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto, 0.5*, 0.5*" Margin="{StaticResource layoutMargin}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
-
+        <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto, 0.5*, 0.5*" Margin="{StaticResource layoutMargin}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
+            
+            <!-- Categories List-->
             <controls:Component Grid.Row="1" Grid.Column="0" >
                 <VerticalStackLayout>
                     <controls:ComponentHeader Title="Categories">
@@ -142,7 +131,10 @@
                 </VerticalStackLayout>
             </controls:Component>
             <!-- Password Entry Details View -->
-            <controls:Component Grid.Row="1" Grid.Column="2" BorderMargin="0">
+            <controls:Component Grid.Row="1" 
+                                Grid.Column="2" 
+                                BorderMargin="0"
+                                IsVisible="{Binding SelectedEntry, Converter={StaticResource IsNotNullConverter}}">
                 <controls:EntryDetailView Grid.Column="2" 
                       BindingContext="{Binding SelectedEntry}">
                     <controls:EntryDetailView.Triggers>

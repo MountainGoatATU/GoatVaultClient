@@ -40,6 +40,7 @@ namespace GoatVaultClient
             if (BindingContext is MainPageViewModel vm)
             {
                 vm.LoadVaultData();
+                vm.StartRandomGoatComments();
             }
         }
 

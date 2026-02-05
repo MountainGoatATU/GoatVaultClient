@@ -14,11 +14,8 @@ namespace GoatVaultClient.ViewModels;
 
 // TODO: Unused UserService injection
 public partial class LoginPageViewModel(
-    IConfiguration configuration,
-    HttpService httpService,
-    AuthTokenService authTokenService,
+    IAuthenticationService authenticationService,
     VaultService vaultService,
-    VaultSessionService vaultSessionService,
     ConnectivityService connectivityService)
     : BaseViewModel
 {
@@ -43,7 +40,7 @@ public partial class LoginPageViewModel(
         // Load local accounts
         await LoadLocalAccountsAsync();
     }
-    public void Cleanup() 
+    public void Cleanup()
     {
         connectivityService.ConnectivityChanged -= OnConnectivityChanged;
     }
@@ -72,152 +69,31 @@ public partial class LoginPageViewModel(
             ? $"Connected via {ConnectionType}"
             : "No internet connection available";
     }
-
-    private async Task<List<DbModel>> GetAllLocalAccountAsync()
-    {
-        // Retrieve all local accounts from the vault service
-        var dbUsers = await vaultService.LoadAllUsersFromLocalAsync();
-        return dbUsers;
-    }
     private async Task LoadLocalAccountsAsync()
     {
-        // Load local accounts from the vault service
-        var accounts = await GetAllLocalAccountAsync();
-        // Update the ObservableCollection
         LocalAccounts.Clear();
-        // Add accounts to the ObservableCollection
-        foreach (var account in accounts)
+        LocalAccounts = await authenticationService.GetAllLocalAccountsAsync()
+            .ContinueWith(t => new ObservableCollection<DbModel>(t.Result));
+        if (LocalAccounts.Count() != 0)
         {
-            LocalAccounts.Add(account);
+            HasLocalAccounts = true;
         }
-        // Update HasLocalAccounts property
-        HasLocalAccounts = LocalAccounts.Count > 0;
     }
 
     [RelayCommand]
     private async Task Login()
     {
-        // Use GetSection and check for null or empty value to avoid CS8600
-        var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
-        string? url = urlSection.Value;
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            await Shell.Current.DisplayAlertAsync("Configuration Error", "Server base URL is not configured.", "OK");
-            return;
-        }  
-        
-        // Prevent multiple simultaneous logins
+        // Prevent multiple simultaneous logins   
         if (IsBusy)
             return;
-
-        // Check connectivity
-        if (!IsConnected)
-        {
-            await Shell.Current.DisplayAlertAsync("No Connection", "Please check your internet connection and try again.", "OK");
-            return;
-        }
-        // Validation
-        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
-        {
-            await Shell.Current.DisplayAlertAsync("Error", "Email and password are required.", "OK");
-            return;
-        }
-
         try
         {
             // Set Busy
             IsBusy = true;
-
-            //Double-check connectivity before network call
-            var hasConnection = await connectivityService.CheckConnectivityAsync();
-            if (!hasConnection) 
-            {
-                await Shell.Current.DisplayAlertAsync(
-                    "Connection Error",
-                    "Unable to verify internet connection.",
-                    "OK");
-                return;
-            }
-
-            // 2. Init Auth
-            var initPayload = new AuthInitRequest { Email = Email };
-            var initResponse = await httpService.PostAsync<AuthInitResponse>(
-                $"{url}v1/auth/init",
-                initPayload
-            );
-
-            // 3. Generate Verifier
-            var loginVerifier = CryptoService.GenerateAuthVerifier(Password, initResponse.AuthSalt);
-
-            // 4. Verify
-            var verifyPayload = new AuthVerifyRequest
-            {
-                UserId = Guid.Parse(initResponse.UserId),
-                AuthVerifier = loginVerifier
-            };
-            var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
-                $"{url}v1/auth/verify",
-                verifyPayload
-            );
-            authTokenService.SetToken(verifyResponse.AccessToken);
-            vaultSessionService.MasterPassword = Password;
-
-            // 5. Get User Data
-            var userResponse = await httpService.GetAsync<UserResponse>(
-                $"{url}v1/users/{initResponse.UserId}"
-            );
-
-            vaultSessionService.CurrentUser = userResponse;
-            // 6. Sync Local DB (Delete old if exists, save new)
-            var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
-
-            if (existingUser != null)
-                await vaultService.DeleteUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
-
-            await vaultService.SaveUserToLocalAsync(new DbModel
-            {
-                Id = vaultSessionService.CurrentUser.Id,
-                Email = vaultSessionService.CurrentUser.Email,
-                AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
-                MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
-                Vault = vaultSessionService.CurrentUser.Vault
-            });
-
-            // 7. Decrypt & Store Session
-            vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, Password);
-
-            // 8. Navigate to App (MainPage)
-            // Note: Originally you went to GratitudePage, but for login, MainPage is standard.
-            // Using "//MainPage" clears the stack so 'Back' doesn't go to Login.
-
-            if (Application.Current != null)
-                Application.Current.MainPage = new AppShell();
-
-            await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
-        }
-        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
-        {
-            await Shell.Current.DisplayAlertAsync("Error", "This email is already registered.", "OK");
-        }
-        catch (HttpRequestException)
-        {
-            // Network-related errors
-            await Shell.Current.DisplayAlertAsync(
-                "Connection Error",
-                "Unable to connect to the server. Please check your internet connection.",
-                "OK");
-        }
-        catch (TaskCanceledException)
-        {
-            // Timeout errors
-            await Shell.Current.DisplayAlertAsync(
-                "Timeout",
-                "The request timed out. Please try again.",
-                "OK");
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            // 1. Attempt online login
+            await authenticationService.LoginAsync(Email, Password);
+            // 2. On success, navigate to main page
+            await NavigateToMainPage();
         }
         finally
         {
@@ -232,71 +108,14 @@ public partial class LoginPageViewModel(
         // Prevent multiple simultaneous logins
         if (IsBusy)
             return;
-
-        // Validation
-        if (SelectedAccount == null)
-        {
-            await Shell.Current.DisplayAlertAsync("Error", "Please select an account.", "OK");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(OfflinePassword))
-        {
-            await Shell.Current.DisplayAlertAsync("Error", "Password is required.", "OK");
-            return;
-        }
-
         try
         {
             // Set Busy
             IsBusy = true;
-
-            // 1. Load the user from local database
-            var dbUser = await vaultService.LoadUserFromLocalAsync(SelectedAccount.Id);
-
-            if (dbUser == null)
-            {
-                await Shell.Current.DisplayAlertAsync("Error", "Account not found in local storage.", "OK");
-                return;
-            }
-
-            // 2. Verify the password locally by generating the auth verifier
-            var loginVerifier = CryptoService.GenerateAuthVerifier(OfflinePassword, dbUser.AuthSalt);
-
-            // 3. Try to decrypt the vault - if this succeeds, password is correct
-            try
-            {
-                var decryptedVault = vaultService.DecryptVault(dbUser.Vault, OfflinePassword);
-
-                // Password is correct!
-                vaultSessionService.MasterPassword = OfflinePassword;
-                vaultSessionService.DecryptedVault = decryptedVault;
-
-                // Set current user in session (convert DbModel to UserResponse format)
-                vaultSessionService.CurrentUser = new UserResponse
-                {
-                    Id = dbUser.Id,
-                    Email = dbUser.Email,
-                    AuthSalt = dbUser.AuthSalt,
-                    MfaEnabled = dbUser.MfaEnabled,
-                    Vault = dbUser.Vault
-                };
-
-                // Navigate to app
-                await NavigateToMainPage();
-            }
-            catch
-            {
-                // Decryption failed - wrong password
-                await Shell.Current.DisplayAlertAsync(
-                    "Error",
-                    "Incorrect password for this account.",
-                    "OK");
-            }
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            // Attempt Login offline
+            await authenticationService.LoginOfflineAsync(Email, OfflinePassword, SelectedAccount);
+            // Navigate to app
+            await NavigateToMainPage();
         }
         finally
         {

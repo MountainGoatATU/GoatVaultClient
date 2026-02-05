@@ -39,12 +39,14 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
         {
             Categories =
             [
-                "General",
-                "Email",
-                "Banking",
-                "Social Media",
-                "Work",
-                "Entertainment"
+                new CategoryItem { Name = "All"},
+                new CategoryItem { Name = "Uncategorized"},
+                new CategoryItem { Name = "General"},
+                new CategoryItem { Name = "Email"},
+                new CategoryItem { Name = "Banking"},
+                new CategoryItem { Name = "Socials"},
+                new CategoryItem { Name = "Work"},
+                new CategoryItem { Name = "Entertainment"},
             ],
             Entries = []
         };
