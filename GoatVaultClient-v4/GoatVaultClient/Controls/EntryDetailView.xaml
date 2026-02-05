@@ -6,12 +6,6 @@
              xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
              x:Class="GoatVaultClient.Controls.EntryDetailView">
 
-    <ContentView.Resources>
-        <ResourceDictionary>
-            <vm:EyeIconConverter x:Key="EyeIconConverter"/>
-        </ResourceDictionary>
-    </ContentView.Resources>
-
     <controls:Component BorderMargin="0">
         <VerticalStackLayout Spacing="10">
 
