@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Controls.Popups;
+using GoatVaultClient.Services;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
@@ -21,6 +22,7 @@ namespace GoatVaultClient.ViewModels
         // Services
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
+        private readonly IAuthenticationService _authenticationService;
         private readonly VaultSessionService _vaultSessionService;
         private readonly VaultService _vaultService;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
@@ -29,12 +31,14 @@ namespace GoatVaultClient.ViewModels
         public UserPageViewModel(
             HttpService httpService,
             AuthTokenService authTokenService,
+            IAuthenticationService authenticationService,
             VaultSessionService vaultSessionService,
             VaultService vaultService,
             Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             _httpService = httpService;
             _authTokenService = authTokenService;
+            _authenticationService = authenticationService;
             _vaultSessionService = vaultSessionService;
             _vaultService = vaultService;
             _configuration = configuration;
@@ -768,61 +772,15 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task LogoutAsync()
         {
+            if (IsBusy)
+                return;
             try
             {
+                // set busy to prevent multiple logout attempts
                 IsBusy = true;
 
-                var confirmPopup = new PromptPopup(
-                    title: "Logout",
-                    body: "Are you sure you want to logout? All changes will be saved.",
-                    aText: "Logout",
-                    cText: "Cancel"
-                );
-                await MopupService.Instance.PushAsync(confirmPopup);
-                var confirm = await confirmPopup.WaitForScan();
-
-                if (!confirm)
-                    return;
-
-                System.Diagnostics.Debug.WriteLine("Logging out - saving vault...");
-
-                // Save vault before logout
-                if (_vaultSessionService.DecryptedVault != null &&
-                    !string.IsNullOrEmpty(_vaultSessionService.MasterPassword) &&
-                    _vaultSessionService.CurrentUser != null)
-                {
-                    await _vaultService.SaveVaultAsync(
-                        _vaultSessionService.CurrentUser,
-                        _vaultSessionService.MasterPassword,
-                        _vaultSessionService.DecryptedVault);
-
-                    System.Diagnostics.Debug.WriteLine("Vault saved successfully");
-                }
-
-                // Clear auth token
-                _authTokenService.SetToken(null);
-
-                // Lock session
-                _vaultSessionService.Lock();
-
-                // Navigate to login/intro page
-                if (Application.Current != null)
-                {
-                    Application.Current.MainPage = new AppShell();
-                }
-
-                await Shell.Current.GoToAsync("//IntroductionPage");
-
-                System.Diagnostics.Debug.WriteLine("Logout complete");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error during logout: {ex}");
-                await MopupService.Instance.PushAsync(new PromptPopup(
-                    title: "Error",
-                    body: "Failed to logout properly. Please try again.",
-                    aText: "OK"
-                ));
+                // Clear session and local data
+                await _authenticationService.LogoutAsync();
             }
             finally
             {
