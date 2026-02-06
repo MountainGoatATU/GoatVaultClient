@@ -36,6 +36,9 @@ namespace GoatVaultClient
         {
             base.OnAppearing();
 
+            // Enable flyout navigation
+            ((AppShell)Shell.Current).EnableFlyout();
+
             // Safely cast the BindingContext and call the method
             if (BindingContext is MainPageViewModel vm)
             {

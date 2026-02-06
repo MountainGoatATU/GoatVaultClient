@@ -222,14 +222,14 @@ namespace GoatVaultClient.ViewModels
          * Sync commands
          */
         // Manual Sync Command
-        [RelayCommand(CanExecute = nameof(CanSync))]
+        [RelayCommand]
         private async Task Save()
         {
             // Indicate syncing
             IsSyncing = true;
 
             // Save to local and server
-            await _syncingService.Save(Categories, Passwords, _vaultSessionService.CurrentUser);
+            await _syncingService.Save();
 
             // Reset syncing indicator
             IsSyncing = false;
