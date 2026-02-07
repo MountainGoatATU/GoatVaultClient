@@ -229,7 +229,8 @@ namespace GoatVaultClient.ViewModels
             IsSyncing = true;
 
             // Save to local and server
-            await _syncingService.Save();
+            //await _syncingService.Save();
+            await _syncingService.Sync();
 
             // Reset syncing indicator
             IsSyncing = false;

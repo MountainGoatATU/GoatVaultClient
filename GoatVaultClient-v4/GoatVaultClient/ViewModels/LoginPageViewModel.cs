@@ -13,6 +13,7 @@ namespace GoatVaultClient.ViewModels;
 // TODO: Unused UserService injection
 public partial class LoginPageViewModel(
     IAuthenticationService authenticationService,
+    ISyncingService syncingService,
     VaultService vaultService,
     ConnectivityService connectivityService)
     : BaseViewModel
@@ -118,8 +119,6 @@ public partial class LoginPageViewModel(
 
             if (success)
             {
-                // Enable flyout navigation
-                ((AppShell)Shell.Current).EnableFlyout();
                 // Navigate to vault
                 await Shell.Current.GoToAsync("//main/home");
             }
@@ -142,7 +141,12 @@ public partial class LoginPageViewModel(
             // Set Busy
             IsBusy = true;
             // Attempt Login offline
-            await authenticationService.LoginOfflineAsync(Email, OfflinePassword, SelectedAccount);
+            var result = await authenticationService.LoginOfflineAsync(Email, OfflinePassword, SelectedAccount);
+            if (result)
+            {
+                // Navigate to Main page
+                await Shell.Current.GoToAsync("//main/home");
+            }
         }
         finally
         {
@@ -177,11 +181,6 @@ public partial class LoginPageViewModel(
         await authenticationService.RemoveLocalAccountAsync(account);
         // Refresh list
         await LoadLocalAccountsAsync();
-    }
-
-    private async Task NavigateToMainPage()
-    {
-        
     }
 
     [RelayCommand]
