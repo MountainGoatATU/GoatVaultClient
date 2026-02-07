@@ -93,15 +93,11 @@ namespace GoatVaultClient.ViewModels
                         break;
 
                     case nameof(GoatTipsService.IsTipVisible):
-                        if (!Preferences.Default.Get("GoatEnabled", true))
-                        {
+                    case nameof(GoatTipsService.IsGoatEnabled):
+                        var show = _goatTipsService.IsGoatEnabled && _goatTipsService.IsTipVisible;
+                        IsGoatCommentVisible = show;
+                        if (!show)
                             GoatComment = string.Empty;
-                            IsGoatCommentVisible = false;
-                        }
-                        else
-                        {
-                            IsGoatCommentVisible = _goatTipsService.IsTipVisible;
-                        }
                         break;
                 }
             };

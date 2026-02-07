@@ -4,9 +4,11 @@ namespace GoatVaultClient.Services;
 
 public partial class GoatTipsService : ObservableObject
 {
+    private const string GoatEnabledKey = "GoatEnabled";
+
     [ObservableProperty] private string currentTip = string.Empty;
     [ObservableProperty] private bool isTipVisible;
-    [ObservableProperty] private bool isGoatEnabled = true;
+    [ObservableProperty] private bool isGoatEnabled;
 
     private readonly List<string> _goatTips =
     [
@@ -18,15 +20,24 @@ public partial class GoatTipsService : ObservableObject
         "Tip: Consider using a passphrase instead of a single word."
     ];
 
+    private readonly Random _random = new();
     private IDispatcherTimer? _timer;
 
-    public void ApplyEnabledState(bool enabled)
+    public GoatTipsService()
     {
-        var current = Preferences.Default.Get("GoatEnabled", true);
-        if (current != enabled)
-            Preferences.Default.Set("GoatEnabled", enabled);
+        // Read persisted state from the device storage via MAUI Preferences
+        IsGoatEnabled = Preferences.Default.Get(GoatEnabledKey, true);
+    }
+
+    public void SetEnabled(bool enabled)
+    {
+        if (IsGoatEnabled == enabled)
+            return;
 
         IsGoatEnabled = enabled;
+
+        // Persist state to device storage via MAUI Preferences.
+        Preferences.Default.Set(GoatEnabledKey, enabled);
 
         if (!enabled)
         {
@@ -35,26 +46,23 @@ public partial class GoatTipsService : ObservableObject
         }
     }
 
+    public void ApplyEnabledState(bool enabled) => SetEnabled(enabled);
+
     public void StartTips()
     {
-        if (_timer != null) return;
+        if (_timer != null)
+            return;
 
-        var random = new Random();
         _timer = Application.Current?.Dispatcher.CreateTimer();
-        if (_timer == null) return;
+        if (_timer == null)
+            return;
 
         var counter = 0;
         _timer.Interval = TimeSpan.FromSeconds(1);
 
-        _timer.Tick += (s, e) =>
+        _timer.Tick += (_, _) =>
         {
-            var goatEnabled = Preferences.Default.Get("GoatEnabled", true);
-
-            // keep IsGoatEnabled in sync even if changed elsewhere
-            if (IsGoatEnabled != goatEnabled)
-                IsGoatEnabled = goatEnabled;
-
-            if (!goatEnabled)
+            if (!IsGoatEnabled)
             {
                 IsTipVisible = false;
                 CurrentTip = string.Empty;
@@ -66,16 +74,18 @@ public partial class GoatTipsService : ObservableObject
             switch (counter % 10)
             {
                 case 0:
-                    CurrentTip = _goatTips[random.Next(_goatTips.Count)];
+                    CurrentTip = _goatTips[_random.Next(_goatTips.Count)];
                     IsTipVisible = true;
                     break;
+
                 case 5:
                     IsTipVisible = false;
                     CurrentTip = string.Empty;
                     break;
             }
 
-            if (counter >= 10) counter = 0;
+            if (counter >= 10)
+                counter = 0;
         };
 
         _timer.Start();

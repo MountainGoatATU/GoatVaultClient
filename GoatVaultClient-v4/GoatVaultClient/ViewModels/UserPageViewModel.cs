@@ -19,8 +19,7 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private string? mfaSecret;
         [ObservableProperty] private string? mfaQrCodeUrl;
         [ObservableProperty] private bool goatEnabled = true;
-    
-        // Services
+
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
         private readonly VaultSessionService _vaultSessionService;
@@ -28,7 +27,6 @@ namespace GoatVaultClient.ViewModels
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly GoatTipsService _goatTipsService;
 
-        // Constructor
         public UserPageViewModel(
             HttpService httpService,
             AuthTokenService authTokenService,
@@ -44,9 +42,9 @@ namespace GoatVaultClient.ViewModels
             _configuration = configuration;
             _goatTipsService = goatTipsService;
 
-            // Load and apply preference default
-            GoatEnabled = Preferences.Default.Get("GoatEnabled", true);
-            _goatTipsService.ApplyEnabledState(GoatEnabled);
+            // Read once from service (single source of truth)
+            GoatEnabled = _goatTipsService.IsGoatEnabled;
+            _goatTipsService.SetEnabled(GoatEnabled);
 
             if (_vaultSessionService.CurrentUser == null)
                 return;
@@ -58,8 +56,9 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private void ToggleGoat()
         {
+            // Persisted via GoatTipsService to device storage.
             GoatEnabled = !GoatEnabled;
-            _goatTipsService.ApplyEnabledState(GoatEnabled);
+            _goatTipsService.SetEnabled(GoatEnabled);
         }
 
         [RelayCommand]
