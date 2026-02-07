@@ -7,9 +7,104 @@
     xmlns:local="clr-namespace:GoatVaultClient" 
     xmlns:pages="clr-namespace:GoatVaultClient.Pages"
     Title="GoatVaultClient"
-    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
+    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}"
+    Shell.TabBarIsVisible="False"
+    Shell.FlyoutBehavior="Disabled"
+    >
+    <!--
+        NAVIGATION ARCHITECTURE (Flyout):
+        ═══════════════════════════════════════════════════════════
+        
+        1. PRE-AUTH FLOW (FlyoutBehavior=Disabled):
+           IntroductionPage → LoginPage ↔ RegisterPage
+        
+        2. POST-AUTH FLOW (FlyoutBehavior=Flyout):
+           Hamburger menu with: Home | Education | Vault | User
+           FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
+        
+        Navigation stack is cleared on:
+           - Login/Register → Main  (//main/home)  + enable flyout
+           - Logout from UserPage   (//intro)       + disable flyout
+        ═══════════════════════════════════════════════════════════
+    -->
 
-    <FlyoutItem Title="Introduction" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Handshake}}">
+    <!-- ============================================================ -->
+    <!-- FLYOUT HEADER                                                 -->
+    <!-- ============================================================ -->
+    <Shell.FlyoutHeader>
+        <Grid HeightRequest="120"
+              BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary}, Dark={StaticResource DarkPrimary}}"
+              Padding="20">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="8">
+                <Label Text="GoatVault"
+                       TextColor="{AppThemeBinding Light={StaticResource LightOnPrimary}, Dark={StaticResource DarkOnPrimary}}"
+                       FontSize="20"
+                       FontAttributes="Bold" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- ============================================================ -->
+    <!-- PRE-AUTH: Hidden from flyout menu                             -->
+    <!-- ============================================================ -->
+    <ShellContent Route="intro"
+                  ContentTemplate="{DataTemplate pages:IntroductionPage}"
+                  Shell.NavBarIsVisible="False"
+                  FlyoutItemIsVisible="False" />
+
+    <ShellContent Route="login"
+                  ContentTemplate="{DataTemplate pages:LoginPage}"
+                  Shell.NavBarIsVisible="False"
+                  FlyoutItemIsVisible="False" />
+
+    <ShellContent Route="register"
+                  ContentTemplate="{DataTemplate pages:RegisterPage}"
+                  Shell.NavBarIsVisible="False"
+                  FlyoutItemIsVisible="False" />
+
+    <ShellContent Route="gratitude"
+              ContentTemplate="{DataTemplate pages:GratitudePage}"
+              Shell.NavBarIsVisible="False"
+              FlyoutItemIsVisible="False" />
+
+    <!-- ============================================================ -->
+    <!-- POST-AUTH: Flyout menu items                                  -->
+    <!-- ============================================================ -->
+    <FlyoutItem Route="main" FlyoutDisplayOptions="AsMultipleItems">
+
+        <ShellContent Route="home"
+                      Title="Home"
+                      Shell.NavBarIsVisible="False"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Home}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
+                      ContentTemplate="{DataTemplate local:MainPage}" />
+
+        <ShellContent Route="education"
+                      Title="Education"
+                      Shell.NavBarIsVisible="False"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Book}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
+                      ContentTemplate="{DataTemplate pages:EducationPage}" />
+
+        <ShellContent Route="user"
+                      Title="Profile"
+                      Shell.NavBarIsVisible="False"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Person}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
+                      ContentTemplate="{DataTemplate pages:UserPage}" />
+
+    </FlyoutItem>
+
+    <!-- ============================================================ -->
+    <!-- FLYOUT FOOTER                                                 -->
+    <!-- ============================================================ -->
+    <Shell.FlyoutFooter>
+        <Grid Padding="20" HeightRequest="60">
+            <Label Text="© 2026 GoatVault"
+                   FontSize="12"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                   VerticalOptions="Center" />
+        </Grid>
+    </Shell.FlyoutFooter>
+
+    <!--<FlyoutItem Title="Introduction" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Handshake}}">
         <ShellContent ContentTemplate="{DataTemplate pages:IntroductionPage}" Route="IntroductionPage" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Key}}" />
     </FlyoutItem>
     <FlyoutItem Title="Vault" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Home}}">
@@ -20,5 +115,5 @@
     </FlyoutItem>
     <FlyoutItem Title="User" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Account_circle}}">
         <ShellContent Title="UserSettings" ContentTemplate="{DataTemplate pages:UserPage}" Route="UserPage" />
-    </FlyoutItem>
+    </FlyoutItem>-->
 </Shell>

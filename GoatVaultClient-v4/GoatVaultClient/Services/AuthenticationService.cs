@@ -1,23 +1,25 @@
+using GoatVaultClient.Controls.Popups;
+using GoatVaultClient.Pages;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
+using Mopups.Services;
 
 namespace GoatVaultClient.Services
 {
     public interface IAuthenticationService
     {
         public Task<bool> LoginAsync(string email, string password, Func<Task<string?>> mfaCodeProvider);
-        public Task LoginOfflineAsync (string email, string password, DbModel selectedAccount);
+        public Task<bool> LoginOfflineAsync(string email, string password, DbModel selectedAccount);
         public Task RegisterAsync(string email, string password, string confirmPassword);
-        public Task<bool> LogoutAsync();
-        public Task<bool> LogoutOfflineAsync();
+        public Task LogoutAsync();
         public Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);
         public Task<bool> ChangeEmailAsync();
         public Task<List<DbModel>> GetAllLocalAccountsAsync();
-        public Task<bool> RemoveLocalAccountAsync(string email);
+        public Task RemoveLocalAccountAsync(DbModel account);
     }
     public class AuthenticationService(
         IConfiguration configuration,
@@ -25,7 +27,8 @@ namespace GoatVaultClient.Services
         AuthTokenService authTokenService,
         HttpService httpService,
         ConnectivityService connectivityService,
-        VaultSessionService vaultSessionService
+        VaultSessionService vaultSessionService,
+        ISyncingService syncingService
         ) : IAuthenticationService
     {
         public async Task<bool> LoginAsync(string email, string password, Func<Task<string?>> mfaCodeProvider)
@@ -114,23 +117,6 @@ namespace GoatVaultClient.Services
                 // Sync Local DB (Delete old if exists, save new)
                 var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
-                if (existingUser != null)
-                {
-                    await vaultService.DeleteUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
-                }
-
-                await vaultService.SaveUserToLocalAsync(new DbModel
-                {
-                    Id = vaultSessionService.CurrentUser.Id,
-                    Email = vaultSessionService.CurrentUser.Email,
-                    AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
-                    MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
-                    MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
-                    Vault = vaultSessionService.CurrentUser.Vault,
-                    CreatedAt = userResponse.CreatedAt,
-                    UpdatedAt = userResponse.UpdatedAt
-                });
-
                 // Decrypt & Store Session
                 vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, password);
 
@@ -182,19 +168,19 @@ namespace GoatVaultClient.Services
 
             return false;
         }
-        public async Task LoginOfflineAsync(string email, string password, DbModel? selectedAccount)
+        public async Task<bool> LoginOfflineAsync(string email, string password, DbModel? selectedAccount)
         {
             // Validation
             if (selectedAccount == null)
             {
                 await Shell.Current.DisplayAlertAsync("Error", "Please select an account.", "OK");
-                return;
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(password))
             {
                 await Shell.Current.DisplayAlertAsync("Error", "Password is required.", "OK");
-                return;
+                return false;
             }
 
             try
@@ -205,43 +191,37 @@ namespace GoatVaultClient.Services
                 if (dbUser == null)
                 {
                     await Shell.Current.DisplayAlertAsync("Error", "Account not found in local storage.", "OK");
-                    return;
+                    return false;
                 }
 
-                // 3. Try to decrypt the vault - if this succeeds, password is correct
-                try
+                var decryptedVault = vaultService.DecryptVault(dbUser.Vault, password);
+
+                // Password is correct!
+                vaultSessionService.MasterPassword = password;
+                vaultSessionService.DecryptedVault = decryptedVault;
+
+                // Set current user in session (convert DbModel to UserResponse format)
+                vaultSessionService.CurrentUser = new UserResponse
                 {
-                    var decryptedVault = vaultService.DecryptVault(dbUser.Vault, password);
-
-                    // Password is correct!
-                    vaultSessionService.MasterPassword = password;
-                    vaultSessionService.DecryptedVault = decryptedVault;
-
-                    // Set current user in session (convert DbModel to UserResponse format)
-                    vaultSessionService.CurrentUser = new UserResponse
-                    {
-                        Id = dbUser.Id,
-                        Email = dbUser.Email,
-                        AuthSalt = dbUser.AuthSalt,
-                        MfaEnabled = dbUser.MfaEnabled,
-                        Vault = dbUser.Vault,
-                        CreatedAt = dbUser.CreatedAt,
-                        UpdatedAt = dbUser.UpdatedAt
-                    };
-                }
-                catch
-                {
-                    // Decryption failed - wrong password
-                    await Shell.Current.DisplayAlertAsync(
-                        "Error",
-                        "Incorrect password for this account.",
-                        "OK");
-                }
+                    Id = dbUser.Id,
+                    Email = dbUser.Email,
+                    AuthSalt = dbUser.AuthSalt,
+                    MfaEnabled = dbUser.MfaEnabled,
+                    Vault = dbUser.Vault,
+                    CreatedAt = dbUser.CreatedAt,
+                    UpdatedAt = dbUser.UpdatedAt
+                };
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+                // Decryption failed - wrong password
+                await Shell.Current.DisplayAlertAsync(
+                    "Error",
+                    "Incorrect password for this account.",
+                    "OK");
+                return false;
             }
+            return true;
         }
         public async Task RegisterAsync(string email, string password, string confirmPassword)
         {
@@ -359,14 +339,60 @@ namespace GoatVaultClient.Services
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
         }
-        public async Task<bool> LogoutAsync()
+        public async Task LogoutAsync()
         {
-            throw new NotImplementedException();
-        }
-        public async Task<bool> LogoutOfflineAsync()
-        {
-            throw new NotImplementedException();
+            try
+            {
 
+                // Confirm logout action
+                var confirmPopup = new PromptPopup(
+                    title: "Logout",
+                    body: "Are you sure you want to logout? All changes will be saved.",
+                    aText: "Logout",
+                    cText: "Cancel"
+                );
+                await MopupService.Instance.PushAsync(confirmPopup);
+                var confirm = await confirmPopup.WaitForScan();
+                await MopupService.Instance.PopAsync();
+
+                // User cancelled logout
+                if (!confirm)
+                    return;
+
+                // Show pending popup while we process logout
+                await MopupService.Instance.PushAsync(new PendingPopup("Logging out..."));
+
+                System.Diagnostics.Debug.WriteLine("Logging out - saving vault...");
+
+                // Save vault before logout
+                await syncingService.Save();
+
+                // Clear auth token
+                authTokenService.SetToken(null);
+
+                // Lock session
+                vaultSessionService.Lock();
+
+                // Pop the pending popup
+                await MopupService.Instance.PopAsync();
+
+                // Disable flyout menu to prevent navigation during logout
+                ((AppShell)Shell.Current).DisableFlyout();
+
+                // Navigate to login page
+                await Shell.Current.GoToAsync("//login");
+
+                System.Diagnostics.Debug.WriteLine("Logout complete");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error during logout: {ex}");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: "Failed to logout properly. Please try again.",
+                    aText: "OK"
+                ));
+            }
         }
         public async Task<bool> ChangePasswordAsync(string oldPassword, string newPassword)
         {
@@ -381,9 +407,28 @@ namespace GoatVaultClient.Services
             var accounts = await vaultService.LoadAllUsersFromLocalAsync();
             return accounts;
         }
-        public async Task<bool> RemoveLocalAccountAsync(string email)
+        public async Task RemoveLocalAccountAsync(DbModel account)
         {
-            throw new NotImplementedException();
+            // Validation
+            if (account == null)
+                return;
+
+            // Confirm deletion
+            var confirmPopup = new PromptPopup(
+                    title: "Remove Local Account",
+                    body: "Are you sure you want to delete this account from local storage? All changes will be saved.",
+                    aText: "Delete",
+                    cText: "Cancel"
+                );
+            await MopupService.Instance.PushAsync(confirmPopup);
+            var confirm = await confirmPopup.WaitForScan();
+
+            // 
+            if (!confirm)
+                return;
+
+            // Remove from local database
+            await vaultService.DeleteUserFromLocalAsync(account.Id);
         }
     }
 }

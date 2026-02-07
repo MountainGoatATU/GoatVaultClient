@@ -8,6 +8,6 @@ public partial class GratitudePageViewModel : BaseViewModel
     private async Task Continue()
     {
         // Go to Main Page (AppShell Root)
-        await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
+        await Shell.Current.GoToAsync("//main/home");
     }
 }

@@ -37,7 +37,7 @@ public partial class RegisterPageViewModel(
             // Call Register method from AuthenticationService
             await authenticationService.RegisterAsync(Email, Password, ConfirmPassword);
             // On success, navigate to Gratitude page
-            await Shell.Current.GoToAsync(nameof(GratitudePage));
+            await Shell.Current.GoToAsync("//gratitude");
         }
         finally
         {
@@ -50,6 +50,6 @@ public partial class RegisterPageViewModel(
     private static async Task GoToLogin()
     {
         // Navigate back to Login
-        await Shell.Current.GoToAsync(nameof(LoginPage));
+        await Shell.Current.GoToAsync("//login");
     }
 }

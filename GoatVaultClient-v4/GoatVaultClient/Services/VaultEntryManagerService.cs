@@ -5,7 +5,9 @@ using Mopups.Services;
 
 namespace GoatVaultClient.Services;
 
-public class VaultEntryManagerService(VaultSessionService vaultSessionService)
+public class VaultEntryManagerService(
+    VaultSessionService vaultSessionService,
+    ISyncingService syncingService)
 {
     public async Task<bool> CreateEntryAsync(IEnumerable<CategoryItem> categories)
     {
@@ -42,6 +44,12 @@ public class VaultEntryManagerService(VaultSessionService vaultSessionService)
 
         // Add to list
         vaultSessionService.DecryptedVault?.Entries.Add(newEntry);
+
+        // Save the changes
+        if (syncingService.HasAutoSave)
+        {
+            await syncingService.Save();
+        }
 
         return true;
     }
@@ -96,6 +104,12 @@ public class VaultEntryManagerService(VaultSessionService vaultSessionService)
             HasMfa = formModel.HasMfa
         };
 
+        // Save the changes
+        if (syncingService.HasAutoSave)
+        {
+            await syncingService.Save();
+        }
+
         return true;
     }
 
@@ -115,10 +129,17 @@ public class VaultEntryManagerService(VaultSessionService vaultSessionService)
         // Act based on the response
         if (!response)
             return false;
-
+        
+        //Remove from the list
         vaultSessionService.DecryptedVault?.Entries.Remove(target);
-        return true;
 
+        // Save the changes
+        if (syncingService.HasAutoSave)
+        {
+            await syncingService.Save();
+        }
+
+        return true;
     }
 
     public static async Task CopyEntryPasswordAsync(VaultEntry? target)

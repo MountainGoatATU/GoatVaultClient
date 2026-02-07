@@ -115,7 +115,7 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
         }
         catch (CryptographicException)
         {
-            throw new InvalidOperationException("Decryption failed — incorrect password or data tampered.");
+            throw new Exception("Decryption failed — incorrect password or data tampered.");
         }
         catch (Exception ex)
         {

@@ -1,24 +1,25 @@
 using CommunityToolkit.Maui;
-using GoatVaultInfrastructure.Database;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Mopups.Hosting;
-using SecretSharingDotNet.Math;
-using System.Net.Http.Headers;
-using System.Numerics;
+using GoatVaultClient.ViewModels.controls;
 using GoatVaultCore.Services.Secrets;
+using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
+using LiveChartsCore.SkiaSharpView.Maui;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Mopups.Hosting;
+using SecretSharingDotNet.Math;
+using SkiaSharp.Views.Maui.Controls.Hosting;
+using System.Net.Http.Headers;
+using System.Numerics;
+using System.Reflection;
 using UraniumUI;
 using Debug = System.Diagnostics.Debug;
-using System.Reflection;
-using Microsoft.Extensions.Configuration;
-using SkiaSharp.Views.Maui.Controls.Hosting;
-using LiveChartsCore.SkiaSharpView.Maui;
 
 namespace GoatVaultClient;
 
@@ -110,6 +111,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<VaultEntryManagerService>();
 
         // Register pages
+        builder.Services.AddTransient<SyncStatusBarViewModel>();
         builder.Services.AddTransient<MainPageViewModel>();
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<IntroductionPageViewModel>();
