@@ -83,6 +83,7 @@ namespace GoatVaultClient.ViewModels
         public void StartRandomGoatComments()
         {
             _goatTipsService.StartTips();
+
             _goatTipsService.PropertyChanged += (s, e) =>
             {
                 switch (e.PropertyName)
@@ -90,8 +91,17 @@ namespace GoatVaultClient.ViewModels
                     case nameof(GoatTipsService.CurrentTip):
                         GoatComment = _goatTipsService.CurrentTip;
                         break;
+
                     case nameof(GoatTipsService.IsTipVisible):
-                        IsGoatCommentVisible = _goatTipsService.IsTipVisible;
+                        if (!Preferences.Default.Get("GoatEnabled", true))
+                        {
+                            GoatComment = string.Empty;
+                            IsGoatCommentVisible = false;
+                        }
+                        else
+                        {
+                            IsGoatCommentVisible = _goatTipsService.IsTipVisible;
+                        }
                         break;
                 }
             };

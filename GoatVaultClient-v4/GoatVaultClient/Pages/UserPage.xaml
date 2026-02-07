@@ -63,6 +63,24 @@
                                               Command="{Binding EditMasterPasswordCommand}"/>
                     </Grid>
 
+                    <!-- Enable Goat -->
+                    <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
+                        <Label Text="Enable Goat" 
+                               FontAttributes="Bold" 
+                               VerticalOptions="Center"/>
+                        <Label Grid.Column="1" 
+                               Text="{Binding GoatEnabled, Converter={StaticResource BoolToEnabledDisabledConverter}}" 
+                               VerticalOptions="Center"
+                               FontSize="14"/>
+                        <Button Grid.Column="2"
+                                Text="{Binding GoatEnabled, Converter={StaticResource BoolToEnableDisableConverter}}"
+                                Command="{Binding ToggleGoatCommand}"
+                                BackgroundColor="{Binding GoatEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
+                                TextColor="White"
+                                WidthRequest="100"
+                                HeightRequest="40"/>
+                    </Grid>
+
                 </VerticalStackLayout>
             </controls:Component>
 

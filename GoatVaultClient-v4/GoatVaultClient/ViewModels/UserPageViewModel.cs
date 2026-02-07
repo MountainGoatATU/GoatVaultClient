@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Controls.Popups;
+using GoatVaultClient.Services;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
@@ -17,13 +18,15 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private bool mfaEnabled;
         [ObservableProperty] private string? mfaSecret;
         [ObservableProperty] private string? mfaQrCodeUrl;
-
+        [ObservableProperty] private bool goatEnabled = true;
+    
         // Services
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
         private readonly VaultSessionService _vaultSessionService;
         private readonly VaultService _vaultService;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
+        private readonly GoatTipsService _goatTipsService;
 
         // Constructor
         public UserPageViewModel(
@@ -31,20 +34,32 @@ namespace GoatVaultClient.ViewModels
             AuthTokenService authTokenService,
             VaultSessionService vaultSessionService,
             VaultService vaultService,
-            Microsoft.Extensions.Configuration.IConfiguration configuration)
+            Microsoft.Extensions.Configuration.IConfiguration configuration,
+            GoatTipsService goatTipsService)
         {
             _httpService = httpService;
             _authTokenService = authTokenService;
             _vaultSessionService = vaultSessionService;
             _vaultService = vaultService;
             _configuration = configuration;
+            _goatTipsService = goatTipsService;
 
-            // Initialize properties from current session
+            // Load and apply preference default
+            GoatEnabled = Preferences.Default.Get("GoatEnabled", true);
+            _goatTipsService.ApplyEnabledState(GoatEnabled);
+
             if (_vaultSessionService.CurrentUser == null)
                 return;
 
             Email = _vaultSessionService.CurrentUser.Email;
             MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled;
+        }
+
+        [RelayCommand]
+        private void ToggleGoat()
+        {
+            GoatEnabled = !GoatEnabled;
+            _goatTipsService.ApplyEnabledState(GoatEnabled);
         }
 
         [RelayCommand]

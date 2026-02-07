@@ -6,29 +6,26 @@ namespace GoatVaultClient
 {
     public partial class MainPage : ContentPage
     {
-        private GoatTipsService _goatTipsService;
-
         public MainPage(MainPageViewModel viewModel)
         {
             InitializeComponent();
             BindingContext = viewModel;
 
-            _goatTipsService = viewModel.GoatTipsService;
-
-            viewModel.PropertyChanged += async (s, e) =>
+            void ApplyVisibility()
             {
-                if (e.PropertyName == nameof(viewModel.IsGoatCommentVisible))
+                var visible = viewModel.IsGoatCommentVisible;
+                GoatBubbleStack.Opacity = visible ? 1 : 0;
+                GoatMascot.Opacity = visible ? 1 : 0;
+            }
+
+            // Start hidden until first tip shows
+            ApplyVisibility();
+
+            viewModel.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(MainPageViewModel.IsGoatCommentVisible))
                 {
-                    if (viewModel.IsGoatCommentVisible)
-                    {
-                        GoatBubbleStack.Opacity = 1;
-                        GoatMascot.Opacity = 1;
-                    }
-                    else
-                    {
-                        GoatBubbleStack.Opacity = 0;
-                        GoatMascot.Opacity = 0;
-                    }
+                    ApplyVisibility();
                 }
             };
         }
