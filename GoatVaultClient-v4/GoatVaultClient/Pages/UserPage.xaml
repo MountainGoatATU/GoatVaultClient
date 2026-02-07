@@ -65,20 +65,36 @@
 
                     <!-- Enable Goat -->
                     <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
-                        <Label Text="Enable Goat" 
-                               FontAttributes="Bold" 
-                               VerticalOptions="Center"/>
-                        <Label Grid.Column="1" 
-                               Text="{Binding GoatEnabled, Converter={StaticResource BoolToEnabledDisabledConverter}}" 
+                        <Label Text="Enable Goat"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center" />
+
+                        <!-- Status text -->
+                        <Label Grid.Column="1"
                                VerticalOptions="Center"
-                               FontSize="14"/>
+                               FontSize="14"
+                               Text="Disabled">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding GoatEnabled}" Value="True">
+                                    <Setter Property="Text" Value="Enabled" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
+                        <!-- Button text -->
                         <Button Grid.Column="2"
-                                Text="{Binding GoatEnabled, Converter={StaticResource BoolToEnableDisableConverter}}"
                                 Command="{Binding ToggleGoatCommand}"
                                 BackgroundColor="{Binding GoatEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
                                 TextColor="White"
                                 WidthRequest="100"
-                                HeightRequest="40"/>
+                                HeightRequest="40"
+                                Text="Enable">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding GoatEnabled}" Value="True">
+                                    <Setter Property="Text" Value="Disable" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
                     </Grid>
 
                 </VerticalStackLayout>
