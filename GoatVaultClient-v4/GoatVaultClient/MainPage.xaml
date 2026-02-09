@@ -34,6 +34,45 @@
             </controls:Component>
             <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto, 0.5*, 0.5*" Margin="{StaticResource layoutMargin}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
 
+        <controls:SyncStatusBar x:Name="SyncStatusBar"/>
+
+        <controls:Component BorderMargin="24,0,24,0">
+            <SearchBar Placeholder="Search passwords..." Text="{Binding SearchText}" HeightRequest="48" />
+        </controls:Component>
+        <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto, 0.5*, 0.5*" Margin="{StaticResource layoutMargin}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
+            
+            <!-- Categories List-->
+            <controls:Component Grid.Row="1" Grid.Column="0" >
+                <VerticalStackLayout>
+                    <controls:ComponentHeader Title="Categories">
+                        <controls:ComponentHeader.Actions>
+                            <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
+                                <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sort}"
+                                              Command="{Binding SortCategoriesCommand}"/>
+                                <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Add}"
+                                              Command="{Binding CreateCategoryCommand}"/>
+                            </HorizontalStackLayout>
+                        </controls:ComponentHeader.Actions>
+                    </controls:ComponentHeader >
+                    <CollectionView x:Name="CategoriesCollection" ItemsSource="{Binding Categories}" SelectionMode="Single" SelectedItem="{Binding SelectedCategory}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="{x:StaticResource sContent}" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <controls:CategoryItemCell Text="{Binding Name}"
+                                                   IconGlyph="{x:Static m:MaterialRounded.Folder}"         
+                                                   ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}">
+                                    <!-- Context Menu-->
+                                    <FlyoutBase.ContextFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem Text="Edit"
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
+                                                            CommandParameter="{Binding .}">
+                                                <MenuFlyoutItem.IconImageSource>
+                                                    <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Edit}" Color="{StaticResource Primary}"/>
+                                                </MenuFlyoutItem.IconImageSource>
+                                            </MenuFlyoutItem>
                 <!-- Categories List-->
                 <controls:Component Grid.Row="1" Grid.Column="0" >
                     <VerticalStackLayout>

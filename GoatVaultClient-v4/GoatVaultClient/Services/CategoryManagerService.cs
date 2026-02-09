@@ -5,7 +5,9 @@ using Mopups.Services;
 
 namespace GoatVaultClient.Services;
 
-public class CategoryManagerService(VaultSessionService vaultSessionService)
+public class CategoryManagerService(
+    VaultSessionService vaultSessionService,
+    ISyncingService syncingService)
 {
     public async Task<bool> CreateCategoryAsync(IEnumerable<CategoryItem> existingCategories)
     {
@@ -26,6 +28,13 @@ public class CategoryManagerService(VaultSessionService vaultSessionService)
 
             // Add to global list
             vaultSessionService.DecryptedVault?.Categories.Add(temp);
+
+            // Save the changes
+            if (syncingService.HasAutoSave)
+            {
+                await syncingService.Save();
+            }
+
             return true;
         }
         else
@@ -95,6 +104,12 @@ public class CategoryManagerService(VaultSessionService vaultSessionService)
             pwd.Category = reassign ? response : string.Empty;
         }
 
+        // Save the changes
+        if (syncingService.HasAutoSave)
+        {
+            await syncingService.Save();
+        }
+
         return true;
     }
 
@@ -142,6 +157,12 @@ public class CategoryManagerService(VaultSessionService vaultSessionService)
 
         // Remove category
         categories?.Remove(target);
+
+        // Save the changes
+        if (syncingService.HasAutoSave)
+        {
+            await syncingService.Save();
+        }
 
         return true;
     }
