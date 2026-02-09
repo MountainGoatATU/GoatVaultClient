@@ -89,8 +89,7 @@
 
                 <material:TextField Title="Password" 
                                     Text="{Binding OfflinePassword}" 
-                                    IsPassword="True" 
-                                    Style="{StaticResource PrimaryTextField}">
+                                    IsPassword="True">
                     <material:TextField.Attachments>
                         <material:TextFieldPasswordShowHideAttachment/>
                     </material:TextField.Attachments>

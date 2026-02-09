@@ -13,6 +13,7 @@ namespace GoatVaultClient.ViewModels;
 // TODO: Unused UserService injection
 public partial class LoginPageViewModel(
     IAuthenticationService authenticationService,
+    ISyncingService syncingService,
     VaultService vaultService,
     ConnectivityService connectivityService)
     : BaseViewModel
@@ -118,8 +119,8 @@ public partial class LoginPageViewModel(
 
             if (success)
             {
-                // Navigate to app
-                await NavigateToMainPage();
+                // Navigate to vault
+                await Shell.Current.GoToAsync("//main/home");
             }
         }
         finally
@@ -140,9 +141,12 @@ public partial class LoginPageViewModel(
             // Set Busy
             IsBusy = true;
             // Attempt Login offline
-            await authenticationService.LoginOfflineAsync(Email, OfflinePassword, SelectedAccount);
-            // Navigate to app
-            await NavigateToMainPage();
+            var result = await authenticationService.LoginOfflineAsync(Email, OfflinePassword, SelectedAccount);
+            if (result)
+            {
+                // Navigate to Main page
+                await Shell.Current.GoToAsync("//main/home");
+            }
         }
         finally
         {
@@ -173,21 +177,10 @@ public partial class LoginPageViewModel(
     [RelayCommand]
     private async Task RemoveOfflineAccount(DbModel account)
     {
-        if (account == null) return;
-
-        // Remove from local database
-        await vaultService.DeleteUserFromLocalAsync(account.Id);
-
-        // Remove from ObservableCollection
-        LocalAccounts.Remove(account);
-    }
-
-    private async Task NavigateToMainPage()
-    {
-        if (Application.Current != null)
-            Application.Current.MainPage = new AppShell();
-
-        await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
+        // Remove from service
+        await authenticationService.RemoveLocalAccountAsync(account);
+        // Refresh list
+        await LoadLocalAccountsAsync();
     }
 
     [RelayCommand]
@@ -201,7 +194,7 @@ public partial class LoginPageViewModel(
                 "OK");
             return;
         }
-        await Shell.Current.GoToAsync(nameof(RegisterPage));
+        await Shell.Current.GoToAsync("//register");
     }
 
     /// <summary>
