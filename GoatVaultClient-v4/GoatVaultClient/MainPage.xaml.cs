@@ -14,7 +14,7 @@ namespace GoatVaultClient
         // Constants for configuration
         private const int SYNC_INTERVAL_MINUTES = 5;
         public MainPage(
-            MainPageViewModel viewModel, 
+            MainPageViewModel viewModel,
             ISyncingService syncingService,
             SyncStatusBarViewModel syncStatusBarViewModel)
         {
@@ -40,25 +40,24 @@ namespace GoatVaultClient
             // Start hidden until first tip shows
             ApplyVisibility();
 
-            viewModel.PropertyChanged += (s, e) =>
+            viewModel.PropertyChanged += async (s, e) =>
             {
                 if (e.PropertyName == nameof(MainPageViewModel.IsGoatCommentVisible))
                 {
-                    if (args.PropertyName != nameof(vm.IsGoatCommentVisible)) 
-                        return;
-
-                    // Fade in and out 0.3 s
-                    if (vm.IsGoatCommentVisible)
+                    if (BindingContext is MainPageViewModel vm)
                     {
-                        await GoatBubbleStack.FadeToAsync(1, 300);
+                        // Fade in and out 0.3 s
+                        if (vm.IsGoatCommentVisible)
+                        {
+                            await GoatBubbleStack.FadeToAsync(1, 300);
+                            await GoatMascot.FadeToAsync(1, 300);
+                        }
+                        else
+                        {
+                            await GoatBubbleStack.FadeToAsync(0, 300);
+                            await GoatMascot.FadeToAsync(0, 300);
+                        }
                     }
-                    else
-                    {
-                        await GoatBubbleStack.FadeToAsync(0, 300);
-                    }
-                }
-            }
-                    ApplyVisibility();
                 }
             };
         }
