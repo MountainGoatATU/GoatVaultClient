@@ -56,7 +56,7 @@ namespace GoatVaultClient
                     {
                         await GoatBubbleStack.FadeToAsync(0, 300);
                     }
-                };
+                }
             }
                     ApplyVisibility();
                 }
