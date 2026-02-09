@@ -4,8 +4,11 @@ namespace GoatVaultClient.Services;
 
 public partial class GoatTipsService : ObservableObject
 {
+    private const string GoatEnabledKey = "GoatEnabled";
+
     [ObservableProperty] private string currentTip = string.Empty;
-    [ObservableProperty] private bool isTipVisible = false;
+    [ObservableProperty] private bool isTipVisible;
+    [ObservableProperty] private bool isGoatEnabled;
 
     private readonly List<string> _goatTips =
     [
@@ -17,40 +20,74 @@ public partial class GoatTipsService : ObservableObject
         "Tip: Consider using a passphrase instead of a single word."
     ];
 
+    private readonly Random _random = new();
     private IDispatcherTimer? _timer;
+
+    public GoatTipsService()
+    {
+        // Read persisted state from the device storage via MAUI Preferences
+        IsGoatEnabled = Preferences.Default.Get(GoatEnabledKey, true);
+    }
+
+    public void SetEnabled(bool enabled)
+    {
+        if (IsGoatEnabled == enabled)
+            return;
+
+        IsGoatEnabled = enabled;
+
+        // Persist state to device storage via MAUI Preferences.
+        Preferences.Default.Set(GoatEnabledKey, enabled);
+
+        if (!enabled)
+        {
+            IsTipVisible = false;
+            CurrentTip = string.Empty;
+        }
+    }
+
+    public void ApplyEnabledState(bool enabled) => SetEnabled(enabled);
 
     public void StartTips()
     {
-        if (_timer != null) return;
+        if (_timer != null)
+            return;
 
-        var random = new Random();
         _timer = Application.Current?.Dispatcher.CreateTimer();
-
-        if (_timer == null) return;
+        if (_timer == null)
+            return;
 
         var counter = 0;
         _timer.Interval = TimeSpan.FromSeconds(1);
 
-        _timer.Tick += (s, e) =>
+        _timer.Tick += (_, _) =>
         {
+            if (!IsGoatEnabled)
+            {
+                IsTipVisible = false;
+                CurrentTip = string.Empty;
+                return;
+            }
+
             counter++;
 
             switch (counter % 10)
             {
-                // Every 10 seconds show a comment
                 case 0:
-                    CurrentTip = _goatTips[random.Next(_goatTips.Count)];
+                    CurrentTip = _goatTips[_random.Next(_goatTips.Count)];
                     IsTipVisible = true;
                     break;
-                // Disappear after 5 seconds
+
                 case 5:
                     IsTipVisible = false;
-                    CurrentTip = "";
+                    CurrentTip = string.Empty;
                     break;
             }
 
-            if (counter >= 10) counter = 0; // Reset counter
+            if (counter >= 10)
+                counter = 0;
         };
+
         _timer.Start();
     }
 }

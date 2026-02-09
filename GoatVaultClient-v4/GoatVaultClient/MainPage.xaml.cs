@@ -30,10 +30,19 @@ namespace GoatVaultClient
             SyncStatusBar.BindingContext = _syncStatusBarViewModel;
 
             GoatBubbleStack.Opacity = 0; // Start hidden
-
-            if (BindingContext is MainPageViewModel vm)
+            void ApplyVisibility()
             {
-                vm.PropertyChanged += async (sender, args) =>
+                var visible = viewModel.IsGoatCommentVisible;
+                GoatBubbleStack.Opacity = visible ? 1 : 0;
+                GoatMascot.Opacity = visible ? 1 : 0;
+            }
+
+            // Start hidden until first tip shows
+            ApplyVisibility();
+
+            viewModel.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(MainPageViewModel.IsGoatCommentVisible))
                 {
                     if (args.PropertyName != nameof(vm.IsGoatCommentVisible)) 
                         return;
@@ -49,6 +58,9 @@ namespace GoatVaultClient
                     }
                 };
             }
+                    ApplyVisibility();
+                }
+            };
         }
 
         protected override async void OnAppearing()

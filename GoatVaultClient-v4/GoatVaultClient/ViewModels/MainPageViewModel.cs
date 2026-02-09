@@ -42,6 +42,7 @@ namespace GoatVaultClient.ViewModels
         private readonly TotpManagerService _totpManagerService;
         private readonly CategoryManagerService _categoryManagerService;
         private readonly VaultEntryManagerService _vaultEntryManagerService;
+        public GoatTipsService GoatTipsService => _goatTipsService;
 
         #endregion
         public MainPageViewModel(
@@ -82,6 +83,7 @@ namespace GoatVaultClient.ViewModels
         public void StartRandomGoatComments()
         {
             _goatTipsService.StartTips();
+
             _goatTipsService.PropertyChanged += (s, e) =>
             {
                 switch (e.PropertyName)
@@ -89,8 +91,13 @@ namespace GoatVaultClient.ViewModels
                     case nameof(GoatTipsService.CurrentTip):
                         GoatComment = _goatTipsService.CurrentTip;
                         break;
+
                     case nameof(GoatTipsService.IsTipVisible):
-                        IsGoatCommentVisible = _goatTipsService.IsTipVisible;
+                    case nameof(GoatTipsService.IsGoatEnabled):
+                        var show = _goatTipsService.IsGoatEnabled && _goatTipsService.IsTipVisible;
+                        IsGoatCommentVisible = show;
+                        if (!show)
+                            GoatComment = string.Empty;
                         break;
                 }
             };
