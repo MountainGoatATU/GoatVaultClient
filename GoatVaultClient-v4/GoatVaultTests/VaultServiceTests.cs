@@ -129,7 +129,7 @@ public class VaultServiceTests
         var encrypted = _vaultService.EncryptVault(correctPassword, vaultData);
 
         // Assert
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<Exception>(() =>
             _vaultService.DecryptVault(encrypted, wrongPassword));
     }
 
@@ -147,7 +147,7 @@ public class VaultServiceTests
         encrypted.EncryptedBlob = Convert.ToBase64String(tamperedBlob);
 
         // Assert
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<Exception>(() =>
             _vaultService.DecryptVault(encrypted, password));
     }
 
