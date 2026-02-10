@@ -18,7 +18,8 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private bool mfaEnabled;
         [ObservableProperty] private string? mfaSecret;
         [ObservableProperty] private string? mfaQrCodeUrl;
-        [ObservableProperty] private string? masterPasswordStrengthLabel;
+        [ObservableProperty] private string? masterPasswordStrength;
+        [ObservableProperty] private string? averagePasswordsStrength;
         [ObservableProperty] private bool goatEnabled = true;
 
         private readonly HttpService _httpService;
@@ -56,8 +57,7 @@ namespace GoatVaultClient.ViewModels
             Email = _vaultSessionService.CurrentUser.Email;
             MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled;
 
-            // Initialize strength based on current master password in session
-            RefreshMasterPasswordStrength();
+            RefreshVaultScore();
         }
 
         [RelayCommand]
@@ -68,25 +68,61 @@ namespace GoatVaultClient.ViewModels
             _goatTipsService.SetEnabled(GoatEnabled);
         }
 
-        [RelayCommand]
-        private void RefreshMasterPasswordStrength()
+      
+        private void CalculateMasterPasswordScore()
         {
             var password = _vaultSessionService.MasterPassword;
-
             var strength = PasswordStrengthService.Evaluate(password);
 
-            // Map Score 0–4 to 0–100%
             var percent = (int)Math.Round((strength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
-
-            vaultScore = percent;
-            OnPropertyChanged(nameof(VaultScore));
+            VaultScore = percent;
 
             var crackText = string.IsNullOrWhiteSpace(strength.CrackTimeText)
                 ? "N/A"
                 : strength.CrackTimeText;
 
-            MasterPasswordStrengthLabel =
+            MasterPasswordStrength =
                 $"Master password strength: {percent}% (score {strength.Score}/4, crack time: {crackText})";
+        }
+
+        private void CalculateAveragePasswordsScore()
+        {
+            var vault = _vaultSessionService.DecryptedVault;
+            if (vault?.Entries == null || vault.Entries.Count == 0)
+            {
+                AveragePasswordsStrength = "Average vault password strength: N/A (no entries)";
+                return;
+            }
+
+            double totalScore = 0;  
+            int count = 0;
+
+            foreach (var entry in vault.Entries)
+            {
+                var strength = PasswordStrengthService.Evaluate(entry.Password);
+                totalScore += strength.Score;
+                count++;
+            }
+
+            if (count == 0)
+            {
+                AveragePasswordsStrength = "Average vault password strength: N/A (no entries)";
+                return;
+            }
+
+            var avgScore = totalScore / count; // 0–4
+            var percent = (int)Math.Round((avgScore / 4.0) * 100, MidpointRounding.AwayFromZero);
+
+            AveragePasswordsStrength =
+                $"Average vault password strength: {percent}% (score {avgScore:F1}/4, {count} passwords)";
+        }
+
+        // Single point to recalc all vault-related scores
+        [RelayCommand]
+        private void RefreshVaultScore()
+        {
+            CalculateMasterPasswordScore();
+            CalculateAveragePasswordsScore();
         }
 
         [RelayCommand]
@@ -209,7 +245,7 @@ namespace GoatVaultClient.ViewModels
                 // Update server with MFA enabled and secret
                 var request = new UserRequest
                 {
-                    Email = user.Email,
+                    Email = user.Email,                                                                     
                     MfaEnabled = true,
                     MfaSecret = secret,
                     Vault = user.Vault
@@ -713,10 +749,8 @@ namespace GoatVaultClient.ViewModels
                 _vaultSessionService.CurrentUser.Vault = newVaultModel;
                 _vaultSessionService.MasterPassword = newPassword;
 
-                System.Diagnostics.Debug.WriteLine("Session updated with new password and auth credentials");
-
-                // >>> Recalculate master password strength <<<
-                RefreshMasterPasswordStrength();
+                // Recalculate all vault-related scores
+                RefreshVaultScore();
 
                 // Confirmation
                 await MopupService.Instance.PushAsync(new PromptPopup(
