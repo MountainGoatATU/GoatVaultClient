@@ -17,24 +17,33 @@
             <!-- Vault Score Section -->
             <controls:Component>
                 <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <Label Text="Vault Score" FontAttributes="Bold" FontSize="24" HorizontalOptions="Center"/>
-                    <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="1000" HeightRequest="150" WidthRequest="150">
-                        <lvc:PieChart.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleVaultDetailsCommand}" />
-                        </lvc:PieChart.GestureRecognizers>
-                        <lvc:PieChart.Series>
-                            <lvc:SeriesCollection>
-                                <lvc:XamlGaugeSeries GaugeValue="{Binding VaultScore}" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
-                                <lvc:XamlGaugeBackgroundSeries MaxRadialColumnWidth="50" Fill="LightGray"/>
-                            </lvc:SeriesCollection>
-                        </lvc:PieChart.Series>
-                    </lvc:PieChart>
-
-                    <Label Text="{Binding VaultTierText}"
-                           Margin="0,8,0,0"
+                    <Label Text="Vault Score"
                            FontAttributes="Bold"
-                           FontSize="16"
+                           FontSize="24"
                            HorizontalOptions="Center"/>
+
+                    <!-- Gauge, tappable to show popup -->
+                    <Grid>
+                        
+                        <lvc:PieChart InitialRotation="-90"
+                                      MinValue="0"
+                                      MaxValue="1000"
+                                      HeightRequest="150"
+                                      WidthRequest="150">
+                            <lvc:PieChart.Series>
+                                <lvc:SeriesCollection>
+                                    <lvc:XamlGaugeSeries GaugeValue="{Binding VaultScore}"
+                                                         DataLabelsSize="20"
+                                                         MaxRadialColumnWidth="50"/>
+                                    <lvc:XamlGaugeBackgroundSeries MaxRadialColumnWidth="50" Fill="LightGray"/>
+                                </lvc:SeriesCollection>
+                            </lvc:PieChart.Series>
+                            <lvc:PieChart.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowVaultDetailsPopupCommand}" NumberOfTapsRequired="1"/>
+                            </lvc:PieChart.GestureRecognizers>
+                        </lvc:PieChart>
+
+                    </Grid>
 
                     <CollectionView ItemsSource="{Binding VaultMetrics}"
                                     IsVisible="{Binding ShowVaultDetails}"
@@ -55,37 +64,36 @@
                 </VerticalStackLayout>
             </controls:Component>
 
-
             <!-- Account Settings Section -->
             <controls:ComponentHeader Title="Account Settings"/>
             <controls:Component>
                 <VerticalStackLayout Spacing="20" Padding="20">
-
+                    
                     <!-- Email -->
                     <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
-                        <Label Text="Email" 
-                               FontAttributes="Bold" 
+                        <Label Text="Email"
+                               FontAttributes="Bold"
                                VerticalOptions="Center"/>
-                        <Label Grid.Column="1" 
-                               Text="{Binding Email}" 
+                        <Label Grid.Column="1"
+                               Text="{Binding Email}"
                                VerticalOptions="Center"
                                FontSize="14"/>
-                        <controls:ImageButton Grid.Column="2" 
-                                              IconGlyph="{x:Static m:MaterialRounded.Edit}" 
+                        <controls:ImageButton Grid.Column="2"
+                                              IconGlyph="{x:Static m:MaterialRounded.Edit}"
                                               Command="{Binding EditEmailCommand}"/>
                     </Grid>
 
                     <!-- Master Password -->
                     <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
-                        <Label Text="Master Password" 
-                               FontAttributes="Bold" 
+                        <Label Text="Master Password"
+                               FontAttributes="Bold"
                                VerticalOptions="Center"/>
-                        <Label Grid.Column="1" 
-                               Text="••••••••••••" 
+                        <Label Grid.Column="1"
+                               Text="••••••••••••"
                                VerticalOptions="Center"
                                FontSize="14"/>
-                        <controls:ImageButton Grid.Column="2" 
-                                              IconGlyph="{x:Static m:MaterialRounded.Edit}" 
+                        <controls:ImageButton Grid.Column="2"
+                                              IconGlyph="{x:Static m:MaterialRounded.Edit}"
                                               Command="{Binding EditMasterPasswordCommand}"/>
                     </Grid>
 
@@ -101,7 +109,9 @@
                                FontSize="14"
                                Text="Disabled">
                             <Label.Triggers>
-                                <DataTrigger TargetType="Label" Binding="{Binding GoatEnabled}" Value="True">
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding GoatEnabled}"
+                                             Value="True">
                                     <Setter Property="Text" Value="Enabled" />
                                 </DataTrigger>
                             </Label.Triggers>
@@ -116,13 +126,15 @@
                                 HeightRequest="40"
                                 Text="Enable">
                             <Button.Triggers>
-                                <DataTrigger TargetType="Button" Binding="{Binding GoatEnabled}" Value="True">
+                                <DataTrigger TargetType="Button"
+                                             Binding="{Binding GoatEnabled}"
+                                             Value="True">
                                     <Setter Property="Text" Value="Disable" />
                                 </DataTrigger>
                             </Button.Triggers>
                         </Button>
                     </Grid>
-
+                    
                 </VerticalStackLayout>
             </controls:Component>
 
@@ -132,7 +144,7 @@
                 <VerticalStackLayout Spacing="15" Padding="20">
                     <!-- MFA Status -->
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                        <Label Text="Status" 
+                        <Label Text="Status"
                                FontSize="14"
                                FontAttributes="Bold"
                                VerticalOptions="Center"/>
@@ -168,7 +180,7 @@
                             BackgroundColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
                             TextColor="White"
                             Margin="0,10,0,0"/>
-
+                    
                 </VerticalStackLayout>
             </controls:Component>
 

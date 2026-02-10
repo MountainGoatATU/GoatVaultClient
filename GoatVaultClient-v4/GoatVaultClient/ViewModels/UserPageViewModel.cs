@@ -111,6 +111,24 @@ namespace GoatVaultClient.ViewModels
         }
 
         [RelayCommand]
+        private async Task ShowVaultDetailsPopupAsync()
+        {
+            var message =
+                $"Tier: {VaultTierText}\n" +
+                $"\nMaster password: {MasterPasswordStrength}" +
+                $"\nAverage passwords: {AveragePasswordsStrength}" +
+                $"\nOriginality: {ReuseRateText}" +
+                $"\nBreached passwords: {BreachesText}" +
+                $"\nMFA: {MfaStatusText}";
+
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Vault Score Details",
+                body: message,
+                aText: "OK"
+            ));
+        }
+
+        [RelayCommand]
         private void ToggleGoat()
         {
             // Persisted via GoatTipsService to device storage.
