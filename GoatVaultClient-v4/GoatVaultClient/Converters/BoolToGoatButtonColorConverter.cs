@@ -8,10 +8,9 @@ public class BoolToGoatButtonColorConverter : IValueConverter
     {
         var enabled = value is bool b && b;
 
-        // keep consistent with your BoolToColorConverter (green/red)
         return enabled
-            ? Color.FromArgb("#4CAF50")
-            : Color.FromArgb("#F44336");
+            ? Color.FromArgb("#F44336")
+            : Color.FromArgb("#4CAF50");
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
