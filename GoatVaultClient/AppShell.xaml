@@ -6,7 +6,7 @@
     xmlns:m="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:local="clr-namespace:GoatVaultClient" 
     xmlns:pages="clr-namespace:GoatVaultClient.Pages"
-    Title="GoatVaultClient"
+    Title="GoatVault"
     BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}"
     Shell.TabBarIsVisible="False"
     Shell.FlyoutBehavior="Disabled"

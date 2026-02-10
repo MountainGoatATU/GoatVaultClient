@@ -20,7 +20,7 @@ The project follows the **MVVM (Model-View-ViewModel)** architectural pattern, l
 1.  Clone the repository:
     ```bash
     git clone https://github.com/MountainGoatATU/GoatVaultClient.git
-    cd GoatVaultClient/GoatVaultClient-v4
+    cd GoatVaultClient
     ```
 
 2.  Restore dependencies:
