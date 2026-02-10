@@ -24,7 +24,6 @@
 
                     <!-- Gauge, tappable to show popup -->
                     <Grid>
-                        
                         <lvc:PieChart InitialRotation="-90"
                                       MinValue="0"
                                       MaxValue="1000"
