@@ -47,7 +47,9 @@ namespace GoatVaultClient.ViewModels
             _configuration = configuration;
             _goatTipsService = goatTipsService;
 
-            // Read once from service (single source of truth)
+            // Subscribe to vault entries changes
+            _vaultSessionService.VaultEntriesChanged += OnVaultEntriesChanged;
+
             GoatEnabled = _goatTipsService.IsGoatEnabled;
             _goatTipsService.SetEnabled(GoatEnabled);
 
@@ -60,6 +62,11 @@ namespace GoatVaultClient.ViewModels
             RefreshVaultScore();
         }
 
+        private void OnVaultEntriesChanged()
+        {
+            RefreshVaultScore();
+        }
+
         [RelayCommand]
         private void ToggleGoat()
         {
@@ -68,62 +75,34 @@ namespace GoatVaultClient.ViewModels
             _goatTipsService.SetEnabled(GoatEnabled);
         }
 
-      
-        private void CalculateMasterPasswordScore()
-        {
-            var password = _vaultSessionService.MasterPassword;
-            var strength = PasswordStrengthService.Evaluate(password);
-
-            var percent = (int)Math.Round((strength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
-            VaultScore = percent;
-
-            var crackText = string.IsNullOrWhiteSpace(strength.CrackTimeText)
-                ? "N/A"
-                : strength.CrackTimeText;
-
-            MasterPasswordStrength =
-                $"Master password strength: {percent}% (score {strength.Score}/4, crack time: {crackText})";
-        }
-
-        private void CalculateAveragePasswordsScore()
-        {
-            var vault = _vaultSessionService.DecryptedVault;
-            if (vault?.Entries == null || vault.Entries.Count == 0)
-            {
-                AveragePasswordsStrength = "Average vault password strength: N/A (no entries)";
-                return;
-            }
-
-            double totalScore = 0;  
-            int count = 0;
-
-            foreach (var entry in vault.Entries)
-            {
-                var strength = PasswordStrengthService.Evaluate(entry.Password);
-                totalScore += strength.Score;
-                count++;
-            }
-
-            if (count == 0)
-            {
-                AveragePasswordsStrength = "Average vault password strength: N/A (no entries)";
-                return;
-            }
-
-            var avgScore = totalScore / count; // 0–4
-            var percent = (int)Math.Round((avgScore / 4.0) * 100, MidpointRounding.AwayFromZero);
-
-            AveragePasswordsStrength =
-                $"Average vault password strength: {percent}% (score {avgScore:F1}/4, {count} passwords)";
-        }
-
         // Single point to recalc all vault-related scores
         [RelayCommand]
         private void RefreshVaultScore()
         {
-            CalculateMasterPasswordScore();
-            CalculateAveragePasswordsScore();
-        }
+            var vault = _vaultSessionService.DecryptedVault;
+            var entries = vault?.Entries;
+
+            var result = VaultScoreCalculatorService.CalculateScore(
+                entries,
+                _vaultSessionService.MasterPassword);
+
+            VaultScore = result.MasterPercent;
+
+            MasterPasswordStrength =
+                $"Master password strength: {result.MasterPercent}% " +
+                $"(score {result.MasterScore}/4, crack time: {result.MasterCrackTime})";
+
+            if (result.PasswordCount == 0)
+            {
+                AveragePasswordsStrength = "Average vault password strength: N/A (no entries)";
+            }
+            else
+               {
+                   AveragePasswordsStrength =
+                       $"Average vault password strength: {result.AveragePercent}% " +
+                       $"(score {result.AverageScore:F1}/4, {result.PasswordCount} passwords)";
+               }
+           }
 
         [RelayCommand]
         private async Task EnableMfaAsync()
