@@ -30,6 +30,8 @@
                 </VerticalStackLayout>
             </controls:Component>
 
+            <Label Margin="40" Text="{Binding MasterPasswordStrengthLabel}" FontSize="13" TextColor="Gray" />
+
             <!-- Account Settings Section -->
             <controls:ComponentHeader Title="Account Settings"/>
             <controls:Component>

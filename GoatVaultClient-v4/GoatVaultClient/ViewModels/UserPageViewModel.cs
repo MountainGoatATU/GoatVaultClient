@@ -18,6 +18,7 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private bool mfaEnabled;
         [ObservableProperty] private string? mfaSecret;
         [ObservableProperty] private string? mfaQrCodeUrl;
+        [ObservableProperty] private string? masterPasswordStrengthLabel;
         [ObservableProperty] private bool goatEnabled = true;
 
         private readonly HttpService _httpService;
@@ -54,6 +55,9 @@ namespace GoatVaultClient.ViewModels
 
             Email = _vaultSessionService.CurrentUser.Email;
             MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled;
+
+            // Initialize strength based on current master password in session
+            RefreshMasterPasswordStrength();
         }
 
         [RelayCommand]
@@ -62,6 +66,27 @@ namespace GoatVaultClient.ViewModels
             // Persisted via GoatTipsService to device storage.
             GoatEnabled = !GoatEnabled;
             _goatTipsService.SetEnabled(GoatEnabled);
+        }
+
+        [RelayCommand]
+        private void RefreshMasterPasswordStrength()
+        {
+            var password = _vaultSessionService.MasterPassword;
+
+            var strength = PasswordStrengthService.Evaluate(password);
+
+            // Map Score 0–4 to 0–100%
+            var percent = (int)Math.Round((strength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
+
+            vaultScore = percent;
+            OnPropertyChanged(nameof(VaultScore));
+
+            var crackText = string.IsNullOrWhiteSpace(strength.CrackTimeText)
+                ? "N/A"
+                : strength.CrackTimeText;
+
+            MasterPasswordStrengthLabel =
+                $"Master password strength: {percent}% (score {strength.Score}/4, crack time: {crackText})";
         }
 
         [RelayCommand]
@@ -689,6 +714,9 @@ namespace GoatVaultClient.ViewModels
                 _vaultSessionService.MasterPassword = newPassword;
 
                 System.Diagnostics.Debug.WriteLine("Session updated with new password and auth credentials");
+
+                // >>> Recalculate master password strength <<<
+                RefreshMasterPasswordStrength();
 
                 // Confirmation
                 await MopupService.Instance.PushAsync(new PromptPopup(
