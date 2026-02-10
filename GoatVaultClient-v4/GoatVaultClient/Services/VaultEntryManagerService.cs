@@ -45,6 +45,9 @@ public class VaultEntryManagerService(
         // Add to list
         vaultSessionService.DecryptedVault?.Entries.Add(newEntry);
 
+        // Notify that entries changed
+        vaultSessionService.RaiseVaultEntriesChanged();
+
         // Save the changes
         if (syncingService.HasAutoSave)
         {
@@ -104,6 +107,9 @@ public class VaultEntryManagerService(
             HasMfa = formModel.HasMfa
         };
 
+        // Notify that entries changed
+        vaultSessionService.RaiseVaultEntriesChanged();
+
         // Save the changes
         if (syncingService.HasAutoSave)
         {
@@ -132,6 +138,9 @@ public class VaultEntryManagerService(
         
         //Remove from the list
         vaultSessionService.DecryptedVault?.Entries.Remove(target);
+
+        // Notify that entries changed
+        vaultSessionService.RaiseVaultEntriesChanged();
 
         // Save the changes
         if (syncingService.HasAutoSave)

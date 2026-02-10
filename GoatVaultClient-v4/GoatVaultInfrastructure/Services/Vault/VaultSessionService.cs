@@ -14,6 +14,8 @@ public class VaultSessionService : IVaultSessionService
     public UserResponse? CurrentUser { get; set; } = null;
     public string? MasterPassword { get; set; } = "";
 
+    public event Action? VaultEntriesChanged;
+
     public void Lock()
     {
         DecryptedVault = null;
@@ -22,5 +24,10 @@ public class VaultSessionService : IVaultSessionService
 
         // Force Garbage Collection to remove secrets from heap (Optional but good)
         GC.Collect();
+    }
+
+    public void RaiseVaultEntriesChanged()
+    {
+        VaultEntriesChanged?.Invoke();
     }
 }
