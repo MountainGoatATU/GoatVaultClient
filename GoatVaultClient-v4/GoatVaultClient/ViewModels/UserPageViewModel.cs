@@ -26,6 +26,9 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private string? averagePasswordsStrength;
         [ObservableProperty] private bool goatEnabled = true;
 
+        [ObservableProperty] private bool showVaultDetails;
+        [ObservableProperty] private string? vaultTierText;
+
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
         private readonly IAuthenticationService _authenticationService;
@@ -73,13 +76,11 @@ namespace GoatVaultClient.ViewModels
             if (user == null)
                 return;
 
-            // Breached passwords count is currently not tracked, so passing 0
             var score = VaultScoreCalculatorService.CalculateScore(
                 _vaultSessionService.VaultEntries,
                 _vaultSessionService.MasterPassword,
                 user.MfaEnabled,
-                breachedPasswordsCount: 0
-            );
+                breachedPasswordsCount: 0);
 
             VaultScore = score.VaultScore;
             MasterPasswordStrength = $"{score.MasterPasswordPercent}%";
@@ -87,6 +88,26 @@ namespace GoatVaultClient.ViewModels
             ReuseRateText = $"{score.ReuseRatePercent}%";
             BreachesText = $"{score.BreachesCount}";
             MfaStatusText = score.MfaEnabled ? "Enabled" : "Disabled";
+
+            // Set tier text
+            VaultTierText = GetVaultTier(VaultScore);
+        }
+
+        // Command for toggling details from the chart
+        [RelayCommand]
+        private void ToggleVaultDetails()
+        {
+            ShowVaultDetails = !ShowVaultDetails;
+        }
+
+        // Tier helper
+        private static string GetVaultTier(double score)
+        {
+            if (score >= 900) return "The Summit Sovereign (900+)";
+            if (score >= 750) return "The Ridge Walker (750–899)";
+            if (score >= 500) return "The Cliffside Scrambler (500–749)";
+            if (score >= 300) return "The Treeline Grazer (300–499)";
+            return "The Dead Meat (< 300)";
         }
 
         [RelayCommand]

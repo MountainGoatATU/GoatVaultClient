@@ -60,9 +60,16 @@ namespace GoatVaultCore.Services.Secrets
             }
 
             // Uniqueness max 200
-            double uniquenessPoints = passwordCount > 0
-                ? Math.Clamp(200 - duplicateCount, 0, 200)
-                : 200;
+            double uniquenessPoints;
+            if (passwordCount > 0)
+            {
+                var uniquenessRatio = (passwordCount - duplicateCount) / (double)passwordCount;
+                uniquenessPoints = uniquenessRatio * 200.0;
+            }
+            else
+            {
+                uniquenessPoints = 200; // Default 200 when no passwords
+            }
 
             // Average password strength max 200
             double behaviorPoints = passwordCount > 0

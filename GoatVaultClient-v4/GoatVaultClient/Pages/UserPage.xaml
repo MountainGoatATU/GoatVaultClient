@@ -19,6 +19,9 @@
                 <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
                     <Label Text="Vault Score" FontAttributes="Bold" FontSize="24" HorizontalOptions="Center"/>
                     <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="1000" HeightRequest="150" WidthRequest="150">
+                        <lvc:PieChart.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleVaultDetailsCommand}" />
+                        </lvc:PieChart.GestureRecognizers>
                         <lvc:PieChart.Series>
                             <lvc:SeriesCollection>
                                 <lvc:XamlGaugeSeries GaugeValue="{Binding VaultScore}" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
@@ -27,13 +30,28 @@
                         </lvc:PieChart.Series>
                     </lvc:PieChart>
 
-                    <VerticalStackLayout Spacing="4" Margin="0,8,0,0">
-                        <Label Text="{Binding MasterPasswordStrength, StringFormat='Master Password: {0}'}"/>
-                        <Label Text="{Binding AveragePasswordsStrength, StringFormat='Average Passwords: {0}'}"/>
-                        <Label Text="{Binding ReuseRateText, StringFormat='Password Reuse: {0}'}"/>
-                        <Label Text="{Binding BreachesText, StringFormat='Breached Passwords: {0}'}"/>
-                        <Label Text="{Binding MfaStatusText, StringFormat='MFA: {0}'}"/>
-                    </VerticalStackLayout>
+                    <Label Text="{Binding VaultTierText}"
+                           Margin="0,8,0,0"
+                           FontAttributes="Bold"
+                           FontSize="16"
+                           HorizontalOptions="Center"/>
+
+                    <CollectionView ItemsSource="{Binding VaultMetrics}"
+                                    IsVisible="{Binding ShowVaultDetails}"
+                                    Margin="0,12,0,0"
+                                    WidthRequest="280">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout Spacing="4" Margin="0,8,0,0">
+                                    <Label Text="{Binding MasterPasswordStrength, StringFormat='Master Password: {0}'}"/>
+                                    <Label Text="{Binding AveragePasswordsStrength, StringFormat='Average Passwords: {0}'}"/>
+                                    <Label Text="{Binding ReuseRateText, StringFormat='Originality: {0}'}"/>
+                                    <Label Text="{Binding BreachesText, StringFormat='Breached Passwords: {0}'}"/>
+                                    <Label Text="{Binding MfaStatusText, StringFormat='MFA: {0}'}"/>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </VerticalStackLayout>
             </controls:Component>
 
