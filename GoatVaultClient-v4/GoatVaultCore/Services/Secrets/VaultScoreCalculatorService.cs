@@ -23,35 +23,9 @@ namespace GoatVaultCore.Services.Secrets
         {
             // Master strength via zxcvbn
             var masterStrength = PasswordStrengthService.Evaluate(masterPassword);
-            var masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
+            int masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
 
-            int passwordCount = 0;
-            int uniquePasswordCount = 0;
-            int totalScore = 0;
-
-            if (entries != null)
-            {
-                var allPasswords = entries
-                    .Where(e => !string.IsNullOrEmpty(e.Password))
-                    .Select(e => e.Password!)
-                    .ToList();
-
-                passwordCount = allPasswords.Count;
-                uniquePasswordCount = allPasswords.Distinct().Count();
-
-                foreach (var pwd in allPasswords)
-                    totalScore += PasswordStrengthService.Evaluate(pwd).Score;
-            }
-
-            int averagePercent = passwordCount > 0
-                ? (int)Math.Round((totalScore / (double)passwordCount / 4.0) * 100, MidpointRounding.AwayFromZero)
-                : 0;
-
-            int reuseRatePercent = passwordCount > 0
-                ? (int)Math.Round((uniquePasswordCount / (double)passwordCount) * 100, MidpointRounding.AwayFromZero)
-                : 0;
-
-            double foundation = masterStrength.Score switch
+            double foundationPoints = masterStrength.Score switch
             {
                 4 => 400,
                 3 => 300,
@@ -59,13 +33,61 @@ namespace GoatVaultCore.Services.Secrets
                 _ => 0
             };
 
-            double uniquenessComponent = reuseRatePercent / 100.0 * 300;
-            double behaviorComponent = averagePercent / 100.0 * 300;
-            double breachPenalty = breachedPasswordsCount * 20;
-            double mfaBonus = mfaEnabled ? 50 : 0;
+            // Passwords
+            int passwordCount = 0;
+            int totalStrengthScore = 0;
+            int duplicateCount = 0;
 
-            double rawScore = uniquenessComponent + behaviorComponent + foundation + mfaBonus - breachPenalty;
-            double finalScore = Math.Clamp(rawScore, 0, 1000);
+            if (entries != null && entries.Any())
+            {
+                var allPasswords = entries
+                    .Where(e => !string.IsNullOrEmpty(e.Password))
+                    .Select(e => e.Password!)
+                    .ToList();
+
+                passwordCount = allPasswords.Count;
+
+                // Count duplicates for uniqueness
+                foreach (var group in allPasswords.GroupBy(p => p))
+                {
+                    if (group.Count() > 1)
+                        duplicateCount += group.Count() - 1;
+                }
+
+                // Sum password strengths
+                foreach (var pwd in allPasswords)
+                    totalStrengthScore += PasswordStrengthService.Evaluate(pwd).Score;
+            }
+
+            // Uniqueness max 200
+            double uniquenessPoints = passwordCount > 0
+                ? Math.Clamp(200 - duplicateCount, 0, 200)
+                : 200;
+
+            // Average password strength max 200
+            double behaviorPoints = passwordCount > 0
+                ? (totalStrengthScore / (double)(passwordCount * 4)) * 200
+                : 200;
+
+            double breachPenalty = breachedPasswordsCount * 20;
+
+            double mfaPoints = mfaEnabled ? 200 : 0;
+
+            double rawScore = foundationPoints + uniquenessPoints + behaviorPoints + mfaPoints - breachPenalty;
+
+            if (!mfaEnabled && rawScore > 800)
+                rawScore = 800;
+
+            double finalScore = Math.Max(rawScore, 0);
+
+            // Percentages for breakdown
+            int averagePercent = passwordCount > 0
+                ? (int)Math.Round((totalStrengthScore / (double)passwordCount / 4.0) * 100, MidpointRounding.AwayFromZero)
+                : 100;
+
+            int reuseRatePercent = passwordCount > 0
+                ? (int)Math.Round(((passwordCount - duplicateCount) / (double)passwordCount) * 100, MidpointRounding.AwayFromZero)
+                : 100;
 
             return new VaultScoreDetails
             {
