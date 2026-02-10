@@ -84,25 +84,24 @@ namespace GoatVaultClient.ViewModels
 
             var result = VaultScoreCalculatorService.CalculateScore(
                 entries,
-                _vaultSessionService.MasterPassword);
+                _vaultSessionService.MasterPassword,
+                mfaEnabled: _vaultSessionService.CurrentUser?.MfaEnabled ?? false,
+                breachedPasswordsCount: 0,
+                breachedEmailsCount: 0);
 
-            VaultScore = result.MasterPercent;
+            VaultScore = result.VaultScore;
 
-            MasterPasswordStrength =
-                $"Master password strength: {result.MasterPercent}% " +
-                $"(score {result.MasterScore}/4, crack time: {result.MasterCrackTime})";
+            MasterPasswordStrength = $"{result.MasterPasswordPercent}%";
 
             if (result.PasswordCount == 0)
             {
-                AveragePasswordsStrength = "Average vault password strength: N/A (no entries)";
+                AveragePasswordsStrength = "N/A";
             }
             else
-               {
-                   AveragePasswordsStrength =
-                       $"Average vault password strength: {result.AveragePercent}% " +
-                       $"(score {result.AverageScore:F1}/4, {result.PasswordCount} passwords)";
-               }
-           }
+            {
+                AveragePasswordsStrength = $"{result.AveragePasswordsPercent}%";
+            }
+        }
 
         [RelayCommand]
         private async Task EnableMfaAsync()

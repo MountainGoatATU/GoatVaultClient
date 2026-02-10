@@ -219,7 +219,13 @@ namespace GoatVaultClient.ViewModels
 
         private void CalculateVaultScore()
         {
-            VaultScore = VaultScoreCalculatorService.CalculateScore(Passwords);
+            var scoreDetails = VaultScoreCalculatorService.CalculateScore(
+                Passwords,
+                null,      // masterPassword
+                false      // mfaEnabled
+            );
+
+            VaultScore = scoreDetails.VaultScore;
         }
 
         #endregion
