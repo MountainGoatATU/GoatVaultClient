@@ -28,17 +28,15 @@
                     </lvc:PieChart>
 
                     <VerticalStackLayout Spacing="4" Margin="0,8,0,0">
-                        <Label Text="{Binding MasterPasswordStrength, StringFormat='Master password: {0}'}" FontSize="12" TextColor="Gray"/>
-                        <Label Text="{Binding AveragePasswordsStrength, StringFormat='Average passwords: {0}'}" FontSize="12" TextColor="Gray"/>
-                        <!--<Label Text="{Binding ReuseRatePercentText, StringFormat='Reuse rate: {0}'}" FontSize="12" TextColor="Gray"/>
-                        <Label Text="{Binding BreachPasswordsText, StringFormat='Breached data: {0}'}" FontSize="12" TextColor="Gray"/>
-                        <Label Text="{Binding MfaStatusText, StringFormat='MFA enabled'}" FontSize="12" TextColor="Gray"/>-->
+                        <Label Text="{Binding MasterPasswordStrength, StringFormat='Master Password: {0}'}"/>
+                        <Label Text="{Binding AveragePasswordsStrength, StringFormat='Average Passwords: {0}'}"/>
+                        <Label Text="{Binding ReuseRateText, StringFormat='Password Reuse: {0}'}"/>
+                        <Label Text="{Binding BreachesText, StringFormat='Breached Passwords: {0}'}"/>
+                        <Label Text="{Binding MfaStatusText, StringFormat='MFA: {0}'}"/>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </controls:Component>
 
-
-            <Label Margin="40" Text="{Binding AveragePasswordsStrength}" FontSize="13" TextColor="Gray" />
 
             <!-- Account Settings Section -->
             <controls:ComponentHeader Title="Account Settings"/>

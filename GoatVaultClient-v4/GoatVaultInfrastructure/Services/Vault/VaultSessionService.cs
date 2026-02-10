@@ -15,6 +15,40 @@ public class VaultSessionService : IVaultSessionService
     public string? MasterPassword { get; set; } = "";
 
     public event Action? VaultEntriesChanged;
+    public event Action? MasterPasswordChanged;
+
+    public List<VaultEntry> VaultEntries => DecryptedVault?.Entries.ToList() ?? new();
+
+    // CRUD methods for vault entries
+    public void AddEntry(VaultEntry entry)
+    {
+        if (DecryptedVault == null) return;
+        DecryptedVault.Entries.Add(entry);
+        VaultEntriesChanged?.Invoke();
+    }
+
+    public void RemoveEntry(VaultEntry entry)
+    {
+        if (DecryptedVault == null) return;
+        DecryptedVault.Entries.Remove(entry);
+        VaultEntriesChanged?.Invoke();
+    }
+
+    public void UpdateEntry(VaultEntry oldEntry, VaultEntry newEntry)
+    {
+        if (DecryptedVault == null) return;
+        var index = DecryptedVault.Entries.IndexOf(oldEntry);
+        if (index >= 0)
+            DecryptedVault.Entries[index] = newEntry;
+        VaultEntriesChanged?.Invoke();
+    }
+
+    // Master password change method
+    public void ChangeMasterPassword(string newPassword)
+    {
+        MasterPassword = newPassword;
+        MasterPasswordChanged?.Invoke();
+    }
 
     public void Lock()
     {
@@ -26,8 +60,6 @@ public class VaultSessionService : IVaultSessionService
         GC.Collect();
     }
 
-    public void RaiseVaultEntriesChanged()
-    {
-        VaultEntriesChanged?.Invoke();
-    }
+    public void RaiseVaultEntriesChanged() => VaultEntriesChanged?.Invoke();
+    public void RaiseMasterPasswordChanged() => MasterPasswordChanged?.Invoke();
 }

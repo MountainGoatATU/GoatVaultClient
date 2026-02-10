@@ -14,10 +14,14 @@ namespace GoatVaultClient.ViewModels
     public partial class UserPageViewModel : BaseViewModel
     {
         [ObservableProperty] private string email;
-        [ObservableProperty] private double vaultScore;
         [ObservableProperty] private bool mfaEnabled;
         [ObservableProperty] private string? mfaSecret;
         [ObservableProperty] private string? mfaQrCodeUrl;
+
+        [ObservableProperty] private double vaultScore;
+        [ObservableProperty] private string? breachesText;
+        [ObservableProperty] private string? mfaStatusText;
+        [ObservableProperty] private string? reuseRateText;
         [ObservableProperty] private string? masterPasswordStrength;
         [ObservableProperty] private string? averagePasswordsStrength;
         [ObservableProperty] private bool goatEnabled = true;
@@ -47,8 +51,8 @@ namespace GoatVaultClient.ViewModels
             _configuration = configuration;
             _goatTipsService = goatTipsService;
 
-            // Subscribe to vault entries changes
-            _vaultSessionService.VaultEntriesChanged += OnVaultEntriesChanged;
+            _vaultSessionService.VaultEntriesChanged += RefreshVaultScore;
+            _vaultSessionService.MasterPasswordChanged += RefreshVaultScore;
 
             GoatEnabled = _goatTipsService.IsGoatEnabled;
             _goatTipsService.SetEnabled(GoatEnabled);
@@ -62,9 +66,27 @@ namespace GoatVaultClient.ViewModels
             RefreshVaultScore();
         }
 
-        private void OnVaultEntriesChanged()
+        [RelayCommand]
+        public void RefreshVaultScore()
         {
-            RefreshVaultScore();
+            var user = _vaultSessionService.CurrentUser;
+            if (user == null)
+                return;
+
+            // Breached passwords count is currently not tracked, so passing 0
+            var score = VaultScoreCalculatorService.CalculateScore(
+                _vaultSessionService.VaultEntries,
+                _vaultSessionService.MasterPassword,
+                user.MfaEnabled,
+                breachedPasswordsCount: 0
+            );
+
+            VaultScore = score.VaultScore;
+            MasterPasswordStrength = $"{score.MasterPasswordPercent}%";
+            AveragePasswordsStrength = $"{score.AveragePasswordsPercent}%";
+            ReuseRateText = $"{score.ReuseRatePercent}%";
+            BreachesText = $"{score.BreachesCount}";
+            MfaStatusText = score.MfaEnabled ? "Enabled" : "Disabled";
         }
 
         [RelayCommand]
@@ -73,34 +95,6 @@ namespace GoatVaultClient.ViewModels
             // Persisted via GoatTipsService to device storage.
             GoatEnabled = !GoatEnabled;
             _goatTipsService.SetEnabled(GoatEnabled);
-        }
-
-        // Single point to recalc all vault-related scores
-        [RelayCommand]
-        private void RefreshVaultScore()
-        {
-            var vault = _vaultSessionService.DecryptedVault;
-            var entries = vault?.Entries;
-
-            var result = VaultScoreCalculatorService.CalculateScore(
-                entries,
-                _vaultSessionService.MasterPassword,
-                mfaEnabled: _vaultSessionService.CurrentUser?.MfaEnabled ?? false,
-                breachedPasswordsCount: 0,
-                breachedEmailsCount: 0);
-
-            VaultScore = result.VaultScore;
-
-            MasterPasswordStrength = $"{result.MasterPasswordPercent}%";
-
-            if (result.PasswordCount == 0)
-            {
-                AveragePasswordsStrength = "N/A";
-            }
-            else
-            {
-                AveragePasswordsStrength = $"{result.AveragePasswordsPercent}%";
-            }
         }
 
         [RelayCommand]
