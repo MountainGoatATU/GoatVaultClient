@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace GoatVaultClient.Services;
 
@@ -37,18 +37,13 @@ public class ConnectivityService : IDisposable
     /// <summary>
     /// Check if there is internet connectivity
     /// </summary>
-    /// TODO: No await operators
-    public async Task<bool> CheckConnectivityAsync()
+    public bool CheckConnectivity()
     {
         try
         {
             var networkAccess = Connectivity.Current.NetworkAccess;
             IsConnected = networkAccess == NetworkAccess.Internet;
-
-            // Optional: Perform actual network test
             return IsConnected;
-            // You could add a ping test here to verify actual internet access
-            // vs just network connection
         }
         catch (Exception ex)
         {
