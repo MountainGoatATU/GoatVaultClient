@@ -1,67 +1,89 @@
-﻿using GoatVaultClient.DB;
-using GoatVaultClient.Helpers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using GoatVaultInfrastructure.Services.Vault;
 
-namespace GoatVaultClient
+namespace GoatVaultClient;
+
+public partial class App : Application
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+    private readonly VaultSessionService _sessionService;
+    private readonly VaultService _vaultService;
+
+    public App(VaultSessionService sessionService, VaultService vaultService)
     {
-        public static IServiceProvider Services { get; private set; }
+        InitializeComponent();
+        MainPage = new AppShell();
+        _sessionService = sessionService;
+        _vaultService = vaultService;
+    }
 
-        protected override void OnStartup(StartupEventArgs e)
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        var window = base.CreateWindow(activationState);
+        window.Stopped += Window_Stopped;
+        return window;
+    }
+
+    private void Window_Stopped(object? sender, EventArgs e)
+    {
+        // This event fires before service disposal
+        try
         {
-            var services = new ServiceCollection();
+            System.Diagnostics.Debug.WriteLine("App stopped - attempting to save vault...");
 
-            // SQLite relative path to app folder
-            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "localvault.db");
-            string connectionString = $"Data Source={dbPath}";
-
-            // Register DbContext
-            services.AddDbContext<VaultDB>(options =>
-                options.UseSqlite(connectionString));
-
-            // Register HttpService with HttpClientFactory
-            services.AddHttpClient<HttpService>(client =>
+            if (_sessionService.DecryptedVault == null ||
+                string.IsNullOrEmpty(_sessionService.MasterPassword) ||
+                _sessionService.CurrentUser == null)
             {
-                client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-                client.Timeout = TimeSpan.FromSeconds(10);
-                client.DefaultRequestHeaders.UserAgent.ParseAdd(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
-                client.DefaultRequestHeaders.Add("X-API-KEY", "PB7KTN_edJEz5oUdhTRpaz2T_-SpZj_C5ZvD2AWPcPc");
-            });
-
-            // Register services
-            services.AddSingleton<VaultService>();
-            services.AddSingleton<UserService>();
-
-            // Register MainWindow
-            services.AddTransient<MainWindow>();
-
-            Services = services.BuildServiceProvider();
-
-            // Ensure database is created
-            using (var scope = Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<VaultDB>();
-                db.Database.EnsureCreated(); // creates DB and tables if they don't exist
+                return;
             }
 
-            var mainWindow = Services.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+            // Use synchronous save - we're in a non-async event handler
+            var saveTask = _vaultService.SaveVaultAsync(
+                _sessionService.CurrentUser,
+                _sessionService.MasterPassword,
+                _sessionService.DecryptedVault);
+
+            // Wait with timeout
+            System.Diagnostics.Debug.WriteLine(saveTask.Wait(TimeSpan.FromSeconds(3))
+                ? "Vault saved successfully on stop"
+                : "Vault save timed out");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error saving vault on stop: {ex}");
         }
     }
+
+    protected override void OnSleep()
+    {
+        // Save when app goes to background
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("App going to sleep - saving vault...");
+
+            if (_sessionService.DecryptedVault != null &&
+                !string.IsNullOrEmpty(_sessionService.MasterPassword) &&
+                _sessionService.CurrentUser != null)
+            {
+                var saveTask = _vaultService.SaveVaultAsync(
+                    _sessionService.CurrentUser,
+                    _sessionService.MasterPassword,
+                    _sessionService.DecryptedVault);
+
+                saveTask.Wait(TimeSpan.FromSeconds(3));
+                System.Diagnostics.Debug.WriteLine("Vault saved on sleep");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error saving on sleep: {ex}");
+        }
+
+        _sessionService.Lock();
+    }
+
+    // protected override Window CreateWindow(IActivationState? activationState)
+    // {
+    //     var introductionPage = _services.GetRequiredService<IntroductionPage>();
+    //     return new Window(new NavigationPage(introductionPage));
+    // }
 }
