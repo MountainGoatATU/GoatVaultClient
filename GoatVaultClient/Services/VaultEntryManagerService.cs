@@ -48,11 +48,7 @@ public class VaultEntryManagerService(
         // Notify that entries changed
         vaultSessionService.RaiseVaultEntriesChanged();
 
-        // Save the changes
-        if (syncingService.HasAutoSave)
-        {
-            await syncingService.Save();
-        }
+        await syncingService.AutoSaveIfEnabled();
 
         return true;
     }
@@ -110,11 +106,7 @@ public class VaultEntryManagerService(
         // Notify that entries changed
         vaultSessionService.RaiseVaultEntriesChanged();
 
-        // Save the changes
-        if (syncingService.HasAutoSave)
-        {
-            await syncingService.Save();
-        }
+        await syncingService.AutoSaveIfEnabled();
 
         return true;
     }
@@ -142,11 +134,7 @@ public class VaultEntryManagerService(
         // Notify that entries changed
         vaultSessionService.RaiseVaultEntriesChanged();
 
-        // Save the changes
-        if (syncingService.HasAutoSave)
-        {
-            await syncingService.Save();
-        }
+        await syncingService.AutoSaveIfEnabled();
 
         return true;
     }
