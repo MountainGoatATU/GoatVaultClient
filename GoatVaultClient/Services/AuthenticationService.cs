@@ -257,7 +257,7 @@ namespace GoatVaultClient.Services
 
             try
             {
-                logger?.LogInformation("Registration attempt for {Email}", email);
+                logger?.LogInformation("Registration attempt.");
                 // Use GetSection and check for null or empty value to avoid CS8600
                 var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
                 var url = urlSection.Value;
@@ -339,7 +339,7 @@ namespace GoatVaultClient.Services
             }
             catch (HttpRequestException)
             {
-                logger?.LogError("Registration connection error for {Email}", email);
+                logger?.LogError("Registration connection error.");
                 // Network-related errors
                 await Shell.Current.DisplayAlertAsync(
                     "Connection Error",
@@ -348,7 +348,7 @@ namespace GoatVaultClient.Services
             }
             catch (TaskCanceledException)
             {
-                logger?.LogWarning("Registration timed out for {Email}", email);
+                logger?.LogWarning("Registration timed out.");
                 // Timeout errors
                 await Shell.Current.DisplayAlertAsync(
                     "Timeout",
@@ -357,7 +357,7 @@ namespace GoatVaultClient.Services
             }
             catch (Exception ex)
             {
-                logger?.LogError(ex, "Unexpected error during registration for {Email}", email);
+                logger?.LogError(ex, "Unexpected error during registration.");
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
         }
