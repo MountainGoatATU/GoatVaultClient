@@ -1,23 +1,21 @@
 using GoatVaultClient.Controls.Popups;
-using GoatVaultClient.Pages;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Mopups.Services;
 
 namespace GoatVaultClient.Services
 {
     public interface IAuthenticationService
     {
-        public Task<bool> LoginAsync(string email, string password, Func<Task<string?>> mfaCodeProvider);
-        public Task<bool> LoginOfflineAsync(string email, string password, DbModel selectedAccount);
-        public Task RegisterAsync(string email, string password, string confirmPassword);
+        public Task<bool> LoginAsync(string? email, string? password, Func<Task<string?>> mfaCodeProvider);
+        public Task<bool> LoginOfflineAsync(string? email, string? password, DbModel? selectedAccount);
+        public Task RegisterAsync(string email, string? password, string? confirmPassword);
         public Task LogoutAsync();
-        public Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);
-        public Task<bool> ChangeEmailAsync();
         public Task<List<DbModel>> GetAllLocalAccountsAsync();
         public Task RemoveLocalAccountAsync(DbModel account);
     }
@@ -28,10 +26,11 @@ namespace GoatVaultClient.Services
         HttpService httpService,
         ConnectivityService connectivityService,
         VaultSessionService vaultSessionService,
-        ISyncingService syncingService
+        ISyncingService syncingService,
+        ILogger<AuthenticationService>? logger = null
         ) : IAuthenticationService
     {
-        public async Task<bool> LoginAsync(string email, string password, Func<Task<string?>> mfaCodeProvider)
+        public async Task<bool> LoginAsync(string? email, string? password, Func<Task<string?>> mfaCodeProvider)
         {
             // Validation
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -41,6 +40,7 @@ namespace GoatVaultClient.Services
             }
             try
             {
+                logger?.LogInformation("Login attempt initiated.");
                 // Use GetSection and check for null or empty value to avoid CS8600
                 var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
                 var url = urlSection.Value;
@@ -51,7 +51,7 @@ namespace GoatVaultClient.Services
                 }
 
                 // Double-check connectivity before network call
-                var hasConnection = await connectivityService.CheckConnectivityAsync();
+                var hasConnection = connectivityService.CheckConnectivity();
                 if (!hasConnection)
                 {
                     await Shell.Current.DisplayAlertAsync(
@@ -124,26 +124,32 @@ namespace GoatVaultClient.Services
                 // Decrypt & Store Session
                 vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, password);
 
+                logger?.LogInformation("Login successful for user {UserId}", vaultSessionService.CurrentUser.Id);
                 return true;
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
+                logger?.LogWarning("Login failed: unauthorized");
                 await Shell.Current.DisplayAlertAsync("Login Failed", "Invalid email or password (or MFA code). Please try again.", "OK");
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
+                logger?.LogWarning("Login failed: account not found");
                 await Shell.Current.DisplayAlertAsync("Account Not Found", "No account found with this email address.", "OK");
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
+                logger?.LogWarning("Login failed: bad request");
                 await Shell.Current.DisplayAlertAsync("Invalid Request", "Please check your email and password.", "OK");
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
+                logger?.LogWarning("Login failed: conflict");
                 await Shell.Current.DisplayAlertAsync("Error", "This email is already registered.", "OK");
             }
             catch (HttpRequestException httpEx)
             {
+                logger?.LogError(httpEx, "Login connection error");
                 // Network-related errors
                 await Shell.Current.DisplayAlertAsync(
                     "Connection Error",
@@ -152,6 +158,7 @@ namespace GoatVaultClient.Services
             }
             catch (TaskCanceledException)
             {
+                logger?.LogWarning("Login timed out");
                 // Timeout errors
                 await Shell.Current.DisplayAlertAsync(
                     "Timeout",
@@ -160,6 +167,7 @@ namespace GoatVaultClient.Services
             }
             catch (InvalidOperationException ex) when (ex.Message.Contains("decrypt"))
             {
+                logger?.LogError(ex, "Vault decryption failed during login");
                 await Shell.Current.DisplayAlertAsync(
                     "Decryption Error",
                     "Unable to decrypt your vault. This may indicate a data corruption issue.",
@@ -167,12 +175,13 @@ namespace GoatVaultClient.Services
             }
             catch (Exception ex)
             {
+                logger?.LogError(ex, "Unexpected error during login");
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
 
             return false;
         }
-        public async Task<bool> LoginOfflineAsync(string email, string password, DbModel? selectedAccount)
+        public async Task<bool> LoginOfflineAsync(string? email, string? password, DbModel? selectedAccount)
         {
             // Validation
             if (selectedAccount == null)
@@ -189,6 +198,8 @@ namespace GoatVaultClient.Services
 
             try
             {
+                logger?.LogInformation("Offline login attempt for account {AccountId}", selectedAccount.Id);
+
                 // 1. Load the user from local database
                 var dbUser = await vaultService.LoadUserFromLocalAsync(selectedAccount.Id);
 
@@ -219,6 +230,7 @@ namespace GoatVaultClient.Services
             catch (Exception ex)
             {
                 // Decryption failed - wrong password
+                logger?.LogWarning(ex, "Offline login failed for account {AccountId} — likely wrong password", selectedAccount.Id);
                 await Shell.Current.DisplayAlertAsync(
                     "Error",
                     "Incorrect password for this account.",
@@ -227,7 +239,7 @@ namespace GoatVaultClient.Services
             }
             return true;
         }
-        public async Task RegisterAsync(string email, string password, string confirmPassword)
+        public async Task RegisterAsync(string email, string? password, string? confirmPassword)
         {
             // Validation
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -245,6 +257,7 @@ namespace GoatVaultClient.Services
 
             try
             {
+                logger?.LogInformation("Registration attempt.");
                 // Use GetSection and check for null or empty value to avoid CS8600
                 var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
                 var url = urlSection.Value;
@@ -254,7 +267,7 @@ namespace GoatVaultClient.Services
                 }
 
                 // Check connectivity before network call
-                var hasConnection = await connectivityService.CheckConnectivityAsync();
+                var hasConnection = connectivityService.CheckConnectivity();
                 if (!hasConnection)
                 {
                     await Shell.Current.DisplayAlertAsync(
@@ -321,9 +334,12 @@ namespace GoatVaultClient.Services
 
                 // Decrypt & Store Session in RAM
                 vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, password);
+
+                logger?.LogInformation("Registration successful for user {UserId}", vaultSessionService.CurrentUser.Id);
             }
             catch (HttpRequestException)
             {
+                logger?.LogError("Registration connection error.");
                 // Network-related errors
                 await Shell.Current.DisplayAlertAsync(
                     "Connection Error",
@@ -332,6 +348,7 @@ namespace GoatVaultClient.Services
             }
             catch (TaskCanceledException)
             {
+                logger?.LogWarning("Registration timed out.");
                 // Timeout errors
                 await Shell.Current.DisplayAlertAsync(
                     "Timeout",
@@ -340,6 +357,7 @@ namespace GoatVaultClient.Services
             }
             catch (Exception ex)
             {
+                logger?.LogError(ex, "Unexpected error during registration.");
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
         }
@@ -347,6 +365,7 @@ namespace GoatVaultClient.Services
         {
             try
             {
+                logger?.LogInformation("Logout initiated");
 
                 // Confirm logout action
                 var confirmPopup = new PromptPopup(
@@ -366,13 +385,11 @@ namespace GoatVaultClient.Services
                 // Show pending popup while we process logout
                 await MopupService.Instance.PushAsync(new PendingPopup("Logging out..."));
 
-                System.Diagnostics.Debug.WriteLine("Logging out - saving vault...");
-
                 // Save vault before logout
                 await syncingService.Save();
 
                 // Clear auth token
-                authTokenService.SetToken(null);
+                authTokenService.SetToken(string.Empty);
 
                 // Lock session
                 vaultSessionService.Lock();
@@ -386,25 +403,17 @@ namespace GoatVaultClient.Services
                 // Navigate to login page
                 await Shell.Current.GoToAsync("//login");
 
-                System.Diagnostics.Debug.WriteLine("Logout complete");
+                logger?.LogInformation("Logout completed successfully");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error during logout: {ex}");
+                logger?.LogError(ex, "Logout failed");
                 await MopupService.Instance.PushAsync(new PromptPopup(
                     title: "Error",
                     body: "Failed to logout properly. Please try again.",
                     aText: "OK"
                 ));
             }
-        }
-        public async Task<bool> ChangePasswordAsync(string oldPassword, string newPassword)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<bool> ChangeEmailAsync()
-        {
-            throw new NotImplementedException();
         }
         public async Task<List<DbModel>> GetAllLocalAccountsAsync()
         {
@@ -413,10 +422,6 @@ namespace GoatVaultClient.Services
         }
         public async Task RemoveLocalAccountAsync(DbModel account)
         {
-            // Validation
-            if (account == null)
-                return;
-
             // Confirm deletion
             var confirmPopup = new PromptPopup(
                     title: "Remove Local Account",
@@ -427,7 +432,6 @@ namespace GoatVaultClient.Services
             await MopupService.Instance.PushAsync(confirmPopup);
             var confirm = await confirmPopup.WaitForScan();
 
-            // 
             if (!confirm)
                 return;
 

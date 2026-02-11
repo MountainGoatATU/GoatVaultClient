@@ -12,6 +12,13 @@ public partial class IncorrectPasswordPopup : PopupPage
 
     private async void OnOkClicked(object sender, EventArgs e)
     {
-        await MopupService.Instance.PopAsync();
+        try
+        {
+            await MopupService.Instance.PopAsync();
+        }
+        catch
+        {
+            throw; // TODO handle exception
+        }
     }
 }

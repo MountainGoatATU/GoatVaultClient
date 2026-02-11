@@ -5,7 +5,6 @@ using GoatVaultCore.Models.Vault;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.Vault;
 using System.Collections.ObjectModel;
-using GoatVaultCore.Services.Secrets;
 using GoatVaultClient.Services;
 
 namespace GoatVaultClient.ViewModels
@@ -13,36 +12,33 @@ namespace GoatVaultClient.ViewModels
     public partial class MainPageViewModel : BaseViewModel
     {
         #region Properties
-        /*
-         * Observables
-         */
+        // Observables
         [ObservableProperty] private ObservableCollection<CategoryItem> categories = [];
         [ObservableProperty] private ObservableCollection<VaultEntry> passwords = [];
-        [ObservableProperty] private CategoryItem? selectedCategory = null;
-        [ObservableProperty] private VaultEntry? selectedEntry = null;
-        [ObservableProperty] private string? searchText = null;
+        [ObservableProperty] private CategoryItem? selectedCategory;
+        [ObservableProperty] private VaultEntry? selectedEntry;
+        [ObservableProperty] private string? searchText;
+        [ObservableProperty] private bool _isPasswordVisible;
+        [ObservableProperty] private double vaultScore;
+        [ObservableProperty] private string goatComment = string.Empty;
+        [ObservableProperty] private bool isGoatCommentVisible;
+        [ObservableProperty] private bool _isSyncing;
+
+        // UI Properties for the Sync Status Component
         private bool _categoriesSortAsc = true;
         private bool _passwordsSortAsc = true;
         private List<VaultEntry> _allVaultEntries = [];
         private List<CategoryItem> _allVaultCategories = [];
         private bool CanSync() => !IsBusy;
-        [ObservableProperty] private bool _isPasswordVisible = false;
-        [ObservableProperty] private double vaultScore;
-        [ObservableProperty] private string goatComment = "";
-        [ObservableProperty] private bool isGoatCommentVisible = false;
-
-        // UI Properties for the Sync Status Component
-        [ObservableProperty] private bool _isSyncing = false;
 
         // Dependency Injection
         private readonly VaultSessionService _vaultSessionService;
         private readonly FakeDataSource _fakeDataSource;
         private readonly ISyncingService _syncingService;
-        private readonly GoatTipsService _goatTipsService;
         private readonly TotpManagerService _totpManagerService;
         private readonly CategoryManagerService _categoryManagerService;
         private readonly VaultEntryManagerService _vaultEntryManagerService;
-        public GoatTipsService GoatTipsService => _goatTipsService;
+        public GoatTipsService GoatTipsService { get; }
 
         #endregion
         public MainPageViewModel(
@@ -58,43 +54,35 @@ namespace GoatVaultClient.ViewModels
             _vaultSessionService = vaultSessionService;
             _fakeDataSource = fakeDataSource;
             _syncingService = syncingService;
-            _goatTipsService = goatTipsService;
+            GoatTipsService = goatTipsService;
             _totpManagerService = totpManagerService;
             _categoryManagerService = categoryManagerService;
             _vaultEntryManagerService = vaultEntryManagerService;
 
             LoadVaultData();
-
             StartRandomGoatComments();
         }
 
-        partial void OnSelectedEntryChanged(VaultEntry? value)
-        {
-            // Update TOTP immediately when entry is selected
-            _totpManagerService.TrackEntry(value);
-        }
+        partial void OnSelectedEntryChanged(VaultEntry? value) => _totpManagerService.TrackEntry(value);
 
         [RelayCommand]
-        private async Task CopyTotpCode()
-        {
-            await _totpManagerService.CopyTotpCodeAsync(SelectedEntry);
-        }
+        private async Task CopyTotpCode() => await _totpManagerService.CopyTotpCodeAsync(SelectedEntry);
 
         public void StartRandomGoatComments()
         {
-            _goatTipsService.StartTips();
+            GoatTipsService.StartTips();
 
-            _goatTipsService.PropertyChanged += (s, e) =>
+            GoatTipsService.PropertyChanged += (s, e) =>
             {
                 switch (e.PropertyName)
                 {
                     case nameof(GoatTipsService.CurrentTip):
-                        GoatComment = _goatTipsService.CurrentTip;
+                        GoatComment = GoatTipsService.CurrentTip;
                         break;
 
                     case nameof(GoatTipsService.IsTipVisible):
                     case nameof(GoatTipsService.IsGoatEnabled):
-                        var show = _goatTipsService.IsGoatEnabled && _goatTipsService.IsTipVisible;
+                        var show = GoatTipsService is { IsGoatEnabled: true, IsTipVisible: true };
                         IsGoatCommentVisible = show;
                         if (!show)
                             GoatComment = string.Empty;
@@ -239,9 +227,10 @@ namespace GoatVaultClient.ViewModels
          */
 
         [RelayCommand]
-        private async Task SortCategories()
+        private Task SortCategories()
         {
             PresortCategories();
+            return Task.CompletedTask;
         }
 
         [RelayCommand]
@@ -279,9 +268,10 @@ namespace GoatVaultClient.ViewModels
         }
 
         [RelayCommand]
-        private async Task SortEntries()
+        private Task SortEntries()
         {
             PresortEntries();
+            return Task.CompletedTask;
         }
 
         // TODO: Unused method parameter

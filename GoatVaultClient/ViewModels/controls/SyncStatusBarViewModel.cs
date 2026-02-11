@@ -15,7 +15,7 @@ namespace GoatVaultClient.ViewModels.controls
     public class SyncStatusBarViewModel : INotifyPropertyChanged
     {
         private readonly ISyncingService _syncingService;
-        private System.Threading.Timer _updateTimer;
+        private readonly Timer _updateTimer;
 
         public SyncStatusBarViewModel(ISyncingService syncingService)
         {
@@ -28,7 +28,17 @@ namespace GoatVaultClient.ViewModels.controls
             _syncingService.SyncFailed += OnSyncFailed;
 
             // Initialize commands
-            SyncCommand = new Command(async () => await ExecuteSyncCommand(), CanExecuteSync);
+            SyncCommand = new Command(async void () =>
+            {
+                try
+                {
+                    await ExecuteSyncCommand();
+                }
+                catch (Exception e)
+                {
+                    throw; // TODO handle exception
+                }
+            }, CanExecuteSync);
 
             // Start a timer to update the "Last synced" time display every minute
             _updateTimer = new System.Threading.Timer(
@@ -42,10 +52,7 @@ namespace GoatVaultClient.ViewModels.controls
 
         public ICommand SyncCommand { get; }
 
-        private bool CanExecuteSync()
-        {
-            return !_syncingService.IsSyncing;
-        }
+        private bool CanExecuteSync() => !_syncingService.IsSyncing;
 
         private async Task ExecuteSyncCommand()
         {

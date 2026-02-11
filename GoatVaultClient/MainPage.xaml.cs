@@ -1,6 +1,7 @@
-﻿using GoatVaultClient.Services;
+using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
 
 namespace GoatVaultClient
@@ -8,18 +9,19 @@ namespace GoatVaultClient
     public partial class MainPage : ContentPage
     {
         private readonly ISyncingService _syncingService;
-        private readonly SyncStatusBarViewModel _syncStatusBarViewModel;
+        private readonly ILogger<MainPage>? _logger;
 
 
         // Constants for configuration
-        private const int SYNC_INTERVAL_MINUTES = 5;
+        private const int SyncIntervalMinutes = 5;
         public MainPage(
             MainPageViewModel viewModel,
             ISyncingService syncingService,
-            SyncStatusBarViewModel syncStatusBarViewModel)
+            SyncStatusBarViewModel syncStatusBarViewModel,
+            ILogger<MainPage>? logger = null)
         {
             _syncingService = syncingService;
-            _syncStatusBarViewModel = syncStatusBarViewModel;
+            _logger = logger;
 
             InitializeComponent();
 
@@ -27,63 +29,82 @@ namespace GoatVaultClient
             BindingContext = viewModel;
 
             // set sync status bar viewmodel
-            SyncStatusBar.BindingContext = _syncStatusBarViewModel;
+            SyncStatusBar.BindingContext = syncStatusBarViewModel;
 
             GoatBubbleStack.Opacity = 0; // Start hidden
-            void ApplyVisibility()
-            {
-                var visible = viewModel.IsGoatCommentVisible;
-                GoatBubbleStack.Opacity = visible ? 1 : 0;
-                GoatMascot.Opacity = visible ? 1 : 0;
-            }
 
             // Start hidden until first tip shows
             ApplyVisibility();
 
             viewModel.PropertyChanged += async (s, e) =>
             {
-                if (e.PropertyName == nameof(MainPageViewModel.IsGoatCommentVisible))
+                if (e.PropertyName != nameof(MainPageViewModel.IsGoatCommentVisible))
+                    return;
+
+                if (BindingContext is not MainPageViewModel vm)
+                    return;
+
+                // Fade in and out 0.3 s
+                if (vm.IsGoatCommentVisible)
                 {
-                    if (BindingContext is MainPageViewModel vm)
-                    {
-                        // Fade in and out 0.3 s
-                        if (vm.IsGoatCommentVisible)
-                        {
-                            await GoatBubbleStack.FadeToAsync(1, 300);
-                            await GoatMascot.FadeToAsync(1, 300);
-                        }
-                        else
-                        {
-                            await GoatBubbleStack.FadeToAsync(0, 300);
-                            await GoatMascot.FadeToAsync(0, 300);
-                        }
-                    }
+                    await GoatBubbleStack.FadeToAsync(1, 300);
+                    await GoatMascot.FadeToAsync(1, 300);
+                }
+                else
+                {
+                    await GoatBubbleStack.FadeToAsync(0, 300);
+                    await GoatMascot.FadeToAsync(0, 300);
                 }
             };
+            return;
+
+            void ApplyVisibility()
+            {
+                var visible = viewModel.IsGoatCommentVisible;
+                GoatBubbleStack.Opacity = visible ? 1 : 0;
+                GoatMascot.Opacity = visible ? 1 : 0;
+            }
         }
 
         protected override async void OnAppearing()
         {
-            base.OnAppearing();
-
-            // Enable flyout navigation
-            ((AppShell)Shell.Current).EnableFlyout();
-
-            // Perform initial sync
-            await _syncingService.Sync();
-
-            // Start periodic background sync (every 5 minutes)
-            _syncingService.StartPeriodicSync(TimeSpan.FromMinutes(SYNC_INTERVAL_MINUTES));
-
-            // Safely cast the BindingContext and call the method
-            if (BindingContext is MainPageViewModel vm)
+            try
             {
+                base.OnAppearing();
+
+                // Enable flyout navigation
+                ((AppShell)Shell.Current).EnableFlyout();
+
+                // Fire-and-forget sync so the page renders immediately (Bug 2 fix)
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _syncingService.Sync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, "Background sync failed during MainPage.OnAppearing");
+                    }
+                });
+
+                // Start periodic background sync (every 5 minutes)
+                _syncingService.StartPeriodicSync(TimeSpan.FromMinutes(SyncIntervalMinutes));
+
+                // Safely cast the BindingContext and call the method
+                if (BindingContext is not MainPageViewModel vm)
+                    return;
+
                 vm.LoadVaultData();
                 vm.StartRandomGoatComments();
             }
+            catch (Exception e)
+            {
+                _logger?.LogError(e, "Unhandled error in MainPage.OnAppearing");
+            }
         }
 
-        protected override async void OnDisappearing()
+        protected override void OnDisappearing()
         {
             base.OnDisappearing();
 

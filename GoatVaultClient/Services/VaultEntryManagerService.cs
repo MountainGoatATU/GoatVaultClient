@@ -48,11 +48,7 @@ public class VaultEntryManagerService(
         // Notify that entries changed
         vaultSessionService.RaiseVaultEntriesChanged();
 
-        // Save the changes
-        if (syncingService.HasAutoSave)
-        {
-            await syncingService.Save();
-        }
+        await syncingService.AutoSaveIfEnabled();
 
         return true;
     }
@@ -110,11 +106,7 @@ public class VaultEntryManagerService(
         // Notify that entries changed
         vaultSessionService.RaiseVaultEntriesChanged();
 
-        // Save the changes
-        if (syncingService.HasAutoSave)
-        {
-            await syncingService.Save();
-        }
+        await syncingService.AutoSaveIfEnabled();
 
         return true;
     }
@@ -135,18 +127,14 @@ public class VaultEntryManagerService(
         // Act based on the response
         if (!response)
             return false;
-        
-        //Remove from the list
+
+        // Remove from the list
         vaultSessionService.DecryptedVault?.Entries.Remove(target);
 
         // Notify that entries changed
         vaultSessionService.RaiseVaultEntriesChanged();
 
-        // Save the changes
-        if (syncingService.HasAutoSave)
-        {
-            await syncingService.Save();
-        }
+        await syncingService.AutoSaveIfEnabled();
 
         return true;
     }

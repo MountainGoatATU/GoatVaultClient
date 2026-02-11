@@ -1,4 +1,5 @@
-﻿using GoatVaultInfrastructure.Services.Vault;
+using GoatVaultInfrastructure.Services.Vault;
+using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient;
 
@@ -6,19 +7,28 @@ public partial class App : Application
 {
     private readonly VaultSessionService _sessionService;
     private readonly VaultService _vaultService;
+    private readonly ILogger<App> _logger;
 
-    public App(VaultSessionService sessionService, VaultService vaultService)
+    public App(VaultSessionService sessionService, VaultService vaultService, ILogger<App> logger)
     {
         InitializeComponent();
         MainPage = new AppShell();
         _sessionService = sessionService;
         _vaultService = vaultService;
+        _logger = logger;
+
+        // Wire up global exception handlers
+        AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+
+        _logger.LogInformation("Application started");
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
         var window = base.CreateWindow(activationState);
         window.Stopped += Window_Stopped;
+        window.Resumed += (_, _) => _logger.LogInformation("Application resumed");
         return window;
     }
 
@@ -27,12 +37,13 @@ public partial class App : Application
         // This event fires before service disposal
         try
         {
-            System.Diagnostics.Debug.WriteLine("App stopped - attempting to save vault...");
+            _logger.LogInformation("App stopped — attempting to save vault");
 
             if (_sessionService.DecryptedVault == null ||
                 string.IsNullOrEmpty(_sessionService.MasterPassword) ||
                 _sessionService.CurrentUser == null)
             {
+                _logger.LogDebug("No active vault session to save on stop");
                 return;
             }
 
@@ -43,13 +54,18 @@ public partial class App : Application
                 _sessionService.DecryptedVault);
 
             // Wait with timeout
-            System.Diagnostics.Debug.WriteLine(saveTask.Wait(TimeSpan.FromSeconds(3))
-                ? "Vault saved successfully on stop"
-                : "Vault save timed out");
+            if (saveTask.Wait(TimeSpan.FromSeconds(3)))
+            {
+                _logger.LogInformation("Vault saved successfully on stop");
+            }
+            else
+            {
+                _logger.LogWarning("Vault save timed out on stop (3s)");
+            }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error saving vault on stop: {ex}");
+            _logger.LogError(ex, "Error saving vault on stop");
         }
     }
 
@@ -58,7 +74,7 @@ public partial class App : Application
         // Save when app goes to background
         try
         {
-            System.Diagnostics.Debug.WriteLine("App going to sleep - saving vault...");
+            _logger.LogInformation("App going to sleep — saving vault");
 
             if (_sessionService.DecryptedVault != null &&
                 !string.IsNullOrEmpty(_sessionService.MasterPassword) &&
@@ -70,20 +86,41 @@ public partial class App : Application
                     _sessionService.DecryptedVault);
 
                 saveTask.Wait(TimeSpan.FromSeconds(3));
-                System.Diagnostics.Debug.WriteLine("Vault saved on sleep");
+                _logger.LogInformation("Vault saved on sleep");
+            }
+            else
+            {
+                _logger.LogDebug("No active vault session to save on sleep");
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error saving on sleep: {ex}");
+            _logger.LogError(ex, "Error saving vault on sleep");
         }
 
         _sessionService.Lock();
     }
 
-    // protected override Window CreateWindow(IActivationState? activationState)
-    // {
-    //     var introductionPage = _services.GetRequiredService<IntroductionPage>();
-    //     return new Window(new NavigationPage(introductionPage));
-    // }
+    #region Global Exception Handlers
+
+    private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        if (e.ExceptionObject is Exception ex)
+        {
+            _logger.LogCritical(ex, "Unhandled AppDomain exception (IsTerminating: {IsTerminating})", e.IsTerminating);
+        }
+        else
+        {
+            _logger.LogCritical("Unhandled AppDomain exception of type {Type} (IsTerminating: {IsTerminating})",
+                e.ExceptionObject?.GetType().Name ?? "unknown", e.IsTerminating);
+        }
+    }
+
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        _logger.LogError(e.Exception, "Unobserved task exception");
+        e.SetObserved(); // Prevent app crash
+    }
+
+    #endregion
 }

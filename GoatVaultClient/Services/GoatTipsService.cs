@@ -31,11 +31,11 @@ public partial class GoatTipsService : ObservableObject
         IsGoatEnabled = enabled;
         Preferences.Default.Set(GoatEnabledKey, enabled);
 
-        if (!enabled)
-        {
-            IsTipVisible = false;
-            CurrentTip = string.Empty;
-        }
+        if (enabled)
+            return;
+
+        IsTipVisible = false;
+        CurrentTip = string.Empty;
     }
 
     public void ApplyEnabledState(bool enabled) => SetEnabled(enabled);
@@ -98,13 +98,14 @@ public partial class GoatTipsService : ObservableObject
         // Build list of all current problems
         var problems = new List<Func<string>>();
 
-        if (score.MasterPasswordPercent < 40)
+        switch (score.MasterPasswordPercent)
         {
-            problems.Add(GetVeryWeakMasterTip);
-        }
-        else if (score.MasterPasswordPercent < 70)
-        {
-            problems.Add(GetMediumMasterTip);
+            case < 40:
+                problems.Add(GetVeryWeakMasterTip);
+                break;
+            case < 70:
+                problems.Add(GetMediumMasterTip);
+                break;
         }
 
         if (score.ReuseRatePercent < 70)
@@ -127,13 +128,14 @@ public partial class GoatTipsService : ObservableObject
             problems.Add(GetMfaTip);
         }
 
-        if (score.VaultScore < 400)
+        switch (score.VaultScore)
         {
-            problems.Add(GetLowScoreTip);
-        }
-        else if (score.VaultScore < 700)
-        {
-            problems.Add(GetMidScoreTip);
+            case < 400:
+                problems.Add(GetLowScoreTip);
+                break;
+            case < 700:
+                problems.Add(GetMidScoreTip);
+                break;
         }
 
         // If no problems detected, use high‑score motivational tips

@@ -131,9 +131,9 @@ public class HttpServiceTests
     public async Task GetAsync_WithAuthToken_IncludesAuthorizationHeader()
     {
         // Arrange
-        const string token = "test-jwt-token";
+        // This JWT has an expiration date in year 2099 (exp: 4102444800)
+        const string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZXhwIjo0MTAyNDQ0ODAwfQ.VxUd4rNJk8LrLZjqKWVVJnLJXLlOLp8W1V9FXnJZQqk";
 
-        // Create a real AuthTokenService and set the token
         var authTokenService = new AuthTokenService();
         var jwtUtils = new JwtUtils();
         authTokenService.SetToken(token);

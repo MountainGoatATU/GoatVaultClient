@@ -30,7 +30,5 @@ public class UserService : IUserService
             Email = email,
             Vault = vault,
         };
-
-        // return JsonSerializer.Serialize(userPayload, new JsonSerializerOptions { WriteIndented = true });
     }
 }

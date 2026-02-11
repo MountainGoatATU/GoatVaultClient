@@ -7,6 +7,7 @@ using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.Logging;
 using GoatVaultInfrastructure.Services.Vault;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,6 @@ using System.Net.Http.Headers;
 using System.Numerics;
 using System.Reflection;
 using UraniumUI;
-using Debug = System.Diagnostics.Debug;
 
 namespace GoatVaultClient;
 
@@ -37,7 +37,6 @@ public static class MauiProgram
             .ConfigureMopups()
             .UseSkiaSharp()
             .UseLiveCharts()
-            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -50,16 +49,32 @@ public static class MauiProgram
                 fonts.AddMaterialSymbolsFonts();
                 fonts.AddFluentIconFonts();
             });
+        // Configure logging
+        var logDirectory = Path.Combine(FileSystem.AppDataDirectory, "logs");
 #if DEBUG
+        builder.Logging.SetMinimumLevel(LogLevel.Debug);
         builder.Logging.AddDebug();
+#else
+        builder.Logging.SetMinimumLevel(LogLevel.Information);
 #endif
+        builder.Logging.AddProvider(new FileLoggerProvider(new FileLoggerOptions
+        {
+            LogDirectory = logDirectory,
+            MaxFileSizeBytes = 5 * 1024 * 1024, // 5MB
+            MaxRetainedFiles = 3,
+#if DEBUG
+            MinimumLevel = LogLevel.Debug
+#else
+            MinimumLevel = LogLevel.Information
+#endif
+        }));
+
         // App settings configuration
         builder.AddAppSettings();
 
         // Setup SQLite local database
-        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "localVaultTest.db");
+        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "localVault.db");
         var connectionString = $"Data Source={dbPath}";
-        Debug.WriteLine(dbPath);
 
         builder.Services.AddDbContext<GoatVaultDb>(options =>
             options.UseSqlite(connectionString));
@@ -139,11 +154,14 @@ public static class MauiProgram
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<GoatVaultDb>();
             db.Database.EnsureCreated();
-            Debug.WriteLine("Database initialized successfully");
+
+            var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MauiProgram");
+            logger.LogInformation("Database initialized at {DbPath}", dbPath);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error initializing database: {ex}");
+            var logger = app.Services.GetService<ILoggerFactory>()?.CreateLogger("MauiProgram");
+            logger?.LogCritical(ex, "Failed to initialize database");
         }
 
         // Done!

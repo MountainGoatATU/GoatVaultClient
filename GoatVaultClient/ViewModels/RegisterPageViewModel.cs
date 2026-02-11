@@ -1,11 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultCore.Models;
-using GoatVaultCore.Models.API;
-using GoatVaultClient.Pages;
-using GoatVaultInfrastructure.Services;
-using GoatVaultInfrastructure.Services.API;
-using GoatVaultInfrastructure.Services.Vault;
 using GoatVaultClient.Services;
 
 namespace GoatVaultClient.ViewModels;
@@ -34,15 +28,16 @@ public partial class RegisterPageViewModel(
         {
             // Set Busy
             IsBusy = true;
+
             // Call Register method from AuthenticationService
-            await authenticationService.RegisterAsync(Email, Password, ConfirmPassword);
+            if (Email != null) await authenticationService.RegisterAsync(Email, Password, ConfirmPassword);
+
             // On success, navigate to Gratitude page
             await Shell.Current.GoToAsync("//gratitude");
         }
         finally
         {
             IsBusy = false;
-           
         }
     }
 

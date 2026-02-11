@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Models;
+using GoatVaultCore.Models;
 using Markdig;
 using System.Text.Json;
 
@@ -6,9 +6,9 @@ namespace GoatVaultClient.Services;
 
 public interface IMarkdownHelperService
 {
-    Task<string> GetHtmlFromAssetAsync(string filename);
+    Task<string> GetHtmlFromAssetAsync(string filename, QuizData? quizData = null);
 }
-public class MarkdownHelperService
+public class MarkdownHelperService : IMarkdownHelperService
 {
     public async Task<string> GetHtmlFromAssetAsync(string filename, QuizData? quizData = null)
     {

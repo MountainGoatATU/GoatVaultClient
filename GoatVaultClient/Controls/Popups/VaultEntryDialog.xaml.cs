@@ -22,24 +22,35 @@ public partial class VaultEntryDialog : PopupPage
         AcceptCommand = new Command(OnAccept);
         CancelCommand = new Command(OnCancel);
 
-        if (ViewModel.AvailableCategories != null)
-        {
-            CategoryInput.ItemsSource = vm.AvailableCategories.ConvertAll(c => c.Name);
-        }
+        CategoryInput.ItemsSource = vm.AvailableCategories.ConvertAll(c => c.Name);
 
         BindingContext = this;
     }
 
     private async void OnAccept()
     {
-        _tcs.TrySetResult(ViewModel);
-        await MopupService.Instance.PopAsync();
+        try
+        {
+            _tcs.TrySetResult(ViewModel);
+            await MopupService.Instance.PopAsync();
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
     }
 
     private async void OnCancel()
     {
-        _tcs.TrySetResult(null);
-        await MopupService.Instance.PopAsync();
+        try
+        {
+            _tcs.TrySetResult(null);
+            await MopupService.Instance.PopAsync();
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
     }
 
     protected override void OnDisappearing()

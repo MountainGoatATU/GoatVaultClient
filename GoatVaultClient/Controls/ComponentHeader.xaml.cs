@@ -1,5 +1,3 @@
-using System.Reflection.PortableExecutable;
-
 namespace GoatVaultClient.Controls;
 
 public partial class ComponentHeader : ContentView

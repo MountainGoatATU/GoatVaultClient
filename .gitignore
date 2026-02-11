@@ -302,7 +302,7 @@ node_modules/
 *.dsw
 *.dsp
 
-# Visual Studio 6 technical files 
+# Visual Studio 6 technical files
 *.ncb
 *.aps
 
@@ -397,7 +397,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-/GoatVaultClient/appsettings.prod.json
 /GoatVaultClient/appsettings.json
 /GoatVaultClient/appsettings.dev.json
-/GoatVaultClient-v4/GoatVaultClient/appsettings.json

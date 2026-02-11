@@ -169,6 +169,7 @@
                     <Button Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
                             Command="{Binding EnableMfaCommand}"
                             IsVisible="{Binding MfaEnabled, Converter={StaticResource InvertedBoolConverter}}"
+                            IsEnabled="{Binding IsNotBusy}"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                             TextColor="White"
                             Margin="0,10,0,0"/>
@@ -176,6 +177,7 @@
                     <Button Text="Disable MFA"
                             Command="{Binding DisableMfaCommand}"
                             IsVisible="{Binding MfaEnabled}"
+                            IsEnabled="{Binding IsNotBusy}"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
                             TextColor="White"
                             Margin="0,10,0,0"/>
