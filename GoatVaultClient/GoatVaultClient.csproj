@@ -101,6 +101,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.2" />
 		<PackageReference Include="SkiaSharp.Extended.UI.Maui" Version="3.1.0-preview.3" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.1" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
 		<PackageReference Include="UraniumUI" Version="2.14.0" />
 		<PackageReference Include="UraniumUI.Blurs" Version="2.14.0" />
 		<PackageReference Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.14.0" />
