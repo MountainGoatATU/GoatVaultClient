@@ -37,7 +37,6 @@ public static class MauiProgram
             .ConfigureMopups()
             .UseSkiaSharp()
             .UseLiveCharts()
-            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
