@@ -14,11 +14,20 @@ namespace GoatVaultClient.ViewModels
     public partial class UserPageViewModel : BaseViewModel
     {
         [ObservableProperty] private string email;
-        [ObservableProperty] private double vaultScore;
         [ObservableProperty] private bool mfaEnabled;
         [ObservableProperty] private string? mfaSecret;
         [ObservableProperty] private string? mfaQrCodeUrl;
+
+        [ObservableProperty] private double vaultScore;
+        [ObservableProperty] private string? breachesText;
+        [ObservableProperty] private string? mfaStatusText;
+        [ObservableProperty] private string? reuseRateText;
+        [ObservableProperty] private string? masterPasswordStrength;
+        [ObservableProperty] private string? averagePasswordsStrength;
         [ObservableProperty] private bool goatEnabled = true;
+
+        [ObservableProperty] private bool showVaultDetails;
+        [ObservableProperty] private string? vaultTierText;
 
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
@@ -45,7 +54,9 @@ namespace GoatVaultClient.ViewModels
             _configuration = configuration;
             _goatTipsService = goatTipsService;
 
-            // Read once from service (single source of truth)
+            _vaultSessionService.VaultEntriesChanged += RefreshVaultScore;
+            _vaultSessionService.MasterPasswordChanged += RefreshVaultScore;
+
             GoatEnabled = _goatTipsService.IsGoatEnabled;
             _goatTipsService.SetEnabled(GoatEnabled);
 
@@ -54,6 +65,67 @@ namespace GoatVaultClient.ViewModels
 
             Email = _vaultSessionService.CurrentUser.Email;
             MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled;
+
+            RefreshVaultScore();
+        }
+
+        [RelayCommand]
+        public void RefreshVaultScore()
+        {
+            var user = _vaultSessionService.CurrentUser;
+            if (user == null)
+                return;
+
+            var score = VaultScoreCalculatorService.CalculateScore(
+                _vaultSessionService.VaultEntries,
+                _vaultSessionService.MasterPassword,
+                user.MfaEnabled,
+                breachedPasswordsCount: 0);
+
+            VaultScore = score.VaultScore;
+            MasterPasswordStrength = $"{score.MasterPasswordPercent}%";
+            AveragePasswordsStrength = $"{score.AveragePasswordsPercent}%";
+            ReuseRateText = $"{score.ReuseRatePercent}%";
+            BreachesText = $"{score.BreachesCount}";
+            MfaStatusText = score.MfaEnabled ? "Enabled" : "Disabled";
+
+            // Set tier text
+            VaultTierText = GetVaultTier(VaultScore);
+        }
+
+        // Command for toggling details from the chart
+        [RelayCommand]
+        private void ToggleVaultDetails()
+        {
+            ShowVaultDetails = !ShowVaultDetails;
+        }
+
+        // Tier helper
+        private static string GetVaultTier(double score)
+        {
+            if (score >= 900) return "The Summit Sovereign (900+)";
+            if (score >= 750) return "The Ridge Walker (750–899)";
+            if (score >= 500) return "The Cliffside Scrambler (500–749)";
+            if (score >= 300) return "The Treeline Grazer (300–499)";
+            return "The Dead Meat (< 300)";
+        }
+
+        [RelayCommand]
+        private async Task ShowVaultDetailsPopupAsync()
+        {
+            var message =
+                $"Tier: {VaultTierText}\n" +
+                $"\nMaster password: {MasterPasswordStrength}" +
+                $"\nAverage passwords: {AveragePasswordsStrength}" +
+                $"\nOriginality: {ReuseRateText}" +
+                $"\nBreached passwords: {BreachesText}" +
+                $"\nMFA: {MfaStatusText}";
+
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                title: "Vault Score Details",
+                body: message,
+                aText: "OK"
+            ));
         }
 
         [RelayCommand]
@@ -184,7 +256,7 @@ namespace GoatVaultClient.ViewModels
                 // Update server with MFA enabled and secret
                 var request = new UserRequest
                 {
-                    Email = user.Email,
+                    Email = user.Email,                                                                     
                     MfaEnabled = true,
                     MfaSecret = secret,
                     Vault = user.Vault
@@ -688,7 +760,8 @@ namespace GoatVaultClient.ViewModels
                 _vaultSessionService.CurrentUser.Vault = newVaultModel;
                 _vaultSessionService.MasterPassword = newPassword;
 
-                System.Diagnostics.Debug.WriteLine("Session updated with new password and auth credentials");
+                // Recalculate all vault-related scores
+                RefreshVaultScore();
 
                 // Confirmation
                 await MopupService.Instance.PushAsync(new PromptPopup(

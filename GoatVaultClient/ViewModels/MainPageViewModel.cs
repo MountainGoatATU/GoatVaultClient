@@ -144,9 +144,6 @@ namespace GoatVaultClient.ViewModels
             // Presort to match UI
             PresortEntries(true);
             PresortCategories(true);
-
-            // Recalculate Vault Score
-            CalculateVaultScore();
         }
 
         private void PresortCategories(bool matchUi = false)
@@ -216,12 +213,6 @@ namespace GoatVaultClient.ViewModels
                 ReloadVaultData();
             }
         }
-
-        private void CalculateVaultScore()
-        {
-            VaultScore = VaultScoreCalculatorService.CalculateScore(Passwords);
-        }
-
         #endregion
 
         #region Commands
@@ -311,7 +302,6 @@ namespace GoatVaultClient.ViewModels
 
                 // Update UI
                 Passwords = _allVaultEntries.ToObservableCollection();
-                CalculateVaultScore();
                 ReloadVaultData();
             }
         }
@@ -323,7 +313,6 @@ namespace GoatVaultClient.ViewModels
             var changed = await _vaultEntryManagerService.EditEntryAsync(target, Categories);
             if (changed)
             {
-                CalculateVaultScore();
                 ReloadVaultData();
             }
         }
@@ -336,7 +325,6 @@ namespace GoatVaultClient.ViewModels
             if (changed)
             {
                 // Update UI
-                CalculateVaultScore();
                 ReloadVaultData();
             }
         }
