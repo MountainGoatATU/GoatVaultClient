@@ -18,7 +18,7 @@ public interface IHttpService
 }
 
 // Use of primary constructor to inject HttpClient dependency
-public class HttpService(HttpClient client, AuthTokenService authTokenService, IConfiguration configuration, JwtUtils jwtUtils, ILogger<HttpService>? logger = null) : IHttpService
+public class HttpService(HttpClient client, AuthTokenService authTokenService, JwtUtils jwtUtils, IConfiguration configuration, ILogger<HttpService>? logger = null) : IHttpService
 {
     private readonly HttpClient _client = client;
     private readonly AuthTokenService _authTokenService = authTokenService;
