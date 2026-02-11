@@ -16,8 +16,6 @@ namespace GoatVaultClient.Services
         public Task<bool> LoginOfflineAsync(string email, string password, DbModel selectedAccount);
         public Task RegisterAsync(string email, string password, string confirmPassword);
         public Task LogoutAsync();
-        public Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);
-        public Task<bool> ChangeEmailAsync();
         public Task<List<DbModel>> GetAllLocalAccountsAsync();
         public Task RemoveLocalAccountAsync(DbModel account);
     }
@@ -51,7 +49,7 @@ namespace GoatVaultClient.Services
                 }
 
                 // Double-check connectivity before network call
-                var hasConnection = await connectivityService.CheckConnectivityAsync();
+                var hasConnection = connectivityService.CheckConnectivity();
                 if (!hasConnection)
                 {
                     await Shell.Current.DisplayAlertAsync(
@@ -250,7 +248,7 @@ namespace GoatVaultClient.Services
                 }
 
                 // Check connectivity before network call
-                var hasConnection = await connectivityService.CheckConnectivityAsync();
+                var hasConnection = connectivityService.CheckConnectivity();
                 if (!hasConnection)
                 {
                     await Shell.Current.DisplayAlertAsync(
@@ -362,8 +360,6 @@ namespace GoatVaultClient.Services
                 // Show pending popup while we process logout
                 await MopupService.Instance.PushAsync(new PendingPopup("Logging out..."));
 
-                System.Diagnostics.Debug.WriteLine("Logging out - saving vault...");
-
                 // Save vault before logout
                 await syncingService.Save();
 
@@ -381,26 +377,15 @@ namespace GoatVaultClient.Services
 
                 // Navigate to login page
                 await Shell.Current.GoToAsync("//login");
-
-                System.Diagnostics.Debug.WriteLine("Logout complete");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error during logout: {ex}");
                 await MopupService.Instance.PushAsync(new PromptPopup(
                     title: "Error",
                     body: "Failed to logout properly. Please try again.",
                     aText: "OK"
                 ));
             }
-        }
-        public async Task<bool> ChangePasswordAsync(string oldPassword, string newPassword)
-        {
-            throw new NotImplementedException();
-        }
-        public async Task<bool> ChangeEmailAsync()
-        {
-            throw new NotImplementedException();
         }
         public async Task<List<DbModel>> GetAllLocalAccountsAsync()
         {
