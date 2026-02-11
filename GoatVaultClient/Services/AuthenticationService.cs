@@ -103,7 +103,11 @@ namespace GoatVaultClient.Services
                     verifyPayload
                 );
 
+                // Store tokens and session data
                 authTokenService.SetToken(verifyResponse.AccessToken);
+                authTokenService.SetRefreshToken(verifyResponse.RefreshToken);
+
+                // Store master password in session for vault decryption
                 vaultSessionService.MasterPassword = password;
 
                 // Get User Data
