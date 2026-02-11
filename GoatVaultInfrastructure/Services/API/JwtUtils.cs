@@ -1,6 +1,4 @@
 ﻿using GoatVaultCore.Models.API;
-using Microsoft.Extensions.Configuration;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace GoatVaultInfrastructure.Services.API
