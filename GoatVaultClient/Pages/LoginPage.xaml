@@ -99,10 +99,10 @@
                         Command="{Binding LoginOfflineCommand}"
                         TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer}, Dark={StaticResource DarkOnSecondaryContainer}}"
                         BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer}, Dark={StaticResource DarkSecondaryContainer}}"
-                        Style="{StaticResource PrimaryButton}"/>
+                        />
 
                 <Button Text="Cancel"
-                        Command="{Binding Source={x:Reference LoginPageRoot}, Path=BindingContext.ClearSelectionCommand}"
+                        Command="{Binding ClearSelectionCommand}"
                         BackgroundColor="Transparent"
                         TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"/>
             </VerticalStackLayout>
@@ -116,15 +116,15 @@
                 <!-- Login Title-->
                 <Label Text="Login" Style="{x:StaticResource MaterialTitleLarge}" HorizontalOptions="Center" FontAttributes="Bold"/>
                 <!-- Email Field-->
-                <material:TextField Title="Email" Text="{Binding Email}" Style="{StaticResource Entry}"/>
+                <material:TextField Title="Email" Text="{Binding Email}"/>
                 <!-- Password Field-->
-                <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True" Style="{StaticResource Entry}">
+                <material:TextField Title="Password" Text="{Binding Password}" IsPassword="True">
                     <material:TextField.Attachments>
                         <material:TextFieldPasswordShowHideAttachment/>
                     </material:TextField.Attachments>
                 </material:TextField>
                 <!-- Login Button -->
-                <Button Text="Login" Command="{Binding LoginCommand}" TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer}, Dark={x:StaticResource DarkOnPrimaryContainer}}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer}, Dark={x:StaticResource DarkPrimaryContainer}}" Style="{StaticResource PrimaryButton}"/>
+                <Button Text="Login" Command="{Binding LoginCommand}" TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer}, Dark={x:StaticResource DarkOnPrimaryContainer}}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer}, Dark={x:StaticResource DarkPrimaryContainer}}" />
                 <!-- Navigate to Register Page -->
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label Text="Don't have an account yet?" TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant}, Dark={x:StaticResource DarkOnSurfaceVariant}}" VerticalOptions="Center"/>

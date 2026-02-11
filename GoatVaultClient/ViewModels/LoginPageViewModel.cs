@@ -32,7 +32,7 @@ public partial class LoginPageViewModel(
     [ObservableProperty] private bool _hasLocalAccounts;
     [ObservableProperty] private string? _offlinePassword;
 
-    public async void Initialize()
+    public async Task InitializeAsync()
     {
         try
         {
@@ -47,7 +47,7 @@ public partial class LoginPageViewModel(
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            logger?.LogError(e, "Error initializing LoginPageViewModel");
         }
     }
 
@@ -62,7 +62,7 @@ public partial class LoginPageViewModel(
 
         if (!isConnected)
         {
-            MainThread.BeginInvokeOnMainThread(async void () =>
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
                 try
                 {
@@ -73,7 +73,7 @@ public partial class LoginPageViewModel(
                 }
                 catch (Exception e)
                 {
-                    throw; // TODO handle exception
+                    logger?.LogError(e, "Error displaying connectivity alert");
                 }
             });
         }
@@ -210,7 +210,15 @@ public partial class LoginPageViewModel(
                 "OK");
             return;
         }
-        await Shell.Current.GoToAsync("//register");
+
+        try
+        {
+            await Shell.Current.GoToAsync("//register");
+        }
+        catch (Exception e)
+        {
+            logger?.LogError(e, "Error navigating to register page");
+        }
     }
 
     /// <summary>
@@ -220,5 +228,14 @@ public partial class LoginPageViewModel(
     private async Task RefreshLocalAccounts()
     {
         await LoadLocalAccountsAsync();
+    }
+
+    /// <summary>
+    /// Clear offline account selection (cancel offline login)
+    /// </summary>
+    [RelayCommand]
+    private void ClearSelection()
+    {
+        SelectedAccount = null;
     }
 }

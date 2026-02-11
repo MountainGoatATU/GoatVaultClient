@@ -1,6 +1,7 @@
-﻿using GoatVaultClient.Services;
+using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
 
 namespace GoatVaultClient
@@ -8,6 +9,7 @@ namespace GoatVaultClient
     public partial class MainPage : ContentPage
     {
         private readonly ISyncingService _syncingService;
+        private readonly ILogger<MainPage>? _logger;
 
 
         // Constants for configuration
@@ -15,9 +17,11 @@ namespace GoatVaultClient
         public MainPage(
             MainPageViewModel viewModel,
             ISyncingService syncingService,
-            SyncStatusBarViewModel syncStatusBarViewModel)
+            SyncStatusBarViewModel syncStatusBarViewModel,
+            ILogger<MainPage>? logger = null)
         {
             _syncingService = syncingService;
+            _logger = logger;
 
             InitializeComponent();
 
@@ -71,8 +75,18 @@ namespace GoatVaultClient
                 // Enable flyout navigation
                 ((AppShell)Shell.Current).EnableFlyout();
 
-                // Perform initial sync
-                await _syncingService.Sync();
+                // Fire-and-forget sync so the page renders immediately (Bug 2 fix)
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _syncingService.Sync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, "Background sync failed during MainPage.OnAppearing");
+                    }
+                });
 
                 // Start periodic background sync (every 5 minutes)
                 _syncingService.StartPeriodicSync(TimeSpan.FromMinutes(SyncIntervalMinutes));
@@ -86,7 +100,7 @@ namespace GoatVaultClient
             }
             catch (Exception e)
             {
-                throw; // TODO handle exception
+                _logger?.LogError(e, "Unhandled error in MainPage.OnAppearing");
             }
         }
 

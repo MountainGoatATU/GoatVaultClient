@@ -26,7 +26,7 @@ public partial class LoginPage : ContentPage
             try
             {
                 // Initialize connectivity monitoring
-                _viewModel.Initialize();
+                await _viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -40,7 +40,7 @@ public partial class LoginPage : ContentPage
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Unhandled error in LoginPage.OnAppearing");
         }
     }
 

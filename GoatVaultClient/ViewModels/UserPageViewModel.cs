@@ -144,6 +144,9 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task EnableMfaAsync()
         {
+            if (IsBusy)
+                return;
+
             var user = _vaultSessionService.CurrentUser;
             if (user == null)
             {
@@ -263,6 +266,9 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task DisableMfaAsync()
         {
+            if (IsBusy)
+                return;
+
             var user = _vaultSessionService.CurrentUser;
             if (user == null)
             {
@@ -444,22 +450,32 @@ namespace GoatVaultClient.ViewModels
                            - Authy
                            """;
 
-            await MopupService.Instance.PushAsync(new PromptPopup(
+            var setupPopup = new PromptPopup(
                 title: "Setup MFA",
                 body: message,
                 aText: "OK"
-            ));
+            );
+            await MopupService.Instance.PushAsync(setupPopup);
 
-            await Task.Delay(300);
+            // Wait for user to dismiss the setup popup before proceeding
+            await setupPopup.WaitForScan();
+
+            // Ensure popup is fully dismissed
+            while (MopupService.Instance.PopupStack.Contains(setupPopup))
+                await Task.Delay(50);
 
             // Copy secret to clipboard for easy entry
             await Clipboard.Default.SetTextAsync(MfaSecret ?? "");
 
-            await MopupService.Instance.PushAsync(new PromptPopup(
+            var copiedPopup = new PromptPopup(
                 title: "Secret Copied",
                 body: "The secret has been copied to your clipboard.",
                 aText: "OK"
-            ));
+            );
+            await MopupService.Instance.PushAsync(copiedPopup);
+
+            // Wait for user to dismiss the copied popup
+            await copiedPopup.WaitForScan();
         }
 
         [RelayCommand]

@@ -18,7 +18,7 @@
         <VerticalStackLayout>
             <material:TextField x:Name="InputEntry" 
                                 Title="Enter value"
-                                IsPassword="False"/>
+                                IsPassword="True"/>
         </VerticalStackLayout>
     </controls:PopupTemplate>
 </mopups:PopupPage>

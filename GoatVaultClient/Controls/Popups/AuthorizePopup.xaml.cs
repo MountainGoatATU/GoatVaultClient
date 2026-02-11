@@ -74,7 +74,7 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Error in AuthorizePopup.OnAccept");
         }
     }
 
@@ -93,7 +93,7 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Error in AuthorizePopup.OnCancel");
         }
     }
 

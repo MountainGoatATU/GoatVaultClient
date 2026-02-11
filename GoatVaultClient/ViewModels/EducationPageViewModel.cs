@@ -1,12 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using GoatVaultClient.Pages;
 using GoatVaultCore.Models;
+using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class EducationPageViewModel : BaseViewModel
+public partial class EducationPageViewModel(ILogger<EducationPageViewModel>? logger = null) : BaseViewModel
 {
     public ObservableCollection<EducationTopic> Topics { get; } =
     [
@@ -56,15 +57,22 @@ public partial class EducationPageViewModel : BaseViewModel
         if (topic == null)
             return;
 
-        // Navigate to the detail page and pass the 'topic' object
-        var navigationParameter = new Dictionary<string, object>
+        try
         {
-            { "Topic", topic }
-        };
+            // Navigate to the detail page and pass the 'topic' object
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "Topic", topic }
+            };
 
-        // Resetting the topic in the menu
-        CurrentTopic = null;
+            // Resetting the topic in the menu
+            CurrentTopic = null;
 
-        await Shell.Current.GoToAsync(nameof(EducationDetailPage), navigationParameter);
+            await Shell.Current.GoToAsync(nameof(EducationDetailPage), navigationParameter);
+        }
+        catch (Exception e)
+        {
+            logger?.LogError(e, "Error navigating to EducationDetailPage for topic {TopicTitle}", topic.Title);
+        }
     }
 }

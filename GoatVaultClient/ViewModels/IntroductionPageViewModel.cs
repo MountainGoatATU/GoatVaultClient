@@ -1,13 +1,21 @@
-﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class IntroductionPageViewModel : BaseViewModel
+public partial class IntroductionPageViewModel(ILogger<IntroductionPageViewModel>? logger = null) : BaseViewModel
 {
     [RelayCommand]
-    private static async Task GetStarted()
+    private async Task GetStarted()
     {
-        // Navigate to Register Page
-        await Shell.Current.GoToAsync("//login");
+        try
+        {
+            // Navigate to Login Page
+            await Shell.Current.GoToAsync("//login");
+        }
+        catch (Exception e)
+        {
+            logger?.LogError(e, "Error navigating to login page");
+        }
     }
 }
