@@ -23,7 +23,7 @@ namespace GoatVaultCore.Services.Secrets
         {
             // Master strength via zxcvbn
             var masterStrength = PasswordStrengthService.Evaluate(masterPassword);
-            int masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
+            var masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
 
             double foundationPoints = masterStrength.Score switch
             {
@@ -34,9 +34,9 @@ namespace GoatVaultCore.Services.Secrets
             };
 
             // Passwords
-            int passwordCount = 0;
-            int totalStrengthScore = 0;
-            int duplicateCount = 0;
+            var passwordCount = 0;
+            var totalStrengthScore = 0;
+            var duplicateCount = 0;
 
             if (entries != null && entries.Any())
             {
@@ -48,15 +48,15 @@ namespace GoatVaultCore.Services.Secrets
                 passwordCount = allPasswords.Count;
 
                 // Count duplicates for uniqueness
-                foreach (var group in allPasswords.GroupBy(p => p))
-                {
-                    if (group.Count() > 1)
-                        duplicateCount += group.Count() - 1;
-                }
+                duplicateCount += allPasswords.GroupBy(p => p)
+                    .Where(group => group
+                        .Count() > 1).Sum(group => group
+                        .Count() - 1);
 
                 // Sum password strengths
-                foreach (var pwd in allPasswords)
-                    totalStrengthScore += PasswordStrengthService.Evaluate(pwd).Score;
+                totalStrengthScore += allPasswords
+                    .Sum(pwd => PasswordStrengthService
+                        .Evaluate(pwd).Score);
             }
 
             // Uniqueness max 200
@@ -72,27 +72,27 @@ namespace GoatVaultCore.Services.Secrets
             }
 
             // Average password strength max 200
-            double behaviorPoints = passwordCount > 0
+            var behaviorPoints = passwordCount > 0
                 ? (totalStrengthScore / (double)(passwordCount * 4)) * 200
                 : 200;
 
-            double breachPenalty = breachedPasswordsCount * 20;
+            var breachPenalty = breachedPasswordsCount * 20;
 
-            double mfaPoints = mfaEnabled ? 200 : 0;
+            var mfaPoints = mfaEnabled ? 200 : 0;
 
-            double rawScore = foundationPoints + uniquenessPoints + behaviorPoints + mfaPoints - breachPenalty;
+            var rawScore = foundationPoints + uniquenessPoints + behaviorPoints + mfaPoints - breachPenalty;
 
             if (!mfaEnabled && rawScore > 800)
                 rawScore = 800;
 
-            double finalScore = Math.Max(rawScore, 0);
+            var finalScore = Math.Max(rawScore, 0);
 
             // Percentages for breakdown
-            int averagePercent = passwordCount > 0
+            var averagePercent = passwordCount > 0
                 ? (int)Math.Round((totalStrengthScore / (double)passwordCount / 4.0) * 100, MidpointRounding.AwayFromZero)
                 : 100;
 
-            int reuseRatePercent = passwordCount > 0
+            var reuseRatePercent = passwordCount > 0
                 ? (int)Math.Round(((passwordCount - duplicateCount) / (double)passwordCount) * 100, MidpointRounding.AwayFromZero)
                 : 100;
 

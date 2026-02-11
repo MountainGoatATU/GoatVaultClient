@@ -1,9 +1,10 @@
 using GoatVaultCore.Models.Vault;
 using GoatVaultCore.Services.Secrets;
+using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.Services;
 
-public class TotpManagerService
+public class TotpManagerService(ILogger<TotpManagerService>? logger = null)
 {
     private IDispatcherTimer? _timer;
     private VaultEntry? _trackedEntry;
@@ -58,7 +59,7 @@ public class TotpManagerService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error generating TOTP: {ex.Message}");
+            logger?.LogError(ex, "Error generating TOTP code");
             _trackedEntry.CurrentTotpCode = "ERROR";
             _trackedEntry.TotpTimeRemaining = 0;
         }

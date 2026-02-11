@@ -127,8 +127,8 @@ public class VaultEntryManagerService(
         // Act based on the response
         if (!response)
             return false;
-        
-        //Remove from the list
+
+        // Remove from the list
         vaultSessionService.DecryptedVault?.Entries.Remove(target);
 
         // Notify that entries changed

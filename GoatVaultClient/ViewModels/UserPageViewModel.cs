@@ -100,11 +100,14 @@ namespace GoatVaultClient.ViewModels
 
         private static string GetVaultTier(double score)
         {
-            if (score >= 900) return "The Summit Sovereign (900+)";
-            if (score >= 750) return "The Ridge Walker (750-899)";
-            if (score >= 500) return "The Cliffside Scrambler (500-749)";
-            if (score >= 300) return "The Treeline Grazer (300-499)";
-            return "The Dead Meat (< 300)";
+            return score switch
+            {
+                >= 900 => "The Summit Sovereign (900+)",
+                >= 750 => "The Ridge Walker (750-899)",
+                >= 500 => "The Cliffside Scrambler (500-749)",
+                >= 300 => "The Treeline Grazer (300-499)",
+                _ => "The Dead Meat (< 300)"
+            };
         }
 
         [RelayCommand]
@@ -135,9 +138,7 @@ namespace GoatVaultClient.ViewModels
         private string GetBaseUrl()
         {
             var baseUrl = _configuration["GOATVAULT_SERVER_BASE_URL"];
-            if (string.IsNullOrWhiteSpace(baseUrl))
-                throw new Exception("Server base URL not configured");
-            return baseUrl;
+            return string.IsNullOrWhiteSpace(baseUrl) ? throw new Exception("Server base URL not configured") : baseUrl;
         }
 
         [RelayCommand]
@@ -235,8 +236,8 @@ namespace GoatVaultClient.ViewModels
                 }
 
                 // Update session
-                _vaultSessionService.CurrentUser.MfaEnabled = true;
-                _vaultSessionService.CurrentUser.MfaSecret = secret;
+                _vaultSessionService.CurrentUser?.MfaEnabled = true;
+                _vaultSessionService.CurrentUser?.MfaSecret = secret;
                 MfaEnabled = true;
 
                 await MopupService.Instance.PushAsync(new PromptPopup(
@@ -281,7 +282,7 @@ namespace GoatVaultClient.ViewModels
                 IsBusy = true;
 
                 // Confirm action
-                bool confirm = false;
+                var confirm = false;
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
                     var confirmPopup = new PromptPopup(
@@ -305,10 +306,7 @@ namespace GoatVaultClient.ViewModels
 
                 // Ask for current password
                 string? password = null;
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    password = await PromptUserAsync("Confirm Password", true);
-                });
+                await MainThread.InvokeOnMainThreadAsync(async () => password = await PromptUserAsync("Confirm Password", true));
 
                 if (password == null)
                 {
@@ -399,8 +397,8 @@ namespace GoatVaultClient.ViewModels
                 await _vaultService.UpdateUserInLocalAsync(dbUser);
 
                 // Update session
-                _vaultSessionService.CurrentUser.MfaEnabled = false;
-                _vaultSessionService.CurrentUser.MfaSecret = null;
+                _vaultSessionService.CurrentUser?.MfaEnabled = false;
+                _vaultSessionService.CurrentUser?.MfaSecret = null;
                 MfaEnabled = false;
 
                 await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -431,13 +429,20 @@ namespace GoatVaultClient.ViewModels
 
         private async Task ShowMfaSetupDialog()
         {
-            var message = $"Scan this QR code with your authenticator app:\n\n" +
-                          $"Or enter this secret manually:\n{MfaSecret}\n\n" +
-                          $"After adding to your app, you'll need to enter a code to verify.\n\n" +
-                          $"Recommended apps:\n" +
-                          $"- Google Authenticator\n" +
-                          $"- Microsoft Authenticator\n" +
-                          $"- Authy";
+            var message = $"""
+                           Scan this QR code with your authenticator app:
+                           
+                           Or enter this secret manually:
+                           
+                           {MfaSecret}
+                           
+                           After adding to your app, you'll need to enter a code to verify.
+                           
+                           Recommended apps:
+                           - Google Authenticator
+                           - Microsoft Authenticator
+                           - Authy
+                           """;
 
             await MopupService.Instance.PushAsync(new PromptPopup(
                 title: "Setup MFA",
@@ -515,7 +520,7 @@ namespace GoatVaultClient.ViewModels
                 }
 
                 // Update session and UI
-                _vaultSessionService.CurrentUser.Email = updatedUser.Email;
+                _vaultSessionService.CurrentUser?.Email = updatedUser.Email;
                 Email = updatedUser.Email;
 
                 await MopupService.Instance.PushAsync(new PromptPopup(
@@ -601,8 +606,8 @@ namespace GoatVaultClient.ViewModels
                 }
 
                 // Update session
-                _vaultSessionService.CurrentUser.AuthSalt = newAuthSaltBase64;
-                _vaultSessionService.CurrentUser.Vault = newVaultModel;
+                _vaultSessionService.CurrentUser?.AuthSalt = newAuthSaltBase64;
+                _vaultSessionService.CurrentUser?.Vault = newVaultModel;
                 _vaultSessionService.MasterPassword = newPassword;
 
                 // Recalculate all vault-related scores
@@ -628,7 +633,7 @@ namespace GoatVaultClient.ViewModels
             }
         }
 
-        private async Task<string?> PromptUserAsync(string title, bool isPassword)
+        private static async Task<string?> PromptUserAsync(string title, bool isPassword)
         {
             try
             {
@@ -650,17 +655,16 @@ namespace GoatVaultClient.ViewModels
 
             try
             {
-                if (enteredPassword != _vaultSessionService.MasterPassword)
-                {
-                    await MopupService.Instance.PushAsync(new PromptPopup(
-                        title: "Incorrect Password",
-                        body: "The password you entered is incorrect. Please try again.",
-                        aText: "OK"
-                    ));
-                    return false;
-                }
+                if (enteredPassword == _vaultSessionService.MasterPassword)
+                    return true;
 
-                return true;
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Incorrect Password",
+                    body: "The password you entered is incorrect. Please try again.",
+                    aText: "OK"
+                ));
+                return false;
+
             }
             catch (Exception ex)
             {

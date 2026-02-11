@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -15,11 +16,8 @@ public interface IHttpService
 }
 
 // Use of primary constructor to inject HttpClient dependency
-public class HttpService(HttpClient client, AuthTokenService authTokenService, IConfiguration configuration) : IHttpService
+public class HttpService(HttpClient client, AuthTokenService authTokenService, IConfiguration configuration, ILogger<HttpService>? logger = null) : IHttpService
 {
-    private readonly HttpClient _client = client;
-    private readonly AuthTokenService _authTokenService = authTokenService;
-
     // JSON serialization options
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -28,13 +26,16 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, I
 
     private async Task<T> SendAsync<T>(HttpMethod method, string url, object? payload = null)
     {
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
+            logger?.LogDebug("HTTP {Method} {Url}", method, url);
+
             // Create the HTTP request based on the method and URL
             using var request = new HttpRequestMessage(method, url);
 
             // Attach Authorization header if token exists
-            var token = _authTokenService.GetToken();
+            var token = authTokenService.GetToken();
             if (!string.IsNullOrWhiteSpace(token))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -53,11 +54,15 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, I
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
 
-            var response = await _client.SendAsync(request);
+            var response = await client.SendAsync(request);
+            stopwatch.Stop();
 
             // Check for HTTP error responses
             if (!response.IsSuccessStatusCode)
             {
+                logger?.LogWarning("HTTP {Method} {Url} returned {StatusCode} in {ElapsedMs}ms",
+                    method, url, (int)response.StatusCode, stopwatch.ElapsedMilliseconds);
+
                 var errorBody = await response.Content.ReadAsStringAsync();
 
                 // Try to extract a meaningful error message from the response
@@ -98,12 +103,17 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, I
                  ?? throw new InvalidOperationException(
                      $"Failed to deserialize response into {typeof(T).Name}. Raw: {responseString}");
 
+            logger?.LogDebug("HTTP {Method} {Url} completed {StatusCode} in {ElapsedMs}ms",
+                method, url, (int)response.StatusCode, stopwatch.ElapsedMilliseconds);
+
             return result;
         }
         catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
         {
             // A TaskCanceledException without user cancellation => timeout
-            throw new TimeoutException($"Request timed out after {_client.Timeout.TotalSeconds} seconds.", ex);
+            logger?.LogWarning("HTTP {Method} {Url} timed out after {TimeoutSeconds}s",
+                method, url, client.Timeout.TotalSeconds);
+            throw new TimeoutException($"Request timed out after {client.Timeout.TotalSeconds} seconds.", ex);
         }
         catch (HttpRequestException)
         {
@@ -112,6 +122,7 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, I
         }
         catch (Exception ex)
         {
+            logger?.LogError(ex, "Unexpected error during HTTP {Method} {Url}", method, url);
             // Unexpected errors - provide generic message without exposing URL
             throw new Exception("Unexpected error while sending request.", ex);
         }

@@ -1,5 +1,6 @@
 using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.ViewModels;
+using Microsoft.Extensions.Logging;
 using Mopups.Services;
 
 namespace GoatVaultClient.Pages;
@@ -7,37 +8,47 @@ namespace GoatVaultClient.Pages;
 public partial class LoginPage : ContentPage
 {
     private readonly LoginPageViewModel _viewModel;
-    public LoginPage(LoginPageViewModel vm)
+    private readonly ILogger<LoginPage>? _logger;
+
+    public LoginPage(LoginPageViewModel vm, ILogger<LoginPage>? logger = null)
     {
         InitializeComponent();
         BindingContext = vm;
         _viewModel = vm;
+        _logger = logger;
     }
 
     protected override async void OnAppearing()
     {
-        base.OnAppearing();
         try
         {
-            // Initialize connectivity monitoring
-            _viewModel.Initialize();
+            base.OnAppearing();
+            try
+            {
+                // Initialize connectivity monitoring
+                _viewModel.Initialize();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error initializing login page");
+                await MopupService.Instance.PushAsync(new PromptPopup(
+                    title: "Error",
+                    body: "Failed to initialize login page. Please restart the application.",
+                    aText: "OK"
+                ));
+            }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            // Log the error for debugging
-            System.Diagnostics.Debug.WriteLine($"Error initializing login page: {ex}");
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                title: "Error",
-                body: "Failed to initialize login page. Please restart the application.",
-                aText: "OK"
-            ));
+            throw; // TODO handle exception
         }
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        //Cleanup connectivity monitoring
+
+        // Cleanup connectivity monitoring
         _viewModel.Cleanup();
     }
 }

@@ -13,6 +13,7 @@ public partial class AppShell : Shell
     {
         FlyoutBehavior = FlyoutBehavior.Flyout;
     }
+
     public void DisableFlyout()
     {
         FlyoutBehavior = FlyoutBehavior.Disabled;

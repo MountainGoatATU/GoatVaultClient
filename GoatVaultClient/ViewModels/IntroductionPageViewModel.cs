@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Pages;
 
 namespace GoatVaultClient.ViewModels;
 

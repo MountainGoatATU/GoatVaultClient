@@ -1,9 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultCore.Models;
 using GoatVaultInfrastructure.Services.Vault;
+using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using Mopups.Services;
 using GoatVaultClient.Controls.Popups;
@@ -15,7 +15,8 @@ public partial class LoginPageViewModel(
     IAuthenticationService authenticationService,
     ISyncingService syncingService,
     VaultService vaultService,
-    ConnectivityService connectivityService)
+    ConnectivityService connectivityService,
+    ILogger<LoginPageViewModel>? logger = null)
     : BaseViewModel
 {
     // Dependencies
@@ -33,14 +34,21 @@ public partial class LoginPageViewModel(
 
     public async void Initialize()
     {
-        // Get initial state
-        UpdateConnectivityState();
+        try
+        {
+            // Get initial state
+            UpdateConnectivityState();
 
-        // Subscribe to changes
-        connectivityService.ConnectivityChanged += OnConnectivityChanged;
+            // Subscribe to changes
+            connectivityService.ConnectivityChanged += OnConnectivityChanged;
 
-        // Load local accounts
-        await LoadLocalAccountsAsync();
+            // Load local accounts
+            await LoadLocalAccountsAsync();
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
     }
 
     public void Cleanup()
@@ -54,12 +62,19 @@ public partial class LoginPageViewModel(
 
         if (!isConnected)
         {
-            MainThread.BeginInvokeOnMainThread(async () =>
+            MainThread.BeginInvokeOnMainThread(async void () =>
             {
-                await Shell.Current.DisplayAlertAsync(
-                    "Connection Lost",
-                    "Your internet connection was lost.",
-                    "OK");
+                try
+                {
+                    await Shell.Current.DisplayAlertAsync(
+                        "Connection Lost",
+                        "Your internet connection was lost.",
+                        "OK");
+                }
+                catch (Exception e)
+                {
+                    throw; // TODO handle exception
+                }
             });
         }
     }
@@ -98,9 +113,9 @@ public partial class LoginPageViewModel(
             IsBusy = true;
 
             // Define the MFA provider function
-            Func<Task<string?>> mfaProvider = async () =>
+            async Task<string?> MfaProvider()
             {
-                System.Diagnostics.Debug.WriteLine("MFA is enabled, prompting for code");
+                logger?.LogDebug("MFA enabled, prompting user for code");
                 string? mfaCode = null;
 
                 // Need to invoke on main thread as this is UI
@@ -112,10 +127,10 @@ public partial class LoginPageViewModel(
                 });
 
                 return mfaCode;
-            };
+            }
 
             // Call the service
-            var success = await authenticationService.LoginAsync(Email, Password, mfaProvider);
+            var success = await authenticationService.LoginAsync(Email, Password, MfaProvider);
 
             if (success)
             {
@@ -140,6 +155,7 @@ public partial class LoginPageViewModel(
         {
             // Set Busy
             IsBusy = true;
+
             // Attempt Login offline
             var result = await authenticationService.LoginOfflineAsync(Email, OfflinePassword, SelectedAccount);
             if (result)

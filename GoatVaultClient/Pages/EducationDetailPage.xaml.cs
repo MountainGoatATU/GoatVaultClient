@@ -1,13 +1,17 @@
 using GoatVaultClient.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.Pages;
 
 public partial class EducationDetailPage : ContentPage
 {
-    public EducationDetailPage(EducationDetailViewModel vm)
+    private readonly ILogger<EducationDetailPage>? _logger;
+
+    public EducationDetailPage(EducationDetailViewModel vm, ILogger<EducationDetailPage>? logger = null)
     {
         InitializeComponent();
         BindingContext = vm;
+        _logger = logger;
     }
 
     private void OnWebViewNavigating(object sender, WebNavigatingEventArgs e)
@@ -29,7 +33,6 @@ public partial class EducationDetailPage : ContentPage
         // 3. Pass to ViewModel (you can implement this method in your VM later)
         // _viewModel.OnQuizCompleted(isSuccess);
 
-        // For now, just a debug log to prove it works
-        Console.WriteLine($"Quiz Completed. Success: {isSuccess}");
+        _logger?.LogDebug("Quiz completed (Success: {IsSuccess})", isSuccess);
     }
 }

@@ -1,12 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using GoatVaultClient.Services;
 using GoatVaultCore.Models;
+using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.ViewModels;
 
 // This attribute maps the navigation parameter "Topic" to the Property "SelectedTopic"
 [QueryProperty(nameof(SelectedTopic), "Topic")]
-public partial class EducationDetailViewModel(MarkdownHelperService markdownHelperService) : BaseViewModel
+public partial class EducationDetailViewModel(MarkdownHelperService markdownHelperService, ILogger<EducationDetailViewModel>? logger = null) : BaseViewModel
 {
     [ObservableProperty] private EducationTopic? _selectedTopic;
     [ObservableProperty] private HtmlWebViewSource? _htmlSource;
@@ -15,7 +16,14 @@ public partial class EducationDetailViewModel(MarkdownHelperService markdownHelp
     // Automatically called when SelectedTopic is set by the navigation
     async partial void OnSelectedTopicChanged(EducationTopic? value)
     {
-        if (value != null) await LoadTopicAsync(value);
+        try
+        {
+            if (value != null) await LoadTopicAsync(value);
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
     }
 
     private async Task LoadTopicAsync(EducationTopic topic)
@@ -37,7 +45,7 @@ public partial class EducationDetailViewModel(MarkdownHelperService markdownHelp
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            logger?.LogError(ex, "Error loading education topic {TopicName}", topic.FileName);
         }
         finally
         {

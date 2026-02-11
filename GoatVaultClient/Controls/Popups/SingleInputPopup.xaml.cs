@@ -7,11 +7,11 @@ namespace GoatVaultClient.Controls.Popups;
 public partial class SingleInputPopup: PopupPage
 {
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
-    private TaskCompletionSource<string?> _tcs = new();
+    private readonly TaskCompletionSource<string?> _tcs = new();
     public Task<string?> WaitForScan() => _tcs.Task;
-    public string? Title { get; set; } = string.Empty;
-    public string? InputFieldTitle { get; set; } = string.Empty;
-    public string? InputFieldText {  get; set; } = string.Empty;
+    public string? Title { get; set; }
+    public string? InputFieldTitle { get; set; }
+    public string? InputFieldText {  get; set; }
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
     public SingleInputPopup(string title = "", string inputFieldTitle = "", string inputFieldText = "")
@@ -30,14 +30,28 @@ public partial class SingleInputPopup: PopupPage
 
     private async void OnAccept()
     {
-        _tcs.TrySetResult(InputField.Text);
-        await MopupService.Instance.PopAsync();
+        try
+        {
+            _tcs.TrySetResult(InputField.Text);
+            await MopupService.Instance.PopAsync();
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
     }
 
     private async void OnCancel()
     {
-        _tcs.TrySetResult(null);
-        await MopupService.Instance.PopAsync();
+        try
+        {
+            _tcs.TrySetResult(null);
+            await MopupService.Instance.PopAsync();
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
     }
 
     protected override void OnDisappearing()

@@ -9,6 +9,7 @@ using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services.API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace GoatVaultInfrastructure.Services.Vault;
 
@@ -21,7 +22,7 @@ public interface IVaultService
     Task SaveVaultAsync(UserResponse currentUser, string password, VaultData vaultData);
 }
 
-public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, HttpService httpService, VaultSessionService vaultSessionService) : IVaultService
+public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb, HttpService httpService, VaultSessionService vaultSessionService, ILogger<VaultService>? logger = null) : IVaultService
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -135,6 +136,8 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
 
         try
         {
+            logger?.LogInformation("Saving vault for user {UserId}", user.Id);
+
             // Encrypt the vault data
             var encryptedModel = EncryptVault(password, vaultData);
 
@@ -178,15 +181,15 @@ public class VaultService(IConfiguration configuration,GoatVaultDb goatVaultDb, 
             }
 
             await goatVaultDb.SaveChangesAsync();
+            logger?.LogInformation("Vault saved successfully for user {UserId}", user.Id);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error syncing on close: {ex.Message}");
+            logger?.LogError(ex, "Error saving vault for user {UserId}", user.Id);
         }
     }
     #endregion
-    #region Sync with server
-    #endregion 
+
     #region Local Storage
     // GET
     public async Task<DbModel?> LoadUserFromLocalAsync(string userId)

@@ -12,17 +12,17 @@ public partial class SyncStatusBar : ContentView
         BindingContext = this;
     }
 
-    protected override void OnPropertyChanged(string propertyName = null)
+    protected override void OnPropertyChanged(string? propertyName = null)
     {
         base.OnPropertyChanged(propertyName);
 
         // Start rotation animation when IsSyncing becomes true
-        if (propertyName == nameof(IsSyncing))
+        if (propertyName != nameof(IsSyncing))
+            return;
+
+        if (IsSyncing && !_isRotating)
         {
-            if (IsSyncing && !_isRotating)
-            {
-                _ = AnimateSyncIcon();
-            }
+            _ = AnimateSyncIcon();
         }
     }
 
@@ -35,7 +35,7 @@ public partial class SyncStatusBar : ContentView
 
         while (IsSyncing && _isRotating)
         {
-            await SyncingIcon.RotateTo(360, 1000, Easing.Linear);
+            await SyncingIcon.RotateToAsync(360, 1000, Easing.Linear);
             SyncingIcon.Rotation = 0; // Reset rotation for continuous animation
         }
 

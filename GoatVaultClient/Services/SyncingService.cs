@@ -36,14 +36,14 @@ namespace GoatVaultClient.Services
         event EventHandler<SyncFailedEventArgs>? SyncFailed;
     }
 
-    public class SyncingService : ObservableObject, ISyncingService
+    public class SyncingService(
+        IConfiguration configuration,
+        VaultSessionService vaultSessionService,
+        VaultService vaultService,
+        HttpService httpService,
+        ILogger<SyncingService>? logger = null)
+        : ObservableObject, ISyncingService
     {
-        private readonly IConfiguration _configuration;
-        private readonly VaultSessionService _vaultSessionService;
-        private readonly VaultService _vaultService;
-        private readonly HttpService _httpService;
-        private readonly ILogger<SyncingService>? _logger;
-
         private System.Threading.Timer? _periodicSyncTimer;
 
         private bool _isSyncing;
@@ -103,20 +103,6 @@ namespace GoatVaultClient.Services
             }
         }
 
-        public SyncingService(
-             IConfiguration configuration,
-             VaultSessionService vaultSessionService,
-             VaultService vaultService,
-             HttpService httpService,
-             ILogger<SyncingService>? logger = null)
-        {
-            _configuration = configuration;
-            _vaultSessionService = vaultSessionService;
-            _vaultService = vaultService;
-            _httpService = httpService;
-            _logger = logger;
-        }
-
         #region Properties
 
         public bool MarkedAsChanged { get; private set; }
@@ -133,13 +119,14 @@ namespace GoatVaultClient.Services
 
                 var timeSince = DateTime.UtcNow - LastSynced;
 
-                if (timeSince.TotalMinutes < 1)
-                    return "Just now";
-                if (timeSince.TotalMinutes < 60)
-                    return $"{(int)timeSince.TotalMinutes}m ago";
-                if (timeSince.TotalHours < 24)
-                    return $"{(int)timeSince.TotalHours}h ago";
-                return $"{(int)timeSince.TotalDays}d ago";
+                return timeSince.TotalMinutes switch
+                {
+                    < 1 => "Just now",
+                    < 60 => $"{(int)timeSince.TotalMinutes}m ago",
+                    _ => timeSince.TotalHours < 24
+                        ? $"{(int)timeSince.TotalHours}h ago"
+                        : $"{(int)timeSince.TotalDays}d ago"
+                };
             }
         }
 
@@ -171,17 +158,27 @@ namespace GoatVaultClient.Services
 
             if (!HasAutoSync)
             {
-                _logger?.LogInformation("Auto-sync is disabled. Periodic sync will not start.");
+                logger?.LogInformation("Auto-sync is disabled. Periodic sync will not start.");
                 return;
             }
 
             _periodicSyncTimer = new System.Threading.Timer(
-                async _ => await PeriodicSyncCallback(),
+                async void (_) =>
+                {
+                    try
+                    {
+                        await PeriodicSyncCallback();
+                    }
+                    catch (Exception e)
+                    {
+                        throw; // TODO handle exception
+                    }
+                },
                 null,
                 interval,
                 interval);
 
-            _logger?.LogInformation($"Periodic sync started with interval: {interval}");
+            logger?.LogInformation("Periodic sync started with interval: {interval}", interval);
         }
 
         /// <summary>
@@ -191,7 +188,7 @@ namespace GoatVaultClient.Services
         {
             _periodicSyncTimer?.Dispose();
             _periodicSyncTimer = null;
-            _logger?.LogInformation("Periodic sync stopped");
+            logger?.LogInformation("Periodic sync stopped");
         }
 
         /// <summary>
@@ -201,15 +198,15 @@ namespace GoatVaultClient.Services
         {
             if (IsSyncing)
             {
-                _logger?.LogWarning("Sync already in progress");
+                logger?.LogWarning("Sync already in progress");
                 return;
             }
 
-            var url = _configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
+            var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
 
-            if (_vaultSessionService.CurrentUser == null && _vaultSessionService.DecryptedVault == null)
+            if (vaultSessionService.CurrentUser == null && vaultSessionService.DecryptedVault == null)
             {
-                _logger?.LogWarning("No user is currently logged in");
+                logger?.LogWarning("No user is currently logged in");
                 return;
             }
 
@@ -220,12 +217,12 @@ namespace GoatVaultClient.Services
                 SyncStatusMessage = "Syncing...";
                 SyncStarted?.Invoke(this, EventArgs.Empty);
 
-                _logger?.LogInformation("Starting sync operation");
+                logger?.LogInformation("Starting sync operation");
 
-                var localCopy = await _vaultService.LoadUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
+                var localCopy = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
-                var userResponse = await _httpService.GetAsync<UserResponse>(
-                    $"{url}v1/users/{_vaultSessionService.CurrentUser.Id}"
+                var userResponse = await httpService.GetAsync<UserResponse>(
+                    $"{url}v1/users/{vaultSessionService.CurrentUser.Id}"
                 );
 
                 if (userResponse == null || localCopy == null)
@@ -233,25 +230,23 @@ namespace GoatVaultClient.Services
 
                 var compareResult = DateTime.Compare(localCopy.UpdatedAt, userResponse.UpdatedAt);
 
-                if (compareResult == 0)
+                switch (compareResult)
                 {
-                    _logger?.LogInformation("Data already in sync");
-                    SyncStatus = SyncStatus.Synced;
-                    SyncStatusMessage = "Synced";
-                    LastSynced = DateTime.UtcNow;
-                    SyncCompleted?.Invoke(this, EventArgs.Empty);
-                    return;
-                }
-
-                if (compareResult > 0)
-                {
-                    _logger?.LogInformation("Local data is newer, updating server");
-                    await HandleLocalNewer(localCopy, url);
-                }
-                else
-                {
-                    _logger?.LogInformation("Server data is newer, updating local");
-                    await HandleServerNewer(localCopy, userResponse);
+                    case 0:
+                        logger?.LogInformation("Data already in sync");
+                        SyncStatus = SyncStatus.Synced;
+                        SyncStatusMessage = "Synced";
+                        LastSynced = DateTime.UtcNow;
+                        SyncCompleted?.Invoke(this, EventArgs.Empty);
+                        return;
+                    case > 0:
+                        logger?.LogInformation("Local data is newer, updating server");
+                        await HandleLocalNewer(localCopy, url);
+                        break;
+                    default:
+                        logger?.LogInformation("Server data is newer, updating local");
+                        await HandleServerNewer(localCopy, userResponse);
+                        break;
                 }
 
                 SyncStatus = SyncStatus.Synced;
@@ -259,11 +254,11 @@ namespace GoatVaultClient.Services
                 LastSynced = DateTime.UtcNow;
                 SyncCompleted?.Invoke(this, EventArgs.Empty);
 
-                _logger?.LogInformation("Sync completed successfully");
+                logger?.LogInformation("Sync completed successfully");
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Sync failed");
+                logger?.LogError(ex, "Sync failed");
                 SyncStatus = SyncStatus.Failed;
                 SyncStatusMessage = "Sync failed";
                 SyncFailed?.Invoke(this, new SyncFailedEventArgs(ex));
@@ -276,31 +271,31 @@ namespace GoatVaultClient.Services
 
         public async Task Save()
         {
-            if (_vaultSessionService.CurrentUser == null || _vaultSessionService.DecryptedVault == null)
+            if (vaultSessionService.CurrentUser == null || vaultSessionService.DecryptedVault == null)
             {
-                _logger?.LogWarning("Cannot save: No user logged in");
+                logger?.LogWarning("Cannot save: No user logged in");
                 return;
             }
 
             try
             {
-                _logger?.LogInformation("Saving vault locally");
+                logger?.LogInformation("Saving vault locally");
 
                 var updatedVault = new VaultData
                 {
-                    Categories = _vaultSessionService.DecryptedVault.Categories,
-                    Entries = _vaultSessionService.DecryptedVault.Entries
+                    Categories = vaultSessionService.DecryptedVault.Categories,
+                    Entries = vaultSessionService.DecryptedVault.Entries
                 };
 
-                var encryptedVault = _vaultService.EncryptVault(_vaultSessionService.MasterPassword, updatedVault);
+                var encryptedVault = vaultService.EncryptVault(vaultSessionService.MasterPassword, updatedVault);
 
-                var localUser = await _vaultService.LoadUserFromLocalAsync(_vaultSessionService.CurrentUser.Id);
+                var localUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
-                localUser.Email = _vaultSessionService.CurrentUser.Email;
+                localUser.Email = vaultSessionService.CurrentUser.Email;
                 localUser.Vault = encryptedVault;
                 localUser.UpdatedAt = DateTime.UtcNow;
 
-                await _vaultService.UpdateUserInLocalAsync(localUser);
+                await vaultService.UpdateUserInLocalAsync(localUser);
 
                 LastSaved = DateTime.UtcNow;
                 MarkedAsChanged = true;
@@ -308,11 +303,11 @@ namespace GoatVaultClient.Services
                 SyncStatus = SyncStatus.Unsynced;
                 SyncStatusMessage = "Changes pending";
 
-                _logger?.LogInformation("Vault saved successfully");
+                logger?.LogInformation("Vault saved successfully");
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Failed to save vault");
+                logger?.LogError(ex, "Failed to save vault");
             }
         }
 
@@ -330,56 +325,56 @@ namespace GoatVaultClient.Services
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Periodic sync failed");
+                logger?.LogError(ex, "Periodic sync failed");
             }
         }
 
         private async Task HandleLocalNewer(DbModel localCopy, string url)
         {
-            var decryptedLocalVault = _vaultService.DecryptVault(localCopy.Vault, _vaultSessionService.MasterPassword);
+            var decryptedLocalVault = vaultService.DecryptVault(localCopy.Vault, vaultSessionService.MasterPassword);
 
-            _vaultSessionService.CurrentUser.Id = localCopy.Id;
-            _vaultSessionService.CurrentUser.Email = localCopy.Email;
-            _vaultSessionService.CurrentUser.MfaEnabled = localCopy.MfaEnabled;
-            _vaultSessionService.CurrentUser.MfaSecret = localCopy.MfaSecret;
-            _vaultSessionService.CurrentUser.UpdatedAt = localCopy.UpdatedAt;
-            _vaultSessionService.CurrentUser.CreatedAt = localCopy.CreatedAt;
-            _vaultSessionService.CurrentUser.Vault = localCopy.Vault;
-            _vaultSessionService.DecryptedVault = decryptedLocalVault;
+            vaultSessionService.CurrentUser.Id = localCopy.Id;
+            vaultSessionService.CurrentUser.Email = localCopy.Email;
+            vaultSessionService.CurrentUser.MfaEnabled = localCopy.MfaEnabled;
+            vaultSessionService.CurrentUser.MfaSecret = localCopy.MfaSecret;
+            vaultSessionService.CurrentUser.UpdatedAt = localCopy.UpdatedAt;
+            vaultSessionService.CurrentUser.CreatedAt = localCopy.CreatedAt;
+            vaultSessionService.CurrentUser.Vault = localCopy.Vault;
+            vaultSessionService.DecryptedVault = decryptedLocalVault;
 
             await UpdateFromLocalToServer(url);
         }
 
         private async Task HandleServerNewer(DbModel localCopy, UserResponse userResponse)
         {
-            var decryptedServerVault = _vaultService.DecryptVault(userResponse.Vault, _vaultSessionService.MasterPassword);
+            var decryptedServerVault = vaultService.DecryptVault(userResponse.Vault, vaultSessionService.MasterPassword);
 
-            _vaultSessionService.CurrentUser.Id = userResponse.Id;
-            _vaultSessionService.CurrentUser.Email = userResponse.Email;
-            _vaultSessionService.CurrentUser.MfaEnabled = userResponse.MfaEnabled;
-            _vaultSessionService.CurrentUser.MfaSecret = userResponse.MfaSecret;
-            _vaultSessionService.CurrentUser.UpdatedAt = userResponse.UpdatedAt;
-            _vaultSessionService.CurrentUser.CreatedAt = userResponse.CreatedAt;
-            _vaultSessionService.CurrentUser.Vault = userResponse.Vault;
-            _vaultSessionService.DecryptedVault = decryptedServerVault;
+            vaultSessionService.CurrentUser.Id = userResponse.Id;
+            vaultSessionService.CurrentUser.Email = userResponse.Email;
+            vaultSessionService.CurrentUser.MfaEnabled = userResponse.MfaEnabled;
+            vaultSessionService.CurrentUser.MfaSecret = userResponse.MfaSecret;
+            vaultSessionService.CurrentUser.UpdatedAt = userResponse.UpdatedAt;
+            vaultSessionService.CurrentUser.CreatedAt = userResponse.CreatedAt;
+            vaultSessionService.CurrentUser.Vault = userResponse.Vault;
+            vaultSessionService.DecryptedVault = decryptedServerVault;
 
             await UpdateFromServerToLocal(localCopy, userResponse);
         }
 
         private async Task UpdateFromLocalToServer(string url)
         {
-            var encryptedVault = _vaultService.EncryptVault(_vaultSessionService.MasterPassword, _vaultSessionService.DecryptedVault);
+            var encryptedVault = vaultService.EncryptVault(vaultSessionService.MasterPassword, vaultSessionService.DecryptedVault);
 
             var updateUserRequest = new UserRequest
             {
-                Email = _vaultSessionService.CurrentUser.Email,
-                MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled,
-                MfaSecret = _vaultSessionService.CurrentUser.MfaSecret,
+                Email = vaultSessionService.CurrentUser.Email,
+                MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
+                MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
                 Vault = encryptedVault,
             };
 
-            await _httpService.PatchAsync<UserResponse>(
-                $"{url}v1/users/{_vaultSessionService.CurrentUser.Id}",
+            await httpService.PatchAsync<UserResponse>(
+                $"{url}v1/users/{vaultSessionService.CurrentUser.Id}",
                 updateUserRequest
             );
         }
@@ -390,7 +385,7 @@ namespace GoatVaultClient.Services
             localData.Vault = serverData.Vault;
             localData.UpdatedAt = serverData.UpdatedAt;
 
-            await _vaultService.UpdateUserInLocalAsync(localData);
+            await vaultService.UpdateUserInLocalAsync(localData);
         }
 
         #endregion
@@ -404,14 +399,9 @@ namespace GoatVaultClient.Services
         Failed
     }
 
-    public class SyncFailedEventArgs : EventArgs
+    public class SyncFailedEventArgs(Exception exception) : EventArgs
     {
-        public Exception Exception { get; }
+        public Exception Exception { get; } = exception;
         public string ErrorMessage => Exception?.Message ?? "Unknown error";
-
-        public SyncFailedEventArgs(Exception exception)
-        {
-            Exception = exception;
-        }
     }
 }

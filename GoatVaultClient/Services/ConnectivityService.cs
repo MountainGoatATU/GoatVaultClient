@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.Services;
 
@@ -7,14 +7,17 @@ namespace GoatVaultClient.Services;
 /// </summary>
 public class ConnectivityService : IDisposable
 {
+    private readonly ILogger<ConnectivityService>? _logger;
     private bool _isDisposed;
 
     public event EventHandler<bool>? ConnectivityChanged;
 
     public bool IsConnected { get; private set; }
 
-    public ConnectivityService()
+    public ConnectivityService(ILogger<ConnectivityService>? logger = null)
     {
+        _logger = logger;
+
         // Set initial state
         IsConnected = Connectivity.Current.NetworkAccess == NetworkAccess.Internet;
 
@@ -30,7 +33,7 @@ public class ConnectivityService : IDisposable
         if (wasConnected == IsConnected)
             return;
 
-        Debug.WriteLine($"Connectivity changed: {IsConnected}");
+        _logger?.LogInformation("Connectivity changed: {IsConnected}", IsConnected);
         ConnectivityChanged?.Invoke(this, IsConnected);
     }
 
@@ -47,7 +50,7 @@ public class ConnectivityService : IDisposable
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error checking connectivity: {ex.Message}");
+            _logger?.LogError(ex, "Error checking connectivity");
             return false;
         }
     }

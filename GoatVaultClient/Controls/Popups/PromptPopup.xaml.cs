@@ -33,13 +33,27 @@ public partial class PromptPopup : PopupPage
 
     private async void OnAccept()
     {
-        _tcs.TrySetResult(true);
-        await MopupService.Instance.PopAsync();
+        try
+        {
+            _tcs.TrySetResult(true);
+            await MopupService.Instance.PopAsync();
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
     }
 
     private async void OnCancel()
     {
-        _tcs.TrySetResult(false);
-        await MopupService.Instance.PopAsync();
+        try
+        {
+            _tcs.TrySetResult(false);
+            await MopupService.Instance.PopAsync();
+        }
+        catch (Exception e)
+        {
+            throw; // TODO handle exception
+        }
     }
 }

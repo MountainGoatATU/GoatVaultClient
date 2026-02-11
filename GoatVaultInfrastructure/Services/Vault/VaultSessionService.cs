@@ -17,7 +17,7 @@ public class VaultSessionService : IVaultSessionService
     public event Action? VaultEntriesChanged;
     public event Action? MasterPasswordChanged;
 
-    public List<VaultEntry> VaultEntries => DecryptedVault?.Entries.ToList() ?? new();
+    public List<VaultEntry> VaultEntries => DecryptedVault?.Entries.ToList() ?? [];
 
     // CRUD methods for vault entries
     public void AddEntry(VaultEntry entry)
