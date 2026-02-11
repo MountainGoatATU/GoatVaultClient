@@ -40,7 +40,7 @@ namespace GoatVaultClient.Services
             }
             try
             {
-                logger?.LogInformation("Login attempt for {Email}", email);
+                logger?.LogInformation("Login attempt initiated.");
                 // Use GetSection and check for null or empty value to avoid CS8600
                 var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
                 var url = urlSection.Value;
@@ -129,27 +129,27 @@ namespace GoatVaultClient.Services
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                logger?.LogWarning("Login failed for {Email}: unauthorized", email);
+                logger?.LogWarning("Login failed: unauthorized");
                 await Shell.Current.DisplayAlertAsync("Login Failed", "Invalid email or password (or MFA code). Please try again.", "OK");
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                logger?.LogWarning("Login failed for {Email}: account not found", email);
+                logger?.LogWarning("Login failed: account not found");
                 await Shell.Current.DisplayAlertAsync("Account Not Found", "No account found with this email address.", "OK");
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
-                logger?.LogWarning("Login failed for {Email}: bad request", email);
+                logger?.LogWarning("Login failed: bad request");
                 await Shell.Current.DisplayAlertAsync("Invalid Request", "Please check your email and password.", "OK");
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
-                logger?.LogWarning("Login failed for {Email}: conflict", email);
+                logger?.LogWarning("Login failed: conflict");
                 await Shell.Current.DisplayAlertAsync("Error", "This email is already registered.", "OK");
             }
             catch (HttpRequestException httpEx)
             {
-                logger?.LogError(httpEx, "Login connection error for {Email}", email);
+                logger?.LogError(httpEx, "Login connection error");
                 // Network-related errors
                 await Shell.Current.DisplayAlertAsync(
                     "Connection Error",
@@ -158,7 +158,7 @@ namespace GoatVaultClient.Services
             }
             catch (TaskCanceledException)
             {
-                logger?.LogWarning("Login timed out for {Email}", email);
+                logger?.LogWarning("Login timed out");
                 // Timeout errors
                 await Shell.Current.DisplayAlertAsync(
                     "Timeout",
@@ -167,7 +167,7 @@ namespace GoatVaultClient.Services
             }
             catch (InvalidOperationException ex) when (ex.Message.Contains("decrypt"))
             {
-                logger?.LogError(ex, "Vault decryption failed during login for {Email}", email);
+                logger?.LogError(ex, "Vault decryption failed during login");
                 await Shell.Current.DisplayAlertAsync(
                     "Decryption Error",
                     "Unable to decrypt your vault. This may indicate a data corruption issue.",
@@ -175,7 +175,7 @@ namespace GoatVaultClient.Services
             }
             catch (Exception ex)
             {
-                logger?.LogError(ex, "Unexpected error during login for {Email}", email);
+                logger?.LogError(ex, "Unexpected error during login");
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
 
