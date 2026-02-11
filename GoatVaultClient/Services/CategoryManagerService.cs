@@ -29,11 +29,7 @@ public class CategoryManagerService(
             // Add to global list
             vaultSessionService.DecryptedVault?.Categories.Add(temp);
 
-            // Save the changes
-            if (syncingService.HasAutoSave)
-            {
-                await syncingService.Save();
-            }
+            await syncingService.AutoSaveIfEnabled();
 
             return true;
         }
@@ -104,11 +100,7 @@ public class CategoryManagerService(
             pwd.Category = reassign ? response : string.Empty;
         }
 
-        // Save the changes
-        if (syncingService.HasAutoSave)
-        {
-            await syncingService.Save();
-        }
+        await syncingService.AutoSaveIfEnabled();
 
         return true;
     }
@@ -159,10 +151,7 @@ public class CategoryManagerService(
         categories?.Remove(target);
 
         // Save the changes
-        if (syncingService.HasAutoSave)
-        {
-            await syncingService.Save();
-        }
+        await syncingService.AutoSaveIfEnabled();
 
         return true;
     }
