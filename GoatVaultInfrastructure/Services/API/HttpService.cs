@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using GoatVaultCore.Models.API;
-using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -20,9 +19,9 @@ public interface IHttpService
 // Use of primary constructor to inject HttpClient dependency
 public class HttpService(HttpClient client, AuthTokenService authTokenService, JwtUtils jwtUtils, IConfiguration configuration, ILogger<HttpService>? logger = null) : IHttpService
 {
-    private readonly HttpClient _client = client;
     private readonly AuthTokenService _authTokenService = authTokenService;
     private readonly JwtUtils _jwtUtils = jwtUtils;
+    private readonly IConfiguration _configuration = configuration;
 
     // JSON serialization options
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -42,39 +41,13 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, J
 
             // Attach Authorization header if token exists
             var token = _authTokenService.GetToken();
-            
-            // If no token is found, throw an exception to indicate the user needs to log in
+
+            // Get Refresh Token
             if (!string.IsNullOrEmpty(token))
             {
-                // Convert token string to JwtSecurityToken to check expiration
-                var convertedToken = _jwtUtils.ConvertJwtStringToJwtSecurityToken(token);
-                
-                // Decode the token to extract claims and other info
-                var decodedToken = _jwtUtils.DecodeToken(convertedToken);
-                
-                // Check if the token has expired
-                if (decodedToken.Expiration < DateTime.UtcNow)
-                {
-                    // Clear access token
-                    _authTokenService.ClearToken();
-                    // Call refresh token endpoint to get new tokens
-                    var refreshPayload = new
-                    {
-                        refresh_token = _authTokenService.GetRefreshToken()
-                    };
-                    var refreshResponse = await PostAsync<AuthRefreshResponse>(
-                        $"{url}v1/auth/refresh",
-                        refreshPayload
-                    );
-                    // Update tokens in AuthTokenService
-                    if (refreshResponse != null)
-                    {
-                        _authTokenService.SetToken(refreshResponse.AccessToken);
-                        _authTokenService.SetRefreshToken(refreshResponse.RefreshToken);
-                        token = refreshResponse.AccessToken; // Update token variable for use in header
-                    }
-                }
+                await GetRefreshToken(token);
             }
+
             if (!string.IsNullOrWhiteSpace(token))
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -171,4 +144,37 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, J
     public Task<T> PostAsync<T>(string url, object payload) => SendAsync<T>(HttpMethod.Post, url, payload);
     public Task<T> PatchAsync<T>(string url, object payload) => SendAsync<T>(HttpMethod.Patch, url, payload);
     public Task<T> DeleteAsync<T>(string url) => SendAsync<T>(HttpMethod.Delete, url);
+    private async Task GetRefreshToken(string token)
+    {
+        // If no token is found, throw an exception to indicate the user needs to log in
+        if (!string.IsNullOrEmpty(token))
+        {
+            // Convert token string to JwtSecurityToken to check expiration
+            var convertedToken = _jwtUtils.ConvertJwtStringToJwtSecurityToken(token);
+
+            // Decode the token to extract claims and other info
+            var decodedToken = _jwtUtils.DecodeToken(convertedToken);
+
+            // Check if the token has expired
+            if (decodedToken.Expiration < DateTime.UtcNow)
+            {
+                // Clear access token
+                _authTokenService.ClearToken();
+                // Call refresh token endpoint to get new tokens
+                var refreshPayload = new AuthRefreshRequest
+                {
+                    RefreshToken = _authTokenService.GetRefreshToken()
+                };
+                var refreshResponse = await PostAsync<AuthRefreshResponse>(
+                    $"{_configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value}v1/auth/refresh",
+                    refreshPayload
+                );
+
+                // Update tokens in AuthTokenService
+                _authTokenService.SetToken(refreshResponse.AccessToken);
+                _authTokenService.SetRefreshToken(refreshResponse.RefreshToken);
+                token = refreshResponse.AccessToken; // Update token variable for use in header
+            }
+        }
+    }
 }
