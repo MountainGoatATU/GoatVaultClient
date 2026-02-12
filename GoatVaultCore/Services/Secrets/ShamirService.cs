@@ -1,68 +1,132 @@
-﻿using System.Numerics;
-using System.Text;
-using SecretSharingDotNet.Cryptography;
+﻿using GoatVaultCore.Models;
+using GoatVaultCore.Services.Secrets;
+using SecretSharingDotNet.Cryptography.ShamirsSecretSharing;
 using SecretSharingDotNet.Math;
+using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
 
-namespace GoatVaultCore.Services.Secrets;
+namespace GoatVaultCore.Services;
 
-public interface IShamirService
+public sealed class EnvelopeSecretSharingService(IMnemonicEncoder encoder)
 {
-    List<string> CreateSecret(int threshold, int totalShares, string phrase);
-    string ReconstructSecret(string[] shareStrings);
-}
+    private const int KeySizeBytes = 32;  // AES-256
+    private const int NonceSizeBytes = 12; // AES-GCM standard
+    private const int TagSizeBytes = 16;   // AES-GCM standard
 
-public class ShamirService(
-    IMakeSharesUseCase<BigInteger> makeSharesUseCase,
-    IReconstructionUseCase<BigInteger> reconstructionUseCase)
-    : IShamirService
-{
-    private readonly IMakeSharesUseCase<BigInteger> _makeSharesUseCase = makeSharesUseCase;
-    private readonly IReconstructionUseCase<BigInteger> _reconstructionUseCase = reconstructionUseCase;
-
-    public List<string> CreateSecret(int threshold, int totalShares, string phrase)
+    /// <summary>
+    /// Splits a secret of any size into n mnemonic shares.
+    /// Returns the envelope (encrypted secret) and the list of mnemonic shares.
+    /// </summary>
+    public (Envelope Envelope, List<string> MnemonicShares) Split(
+        string secret, int totalShares, int threshold)
     {
+        byte[] secretBytes = Encoding.UTF8.GetBytes(secret);
+
+        // 1. Generate a random AES-256 key — this is the only thing we split
+        byte[] innerKey = RandomNumberGenerator.GetBytes(KeySizeBytes);
+
+        // 2. Encrypt the actual secret with the inner key
+        Envelope envelope = Encrypt(secretBytes, innerKey);
+
+        // 3. Split only the 32-byte inner key using Shamir
+        List<string> mnemonicShares = SplitKey(innerKey, totalShares, threshold);
+
+        // 4. Securely wipe the inner key from memory
+        CryptographicOperations.ZeroMemory(innerKey);
+
+        return (envelope, mnemonicShares);
+    }
+
+    /// <summary>
+    /// Recovers the secret given the envelope and enough mnemonic shares.
+    /// </summary>
+    public string Recover(Envelope envelope, List<string> mnemonicShares)
+    {
+        // 1. Reconstruct the inner key from shares
+        byte[] innerKey = RecoverKey(mnemonicShares);
+
         try
         {
-            var gcd = new ExtendedEuclideanAlgorithm<BigInteger>();
-
-            // TODO: Create Shamir's Secret Sharing instance with BigInteger
-            // var split = new ShamirsSecretSharing<BigInteger>(gcd);
-            // var shares = split.MakeShares(threshold, totalShares, phrase);
-            // var shareStrings = shares.Select(s => s.ToString()).ToList();
-            // return shareStrings;
-
-            // TODO: Temporary return
-            return [];
-
+            // 2. Decrypt the envelope
+            byte[] secretBytes = Decrypt(envelope, innerKey);
+            return Encoding.UTF8.GetString(secretBytes);
         }
-        catch (Exception ex)
+        finally
         {
-            throw new Exception("Error creating secret shares: " + ex.Message);
+            CryptographicOperations.ZeroMemory(innerKey);
         }
     }
 
-    public string ReconstructSecret(string[] shareStrings)
+    private Envelope Encrypt(byte[] plaintext, byte[] key)
     {
-        try
+        byte[] nonce = RandomNumberGenerator.GetBytes(NonceSizeBytes);
+        byte[] ciphertext = new byte[plaintext.Length];
+        byte[] tag = new byte[TagSizeBytes];
+
+        using var aes = new AesGcm(key, TagSizeBytes);
+        aes.Encrypt(nonce, plaintext, ciphertext, tag);
+
+        return new Envelope
         {
-            var gcd = new ExtendedEuclideanAlgorithm<BigInteger>();
+            Nonce = nonce,
+            Tag = tag,
+            Ciphertext = ciphertext
+        };
+    }
 
-            // TODO: Create Shamir's Secret Sharing instance with BigInteger
-            // var combine = new ShamirsSecretSharing<BigInteger>(gcd);
+    private byte[] Decrypt(Envelope envelope, byte[] key)
+    {
+        byte[] plaintext = new byte[envelope.Ciphertext.Length];
 
-            // TODO: Obsolete method
-            var reconstructedSecret = _reconstructionUseCase.Reconstruction(shareStrings);
+        using var aes = new AesGcm(key, TagSizeBytes);
+        aes.Decrypt(envelope.Nonce, envelope.Ciphertext, envelope.Tag, plaintext);
 
-            var bytes = reconstructedSecret.ToByteArray();
-            var tempString = Encoding.UTF8.GetString(bytes);
+        return plaintext;
+    }
 
-            var originalString = tempString.Replace("\0", "");
+    private List<string> SplitKey(byte[] key, int totalShares, int threshold)
+    {
+        var splitter = new SecretSplitter<BigInteger>();
 
-            return originalString;
-        }
-        catch (Exception ex)
+        // Convert the 32-byte key to a hex string for SecretSharingDotNet
+        string keyHex = Convert.ToHexString(key);
+
+        var shares = splitter.MakeShares(
+            (BigInteger)threshold,
+            (BigInteger)totalShares,
+            keyHex);
+
+        string fullShareString = shares.ToString();
+        var parts = fullShareString.Split('-');
+        string thresholdStr = parts[0];
+
+        var mnemonicShares = new List<string>();
+        for (int i = 1; i < parts.Length; i++)
         {
-            throw new Exception("Error reconstructing secret: " + ex.Message);
+            string individualShare = $"{thresholdStr}-{parts[i]}";
+            byte[] shareBytes = Encoding.UTF8.GetBytes(individualShare);
+            string mnemonic = encoder.Encode(shareBytes);
+            mnemonicShares.Add(mnemonic);
         }
+
+        return mnemonicShares;
+    }
+
+    private byte[] RecoverKey(List<string> mnemonicShares)
+    {
+        var gcd = new ExtendedEuclideanAlgorithm<BigInteger>();
+        var combiner = new SecretReconstructor<BigInteger>(gcd);
+
+        var decodedParts = mnemonicShares
+            .Select(m => Encoding.UTF8.GetString(encoder.Decode(m)))
+            .ToList();
+
+        string threshold = decodedParts[0].Split('-')[0];
+        var xyParts = decodedParts.Select(s => s.Split('-')[1]);
+        string combined = $"{threshold}-{string.Join("-", xyParts)}";
+
+        var reconstructed = combiner.Reconstruction(combined);
+        return Convert.FromHexString(reconstructed.ToString());
     }
 }

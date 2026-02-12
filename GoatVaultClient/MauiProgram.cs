@@ -107,8 +107,6 @@ public static class MauiProgram
         // builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
         // builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
 
-        builder.Services.AddTransient<ShamirService>();
-
 
         // UraniumUI dialogs
         builder.Services.AddMopupsDialogs();
