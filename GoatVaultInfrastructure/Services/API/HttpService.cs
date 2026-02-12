@@ -44,7 +44,7 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, J
             var token = _authTokenService.GetToken();
             
             // If no token is found, throw an exception to indicate the user needs to log in
-            if (token != null)
+            if (!string.IsNullOrEmpty(token))
             {
                 // Convert token string to JwtSecurityToken to check expiration
                 var convertedToken = _jwtUtils.ConvertJwtStringToJwtSecurityToken(token);
