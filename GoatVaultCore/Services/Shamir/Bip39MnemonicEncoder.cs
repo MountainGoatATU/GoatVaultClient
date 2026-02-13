@@ -1,7 +1,15 @@
 ﻿using System.Collections;
 
-namespace GoatVaultCore.Services.Secrets
+namespace GoatVaultCore.Services.Shamir
 {
+    /// <summary>
+    /// Converts between raw byte arrays and human-readable mnemonic word sequences.
+    /// </summary>
+    public interface IMnemonicEncoder
+    {
+        string Encode(byte[] data);
+        byte[] Decode(string mnemonic);
+    }
     public sealed class Bip39MnemonicEncoder : IMnemonicEncoder
     {
         private readonly string[] _wordList = [];
@@ -12,10 +20,10 @@ namespace GoatVaultCore.Services.Secrets
 
         public Bip39MnemonicEncoder(string[] wordList)
         {
+            _wordList = wordList;
             if (_wordList.Length != WordListSize)
                 throw new ArgumentException($"Word list must contain exactly {WordListSize} words.");
             
-            _wordList = wordList;
             _wordIndex = new Dictionary<string, int>(WordListSize, StringComparer.OrdinalIgnoreCase);
             for (int i = 0; i < wordList.Length; i++)
             {
@@ -27,7 +35,7 @@ namespace GoatVaultCore.Services.Secrets
         {
             ArgumentNullException.ThrowIfNull(data);
 
-            byte[] payload = new byte[data.Length + 1];
+            var payload = new byte[data.Length + 1];
             payload[0] = (byte)data.Length;
             Buffer.BlockCopy(data, 0, payload, 1, data.Length);
 
@@ -56,7 +64,7 @@ namespace GoatVaultCore.Services.Secrets
         {
             ArgumentNullException.ThrowIfNull(mnemonic);
 
-            string[] words = mnemonic.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var words = mnemonic.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             int totalBits = words.Length * BitsPerWord;
             var bits = new BitArray(totalBits);

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GoatVaultCore.Models
+﻿namespace GoatVaultCore.Models.Shamir
 {
     public sealed class SharePackage
     {

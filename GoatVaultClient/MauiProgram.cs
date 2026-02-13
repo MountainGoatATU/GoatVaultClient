@@ -103,10 +103,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<FakeDataSource>();
 
         // TODO: Fix Shamir services
-        builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
-        // builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
-        // builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
-
+        builder.Services.AddShamirSecretSharing();
 
         // UraniumUI dialogs
         builder.Services.AddMopupsDialogs();

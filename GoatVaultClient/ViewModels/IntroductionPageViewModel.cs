@@ -18,4 +18,17 @@ public partial class IntroductionPageViewModel(ILogger<IntroductionPageViewModel
             logger?.LogError(e, "Error navigating to login page");
         }
     }
+    [RelayCommand]
+    private async Task NavigateToSecretSharePage()
+    {
+        try
+        {
+            // Navigate to Login Page
+            await Shell.Current.GoToAsync("//splitKey");
+        }
+        catch (Exception e)
+        {
+            logger?.LogError(e, "Error navigating to login page");
+        }
+    }
 }

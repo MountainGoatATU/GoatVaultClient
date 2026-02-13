@@ -31,6 +31,17 @@
                 </material:ButtonView.GestureRecognizers>
             </material:ButtonView>
 
+            <material:ButtonView WidthRequest="220" HeightRequest="55" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
+                <material:ButtonView.StrokeShape>
+                    <RoundRectangle CornerRadius="27"/>
+                </material:ButtonView.StrokeShape>
+                <Label Text="Navigate to Secret Sharing" TextColor="White" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
+
+                <material:ButtonView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToSecretSharePageCommand}"/>
+                </material:ButtonView.GestureRecognizers>
+            </material:ButtonView>
+
         </VerticalStackLayout>
     </Grid>
 </ContentPage>
