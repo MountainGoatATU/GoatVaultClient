@@ -127,7 +127,7 @@ public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb,
 
         vaultSessionService.Lock();
     }
-    public async Task SaveVaultAsync (UserResponse? user, string password, VaultData? vaultData)
+    public async Task SaveVaultAsync(UserResponse? user, string password, VaultData? vaultData)
     {
         var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
 
@@ -166,13 +166,21 @@ public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb,
             if (existingUser != null)
             {
                 // Update local Vault
+                existingUser.Email = dbModel.Email;
+                existingUser.AuthSalt = dbModel.AuthSalt;
                 existingUser.Vault = dbModel.Vault;
+                existingUser.MfaEnabled = dbModel.MfaEnabled;
+                existingUser.MfaSecret = dbModel.MfaSecret;
+                existingUser.UpdatedAt = dbModel.UpdatedAt;
+                existingUser.CreatedAt = dbModel.CreatedAt;
+
                 goatVaultDb.LocalCopy.Update(existingUser);
+
                 // Sync with server
-                var userResponse = await httpService.PatchAsync<UserResponse>(
-                $"{url}v1/users/{ vaultSessionService.CurrentUser?.Id}",
-                userRequest
-            );
+                await httpService.PatchAsync<UserResponse>(
+                    $"{url}v1/users/{ vaultSessionService.CurrentUser?.Id}",
+                    userRequest
+                );
             }
             else
             {
