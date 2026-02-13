@@ -93,8 +93,10 @@ public partial class LoginPageViewModel(
     private async Task LoadLocalAccountsAsync()
     {
         LocalAccounts.Clear();
-        LocalAccounts = await authenticationService.GetAllLocalAccountsAsync()
-            .ContinueWith(t => new ObservableCollection<DbModel>(t.Result));
+
+        var accounts = await authenticationService.GetAllLocalAccountsAsync();
+        LocalAccounts = new ObservableCollection<DbModel>(accounts);
+
         if (LocalAccounts.Count != 0)
         {
             HasLocalAccounts = true;

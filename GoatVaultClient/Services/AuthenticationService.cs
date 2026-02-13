@@ -115,11 +115,29 @@ namespace GoatVaultClient.Services
                     $"{url}v1/users/{initResponse.UserId}"
                 );
 
+                if (userResponse == null)
+                    throw new InvalidOperationException("Failed to load user profile");
+
                 // Set the current user
                 vaultSessionService.CurrentUser = userResponse;
 
                 // Sync Local DB (Delete old if exists, save new)
-                var existingUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
+                var existingUser = await vaultService.LoadUserFromLocalAsync(userResponse.Id);
+
+                if (existingUser == null)
+                {
+                    await vaultService.SaveUserToLocalAsync(new DbModel
+                    {
+                        Id = userResponse.Id,
+                        Email = userResponse.Email,
+                        AuthSalt = userResponse.AuthSalt,
+                        MfaEnabled = userResponse.MfaEnabled,
+                        MfaSecret = userResponse.MfaSecret,
+                        Vault = userResponse.Vault,
+                        CreatedAt = userResponse.CreatedAt,
+                        UpdatedAt = userResponse.UpdatedAt
+                    });
+                }
 
                 // Decrypt & Store Session
                 vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, password);
@@ -389,7 +407,8 @@ namespace GoatVaultClient.Services
                 await syncingService.Save();
 
                 // Clear auth token
-                authTokenService.SetToken(string.Empty);
+                authTokenService.ClearToken();
+                authTokenService.ClearRefreshToken();
 
                 // Lock session
                 vaultSessionService.Lock();

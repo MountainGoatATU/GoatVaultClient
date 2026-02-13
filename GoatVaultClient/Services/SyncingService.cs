@@ -162,7 +162,7 @@ namespace GoatVaultClient.Services
                 return;
             }
 
-            _periodicSyncTimer = new System.Threading.Timer(
+            _periodicSyncTimer = new Timer(
                 async void (_) =>
                 {
                     try
@@ -204,7 +204,7 @@ namespace GoatVaultClient.Services
 
             var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
 
-            if (vaultSessionService.CurrentUser == null && vaultSessionService.DecryptedVault == null)
+            if (vaultSessionService.CurrentUser == null || vaultSessionService.DecryptedVault == null)
             {
                 logger?.LogWarning("No user is currently logged in");
                 return;
@@ -219,14 +219,33 @@ namespace GoatVaultClient.Services
 
                 logger?.LogInformation("Starting sync operation");
 
-                var localCopy = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
+                var localCopy = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser?.Id ?? throw new NullReferenceException());
 
                 var userResponse = await httpService.GetAsync<UserResponse>(
                     $"{url}v1/users/{vaultSessionService.CurrentUser.Id}"
                 );
 
-                if (userResponse == null || localCopy == null)
-                    throw new InvalidOperationException("Failed to retrieve user data to compare");
+                if (userResponse == null)
+                    throw new InvalidOperationException("Failed to load user profile");
+
+                if (localCopy == null)
+                {
+                    logger?.LogInformation("Local copy missing - pulling server copy");
+
+                    await vaultService.SaveUserToLocalAsync(new DbModel
+                    {
+                        Id = userResponse.Id,
+                        Email = userResponse.Email,
+                        Vault = userResponse.Vault,
+                        AuthSalt = userResponse.AuthSalt,
+                        UpdatedAt = userResponse.UpdatedAt,
+                        CreatedAt = userResponse.CreatedAt,
+                        MfaEnabled = userResponse.MfaEnabled,
+                        MfaSecret = userResponse.MfaSecret
+                    });
+
+                    return;
+                }
 
                 var compareResult = DateTime.Compare(localCopy.UpdatedAt, userResponse.UpdatedAt);
 
@@ -290,6 +309,9 @@ namespace GoatVaultClient.Services
                 var encryptedVault = vaultService.EncryptVault(vaultSessionService.MasterPassword, updatedVault);
 
                 var localUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
+
+                if (localUser == null)
+                    throw new InvalidOperationException("Local user missing during save");
 
                 localUser.Email = vaultSessionService.CurrentUser.Email;
                 localUser.Vault = encryptedVault;
