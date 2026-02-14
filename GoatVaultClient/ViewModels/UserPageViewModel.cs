@@ -79,8 +79,7 @@ namespace GoatVaultClient.ViewModels
             var score = VaultScoreCalculatorService.CalculateScore(
                 _vaultSessionService.VaultEntries,
                 _vaultSessionService.MasterPassword,
-                user.MfaEnabled,
-                breachedPasswordsCount: 0);
+                user.MfaEnabled);
 
             VaultScore = score.VaultScore;
             MasterPasswordStrength = $"{score.MasterPasswordPercent}%";
@@ -88,7 +87,6 @@ namespace GoatVaultClient.ViewModels
             ReuseRateText = $"{score.ReuseRatePercent}%";
             BreachesText = $"{score.BreachesCount}";
             MfaStatusText = score.MfaEnabled ? "Enabled" : "Disabled";
-
             VaultTierText = GetVaultTier(VaultScore);
         }
 
@@ -242,7 +240,8 @@ namespace GoatVaultClient.ViewModels
                 _vaultSessionService.CurrentUser?.MfaEnabled = true;
                 _vaultSessionService.CurrentUser?.MfaSecret = secret;
                 MfaEnabled = true;
-
+                RefreshVaultScore();
+                
                 await MopupService.Instance.PushAsync(new PromptPopup(
                     title: "MFA Enabled",
                     body: "Two-factor authentication has been successfully enabled for your account.",
@@ -406,6 +405,7 @@ namespace GoatVaultClient.ViewModels
                 _vaultSessionService.CurrentUser?.MfaEnabled = false;
                 _vaultSessionService.CurrentUser?.MfaSecret = null;
                 MfaEnabled = false;
+                RefreshVaultScore();
 
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {

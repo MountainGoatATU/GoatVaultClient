@@ -1,5 +1,6 @@
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Services.Secrets;
 using GoatVaultInfrastructure.Services.Vault;
 using Mopups.Services;
 
@@ -7,7 +8,8 @@ namespace GoatVaultClient.Services;
 
 public class VaultEntryManagerService(
     VaultSessionService vaultSessionService,
-    ISyncingService syncingService)
+    ISyncingService syncingService,
+    PwnedPasswordService pwnedPasswordService)
 {
     public async Task<bool> CreateEntryAsync(IEnumerable<CategoryItem> categories)
     {
@@ -42,6 +44,11 @@ public class VaultEntryManagerService(
             HasMfa = formModel.HasMfa
         };
 
+        if (!string.IsNullOrEmpty(newEntry.Password))
+        {
+            newEntry.BreachCount = await pwnedPasswordService.CheckPasswordAsync(newEntry.Password);
+        }
+
         // Add to list
         vaultSessionService.DecryptedVault?.Entries.Add(newEntry);
 
@@ -57,7 +64,6 @@ public class VaultEntryManagerService(
     {
         if (target == null) return false;
 
-        // Find the index of the entry in the vault
         var entries = vaultSessionService.DecryptedVault?.Entries;
         if (entries == null) return false;
 
@@ -66,7 +72,6 @@ public class VaultEntryManagerService(
 
         var categoriesList = categories.ToList();
 
-        // Temp model to hold existing data
         var formModel = new VaultEntryForm(categoriesList)
         {
             UserName = target.UserName,
@@ -78,21 +83,17 @@ public class VaultEntryManagerService(
             HasMfa = target.HasMfa
         };
 
-        // Create the dialog
         var dialog = new VaultEntryDialog(formModel);
 
-        // Push the dialog to MopupService
         await MopupService.Instance.PushAsync(dialog);
         await dialog.WaitForScan();
 
-        // Simple validation
         if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
         {
             return false;
         }
 
-        // Update the entry in the list
-        entries[index] = new VaultEntry
+        var updatedEntry = new VaultEntry
         {
             UserName = formModel.UserName,
             Site = formModel.Site,
@@ -103,6 +104,11 @@ public class VaultEntryManagerService(
             HasMfa = formModel.HasMfa
         };
 
+        {
+            updatedEntry.BreachCount = await pwnedPasswordService.CheckPasswordAsync(updatedEntry.Password);
+        }
+
+        entries[index] = updatedEntry;
         // Notify that entries changed
         vaultSessionService.RaiseVaultEntriesChanged();
 

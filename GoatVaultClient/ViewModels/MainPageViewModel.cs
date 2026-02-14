@@ -6,6 +6,7 @@ using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.Vault;
 using System.Collections.ObjectModel;
 using GoatVaultClient.Services;
+using GoatVaultCore.Services.Secrets;
 
 namespace GoatVaultClient.ViewModels
 {
@@ -38,6 +39,7 @@ namespace GoatVaultClient.ViewModels
         private readonly TotpManagerService _totpManagerService;
         private readonly CategoryManagerService _categoryManagerService;
         private readonly VaultEntryManagerService _vaultEntryManagerService;
+        private readonly PwnedPasswordService _pwnedPasswordService;
         public GoatTipsService GoatTipsService { get; }
 
         #endregion
@@ -48,7 +50,8 @@ namespace GoatVaultClient.ViewModels
             GoatTipsService goatTipsService,
             TotpManagerService totpManagerService,
             CategoryManagerService categoryManagerService,
-            VaultEntryManagerService vaultEntryManagerService)
+            VaultEntryManagerService vaultEntryManagerService,
+            PwnedPasswordService pwnedPasswordService)
         {
             // Dependency Injection
             _vaultSessionService = vaultSessionService;
@@ -58,6 +61,7 @@ namespace GoatVaultClient.ViewModels
             _totpManagerService = totpManagerService;
             _categoryManagerService = categoryManagerService;
             _vaultEntryManagerService = vaultEntryManagerService;
+            _pwnedPasswordService = pwnedPasswordService;
 
             LoadVaultData();
             StartRandomGoatComments();
