@@ -27,6 +27,7 @@ namespace GoatVaultClient.Services
         ConnectivityService connectivityService,
         VaultSessionService vaultSessionService,
         ISyncingService syncingService,
+        PwnedPasswordService pwnedPasswordService,
         ILogger<AuthenticationService>? logger = null
         ) : IAuthenticationService
     {
@@ -275,6 +276,24 @@ namespace GoatVaultClient.Services
                         "Unable to verify internet connection.",
                         "OK");
                     return;
+                }
+
+                // Check if password has been pwned
+                var pwnCount = await pwnedPasswordService.CheckPasswordAsync(password);
+                if (pwnCount > 0)
+                {
+                    var prompt = new PromptPopup(
+                        "Breached Password",
+                        $"The password you chose was found in breach databases {pwnCount} times. Do you want to continue with registration?",
+                        "Continue",
+                        "Choose another password"
+                    );
+                    await MopupService.Instance.PushAsync(prompt);
+                    var proceed = await prompt.WaitForScan();
+                    if (!proceed)
+                    {
+                        return;
+                    }
                 }
 
                 // Generate Auth Salt & Verifier
