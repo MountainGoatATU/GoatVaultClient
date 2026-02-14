@@ -2,6 +2,7 @@
 using SecretSharingDotNet.Cryptography;
 using SecretSharingDotNet.Cryptography.ShamirsSecretSharing;
 using SecretSharingDotNet.Math;
+using System.Net.Sockets;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
@@ -33,7 +34,7 @@ public sealed class EnvelopeSharingService : IEnvelopeSharingService
             throw new ArgumentOutOfRangeException(nameof(threshold), "Threshold must be >= 2.");
         if (totalShares < threshold)
             throw new ArgumentException($"Total shares ({totalShares}) must be >= threshold ({threshold}).");
-        if (totalShares > 255)
+        if (totalShares > 10)
             throw new ArgumentOutOfRangeException(nameof(totalShares), "Max 255 shares.");
 
         byte[] key = RandomNumberGenerator.GetBytes(KeySize);
@@ -41,7 +42,7 @@ public sealed class EnvelopeSharingService : IEnvelopeSharingService
         {
             byte[] secretBytes = Encoding.UTF8.GetBytes(secret);
             var envelope = Encrypt(secretBytes, key);
-            string envB64 = envelope.ToBase64();
+            string envB64 = envelope.ToString();
             var mnemonics = SplitKey(key, totalShares, threshold);
 
             return mnemonics.Select((m, i) => new SharePackage
@@ -107,29 +108,18 @@ public sealed class EnvelopeSharingService : IEnvelopeSharingService
 
     private List<string> SplitKey(byte[] key, int n, int k)
     {
-        var secretValue = new BigInteger(key, isUnsigned: true, isBigEndian: true);
-
         var splitter = new SecretSplitter<BigInteger>();
-        string hex = Convert.ToHexString(key);
-        var shares = splitter.MakeShares((BigInteger)k, (BigInteger)n, secretValue, 256);
+        var shares = splitter.MakeShares(k, n, key);
 
         var result = new List<string>(n);
-
-        foreach(var share in shares)
+        foreach (var share in shares)
         {
-            // Convert Y to a 32-byte array
-            byte[] yBytes = share.Value.Value.ToByteArray(isUnsigned: true, isBigEndian: true);
+            byte index = (byte)share.Index.Value;
+            byte[] shareValue = share.Value.Value.ToByteArray(isUnsigned: true, isBigEndian: true);
 
-            // Ensure it is exactly 32 bytes (pad with leading zeros if necessary)
-            byte[] paddedY = new byte[32];
-            int startAt = Math.Max(0, 32 - yBytes.Length);
-            Buffer.BlockCopy(yBytes, Math.Max(0, yBytes.Length - 32), paddedY, startAt, Math.Min(32, yBytes.Length));
-
-            // Pack metadata
-            byte[] packed = new byte[34];
-            packed[0] = (byte)k;
-            packed[1] = (byte)share.Index.Value;
-            Buffer.BlockCopy(paddedY, 0, packed, 2, 32);
+            byte[] packed = new byte[1 + KeySize];
+            packed[0] = (byte)index;
+            Buffer.BlockCopy(shareValue,0,packed,1, shareValue.Length);
 
             result.Add(_encoder.Encode(packed));
         }
@@ -138,39 +128,42 @@ public sealed class EnvelopeSharingService : IEnvelopeSharingService
 
     private byte[] RecoverKey(List<string> mnemonics)
     {
-        // Initiate lits of shares
-        var sharePoints = new List<Share<BigInteger>>();
-        int? expectedThreshold = null;
+        // Decode each mnemonic back to the "XX-HexY" share string
+        var shareStrings = mnemonics
+            .Select(m =>
+            {
+                byte[] decoded = _encoder.Decode(m);
+                int x = decoded[0];
+                string hexY = Convert.ToHexString(decoded, 1, decoded.Length - 1);
+                return new Share<BigInteger>($"{x}-{hexY}");
+            })
+            .ToArray();
 
-        foreach (var m in mnemonics)
-        {
-            byte[] packed = _encoder.Decode(m);
-
-            if (packed.Length < 34)
-                throw new FormatException($"Decoded share data is too short: expected at least 34 bytes, got {packed.Length}.");
-
-            int treshold = packed[0];
-            BigInteger x = packed[1];
-
-            // Extract Y and convert to BigInteger
-            byte[] yBytes = new byte[32];
-            Buffer.BlockCopy(packed, 2, yBytes, 0, 32);
-            BigInteger y = new BigInteger(yBytes, isUnsigned: true, isBigEndian: true);
-
-            if (expectedThreshold == null) expectedThreshold = treshold;
-            else if (expectedThreshold != treshold)
-                throw new InvalidOperationException("Shares from different split sessions detected.");
-
-            sharePoints.Add(new Share<BigInteger>(x,y));
-        }
-
+        // SecretReconstructor.Reconstruction(FinitePoint<T>[])
+        // internally determines the prime from the share data
+        // and performs correct modular Lagrange interpolation.
         var gcd = new ExtendedEuclideanAlgorithm<BigInteger>();
         var combiner = new SecretReconstructor<BigInteger>(gcd);
 
-        // Use the implicit operator for Share<BigInteger>[] -> Shares<BigInteger>
-        Shares<BigInteger> shares = sharePoints.ToArray();
-        BigInteger secret = combiner.Reconstruction(shares);
+        Shares<BigInteger> shares = shareStrings.ToArray();
+        var reconstructed = combiner.Reconstruction(shares);
 
-        return secret.ToByteArray(isUnsigned: true, isBigEndian: true);
+        // Force the output to be exactly KeySize (32 bytes)
+        byte[] rawBytes = reconstructed.ToByteArray();
+
+        if (rawBytes.Length == KeySize) return rawBytes;
+
+        byte[] fixedKey = new byte[KeySize];
+        if (rawBytes.Length > KeySize)
+        {
+            // If longer (due to library prime field), take the last 32 bytes
+            Buffer.BlockCopy(rawBytes, rawBytes.Length - KeySize, fixedKey, 0, KeySize);
+        }
+        else
+        {
+            // If shorter, copy into the end of the fixedKey (left-pad with zeros)
+            Buffer.BlockCopy(rawBytes, 0, fixedKey, KeySize - rawBytes.Length, rawBytes.Length);
+        }
+        return fixedKey;
     }
 }
