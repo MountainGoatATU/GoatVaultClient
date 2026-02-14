@@ -39,24 +39,28 @@ namespace GoatVaultCore.Services.Shamir
             payload[0] = (byte)data.Length;
             Buffer.BlockCopy(data, 0, payload, 1, data.Length);
 
-            var bits = new BitArray(payload);
-            int totalBits = bits.Length;
+            int totalBits = payload.Length * 8;
             int wordCount = (totalBits + BitsPerWord - 1) / BitsPerWord;
-
-            var words = new string[wordCount];
+            var words = new string[wordCount]; 
 
             for (int i = 0; i < wordCount; i++)
             {
-                int index = 0;
+                int bitOffset = i * BitsPerWord;
+                int value = 0;
+
                 for (int bit = 0; bit < BitsPerWord; bit++)
                 {
-                    int bitIndex = i * BitsPerWord + bit;
-                    if (bitIndex < totalBits && bits[bitIndex])
+                    int currentBit = bitOffset + bit;
+                    int byteIdx = currentBit / 8;
+                    int bitIdx = 7 - (currentBit % 8);
+
+                    if (byteIdx < payload.Length && (payload[byteIdx] & (1 << bitIdx)) != 0)
                     {
-                        index |= (1 << (BitsPerWord - 1 - bit));
+                        value |= (1 << (BitsPerWord - 1 - bit));
                     }
+                    
                 }
-                words[i] = _wordList[index];
+                words[i] = _wordList[value];
             }
             return string.Join(' ', words);
         }
@@ -65,34 +69,38 @@ namespace GoatVaultCore.Services.Shamir
             ArgumentNullException.ThrowIfNull(mnemonic);
 
             var words = mnemonic.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
             int totalBits = words.Length * BitsPerWord;
-            var bits = new BitArray(totalBits);
+            var buffer = new byte[(totalBits+7)/8];
 
             for (int i = 0; i < words.Length; i++)
             {
-                if (!_wordIndex.TryGetValue(words[i], out int index))
+               if (!_wordIndex.TryGetValue(words[i], out int wordValue))
                     throw new FormatException($"Unknown word in mnemonic: {words[i]}");
-
-                for (int bit = 0; bit < BitsPerWord; bit++)
+               int bitOffset = i * BitsPerWord;
+               for (int bit = 0; bit < BitsPerWord; bit++)
                 {
-                    if ((index & (1 << (BitsPerWord - 1 - bit))) !=0)
+                    if ((wordValue & (1 << (BitsPerWord-1 - bit))) != 0)
                     {
-                        bits[i * BitsPerWord + bit] = true;
+                        int currentBit = bitOffset + bit;
+                        int byteIdx = currentBit / 8;
+                        int bitIdx = 7 - (currentBit % 8);
+                        
+                        if (byteIdx < buffer.Length)
+                        {
+                            buffer[byteIdx] |= (byte)(1 << bitIdx);
+                        }
                     }
                 }
             }
 
-            // Convert bits back to bytes
-            int totalBytes = totalBits / 8;
-            byte[] allBytes = new byte[totalBytes];
-            bits.CopyTo(allBytes, 0);
+            if (buffer.Length == 0) throw new FormatException("Decoded data is empty.");
 
-            // First byte is the length of the original data
-            int originalLength = allBytes[0];
+            int originalLength = buffer[0];
+            if (originalLength > buffer.Length - 1)
+                throw new FormatException("Invalid original length in decoded data.");
+
             byte[] result = new byte[originalLength];
-            Buffer.BlockCopy(allBytes, 1, result, 0, originalLength);
-
+            Buffer.BlockCopy(buffer, 1, result, 0, originalLength);
             return result;
         }
     }
