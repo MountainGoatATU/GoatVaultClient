@@ -36,6 +36,7 @@ namespace GoatVaultClient.ViewModels
         private readonly VaultService _vaultService;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly GoatTipsService _goatTipsService;
+        private readonly PwnedPasswordService _pwnedPasswordService;
 
         public UserPageViewModel(
             HttpService httpService,
@@ -44,7 +45,8 @@ namespace GoatVaultClient.ViewModels
             VaultSessionService vaultSessionService,
             VaultService vaultService,
             Microsoft.Extensions.Configuration.IConfiguration configuration,
-            GoatTipsService goatTipsService)
+            GoatTipsService goatTipsService,
+            PwnedPasswordService pwnedPasswordService)
         {
             _httpService = httpService;
             _authTokenService = authTokenService;
@@ -53,6 +55,7 @@ namespace GoatVaultClient.ViewModels
             _vaultService = vaultService;
             _configuration = configuration;
             _goatTipsService = goatTipsService;
+            _pwnedPasswordService = pwnedPasswordService;
 
             _vaultSessionService.VaultEntriesChanged += RefreshVaultScore;
             _vaultSessionService.MasterPasswordChanged += RefreshVaultScore;
@@ -585,6 +588,26 @@ namespace GoatVaultClient.ViewModels
 
                 if (string.IsNullOrWhiteSpace(newPassword))
                     return;
+
+                // Check if password has been pwned
+                var pwnCount = await _pwnedPasswordService.CheckPasswordAsync(newPassword);
+                if (pwnCount > 0)
+                {
+                    var prompt = new PromptPopup(
+                        "Breached Password",
+                        $"The password you entered was found in breach databases {pwnCount} times. Do you want to continue?",
+                        "Continue",
+                        "Back"
+                    );
+
+                    await MopupService.Instance.PushAsync(prompt);
+                    var proceed = await prompt.WaitForScan();
+                    if (!proceed)
+                    {
+                        // user chose not to continue
+                        return;
+                    }
+                }
 
                 // Re-encrypt vault with new password
                 var newVaultModel = _vaultService.EncryptVault(newPassword, _vaultSessionService.DecryptedVault);

@@ -46,7 +46,25 @@ public class VaultEntryManagerService(
 
         if (!string.IsNullOrEmpty(newEntry.Password))
         {
-            newEntry.BreachCount = await pwnedPasswordService.CheckPasswordAsync(newEntry.Password);
+            newEntry.BreachCount = (int)await pwnedPasswordService.CheckPasswordAsync(newEntry.Password);
+            
+            // If breached, confirm with user before saving
+            if (newEntry.BreachCount > 0)
+            {
+                var prompt = new PromptPopup(
+                    "Breached Password",
+                    $"This password was found in breach databases {newEntry.BreachCount} times. Do you want to save it anyway?",
+                    "Save anyway",
+                    "Back"
+                );
+
+                await MopupService.Instance.PushAsync(prompt);
+                var keep = await prompt.WaitForScan();
+                if (!keep)
+                {
+                    return false;
+                }
+            }
         }
 
         // Add to list
@@ -105,7 +123,25 @@ public class VaultEntryManagerService(
         };
 
         {
-            updatedEntry.BreachCount = await pwnedPasswordService.CheckPasswordAsync(updatedEntry.Password);
+            updatedEntry.BreachCount = (int)await pwnedPasswordService.CheckPasswordAsync(updatedEntry.Password);
+
+            // If breached, confirm with user before saving
+            if (updatedEntry.BreachCount > 0)
+            {
+                var prompt = new PromptPopup(
+                    "Breached Password",
+                    $"This password was found in breach databases {updatedEntry.BreachCount} times. Do you want to save it anyway?",
+                    "Save anyway",
+                    "Back"
+                );
+
+                await MopupService.Instance.PushAsync(prompt);
+                var keep = await prompt.WaitForScan();
+                if (!keep)
+                {
+                    return false;
+                }
+            }
         }
 
         entries[index] = updatedEntry;
