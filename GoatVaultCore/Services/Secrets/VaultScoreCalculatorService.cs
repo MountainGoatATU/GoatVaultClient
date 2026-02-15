@@ -18,7 +18,8 @@ namespace GoatVaultCore.Services.Secrets
         public static VaultScoreDetails CalculateScore(
             IEnumerable<VaultEntry> entries,
             string masterPassword,
-            bool mfaEnabled)
+            bool mfaEnabled,
+            bool masterPasswordBreached = false)
         {
             int total = entries.Count();
             int breached = entries.Count(e => e.BreachCount > 0);
@@ -34,6 +35,13 @@ namespace GoatVaultCore.Services.Secrets
                 2 => 150,
                 _ => 0
             };
+
+            // If master password is breached, zero points
+            if (masterPasswordBreached)
+            {
+                foundationPoints = 0;
+                masterPercent = 0;
+            }
 
             // Passwords
             var passwordCount = 0;
