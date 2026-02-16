@@ -14,19 +14,20 @@ namespace GoatVaultClient.Services
     {
         public Task<bool> LoginAsync(string? email, string? password, Func<Task<string?>> mfaCodeProvider);
         public Task<bool> LoginOfflineAsync(string? email, string? password, DbModel? selectedAccount);
-        public Task RegisterAsync(string email, string? password, string? confirmPassword);
+        public Task<bool> RegisterAsync(string email, string? password, string? confirmPassword);
         public Task LogoutAsync();
         public Task<List<DbModel>> GetAllLocalAccountsAsync();
         public Task RemoveLocalAccountAsync(DbModel account);
     }
     public class AuthenticationService(
-        IConfiguration configuration,
+        IConfiguration configuration,   
         VaultService vaultService,
         AuthTokenService authTokenService,
         HttpService httpService,
         ConnectivityService connectivityService,
         VaultSessionService vaultSessionService,
         ISyncingService syncingService,
+        PwnedPasswordService pwnedPasswordService,
         ILogger<AuthenticationService>? logger = null
         ) : IAuthenticationService
     {
@@ -257,20 +258,20 @@ namespace GoatVaultClient.Services
             }
             return true;
         }
-        public async Task RegisterAsync(string email, string? password, string? confirmPassword)
+        public async Task<bool> RegisterAsync(string email, string? password, string? confirmPassword)
         {
             // Validation
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 await Shell.Current.DisplayAlertAsync("Error", "Email and password are required.", "OK");
-                return;
+                return false;
             }
 
             // Password Match
             if (password != confirmPassword)
             {
                 await Shell.Current.DisplayAlertAsync("Error", "Passwords do not match.", "OK");
-                return;
+                return false;
             }
 
             try
@@ -281,7 +282,7 @@ namespace GoatVaultClient.Services
                 var url = urlSection.Value;
                 if (string.IsNullOrWhiteSpace(url))
                 {
-                    return;
+                    return false;
                 }
 
                 // Check connectivity before network call
@@ -292,7 +293,26 @@ namespace GoatVaultClient.Services
                         "Connection Error",
                         "Unable to verify internet connection.",
                         "OK");
-                    return;
+                    return false;
+                }
+
+                // Check if password has been pwned
+                var pwnCount = await pwnedPasswordService.CheckPasswordAsync(password);
+                if (pwnCount > 0)
+                {
+                    var prompt = new PromptPopup(
+                        "Breached Password",
+                        $"The password you chose was found in breach databases {pwnCount} times. Do you want to continue with registration?",
+                        "Continue",
+                        "Choose another password"
+                    );
+                    await MopupService.Instance.PushAsync(prompt);
+                    var proceed = await prompt.WaitForScan();
+                    if (!proceed)
+                    {
+                        // User chose to pick another password, do not continue registration
+                        return false;
+                    }
                 }
 
                 // Generate Auth Salt & Verifier
@@ -354,6 +374,7 @@ namespace GoatVaultClient.Services
                 vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, password);
 
                 logger?.LogInformation("Registration successful for user {UserId}", vaultSessionService.CurrentUser.Id);
+                return true;
             }
             catch (HttpRequestException)
             {
@@ -378,6 +399,8 @@ namespace GoatVaultClient.Services
                 logger?.LogError(ex, "Unexpected error during registration.");
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
+
+            return false;
         }
         public async Task LogoutAsync()
         {

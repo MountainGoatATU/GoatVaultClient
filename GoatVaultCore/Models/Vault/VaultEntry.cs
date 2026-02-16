@@ -16,4 +16,7 @@ public partial class VaultEntry : ObservableObject
     [ObservableProperty] [property: Required] private bool hasMfa;
     [ObservableProperty] [property: Required] private string? currentTotpCode;
     [ObservableProperty] [property: Required] private int totpTimeRemaining;
+
+    // Vault score
+    [ObservableProperty] [property: Required] private int breachCount;
 }

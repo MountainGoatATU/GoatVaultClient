@@ -92,8 +92,7 @@ public partial class GoatTipsService : ObservableObject
         var score = VaultScoreCalculatorService.CalculateScore(
             entries,
             masterPassword,
-            user.MfaEnabled,
-            breachedPasswordsCount: 0);
+            user.MfaEnabled);
 
         // Build list of all current problems
         var problems = new List<Func<string>>();
