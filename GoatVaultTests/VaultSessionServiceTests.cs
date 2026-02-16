@@ -12,13 +12,13 @@ public class VaultSessionServiceTests
         // Arrange
         var service = new VaultSessionService
         {
-            DecryptedVault = new DecryptedVault { Categories = [], Entries = [] },
+            DecryptedVault = new VaultDecrypted { Categories = [], Entries = [] },
             CurrentUser = new UserResponse
             {
                 Id = "test-id",
                 Email = "test@example.com",
                 AuthSalt = "salt",
-                Vault = new VaultModel(),
+                Vault = new VaultEncrypted(),
                 MfaEnabled = false,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -40,7 +40,7 @@ public class VaultSessionServiceTests
     {
         // Arrange
         var service = new VaultSessionService();
-        var vaultData = new DecryptedVault
+        var vaultData = new VaultDecrypted
         {
             Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }],
             Entries = []
@@ -64,7 +64,7 @@ public class VaultSessionServiceTests
             Id = "user-123",
             Email = "user@example.com",
             AuthSalt = "salt-value",
-            Vault = new VaultModel(),
+            Vault = new VaultEncrypted(),
             MfaEnabled = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

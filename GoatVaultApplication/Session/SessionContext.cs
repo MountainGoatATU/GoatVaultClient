@@ -1,25 +1,30 @@
-﻿using GoatVaultCore.Models;
+﻿using GoatVaultCore;
+using GoatVaultCore.Models;
 using GoatVaultCore.Models.Vault;
 
 namespace GoatVaultApplication.Session;
 
-public class SessionContext
+public sealed class SessionContext : ISessionContext
 {
-    public LoggedInUser? User { get; private set; }
-    public DecryptedVault? DecryptedVault { get; private set; }
-    public bool IsAuthenticated { get; private set; }
+    private MasterKey? _masterKey;
 
-    public void Start(LoggedInUser user, DecryptedVault decryptedVault)
+    public Guid? UserId { get; private set; }
+    public VaultDecrypted? Vault { get; private set; }
+
+    public void Start(Guid userId, MasterKey masterKey)
     {
-        User = user;
-        DecryptedVault = decryptedVault;
-        IsAuthenticated = true;
+        UserId = userId;
+        _masterKey = masterKey;
     }
+
+    public void SetVault(VaultDecrypted vault) => Vault = vault;
+
+    public MasterKey GetMasterKey() => _masterKey ?? throw new InvalidOperationException("Session not authenticated.");
 
     public void End()
     {
-        IsAuthenticated = false;
-        DecryptedVault = null;
-        User = null;
+        _masterKey?.Dispose();
+        _masterKey = null;
+        Vault = null;
     }
 }

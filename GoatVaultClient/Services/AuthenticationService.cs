@@ -2,8 +2,8 @@ using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Services.Secrets;
+using GoatVaultInfrastructure;
 using GoatVaultInfrastructure.Services.API;
-using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
@@ -13,19 +13,17 @@ namespace GoatVaultClient.Services
     public interface IAuthenticationService
     {
         public Task<bool> LoginAsync(string? email, string? password, Func<Task<string?>> mfaCodeProvider);
-        public Task<bool> LoginOfflineAsync(string? email, string? password, DbModel? selectedAccount);
+        public Task<bool> LoginOfflineAsync(string? email, string? password, User? selectedUser);
         public Task<bool> RegisterAsync(string email, string? password, string? confirmPassword);
         public Task LogoutAsync();
-        public Task<List<DbModel>> GetAllLocalAccountsAsync();
-        public Task RemoveLocalAccountAsync(DbModel account);
+        public Task<List<User>> GetAllLocalAccountsAsync();
+        public Task RemoveLocalAccountAsync(User account);
     }
     public class AuthenticationService(
-        IConfiguration configuration,   
-        VaultService vaultService,
+        IConfiguration configuration,
         AuthTokenService authTokenService,
         HttpService httpService,
         ConnectivityService connectivityService,
-        VaultSessionService vaultSessionService,
         ISyncingService syncingService,
         PwnedPasswordService pwnedPasswordService,
         ILogger<AuthenticationService>? logger = null
@@ -127,7 +125,7 @@ namespace GoatVaultClient.Services
 
                 if (existingUser == null)
                 {
-                    await vaultService.SaveUserToLocalAsync(new DbModel
+                    await vaultService.SaveUserToLocalAsync(new User
                     {
                         Id = userResponse.Id,
                         Email = userResponse.Email,
@@ -200,10 +198,10 @@ namespace GoatVaultClient.Services
 
             return false;
         }
-        public async Task<bool> LoginOfflineAsync(string? email, string? password, DbModel? selectedAccount)
+        public async Task<bool> LoginOfflineAsync(string? email, string? password, User? selectedUser)
         {
             // Validation
-            if (selectedAccount == null)
+            if (selectedUser == null)
             {
                 await Shell.Current.DisplayAlertAsync("Error", "Please select an account.", "OK");
                 return false;
@@ -217,10 +215,10 @@ namespace GoatVaultClient.Services
 
             try
             {
-                logger?.LogInformation("Offline login attempt for account {AccountId}", selectedAccount.Id);
+                logger?.LogInformation("Offline login attempt for account {AccountId}", selectedUser.Id);
 
                 // 1. Load the user from local database
-                var dbUser = await vaultService.LoadUserFromLocalAsync(selectedAccount.Id);
+                var dbUser = await vaultService.LoadUserFromLocalAsync(selectedUser.Id);
 
                 if (dbUser == null)
                 {
@@ -249,7 +247,7 @@ namespace GoatVaultClient.Services
             catch (Exception ex)
             {
                 // Decryption failed - wrong password
-                logger?.LogWarning(ex, "Offline login failed for account {AccountId} — likely wrong password", selectedAccount.Id);
+                logger?.LogWarning(ex, "Offline login failed for account {AccountId} — likely wrong password", selectedUser.Id);
                 await Shell.Current.DisplayAlertAsync(
                     "Error",
                     "Incorrect password for this account.",
@@ -361,7 +359,7 @@ namespace GoatVaultClient.Services
                 vaultSessionService.CurrentUser = userResponse;
 
                 // Save new user to SQLite
-                await vaultService.SaveUserToLocalAsync(new DbModel
+                await vaultService.SaveUserToLocalAsync(new User
                 {
                     Id = vaultSessionService.CurrentUser.Id,
                     Email = vaultSessionService.CurrentUser.Email,
@@ -457,12 +455,12 @@ namespace GoatVaultClient.Services
                 ));
             }
         }
-        public async Task<List<DbModel>> GetAllLocalAccountsAsync()
+        public async Task<List<User>> GetAllLocalAccountsAsync()
         {
             var accounts = await vaultService.LoadAllUsersFromLocalAsync();
             return accounts;
         }
-        public async Task RemoveLocalAccountAsync(DbModel account)
+        public async Task RemoveLocalAccountAsync(User account)
         {
             // Confirm deletion
             var confirmPopup = new PromptPopup(

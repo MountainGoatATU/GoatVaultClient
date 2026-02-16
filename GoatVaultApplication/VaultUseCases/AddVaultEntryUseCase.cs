@@ -10,9 +10,9 @@ public class AddEntryUseCase(
     /*
     public Task ExecuteAsync(VaultEntry entry)
     {
-        session.DecryptedVault?.AddEntry(entry);
+        session.VaultDecrypted?.AddEntry(entry);
         return Task.CompletedTask;
-        // await userRepository.SaveAsync(session.UserId, session.DecryptedVault);
+        // await userRepository.SaveAsync(session.UserId, session.VaultDecrypted);
     }
 */
 }

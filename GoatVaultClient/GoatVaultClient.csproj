@@ -117,6 +117,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\GoatVaultApplication\GoatVaultApplication.csproj" />
 	  <ProjectReference Include="..\GoatVaultCore\GoatVaultCore.csproj" />
 	  <ProjectReference Include="..\GoatVaultInfrastructure\GoatVaultInfrastructure.csproj" />
 	</ItemGroup>

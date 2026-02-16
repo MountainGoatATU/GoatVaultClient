@@ -1,4 +1,4 @@
-﻿namespace GoatVaultApplication.User;
+﻿namespace GoatVaultApplication.Account;
 
 internal class LoadUserProfileUseCase
 {

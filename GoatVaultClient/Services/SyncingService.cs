@@ -300,7 +300,7 @@ namespace GoatVaultClient.Services
             {
                 logger?.LogInformation("Saving vault locally");
 
-                var updatedVault = new DecryptedVault
+                var updatedVault = new VaultDecrypted
                 {
                     Categories = vaultSessionService.DecryptedVault.Categories,
                     Entries = vaultSessionService.DecryptedVault.Entries

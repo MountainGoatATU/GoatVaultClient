@@ -3,25 +3,50 @@ using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
+using GoatVaultCore;
 using GoatVaultCore.Services.Secrets;
+using GoatVaultInfrastructure;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.API;
 using GoatVaultInfrastructure.Services.Logging;
-using GoatVaultInfrastructure.Services.Vault;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
-using SecretSharingDotNet.Math;
 using SkiaSharp.Views.Maui.Controls.Hosting;
-using System.Net.Http.Headers;
-using System.Numerics;
 using System.Reflection;
+using GoatVaultApplication.Auth;
+using GoatVaultApplication.Session;
 using UraniumUI;
+using CryptoService = GoatVaultInfrastructure.CryptoService;
 
 namespace GoatVaultClient;
+
+public static class MauiAppBuilderExtensions
+{
+    public static MauiAppBuilder AddEmbeddedAppSettings(this MauiAppBuilder builder, string fileName = "appsettings.json")
+    {
+        // Load embedded JSON
+        using var stream = Assembly
+            .GetExecutingAssembly()
+            .GetManifestResourceStream($"GoatVaultClient.{fileName}");
+        if (stream != null)
+        {
+            var config = new ConfigurationBuilder()
+                .AddJsonStream(stream)
+                .Build();
+            builder.Configuration.AddConfiguration(config);
+        }
+
+        // Override with Preferences (runtime override)
+        var serverUrl = Preferences.Get("API_BASE_URL", builder.Configuration["API_BASE_URL"]);
+        builder.Configuration["API_BASE_URL"] = serverUrl;
+
+        return builder;
+    }
+}
 
 public static class MauiProgram
 {
@@ -49,6 +74,9 @@ public static class MauiProgram
                 fonts.AddMaterialSymbolsFonts();
                 fonts.AddFluentIconFonts();
             });
+
+        #region Logging
+
         // Configure logging
         var logDirectory = Path.Combine(FileSystem.AppDataDirectory, "logs");
 #if DEBUG
@@ -69,65 +97,68 @@ public static class MauiProgram
 #endif
         }));
 
-        // App settings configuration
-        builder.AddAppSettings();
+        #endregion
 
-        // Setup SQLite local database
+        // Embedded config
+        builder.AddEmbeddedAppSettings();
+
+        // SQLite DB
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "localVault.db");
         var connectionString = $"Data Source={dbPath}";
+        builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
-        builder.Services.AddDbContext<GoatVaultDb>(options =>
-            options.UseSqlite(connectionString));
+        #region Builder Services
 
-        // Register HttpService with HttpClientFactory
-        builder.Services.AddHttpClient<HttpService>(client =>
-        {
-            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-            client.Timeout = TimeSpan.FromSeconds(10);
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(
-                "Mozilla/5.0 (MAUI; Android/iOS/Desktop) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
-        });
-
-        // Register app services
-        builder.Services.AddSingleton<VaultService>();
+        // Core app services
         builder.Services.AddSingleton<UserService>();
-        builder.Services.AddSingleton<AuthTokenService>();
-        builder.Services.AddSingleton<VaultSessionService>();
         builder.Services.AddSingleton<MarkdownHelperService>();
         builder.Services.AddSingleton<ConnectivityService>();
-        builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
-        builder.Services.AddTransient<JwtUtils>();
-        builder.Services.AddSingleton<ISyncingService, SyncingService>();
+        // builder.Services.AddSingleton<ISyncingService, SyncingService>();
+        builder.Services.AddScoped<ISessionContext, SessionContext>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<ICryptoService, CryptoService>();
+        builder.Services.AddScoped<LoginOfflineUseCase>();
+        builder.Services.AddSingleton<IAuthTokenService, AuthTokenService>();
+        builder.Services.AddSingleton<JwtUtils>();
 
-        // Test services
-        builder.Services.AddSingleton<FakeDataSource>();
-
-        // TODO: Fix Shamir services
-        builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
-        // builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
-        // builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
-
-        builder.Services.AddTransient<ShamirService>();
-
-
-        // UraniumUI dialogs
-        builder.Services.AddMopupsDialogs();
-        builder.Services.AddCommunityToolkitDialogs();
-
-        // Ensure DB creation when app starts
-        using (var scope = builder.Services.BuildServiceProvider().CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<GoatVaultDb>();
-            db.Database.EnsureCreated();
-        }
-
+        // Misc services
         builder.Services.AddSingleton<GoatTipsService>();
         builder.Services.AddSingleton<TotpManagerService>();
         builder.Services.AddSingleton<CategoryManagerService>();
         builder.Services.AddSingleton<VaultEntryManagerService>();
         builder.Services.AddSingleton<PwnedPasswordService>();
 
-        // Register pages
+        // Test / helper services
+        builder.Services.AddSingleton<FakeDataSource>();
+        // builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
+        // builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
+        // builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
+        // builder.Services.AddTransient<ShamirService>();
+
+        // UraniumUI
+        builder.Services.AddMopupsDialogs();
+        builder.Services.AddCommunityToolkitDialogs();
+
+        #endregion
+
+        // HTTP
+        var serverBaseUrl = builder.Configuration["API_BASE_URL"];
+        builder.Services.AddHttpClient<IHttpService, HttpService>()
+            .AddHttpMessageHandler(sp =>
+            {
+                var authService = sp.GetRequiredService<IAuthTokenService>();
+                var jwtUtils = sp.GetRequiredService<JwtUtils>();
+                var logger = sp.GetService<ILogger<AuthenticatedHttpHandler>>();
+                return new AuthenticatedHttpHandler(
+                    authService,
+                    jwtUtils,
+                    $"{serverBaseUrl}v1/auth/refresh",
+                    logger
+                );
+            });
+
+        #region App pages & view models
+
         builder.Services.AddTransient<SyncStatusBarViewModel>();
         builder.Services.AddTransient<MainPageViewModel>();
         builder.Services.AddTransient<MainPage>();
@@ -146,14 +177,14 @@ public static class MauiProgram
         builder.Services.AddTransient<UserPageViewModel>();
         builder.Services.AddTransient<UserPage>();
 
-        // Build the app
-        var app = builder.Build();
+        #endregion
 
-        // Initialize database after app is built
+        // Build & ensure DB
+        var app = builder.Build();
         try
         {
             using var scope = app.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<GoatVaultDb>();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             db.Database.EnsureCreated();
 
             var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MauiProgram");
@@ -165,31 +196,6 @@ public static class MauiProgram
             logger?.LogCritical(ex, "Failed to initialize database");
         }
 
-        // Done!
         return app;
-
-
-    }
-    extension(MauiAppBuilder builder)
-    {
-        private void AddJsonSettings(string fileName)
-        {
-            using var stream = Assembly
-                .GetExecutingAssembly()
-                .GetManifestResourceStream($"GoatVaultClient.{fileName}");
-
-            if (stream == null)
-                return;
-
-            var config = new ConfigurationBuilder()
-                .AddJsonStream(stream)
-                .Build();
-            builder.Configuration.AddConfiguration(config);
-        }
-
-        private void AddAppSettings()
-        {
-            builder.AddJsonSettings("appsettings.json");
-        }
     }
 }

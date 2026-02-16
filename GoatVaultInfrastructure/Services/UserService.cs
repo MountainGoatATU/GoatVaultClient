@@ -1,7 +1,5 @@
-﻿using System.Security.Cryptography;
-using GoatVaultCore.Models.API;
+﻿using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
-using GoatVaultCore.Services.Secrets;
 
 namespace GoatVaultInfrastructure.Services;
 
@@ -13,12 +11,12 @@ public enum LoginStatus
 
 public interface IUserService
 {
-    AuthRegisterRequest RegisterUser(string email, string password, VaultModel? vault);
+    AuthRegisterRequest RegisterUser(string email, string password, VaultEncrypted? vault);
 }
 
 public class UserService : IUserService
 {
-    public AuthRegisterRequest RegisterUser(string email, string masterPassword, VaultModel? vault)
+    public AuthRegisterRequest RegisterUser(string email, string masterPassword, VaultEncrypted? vault)
     {
         var authSalt = CryptoService.GenerateAuthSalt();
         var authVerifier = CryptoService.HashPassword(masterPassword, authSalt);

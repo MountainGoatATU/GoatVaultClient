@@ -1,29 +1,15 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using GoatVaultCore.Models.API;
-using System.Net.Http.Headers;
-using System.Text;
+using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace GoatVaultInfrastructure.Services.API;
 
-public interface IHttpService
+public class HttpService(
+    HttpClient client,
+    ILogger<HttpService>? logger = null)
+    : IHttpService
 {
-    // Public methods for making HTTP requests
-    Task<T> GetAsync<T>(string url);
-    Task<T> PostAsync<T>(string url, object payload);
-    Task<T> PatchAsync<T>(string url, object payload);
-    Task<T> DeleteAsync<T>(string url);
-}
-
-// Use of primary constructor to inject HttpClient dependency
-public class HttpService(HttpClient client, AuthTokenService authTokenService, JwtUtils jwtUtils, IConfiguration configuration, ILogger<HttpService>? logger = null) : IHttpService
-{
-    private readonly AuthTokenService _authTokenService = authTokenService;
-    private readonly JwtUtils _jwtUtils = jwtUtils;
-    private readonly IConfiguration _configuration = configuration;
-
-    // JSON serialization options
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -31,150 +17,31 @@ public class HttpService(HttpClient client, AuthTokenService authTokenService, J
 
     private async Task<T> SendAsync<T>(HttpMethod method, string url, object? payload = null)
     {
+        using var request = new HttpRequestMessage(method, url);
+
+        if (payload != null)
+            request.Content = JsonContent.Create(payload);
+
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        try
+        var response = await client.SendAsync(request);
+        stopwatch.Stop();
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (response.IsSuccessStatusCode)
         {
-            logger?.LogDebug("HTTP {Method} {Url}", method, url);
-
-            // Create the HTTP request based on the method and URL
-            using var request = new HttpRequestMessage(method, url);
-
-            // Attach Authorization header if token exists
-            var token = _authTokenService.GetToken();
-
-            // Get Refresh Token
-            if (!string.IsNullOrEmpty(token))
-            {
-                await GetRefreshToken(token);
-            }
-
-            if (!string.IsNullOrWhiteSpace(token))
-            {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            }
-
-            // If there's a payload, serialize it to JSON and add it to the request body
-            if (payload != null)
-            {
-                string json;
-
-                // Don't double serialize if payload is already a string
-                if (payload is string jsonString)
-                    json = jsonString;
-                else
-                    json = JsonSerializer.Serialize(payload);
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-            }
-
-            var response = await client.SendAsync(request);
-            stopwatch.Stop();
-
-            // Check for HTTP error responses
-            if (!response.IsSuccessStatusCode)
-            {
-                logger?.LogWarning("HTTP {Method} {Url} returned {StatusCode} in {ElapsedMs}ms",
-                    method, url, (int)response.StatusCode, stopwatch.ElapsedMilliseconds);
-
-                var errorBody = await response.Content.ReadAsStringAsync();
-
-                // Try to extract a meaningful error message from the response
-                string errorMessage;
-                try
-                {
-                    // Try to parse as JSON and extract message
-                    var errorJson = JsonSerializer.Deserialize<JsonElement>(errorBody);
-                    if (errorJson.TryGetProperty("message", out var msgProperty))
-                    {
-                        errorMessage = msgProperty.GetString() ?? errorBody;
-                    }
-                    else if (errorJson.TryGetProperty("error", out var errProperty))
-                    {
-                        errorMessage = errProperty.GetString() ?? errorBody;
-                    }
-                    else
-                    {
-                        errorMessage = errorBody;
-                    }
-                }
-                catch
-                {
-                    errorMessage = errorBody;
-                }
-
-                // Throw HttpRequestException with StatusCode preserved
-                throw new HttpRequestException(
-                    errorMessage,
-                    null,
-                    response.StatusCode);
-            }
-
-            // Read the response content as a string
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            var result = JsonSerializer.Deserialize<T>(responseString, JsonOptions)
-                 ?? throw new InvalidOperationException(
-                     $"Failed to deserialize response into {typeof(T).Name}. Raw: {responseString}");
-
-            logger?.LogDebug("HTTP {Method} {Url} completed {StatusCode} in {ElapsedMs}ms",
-                method, url, (int)response.StatusCode, stopwatch.ElapsedMilliseconds);
-
-            return result;
+            return JsonSerializer.Deserialize<T>(content, JsonOptions)
+                   ?? throw new InvalidOperationException($"Failed to deserialize {typeof(T).Name}");
         }
-        catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
-        {
-            // A TaskCanceledException without user cancellation => timeout
-            logger?.LogWarning("HTTP {Method} {Url} timed out after {TimeoutSeconds}s",
-                method, url, client.Timeout.TotalSeconds);
-            throw new TimeoutException($"Request timed out after {client.Timeout.TotalSeconds} seconds.", ex);
-        }
-        catch (HttpRequestException)
-        {
-            // Re-throw HttpRequestException to preserve StatusCode
-            throw;
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex, "Unexpected error during HTTP {Method} {Url}", method, url);
-            // Unexpected errors - provide generic message without exposing URL
-            throw new Exception("Unexpected error while sending request.", ex);
-        }
+
+        logger?.LogWarning("HTTP {Method} {Url} failed {StatusCode} in {Elapsed}ms",
+            method, url, response.StatusCode, stopwatch.ElapsedMilliseconds);
+
+        throw new HttpRequestException($"Request failed: {content}", null, response.StatusCode);
     }
 
     public Task<T> GetAsync<T>(string url) => SendAsync<T>(HttpMethod.Get, url);
     public Task<T> PostAsync<T>(string url, object payload) => SendAsync<T>(HttpMethod.Post, url, payload);
     public Task<T> PatchAsync<T>(string url, object payload) => SendAsync<T>(HttpMethod.Patch, url, payload);
     public Task<T> DeleteAsync<T>(string url) => SendAsync<T>(HttpMethod.Delete, url);
-    private async Task GetRefreshToken(string token)
-    {
-        // If no token is found, throw an exception to indicate the user needs to log in
-        if (!string.IsNullOrEmpty(token))
-        {
-            // Convert token string to JwtSecurityToken to check expiration
-            var convertedToken = _jwtUtils.ConvertJwtStringToJwtSecurityToken(token);
-
-            // Decode the token to extract claims and other info
-            var decodedToken = _jwtUtils.DecodeToken(convertedToken);
-
-            // Check if the token has expired
-            if (decodedToken.Expiration < DateTime.UtcNow)
-            {
-                // Clear access token
-                _authTokenService.ClearToken();
-                // Call refresh token endpoint to get new tokens
-                var refreshPayload = new AuthRefreshRequest
-                {
-                    RefreshToken = _authTokenService.GetRefreshToken()
-                };
-                var refreshResponse = await PostAsync<AuthRefreshResponse>(
-                    $"{_configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value}v1/auth/refresh",
-                    refreshPayload
-                );
-
-                // Update tokens in AuthTokenService
-                _authTokenService.SetToken(refreshResponse.AccessToken);
-                _authTokenService.SetRefreshToken(refreshResponse.RefreshToken);
-                token = refreshResponse.AccessToken; // Update token variable for use in header
-            }
-        }
-    }
 }

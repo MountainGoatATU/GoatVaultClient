@@ -1,36 +1,44 @@
 ﻿using GoatVaultCore.Models.API;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace GoatVaultInfrastructure.Services.API
+namespace GoatVaultInfrastructure.Services.API;
+
+public class JwtUtils
 {
-    public class JwtUtils()
+    private readonly JwtSecurityTokenHandler _handler = new();
+
+    public JwtSecurityToken ConvertJwtStringToJwtSecurityToken(string? jwt)
     {
-        public JwtSecurityToken ConvertJwtStringToJwtSecurityToken(string? jwt)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(jwt);
+        return string.IsNullOrWhiteSpace(jwt)
+            ? throw new ArgumentException("JWT string cannot be null or empty")
+            : _handler.ReadJwtToken(jwt);
+    }
 
-            return token;
-        }
-        public DecodedToken DecodeToken(JwtSecurityToken token)
-        {
-            var keyId = token.Header.Kid;
-            var audience = token.Audiences.ToList();
-            var claims = token.Claims.Select(claim => (claim.Type, claim.Value)).ToList();
+    public DecodedToken DecodeToken(JwtSecurityToken token)
+    {
+        ArgumentNullException.ThrowIfNull(token);
 
-            return new DecodedToken(
-                keyId,
-                token.Issuer,
-                audience,
-                claims,
-                token.ValidTo,
-                token.SignatureAlgorithm,
-                token.RawData,
-                token.Subject,
-                token.ValidFrom,
-                token.EncodedHeader,
-                token.EncodedPayload
-            );
-        }
+        var claims = token.Claims.Select(c => (c.Type, c.Value)).ToList();
+        var audience = token.Audiences.ToList();
+
+        return new DecodedToken(
+            KeyId: token.Header.Kid ?? string.Empty,
+            Issuer: token.Issuer,
+            Audience: audience,
+            Claims: claims,
+            Expiration: token.ValidTo,
+            SignatureAlgorithm: token.SignatureAlgorithm,
+            RawData: token.RawData,
+            Subject: token.Subject ?? string.Empty,
+            ValidFrom: token.ValidFrom,
+            Header: token.EncodedHeader,
+            Payload: token.EncodedPayload
+        );
+    }
+
+    public bool IsExpired(string jwt)
+    {
+        var token = ConvertJwtStringToJwtSecurityToken(jwt);
+        return token.ValidTo <= DateTime.UtcNow;
     }
 }

@@ -109,7 +109,7 @@
             <!-- Main Login Form -->
             <VerticalStackLayout VerticalOptions="Center" 
                                  Grid.Row="0"
-                                 IsVisible="{Binding IsConnected}"
+                                 IsVisible="{Binding IsOnline}"
                                  Spacing="{StaticResource formSpacing}" 
                                  HorizontalOptions="Center" 
                                  WidthRequest="{StaticResource textFieldWidth}">
