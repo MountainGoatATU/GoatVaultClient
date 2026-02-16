@@ -42,7 +42,7 @@ public sealed class EnvelopeSharingService : IEnvelopeSharingService
         {
             byte[] secretBytes = Encoding.UTF8.GetBytes(secret);
             var envelope = Encrypt(secretBytes, key);
-            string envB64 = envelope.ToString();
+            string envB64 = envelope.ToBase64();
             var mnemonics = SplitKey(key, totalShares, threshold);
 
             return mnemonics.Select((m, i) => new SharePackage
@@ -117,7 +117,7 @@ public sealed class EnvelopeSharingService : IEnvelopeSharingService
             byte index = (byte)share.Index.Value;
             byte[] shareValue = share.Value.Value.ToByteArray(isUnsigned: true, isBigEndian: true);
 
-            byte[] packed = new byte[1 + KeySize];
+            byte[] packed = new byte[1 + shareValue.Length];
             packed[0] = (byte)index;
             Buffer.BlockCopy(shareValue,0,packed,1, shareValue.Length);
 
