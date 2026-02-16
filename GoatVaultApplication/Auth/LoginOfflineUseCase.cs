@@ -20,7 +20,6 @@ public sealed class LoginOfflineUseCase(
 
         var decryptedVault = vaultCrypto.Decrypt(user.Vault, masterKey);
 
-        session.Start(user.Id, masterKey);
-        session.SetVault(decryptedVault);
+        session.Start(user.Id, masterKey, decryptedVault);
     }
 }

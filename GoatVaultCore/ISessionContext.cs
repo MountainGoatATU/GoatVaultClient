@@ -9,7 +9,6 @@ public interface ISessionContext
     MasterKey GetMasterKey();
     VaultDecrypted? Vault { get; }
 
-    void Start(Guid userId, MasterKey masterKey);
-    void SetVault(VaultDecrypted vault);
+    void Start(Guid userId, MasterKey masterKey, VaultDecrypted vaultDecrypted);
     void End();
 }

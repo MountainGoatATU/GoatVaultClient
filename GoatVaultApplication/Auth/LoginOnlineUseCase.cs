@@ -4,44 +4,52 @@ using GoatVaultCore.Models;
 namespace GoatVaultApplication.Auth;
 
 public class LoginOnlineUseCase(
-    IUserRepository users,
     ICryptoService crypto,
     IVaultCrypto vaultCrypto,
     ISessionContext session,
-    IServerAuthService serverAuth)
+    IServerAuthService serverAuth,
+    IAuthTokenService authTokenService)
 {
-    public async Task<User> ExecuteAsync(
+    public async Task ExecuteAsync(
         Email email,
         string password,
-        Func<Task<string?>>? mfaProvider = null)
+        Func<Task<string?>>? mfaProvider = null,
+        CancellationToken ct = default)
     {
-        // Authenticate with server
-        var userResponse = await serverAuth.AuthenticateAsync(email, password, mfaProvider);
-        if (userResponse == null) throw new UnauthorizedAccessException("Invalid credentials or MFA.");
+        // 1. Init auth and get salts
+        var initResp = await serverAuth.InitAsync(email, ct);
+        var userId = Guid.Parse(initResp.UserId);
 
-        // Derive master key from server-provided vault salt
-        var masterKey = crypto.DeriveMasterKey(password, Convert.FromBase64String(userResponse.VaultSalt));
+        // 2. Compute verifier client-side
+        var verifier = crypto.GenerateAuthVerifier(password, Convert.FromBase64String(initResp.AuthSalt));
 
-        // Decrypt vault
-        var encryptedVault = userResponse.Vault ?? throw new InvalidOperationException("Server did not return vault.");
-        var decryptedVault = vaultCrypto.Decrypt(encryptedVault, masterKey);
-
-        var localUser = new User
+        // 3. MFA code if required
+        string? mfaCode = null;
+        if (initResp.MfaEnabled)
         {
-            Id = Guid.Parse(userResponse.Id),
-            Email = new Email(userResponse.Email),
-            AuthSalt = Convert.FromBase64String(userResponse.AuthSalt),
-            AuthVerifier = Convert.FromBase64String(userResponse.AuthVerifier),
-            VaultSalt = Convert.FromBase64String(userResponse.VaultSalt),
-            Vault = encryptedVault
-        };
+            if (mfaProvider == null)
+                throw new InvalidOperationException("MFA is enabled but no provider was supplied.");
+            mfaCode = await mfaProvider();
+            if (string.IsNullOrWhiteSpace(mfaCode))
+                throw new OperationCanceledException("User cancelled MFA input");
+        }
 
-        await users.SaveAsync(localUser);
+        // 4. Verify credentials
+        var verifyResp = await serverAuth.VerifyAsync(userId, verifier, mfaCode, ct); 
+        authTokenService.SetToken(verifyResp.AccessToken);
+        authTokenService.SetRefreshToken(verifyResp.RefreshToken);
 
-        // Start session
-        session.Start(localUser.Id, masterKey);
-        session.SetVault(decryptedVault);
+        // 5. Get user
+        var user = await serverAuth.GetUserAsync(userId, ct);
+        if (user.Vault == null)
+            throw new InvalidOperationException("Vault is missing.");
 
-        return localUser;
+        // 6. Decrypt vault
+        var vaultSalt = Convert.FromBase64String(user.VaultSalt);
+        var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
+        var decryptedVault = vaultCrypto.Decrypt(user.Vault, masterKey);
+
+        // 7. Start session
+        session.Start(userId, masterKey, decryptedVault);
     }
 }

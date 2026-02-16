@@ -53,7 +53,6 @@ public class RegisterUseCase(
         await users.SaveAsync(localUser);
 
         // 7. Start session
-        session.Start(localUser.Id, masterKey);
-        session.SetVault(emptyVault);
+        session.Start(localUser.Id, masterKey, emptyVault);
     }
 }

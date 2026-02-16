@@ -11,13 +11,12 @@ public sealed class SessionContext : ISessionContext
     public Guid? UserId { get; private set; }
     public VaultDecrypted? Vault { get; private set; }
 
-    public void Start(Guid userId, MasterKey masterKey)
+    public void Start(Guid userId, MasterKey masterKey, VaultDecrypted decryptedVault)
     {
         UserId = userId;
         _masterKey = masterKey;
+        Vault = decryptedVault;
     }
-
-    public void SetVault(VaultDecrypted vault) => Vault = vault;
 
     public MasterKey GetMasterKey() => _masterKey ?? throw new InvalidOperationException("Session not authenticated.");
 
