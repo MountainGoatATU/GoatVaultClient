@@ -10,7 +10,7 @@ public interface IVaultSessionService
 
 public class VaultSessionService : IVaultSessionService
 {
-    public VaultData? DecryptedVault { get; set; } = null;
+    public DecryptedVault? DecryptedVault { get; set; } = null;
     public UserResponse? CurrentUser { get; set; } = null;
     public string? MasterPassword { get; set; } = "";
 

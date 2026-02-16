@@ -30,7 +30,7 @@ public class VaultServiceTests
     {
         // Arrange
         const string password = "StrongPassword123!";
-        var vaultData = new VaultData
+        var vaultData = new DecryptedVault
         {
             Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }],
             Entries =
@@ -83,7 +83,7 @@ public class VaultServiceTests
     {
         // Arrange
         const string password = "StrongPassword123!";
-        var originalData = new VaultData
+        var originalData = new DecryptedVault
         {
             Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }, new CategoryItem { Name = "Finance" }],
             Entries =
@@ -119,7 +119,7 @@ public class VaultServiceTests
         // Arrange
         const string correctPassword = "CorrectPassword123!";
         const string wrongPassword = "WrongPassword123!";
-        var vaultData = new VaultData
+        var vaultData = new DecryptedVault
         {
             Categories = [new CategoryItem { Name = "Work" }],
             Entries = []
@@ -138,7 +138,7 @@ public class VaultServiceTests
     {
         // Arrange
         const string password = "StrongPassword123!";
-        var vaultData = new VaultData { Categories = [], Entries = [] };
+        var vaultData = new DecryptedVault { Categories = [], Entries = [] };
         var encrypted = _vaultService.EncryptVault(password, vaultData);
 
         // Tamper with the encrypted blob
@@ -156,7 +156,7 @@ public class VaultServiceTests
     {
         // Arrange
         const string password = "SuperSecurePassword!@#123";
-        var complexData = new VaultData
+        var complexData = new DecryptedVault
         {
             Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }, new CategoryItem { Name = "Finance" }, new CategoryItem { Name = "Social Media" }, new CategoryItem { Name = "Entertainment" }],
             Entries =

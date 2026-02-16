@@ -16,10 +16,10 @@ namespace GoatVaultInfrastructure.Services.Vault;
 
 public interface IVaultService
 {
-    VaultModel EncryptVault(string password, VaultData vaultData);
-    VaultData DecryptVault(VaultModel vault, string password);
-    Task SyncAndCloseAsync(UserResponse currentUser, string password, VaultData vaultData);
-    Task SaveVaultAsync(UserResponse currentUser, string password, VaultData vaultData);
+    VaultModel EncryptVault(string password, DecryptedVault vaultData);
+    DecryptedVault DecryptVault(VaultModel vault, string password);
+    Task SyncAndCloseAsync(UserResponse currentUser, string password, DecryptedVault vaultData);
+    Task SaveVaultAsync(UserResponse currentUser, string password, DecryptedVault vaultData);
 }
 
 public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb, HttpService httpService, VaultSessionService vaultSessionService, ILogger<VaultService>? logger = null) : IVaultService
@@ -30,10 +30,10 @@ public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb,
     };
 
     #region Vault Encryption/Decryption
-    public VaultModel EncryptVault(string masterPassword, VaultData? vaultData)
+    public VaultModel EncryptVault(string masterPassword, DecryptedVault? vaultData)
     {
         // Create default vault structure if none exists
-        vaultData ??= new VaultData
+        vaultData ??= new DecryptedVault
         {
             Categories =
             [
@@ -78,7 +78,7 @@ public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb,
         // return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
     }
 
-    public VaultData DecryptVault(VaultModel payload, string password)
+    public DecryptedVault DecryptVault(VaultModel payload, string password)
     {
         ArgumentNullException.ThrowIfNull(payload);
 
@@ -104,7 +104,7 @@ public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb,
             var decryptedJson = Encoding.UTF8.GetString(decryptedBytes);
 
             // Deserialize JSON into VaultData
-            var vaultData = JsonSerializer.Deserialize<VaultData>(decryptedJson, new JsonSerializerOptions
+            var vaultData = JsonSerializer.Deserialize<DecryptedVault>(decryptedJson, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             }) ?? throw new InvalidOperationException("Failed to deserialize decrypted vault.");
@@ -121,13 +121,13 @@ public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb,
         }
     }
 
-    public async Task SyncAndCloseAsync(UserResponse? user, string password, VaultData? vaultData)
+    public async Task SyncAndCloseAsync(UserResponse? user, string password, DecryptedVault? vaultData)
     {
         await SaveVaultAsync(user, password, vaultData);
 
         vaultSessionService.Lock();
     }
-    public async Task SaveVaultAsync(UserResponse? user, string password, VaultData? vaultData)
+    public async Task SaveVaultAsync(UserResponse? user, string password, DecryptedVault? vaultData)
     {
         var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
 

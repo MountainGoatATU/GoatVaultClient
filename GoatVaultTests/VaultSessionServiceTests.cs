@@ -12,7 +12,7 @@ public class VaultSessionServiceTests
         // Arrange
         var service = new VaultSessionService
         {
-            DecryptedVault = new VaultData { Categories = [], Entries = [] },
+            DecryptedVault = new DecryptedVault { Categories = [], Entries = [] },
             CurrentUser = new UserResponse
             {
                 Id = "test-id",
@@ -40,7 +40,7 @@ public class VaultSessionServiceTests
     {
         // Arrange
         var service = new VaultSessionService();
-        var vaultData = new VaultData
+        var vaultData = new DecryptedVault
         {
             Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }],
             Entries = []
