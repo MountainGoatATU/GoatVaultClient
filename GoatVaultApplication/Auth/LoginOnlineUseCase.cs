@@ -1,5 +1,6 @@
 ﻿using GoatVaultCore;
 using GoatVaultCore.Models;
+using GoatVaultCore.Models.API;
 
 namespace GoatVaultApplication.Auth;
 
@@ -17,15 +18,17 @@ public class LoginOnlineUseCase(
         CancellationToken ct = default)
     {
         // 1. Init auth and get salts
-        var initResp = await serverAuth.InitAsync(email, ct);
-        var userId = Guid.Parse(initResp.UserId);
+        var authInitRequest = new AuthInitRequest { Email = email.Value };
+        var authInitResponse = await serverAuth.InitAsync(authInitRequest, ct);
+        var userId = Guid.Parse(authInitResponse.UserId);
 
         // 2. Compute verifier client-side
-        var verifier = crypto.GenerateAuthVerifier(password, Convert.FromBase64String(initResp.AuthSalt));
+        var authSalt = Convert.FromBase64String(authInitResponse.AuthSalt);
+        var authVerifier = Convert.ToBase64String(crypto.GenerateAuthVerifier(password, authSalt));
 
         // 3. MFA code if required
         string? mfaCode = null;
-        if (initResp.MfaEnabled)
+        if (authInitResponse.MfaEnabled)
         {
             if (mfaProvider == null)
                 throw new InvalidOperationException("MFA is enabled but no provider was supplied.");
@@ -35,9 +38,13 @@ public class LoginOnlineUseCase(
         }
 
         // 4. Verify credentials
-        var verifyResp = await serverAuth.VerifyAsync(userId, verifier, mfaCode, ct); 
-        authTokenService.SetToken(verifyResp.AccessToken);
-        authTokenService.SetRefreshToken(verifyResp.RefreshToken);
+        var authVerifyRequest = new AuthVerifyRequest
+        {
+            UserId = userId, AuthVerifier = authVerifier, MfaCode = mfaCode
+        };
+        var authVerifyResponse = await serverAuth.VerifyAsync(authVerifyRequest, ct);
+        authTokenService.SetToken(authVerifyResponse.AccessToken);
+        authTokenService.SetRefreshToken(authVerifyResponse.RefreshToken);
 
         // 5. Get user
         var user = await serverAuth.GetUserAsync(userId, ct);

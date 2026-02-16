@@ -15,22 +15,13 @@ public class ServerAuthService(
     private string BaseUrl => configuration.GetSection("API_BASE_URL").Value
                               ?? throw new InvalidOperationException("Server base URL missing");
 
-    public async Task<AuthInitResponse> InitAsync(Email email, CancellationToken ct = default)
+    public async Task<AuthInitResponse> InitAsync(AuthInitRequest payload, CancellationToken ct = default)
     {
-        var payload = new AuthInitRequest { Email = email.Value };
-
         return await PostAsync<AuthInitResponse>("v1/auth/init", payload, ct);
     }
 
-    public async Task<AuthVerifyResponse> VerifyAsync(Guid userId, byte[] authVerifier, string? mfaCode = null, CancellationToken ct = default)
+    public async Task<AuthVerifyResponse> VerifyAsync(AuthVerifyRequest payload, CancellationToken ct = default)
     {
-        var payload = new AuthVerifyRequest
-        {
-            UserId = userId,
-            AuthVerifier = Convert.ToBase64String(authVerifier),
-            MfaCode = mfaCode
-        };
-
         return await PostAsync<AuthVerifyResponse>("v1/auth/verify", payload, ct);
     }
 
@@ -42,23 +33,8 @@ public class ServerAuthService(
         return JsonSerializer.Deserialize<UserResponse>(json) ?? throw new InvalidOperationException("Invalid user response");
     }
 
-    public async Task<AuthRegisterResponse> RegisterAsync(
-        Email email,
-        byte[] authSalt,
-        byte[] authVerifier,
-        byte[] vaultSalt,
-        VaultEncrypted? vault,
-        CancellationToken ct = default)
+    public async Task<AuthRegisterResponse> RegisterAsync(AuthRegisterRequest payload, CancellationToken ct = default)
     {
-        var payload = new AuthRegisterRequest
-        {
-            Email = email.Value,
-            AuthSalt = Convert.ToBase64String(authSalt),
-            AuthVerifier = Convert.ToBase64String(authVerifier),
-            VaultSalt = Convert.ToBase64String(vaultSalt),
-            Vault = vault
-        };
-
         return await PostAsync<AuthRegisterResponse>("v1/auth/register", payload, ct);
     }
 
