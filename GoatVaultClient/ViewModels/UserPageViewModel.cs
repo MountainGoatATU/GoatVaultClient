@@ -19,15 +19,14 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private string? mfaQrCodeUrl;
 
         [ObservableProperty] private double vaultScore;
-        [ObservableProperty] private string? breachesText;
-        [ObservableProperty] private string? mfaStatusText;
-        [ObservableProperty] private string? reuseRateText;
-        [ObservableProperty] private string? masterPasswordStrength;
-        [ObservableProperty] private string? averagePasswordsStrength;
-        [ObservableProperty] private bool goatEnabled = true;
-
-        [ObservableProperty] private bool showVaultDetails;
+        [ObservableProperty] private double masterPasswordStrength;
+        [ObservableProperty] private double averagePasswordsStrength;
+        [ObservableProperty] private double reuseRate;
+        [ObservableProperty] private int breachesCount;
+        [ObservableProperty] private double mfaPercent;
         [ObservableProperty] private string? vaultTierText;
+
+        [ObservableProperty] private bool goatEnabled = true;
 
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
@@ -79,25 +78,33 @@ namespace GoatVaultClient.ViewModels
             if (user == null)
                 return;
 
+            int breachedCount = _vaultSessionService.VaultEntries?.Sum(e => e.BreachCount) ?? 0;
+
             var score = VaultScoreCalculatorService.CalculateScore(
                 _vaultSessionService.VaultEntries,
                 _vaultSessionService.MasterPassword,
-                user.MfaEnabled);
+                user.MfaEnabled,
+                breachedPasswordsCount: breachedCount
+            );
 
-            VaultScore = score.VaultScore;
-            MasterPasswordStrength = $"{score.MasterPasswordPercent}%";
-            AveragePasswordsStrength = $"{score.AveragePasswordsPercent}%";
-            ReuseRateText = $"{score.ReuseRatePercent}%";
-            BreachesText = $"{score.BreachesCount}";
-            MfaStatusText = score.MfaEnabled ? "Enabled" : "Disabled";
-            VaultTierText = GetVaultTier(VaultScore);
+            // Points calculation based on percentages, with maximum caps for each category
+            MasterPasswordStrength = Math.Min(score.MasterPasswordPercent / 100.0 * 400, 400);
+            AveragePasswordsStrength = Math.Min(score.AveragePasswordsPercent / 100.0 * 200, 200);
+            ReuseRate = Math.Min(score.ReuseRatePercent / 100.0 * 200, 200);
+            MfaPercent = user.MfaEnabled ? 200 : 0;
+
+            // Penalize breaches
+            int breachPenalty = 20;
+            int totalBreachPenalty = score.BreachesCount * breachPenalty;
+
+            VaultScore = MasterPasswordStrength + AveragePasswordsStrength + ReuseRate + MfaPercent - totalBreachPenalty;
+            if (VaultScore < 0) VaultScore = 0;
+
+            VaultTierText = $"{GetVaultTier(VaultScore)} ({VaultScore:0}/1000)";
+
+            BreachesCount = Math.Max(-100, -breachPenalty * breachedCount);
         }
 
-        [RelayCommand]
-        private void ToggleVaultDetails()
-        {
-            ShowVaultDetails = !ShowVaultDetails;
-        }
 
         private static string GetVaultTier(double score)
         {
@@ -109,24 +116,6 @@ namespace GoatVaultClient.ViewModels
                 >= 300 => "The Treeline Grazer (300-499)",
                 _ => "The Dead Meat (< 300)"
             };
-        }
-
-        [RelayCommand]
-        private async Task ShowVaultDetailsPopupAsync()
-        {
-            var message =
-                $"Tier: {VaultTierText}\n" +
-                $"\nMaster password: {MasterPasswordStrength}" +
-                $"\nAverage passwords: {AveragePasswordsStrength}" +
-                $"\nOriginality: {ReuseRateText}" +
-                $"\nBreached passwords: {BreachesText}" +
-                $"\nMFA: {MfaStatusText}";
-
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                title: "Vault Score Details",
-                body: message,
-                aText: "OK"
-            ));
         }
 
         [RelayCommand]
