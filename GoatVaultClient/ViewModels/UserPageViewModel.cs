@@ -75,34 +75,22 @@ namespace GoatVaultClient.ViewModels
         public void RefreshVaultScore()
         {
             var user = _vaultSessionService.CurrentUser;
-            if (user == null)
-                return;
-
-            int breachedCount = _vaultSessionService.VaultEntries?.Sum(e => e.BreachCount) ?? 0;
+            if (user == null) return;
 
             var score = VaultScoreCalculatorService.CalculateScore(
                 _vaultSessionService.VaultEntries,
                 _vaultSessionService.MasterPassword,
-                user.MfaEnabled,
-                breachedPasswordsCount: breachedCount
+                user.MfaEnabled
             );
 
-            // Points calculation based on percentages, with maximum caps for each category
-            MasterPasswordStrength = Math.Min(score.MasterPasswordPercent / 100.0 * 400, 400);
-            AveragePasswordsStrength = Math.Min(score.AveragePasswordsPercent / 100.0 * 200, 200);
-            ReuseRate = Math.Min(score.ReuseRatePercent / 100.0 * 200, 200);
-            MfaPercent = user.MfaEnabled ? 200 : 0;
+            MasterPasswordStrength = score.MasterPasswordPercent / 100.0 * 400;
+            AveragePasswordsStrength = score.AveragePasswordsPercent / 100.0 * 200;
+            ReuseRate = score.ReuseRatePercent / 100.0 * 200;
+            MfaPercent = score.MfaEnabled ? 200 : 0;
 
-            // Penalize breaches
-            int breachPenalty = 20;
-            int totalBreachPenalty = score.BreachesCount * breachPenalty;
-
-            VaultScore = MasterPasswordStrength + AveragePasswordsStrength + ReuseRate + MfaPercent - totalBreachPenalty;
-            if (VaultScore < 0) VaultScore = 0;
-
+            VaultScore = score.VaultScore;
             VaultTierText = $"{GetVaultTier(VaultScore)} ({VaultScore:0}/1000)";
-
-            BreachesCount = Math.Max(-100, -breachPenalty * breachedCount);
+            BreachesCount = score.BreachesCount;
         }
 
 
