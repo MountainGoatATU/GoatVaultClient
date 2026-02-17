@@ -12,6 +12,7 @@ namespace GoatVaultClient.ViewModels
     public partial class MainPageViewModel : BaseViewModel
     {
         private readonly LoadVaultUseCase _loadVault;
+        private readonly ISessionContext _sessionContext;
 
         #region Properties
 
@@ -49,6 +50,7 @@ namespace GoatVaultClient.ViewModels
 
         public MainPageViewModel(
             LoadVaultUseCase loadVault,
+            ISessionContext sessionContext,
             ISyncingService syncingService,
             GoatTipsService goatTipsService,
             TotpManagerService totpManagerService,
@@ -57,6 +59,7 @@ namespace GoatVaultClient.ViewModels
             PwnedPasswordService pwnedPasswordService*/)
         {
             _loadVault = loadVault;
+            _sessionContext = sessionContext;
             _syncingService = syncingService;
             GoatTipsService = goatTipsService;
             _totpManagerService = totpManagerService;
@@ -64,10 +67,23 @@ namespace GoatVaultClient.ViewModels
             _vaultEntryManagerService = vaultEntryManagerService;
             // _pwnedPasswordService = pwnedPasswordService;
 
-
+            _sessionContext.VaultChanged += OnVaultChanged;
 
             StartRandomGoatComments();
             Task.Run(async () => await InitializeAsync());
+        }
+
+        private void OnVaultChanged(object? sender, EventArgs e)
+        {
+             MainThread.BeginInvokeOnMainThread(() =>
+             {
+                 if (_sessionContext.Vault != null)
+                 {
+                     _allVaultEntries = _sessionContext.Vault.Entries.ToList();
+                     _allVaultCategories = _sessionContext.Vault.Categories.ToList();
+                     ReloadVaultData();
+                 }
+             });
         }
 
         private async Task InitializeAsync() => await LoadVaultAsync();
@@ -105,6 +121,12 @@ namespace GoatVaultClient.ViewModels
 
         private void ReloadVaultData()
         {
+            if (_sessionContext.Vault != null)
+            {
+                _allVaultEntries = _sessionContext.Vault.Entries.ToList();
+                _allVaultCategories = _sessionContext.Vault.Categories.ToList();
+            }
+
             Passwords = _allVaultEntries.ToObservableCollection();
             Categories = _allVaultCategories.ToObservableCollection();
 

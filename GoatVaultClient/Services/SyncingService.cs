@@ -1,18 +1,19 @@
+using GoatVaultApplication.VaultUseCases;
 using CommunityToolkit.Mvvm.ComponentModel;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultInfrastructure.Services.API;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models;
 using Email = GoatVaultCore.Models.Email;
 
 namespace GoatVaultClient.Services;
 
-// TODO: REFACTOR
 public class SyncingService(
     IConfiguration configuration,
     ISessionContext session,
+    IServiceProvider services,
     IHttpService http,
     IVaultCrypto vaultCrypto,
     ILogger<SyncingService>? logger = null)
@@ -206,8 +207,8 @@ public class SyncingService(
                     Email = userResponse.Email,
                     Vault = userResponse.Vault,
                     AuthSalt = userResponse.AuthSalt,
-                    UpdatedAt = userResponse.UpdatedAt,
-                    CreatedAt = userResponse.CreatedAt,
+                    UpdatedAtUtc = userResponse.UpdatedAtUtc,
+                    CreatedAtUtc = userResponse.CreatedAtUtc,
                     MfaEnabled = userResponse.MfaEnabled,
                     MfaSecret = userResponse.MfaSecret
                 });
@@ -276,21 +277,11 @@ public class SyncingService(
                 Entries = session.Vault.Entries
             };
 
-            var encryptedVault = vaultCrypto.Encrypt(updatedVault, session.GetMasterKey());
+            // var encryptedVault = vaultCrypto.Encrypt(updatedVault, session.GetMasterKey());
 
-            // TODO: Save
-            /*
-            var localUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
-
-            if (localUser == null)
-                throw new InvalidOperationException("Local user missing during save");
-
-            localUser.Email = vaultSessionService.CurrentUser.Email;
-            localUser.Vault = encryptedVault;
-            localUser.UpdatedAt = DateTime.UtcNow;
-
-            await vaultService.UpdateUserInLocalAsync(localUser);
-            */
+            using var scope = services.CreateScope();
+            var saveVault = scope.ServiceProvider.GetRequiredService<SaveVaultUseCase>();
+            await saveVault.ExecuteAsync();
 
             LastSaved = DateTime.UtcNow;
             MarkedAsChanged = true;
@@ -334,8 +325,8 @@ public class SyncingService(
         vaultSessionService.CurrentUser.Email = user.Email;
         vaultSessionService.CurrentUser.MfaEnabled = user.MfaEnabled;
         vaultSessionService.CurrentUser.MfaSecret = user.MfaSecret;
-        vaultSessionService.CurrentUser.UpdatedAt = user.UpdatedAt;
-        vaultSessionService.CurrentUser.CreatedAt = user.CreatedAt;
+        vaultSessionService.CurrentUser.UpdatedAtUtc = user.UpdatedAtUtc;
+        vaultSessionService.CurrentUser.CreatedAtUtc = user.CreatedAtUtc;
         vaultSessionService.CurrentUser.Vault = user.Vault;
         vaultSessionService.DecryptedVault = decryptedLocalVault;
         */
@@ -367,7 +358,7 @@ public class SyncingService(
         if (session.Vault is null)
             return;
 
-        var encryptedVault = vaultCrypto.Encrypt(session.Vault, session.GetMasterKey());
+        // var encryptedVault = vaultCrypto.Encrypt(session.Vault, session.GetMasterKey());
 
         /*
         var updateUserRequest = new UserRequest
@@ -389,7 +380,7 @@ public class SyncingService(
     {
         user.Email = new Email(userOnServer.Email);
         user.Vault = userOnServer.Vault;
-        user.UpdatedAtUtc = userOnServer.UpdatedAt;
+        user.UpdatedAtUtc = userOnServer.UpdatedAtUtc;
 
         // TODO: Fix
         // await vaultService.UpdateUserInLocalAsync(user);

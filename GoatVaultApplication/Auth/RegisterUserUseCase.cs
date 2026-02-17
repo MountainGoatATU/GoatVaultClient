@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Services;
@@ -31,7 +31,7 @@ public class RegisterUseCase(
         // 2. Create empty vault and encrypt
         var emptyVault = new VaultDecrypted(); // Empty vault structure
         var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
-        var encryptedVault = vaultCrypto.Encrypt(emptyVault, masterKey);
+        var encryptedVault = vaultCrypto.Encrypt(emptyVault, masterKey, vaultSalt);
 
         // 3. Create registration payload
         var registerPayload = new AuthRegisterRequest()
@@ -39,7 +39,6 @@ public class RegisterUseCase(
             Email = email.Value,
             AuthSalt = Convert.ToBase64String(authSalt),
             AuthVerifier = Convert.ToBase64String(authVerifier),
-            VaultSalt = Convert.ToBase64String(vaultSalt),
             Vault = encryptedVault
         };
 

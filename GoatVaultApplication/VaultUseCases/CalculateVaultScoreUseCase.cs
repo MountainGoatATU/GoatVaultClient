@@ -1,5 +1,5 @@
 ﻿namespace GoatVaultApplication.VaultUseCases;
 
-internal class CalculateVaultScoreUseCase
+public class CalculateVaultScoreUseCase
 {
 }

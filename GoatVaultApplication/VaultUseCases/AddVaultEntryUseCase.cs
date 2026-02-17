@@ -1,18 +1,19 @@
-﻿using GoatVaultApplication.Session;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models.Vault;
 
 namespace GoatVaultApplication.VaultUseCases;
 
-public class AddEntryUseCase(
-    /*
-    IUserRepository userRepository,
-    VaultSession session*/)
+public class AddVaultEntryUseCase(ISessionContext session, SaveVaultUseCase saveVault)
 {
-    /*
-    public Task ExecuteAsync(VaultEntry entry)
+    public async Task ExecuteAsync(VaultEntry entry)
     {
-        session.VaultDecrypted?.AddEntry(entry);
-        return Task.CompletedTask;
-        // await userRepository.SaveAsync(session.UserId, session.VaultDecrypted);
+        if (session.Vault is null)
+        {
+            throw new InvalidOperationException("Vault not loaded.");
+        }
+
+        session.Vault.Entries.Add(entry);
+        session.RaiseVaultChanged();
+        await saveVault.ExecuteAsync();
     }
-*/
 }

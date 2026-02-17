@@ -1,5 +1,5 @@
 ﻿namespace GoatVaultApplication.Account;
 
-internal class DisableMfaUseCase
+public class DisableMfaUseCase
 {
 }

@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Abstractions;
 
 namespace GoatVaultApplication.VaultUseCases;
 
@@ -13,10 +13,10 @@ public sealed class SaveVaultUseCase(
         var vault = session.Vault
                     ?? throw new InvalidOperationException("Vault not loaded.");
 
-        var encrypted = crypto.Encrypt(vault, masterKey);
-
         var user = await users.GetByIdAsync(session.UserId!.Value)
                    ?? throw new InvalidOperationException("User not found.");
+
+        var encrypted = crypto.Encrypt(vault, masterKey, user.VaultSalt);
 
         user.Vault = encrypted;
 

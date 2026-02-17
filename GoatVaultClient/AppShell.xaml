@@ -19,7 +19,7 @@
            IntroductionPage → LoginPage ↔ RegisterPage
         
         2. POST-AUTH FLOW (FlyoutBehavior=Flyout):
-           Hamburger menu with: Home | Education | Vault | User
+           Hamburger menu with: Home | Vault | User
            FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
         
         Navigation stack is cleared on:
@@ -78,12 +78,6 @@
                       Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Home}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
                       ContentTemplate="{DataTemplate local:MainPage}" />
 
-        <ShellContent Route="education"
-                      Title="Education"
-                      Shell.NavBarIsVisible="False"
-                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Book}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
-                      ContentTemplate="{DataTemplate pages:EducationPage}" />
-
         <ShellContent Route="user"
                       Title="Profile"
                       Shell.NavBarIsVisible="False"
@@ -110,8 +104,6 @@
     <FlyoutItem Title="Vault" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Home}}">
         <ShellContent Title="Vault" ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" Icon="user_icon.png" />
     </FlyoutItem>
-    <FlyoutItem Title="Education" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Book}}">
-        <ShellContent Title="EducationPage" ContentTemplate="{DataTemplate pages:EducationPage}" Route="EducationPage" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Book}}" />
     </FlyoutItem>
     <FlyoutItem Title="User" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Account_circle}}">
         <ShellContent Title="UserSettings" ContentTemplate="{DataTemplate pages:UserPage}" Route="UserPage" />

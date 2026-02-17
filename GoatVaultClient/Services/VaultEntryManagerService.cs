@@ -1,3 +1,4 @@
+using GoatVaultApplication.VaultUseCases;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Vault;
@@ -8,6 +9,9 @@ namespace GoatVaultClient.Services;
 
 public class VaultEntryManagerService(
     ISessionContext session,
+    AddVaultEntryUseCase addEntry,
+    UpdateVaultEntryUseCase updateEntry,
+    DeleteVaultEntryUseCase deleteEntry,
     ISyncingService syncing,
     PwnedPasswordService pwned)
 {
@@ -68,11 +72,10 @@ public class VaultEntryManagerService(
         }
 
         // Add to list
-        session.Vault?.Entries.Add(newEntry);
+        await addEntry.ExecuteAsync(newEntry);
 
         // Notify that entries changed
-        // TODO: Fix
-        // session.RaiseVaultEntriesChanged();
+        // session.RaiseVaultEntriesChanged(); // Handled by use case
 
         await syncing.AutoSaveIfEnabled();
 
@@ -145,10 +148,10 @@ public class VaultEntryManagerService(
             }
         }
 
-        entries[index] = updatedEntry;
+        await updateEntry.ExecuteAsync(target, updatedEntry);
+
         // Notify that entries changed
-        // TODO: Fix
-        // session.RaiseVaultEntriesChanged();
+        // session.RaiseVaultEntriesChanged(); // Handled by use case
 
         await syncing.AutoSaveIfEnabled();
 
@@ -173,11 +176,10 @@ public class VaultEntryManagerService(
             return false;
 
         // Remove from the list
-        session.Vault?.Entries.Remove(target);
+        await deleteEntry.ExecuteAsync(target);
 
         // Notify that entries changed
-        // TODO: Fix
-        // session.RaiseVaultEntriesChanged();
+        // session.RaiseVaultEntriesChanged(); // Handled by use case
 
         await syncing.AutoSaveIfEnabled();
 

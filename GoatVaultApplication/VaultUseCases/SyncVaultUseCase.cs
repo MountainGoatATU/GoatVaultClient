@@ -1,5 +1,5 @@
 ﻿namespace GoatVaultApplication.VaultUseCases;
 
-internal class SyncVaultUseCase
+public class SyncVaultUseCase
 {
 }

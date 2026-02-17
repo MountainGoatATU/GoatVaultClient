@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using GoatVaultCore.Models;
 using GoatVaultCore.Abstractions;
@@ -19,7 +19,7 @@ public class VaultCrypto : IVaultCrypto
                ?? throw new InvalidOperationException("Vault decryption returned null");
     }
 
-    public VaultEncrypted Encrypt(VaultDecrypted decryptedVault, MasterKey key)
+    public VaultEncrypted Encrypt(VaultDecrypted decryptedVault, MasterKey key, byte[] vaultSalt)
     {
         var json = System.Text.Json.JsonSerializer.Serialize(decryptedVault);
         var plaintext = Encoding.UTF8.GetBytes(json);
@@ -31,6 +31,6 @@ public class VaultCrypto : IVaultCrypto
         using var aesGcm = new AesGcm(key.Key, 16);
         aesGcm.Encrypt(nonce, plaintext, encryptedBlob, authTag);
 
-        return new VaultEncrypted(encryptedBlob, nonce, authTag);
+        return new VaultEncrypted(vaultSalt, encryptedBlob, nonce, authTag);
     }
 }

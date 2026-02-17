@@ -21,7 +21,7 @@ public partial class LoginPageViewModel(
     ILogger<LoginPageViewModel>? logger = null)
     : BaseViewModel
 {
-    [ObservableProperty] private Email? _email;
+    [ObservableProperty] private string? _emailText;
     [ObservableProperty] private string? _password;
     [ObservableProperty] private bool _isOnline = true;
     [ObservableProperty] private string _connectivityMessage = string.Empty;
@@ -116,7 +116,12 @@ public partial class LoginPageViewModel(
 
     private async Task LoginOnline()
     {
-        await loginOnline.ExecuteAsync(Email, Password, PromptForMfaCode);
+        if (string.IsNullOrWhiteSpace(EmailText))
+            throw new InvalidOperationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(Password))
+            throw new InvalidOperationException("Password is required.");
+
+        await loginOnline.ExecuteAsync(new Email(EmailText), Password, PromptForMfaCode);
     }
 
     private async Task LoginOffline()
@@ -143,7 +148,7 @@ public partial class LoginPageViewModel(
         }
         else
         {
-            Email = user.Email;
+            EmailText = user.Email.Value;
             SelectedUser = null; // Clear selection for online login
         }
     }

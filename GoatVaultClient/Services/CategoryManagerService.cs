@@ -29,6 +29,7 @@ public class CategoryManagerService(
 
             // Add to global list
             session.Vault?.Categories.Add(temp);
+            session.RaiseVaultChanged();
 
             await syncing.AutoSaveIfEnabled();
 
@@ -112,6 +113,8 @@ public class CategoryManagerService(
             pwd.Category = reassign ? response : string.Empty;
         }
 
+        session.RaiseVaultChanged();
+
         await syncing.AutoSaveIfEnabled();
 
         return true;
@@ -172,6 +175,8 @@ public class CategoryManagerService(
 
         // Remove category
         categories?.Remove(target);
+
+        session.RaiseVaultChanged();
 
         // Save the changes
         await syncing.AutoSaveIfEnabled();

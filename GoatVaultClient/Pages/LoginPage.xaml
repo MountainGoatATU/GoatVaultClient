@@ -147,7 +147,7 @@
                     Text="Login" />
 
                 <!--  Email Field  -->
-                <material:TextField Title="Email" Text="{Binding Email}" />
+                <material:TextField Title="Email" Text="{Binding EmailText}" />
 
                 <!--  Password Field  -->
                 <material:TextField

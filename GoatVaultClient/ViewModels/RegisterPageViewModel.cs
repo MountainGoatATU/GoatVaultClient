@@ -37,6 +37,18 @@ public partial class RegisterPageViewModel(
             // On success, navigate to Gratitude page
             await Shell.Current.GoToAsync("//gratitude");
         }
+        catch (InvalidOperationException ex)
+        {
+            await Shell.Current.DisplayAlert("Registration Failed", ex.Message, "OK");
+        }
+        catch (HttpRequestException)
+        {
+            await Shell.Current.DisplayAlert("Network Error", "Unable to reach server. Please try again later.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Error", $"An unexpected error occurred: {ex.Message}", "OK");
+        }
         finally
         {
             IsBusy = false;

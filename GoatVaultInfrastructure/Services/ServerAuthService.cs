@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.API;
 using Microsoft.Extensions.Configuration;
 using System.Text;
@@ -12,6 +12,12 @@ public class ServerAuthService(
 {
     private string BaseUrl => configuration.GetSection("API_BASE_URL").Value
                               ?? throw new InvalidOperationException("Server base URL missing");
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
 
     public async Task<AuthInitResponse> InitAsync(AuthInitRequest payload, CancellationToken ct = default)
     {
@@ -28,7 +34,7 @@ public class ServerAuthService(
         var response = await http.GetAsync($"{BaseUrl}/v1/users/{userId}", ct);
         response.EnsureSuccessStatusCode();
         var json = await response.Content.ReadAsStringAsync(ct);
-        return JsonSerializer.Deserialize<UserResponse>(json) ?? throw new InvalidOperationException("Invalid user response");
+        return JsonSerializer.Deserialize<UserResponse>(json, JsonOptions) ?? throw new InvalidOperationException("Invalid user response");
     }
 
     public async Task<AuthRegisterResponse> RegisterAsync(AuthRegisterRequest payload, CancellationToken ct = default)
@@ -39,7 +45,7 @@ public class ServerAuthService(
     private async Task<T> PostAsync<T>(string endpoint, object payload, CancellationToken ct)
     {
         var content = new StringContent(
-            JsonSerializer.Serialize(payload),
+            JsonSerializer.Serialize(payload, JsonOptions),
             Encoding.UTF8,
             "application/json");
 
@@ -47,6 +53,6 @@ public class ServerAuthService(
         resp.EnsureSuccessStatusCode();
 
         var json = await resp.Content.ReadAsStringAsync(ct);
-        return JsonSerializer.Deserialize<T>(json) ?? throw new InvalidOperationException($"Invalid response for {endpoint}");
+        return JsonSerializer.Deserialize<T>(json, JsonOptions) ?? throw new InvalidOperationException($"Invalid response for {endpoint}");
     }
 }

@@ -1,4 +1,5 @@
-﻿using GoatVaultCore.Abstractions;
+using System.Security.Cryptography;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 
@@ -22,9 +23,14 @@ public class LoginOnlineUseCase(
         var authInitResponse = await serverAuth.InitAsync(authInitRequest, ct);
         var userId = Guid.Parse(authInitResponse.UserId);
 
-        // 2. Compute verifier client-side
+        // 2. Compute proof client-side
         var authSalt = Convert.FromBase64String(authInitResponse.AuthSalt);
-        var authVerifier = Convert.ToBase64String(crypto.GenerateAuthVerifier(password, authSalt));
+        var authVerifierBytes = crypto.GenerateAuthVerifier(password, authSalt);
+
+        var nonce = Convert.FromBase64String(authInitResponse.Nonce);
+        using var hmac = new HMACSHA256(authVerifierBytes);
+        var proofBytes = hmac.ComputeHash(nonce);
+        var proof = Convert.ToBase64String(proofBytes);
 
         // 3. MFA code if required
         string? mfaCode = null;
@@ -40,7 +46,7 @@ public class LoginOnlineUseCase(
         // 4. Verify credentials
         var authVerifyRequest = new AuthVerifyRequest
         {
-            UserId = userId, AuthVerifier = authVerifier, MfaCode = mfaCode
+            UserId = userId, Proof = proof, MfaCode = mfaCode
         };
         var authVerifyResponse = await serverAuth.VerifyAsync(authVerifyRequest, ct);
         authTokenService.SetToken(authVerifyResponse.AccessToken);
@@ -52,7 +58,7 @@ public class LoginOnlineUseCase(
             throw new InvalidOperationException("Vault is missing.");
 
         // 6. Decrypt vault
-        var vaultSalt = Convert.FromBase64String(user.VaultSalt);
+        var vaultSalt = user.Vault.VaultSalt;
         var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
         var decryptedVault = vaultCrypto.Decrypt(user.Vault, masterKey);
 

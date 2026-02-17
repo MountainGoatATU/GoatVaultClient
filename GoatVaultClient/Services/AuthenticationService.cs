@@ -7,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
 
+using GoatVaultApplication.Auth;
+using Email = GoatVaultCore.Models.Email;
+
 // TODO: REFACTOR only hold use cases
 namespace GoatVaultClient.Services
 {
@@ -20,12 +23,12 @@ namespace GoatVaultClient.Services
         public Task RemoveLocalAccountAsync(User account);
     }
     public class AuthenticationService(
-        IConfiguration configuration,
-        IAuthTokenService authToken,
-        IHttpService http,
+        LoginOnlineUseCase loginOnline,
+        LoginOfflineUseCase loginOffline,
+        RegisterUseCase register,
+        LogoutUseCase logout,
+        IUserRepository users,
         ConnectivityService connectivity,
-        ISyncingService syncing,
-        PwnedPasswordService pwned,
         ILogger<AuthenticationService>? logger = null
         ) : IAuthenticationService
     {
@@ -52,7 +55,7 @@ namespace GoatVaultClient.Services
                     return false;
                 }
 
-                // TODO: Login Online Use Case
+                await loginOnline.ExecuteAsync(new Email(email!), password!, mfaCodeProvider);
 
                 return true;
             }
@@ -127,7 +130,7 @@ namespace GoatVaultClient.Services
 
             try
             {
-                // TODO: Login Offline Use Case
+                await loginOffline.ExecuteAsync(selectedUser.Id, password!);
                 logger?.LogInformation("Offline login attempt for account {AccountId}", selectedUser.Id);
             }
             catch (Exception ex)
@@ -173,7 +176,7 @@ namespace GoatVaultClient.Services
                     return false;
                 }
 
-                // TODO: Register Use Case
+                await register.ExecuteAsync(new Email(email), password!);
 
                 logger?.LogInformation("Registration successful");
                 return true;
@@ -228,7 +231,7 @@ namespace GoatVaultClient.Services
                 // Show pending popup while we process logout
                 await MopupService.Instance.PushAsync(new PendingPopup("Logging out..."));
 
-                // TODO: Logout Use Case
+                await logout.ExecuteAsync();
 
                 // Pop the pending popup
                 await MopupService.Instance.PopAsync();
@@ -251,13 +254,7 @@ namespace GoatVaultClient.Services
                 ));
             }
         }
-        public async Task<List<User>> GetAllLocalAccountsAsync()
-        {
-            // TODO: Implement
-            throw new NotImplementedException("New implementation needed post refactor");
-            // var accounts = await vaultService.LoadAllUsersFromLocalAsync();
-            // return accounts;
-        }
+        public async Task<List<User>> GetAllLocalAccountsAsync() => await users.GetAllAsync();
         public async Task RemoveLocalAccountAsync(User account)
         {
             // Confirm deletion
@@ -273,10 +270,7 @@ namespace GoatVaultClient.Services
             if (!confirm)
                 return;
 
-            // TODO: Implement
-            throw new NotImplementedException("New implementation needed post refactor");
-
-            // await vaultService.DeleteUserFromLocalAsync(account.Id);
+            await users.DeleteAsync(account);
         }
     }
 }

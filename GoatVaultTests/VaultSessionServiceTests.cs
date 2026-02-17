@@ -1,6 +1,6 @@
+using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
-using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultTests;
 
@@ -20,8 +20,8 @@ public class VaultSessionServiceTests
                 AuthSalt = "salt",
                 Vault = new VaultEncrypted(),
                 MfaEnabled = false,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAtUtc = DateTime.UtcNow,
+                UpdatedAtUtc = DateTime.UtcNow
             },
             MasterPassword = "password123"
         };
@@ -66,8 +66,8 @@ public class VaultSessionServiceTests
             AuthSalt = "salt-value",
             Vault = new VaultEncrypted(),
             MfaEnabled = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAtUtc = DateTime.UtcNow,
+            UpdatedAtUtc = DateTime.UtcNow
         };
 
         // Act
