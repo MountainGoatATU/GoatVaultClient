@@ -1,8 +1,6 @@
 using GoatVaultCore.Models.Vault;
-using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
 using Moq;
-using System.Linq;
 
 namespace GoatVaultTests;
 

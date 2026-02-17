@@ -1,6 +1,3 @@
-using GoatVaultCore.Models.Vault;
-using System.Text.Json.Serialization;
-
 namespace GoatVaultCore.Models.API;
 
 public class AuthVerifyResponse

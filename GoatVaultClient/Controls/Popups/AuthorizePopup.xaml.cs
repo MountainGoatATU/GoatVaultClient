@@ -3,7 +3,6 @@ using Mopups.Pages;
 using Mopups.Services;
 using System.ComponentModel;
 using System.Windows.Input;
-using UraniumUI.Material.Attachments;
 using UraniumUI.Material.Controls;
 
 namespace GoatVaultClient.Controls.Popups;

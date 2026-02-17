@@ -1,6 +1,4 @@
-﻿using GoatVaultInfrastructure.Services;
-
-namespace GoatVaultTests;
+﻿namespace GoatVaultTests;
 
 public class UserServiceTests
 {

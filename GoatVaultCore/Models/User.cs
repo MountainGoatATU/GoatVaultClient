@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using GoatVaultCore;
 
 namespace GoatVaultCore.Models;
 

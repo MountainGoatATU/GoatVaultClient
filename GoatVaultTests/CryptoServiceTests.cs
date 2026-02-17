@@ -1,6 +1,4 @@
-﻿using GoatVaultCore.Services.Secrets;
-
-namespace GoatVaultTests;
+﻿namespace GoatVaultTests;
 
 public class CryptoServiceTests
 {
