@@ -12,7 +12,8 @@ public class HttpService(
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
     private async Task<T> SendAsync<T>(HttpMethod method, string url, object? payload = null)
@@ -20,7 +21,9 @@ public class HttpService(
         using var request = new HttpRequestMessage(method, url);
 
         if (payload != null)
-            request.Content = JsonContent.Create(payload);
+        {
+            request.Content = JsonContent.Create(payload, options: JsonOptions);
+        }
 
         var stopwatch = Stopwatch.StartNew();
         var response = await client.SendAsync(request);
