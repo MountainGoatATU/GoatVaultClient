@@ -126,6 +126,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<CategoryManagerService>();
         builder.Services.AddSingleton<VaultEntryManagerService>();
         builder.Services.AddSingleton<PwnedPasswordService>();
+        builder.Services.AddSingleton<PasswordStrengthService>();
+        builder.Services.AddSingleton<VaultScoreCalculatorService>();
 
         // Register pages
         builder.Services.AddTransient<SyncStatusBarViewModel>();

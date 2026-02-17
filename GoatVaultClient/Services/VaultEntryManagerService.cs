@@ -9,13 +9,14 @@ namespace GoatVaultClient.Services;
 public class VaultEntryManagerService(
     VaultSessionService vaultSessionService,
     ISyncingService syncingService,
-    PwnedPasswordService pwnedPasswordService)
+    PwnedPasswordService pwnedPasswordService,
+    IPasswordStrengthService passwordStrengthService)
 {
     public async Task<bool> CreateEntryAsync(IEnumerable<CategoryItem> categories)
     {
         var categoriesList = categories.ToList();
 
-        var formModel = new VaultEntryForm(categoriesList)
+        var formModel = new VaultEntryForm(categoriesList, passwordStrengthService)
         {
             // Optional: Set a default selected category
             Category = categoriesList.FirstOrDefault()?.Name ?? ""
@@ -90,7 +91,7 @@ public class VaultEntryManagerService(
 
         var categoriesList = categories.ToList();
 
-        var formModel = new VaultEntryForm(categoriesList)
+        var formModel = new VaultEntryForm(categoriesList, passwordStrengthService)
         {
             UserName = target.UserName,
             Site = target.Site,
