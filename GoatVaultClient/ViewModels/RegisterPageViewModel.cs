@@ -1,11 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Services;
+using GoatVaultApplication.Auth;
+using Email = GoatVaultCore.Models.Email;
 
 namespace GoatVaultClient.ViewModels;
 
 public partial class RegisterPageViewModel(
-    IAuthenticationService authenticationService)
+    RegisterUseCase register)
     : BaseViewModel
 {
     // Services
@@ -29,8 +30,9 @@ public partial class RegisterPageViewModel(
             // Set Busy
             IsBusy = true;
 
-            // Call Register method from AuthenticationService
-            if (Email != null) await authenticationService.RegisterAsync(Email, Password, ConfirmPassword);
+            // Call Register use case
+            if (Email is not null && Password is not null) 
+                await register.ExecuteAsync(new Email(Email), Password);
 
             // On success, navigate to Gratitude page
             await Shell.Current.GoToAsync("//gratitude");
