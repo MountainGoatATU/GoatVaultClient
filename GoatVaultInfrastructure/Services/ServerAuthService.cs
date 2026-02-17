@@ -1,10 +1,10 @@
-﻿using GoatVaultCore;
+﻿using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.API;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
 
-namespace GoatVaultInfrastructure;
+namespace GoatVaultInfrastructure.Services;
 
 public class ServerAuthService(
     HttpClient http,

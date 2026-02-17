@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using GoatVaultCore;
+using GoatVaultCore.Abstractions;
 
 namespace GoatVaultInfrastructure.Services.API;
 

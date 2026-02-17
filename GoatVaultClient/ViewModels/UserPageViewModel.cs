@@ -2,15 +2,16 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Services;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.API;
-using GoatVaultCore.Services.Secrets;
+using GoatVaultCore.Services;
 using GoatVaultInfrastructure.Services.API;
-using GoatVaultInfrastructure.Services.Vault;
 using Mopups.Services;
 using OtpNet;
 
 namespace GoatVaultClient.ViewModels
 {
+    // TODO: Refactor
     public partial class UserPageViewModel : BaseViewModel
     {
         [ObservableProperty] private string email;
@@ -29,45 +30,45 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private bool showVaultDetails;
         [ObservableProperty] private string? vaultTierText;
 
-        private readonly HttpService _httpService;
-        private readonly AuthTokenService _authTokenService;
-        private readonly IAuthenticationService _authenticationService;
-        private readonly VaultSessionService _vaultSessionService;
-        private readonly VaultService _vaultService;
-        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
-        private readonly GoatTipsService _goatTipsService;
-        private readonly PwnedPasswordService _pwnedPasswordService;
+        private readonly IHttpService _http;
+        private readonly IAuthTokenService _authToken;
+        private readonly IAuthenticationService _auth;
+        private readonly ISessionContext _session;
+        private readonly IVaultCrypto _vaultCrypto;
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
+        private readonly GoatTipsService _goatTips;
+        private readonly PwnedPasswordService _pwned;
 
         public UserPageViewModel(
-            HttpService httpService,
-            AuthTokenService authTokenService,
-            IAuthenticationService authenticationService,
-            VaultSessionService vaultSessionService,
-            VaultService vaultService,
-            Microsoft.Extensions.Configuration.IConfiguration configuration,
-            GoatTipsService goatTipsService,
-            PwnedPasswordService pwnedPasswordService)
+            IHttpService http,
+            IAuthTokenService authToken,
+            IAuthenticationService auth,
+            ISessionContext session,
+            IVaultCrypto vaultCrypto,
+            Microsoft.Extensions.Configuration.IConfiguration config,
+            GoatTipsService goatTips,
+            PwnedPasswordService pwned)
         {
-            _httpService = httpService;
-            _authTokenService = authTokenService;
-            _authenticationService = authenticationService;
-            _vaultSessionService = vaultSessionService;
-            _vaultService = vaultService;
-            _configuration = configuration;
-            _goatTipsService = goatTipsService;
-            _pwnedPasswordService = pwnedPasswordService;
+            _http = http;
+            _authToken = authToken;
+            _auth = auth;
+            _session = session;
+            _vaultCrypto = vaultCrypto;
+            _config = config;
+            _goatTips = goatTips;
+            _pwned = pwned;
 
-            _vaultSessionService.VaultEntriesChanged += RefreshVaultScore;
-            _vaultSessionService.MasterPasswordChanged += RefreshVaultScore;
+            _session.VaultEntriesChanged += RefreshVaultScore;
+            _session.MasterPasswordChanged += RefreshVaultScore;
 
-            GoatEnabled = _goatTipsService.IsGoatEnabled;
-            _goatTipsService.SetEnabled(GoatEnabled);
+            GoatEnabled = _goatTips.IsGoatEnabled;
+            _goatTips.SetEnabled(GoatEnabled);
 
-            if (_vaultSessionService.CurrentUser == null)
+            if (_session.CurrentUser == null)
                 return;
 
-            Email = _vaultSessionService.CurrentUser.Email;
-            MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled;
+            Email = _session.CurrentUser.Email;
+            MfaEnabled = _session.CurrentUser.MfaEnabled;
 
             RefreshVaultScore();
         }
@@ -75,13 +76,13 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         public void RefreshVaultScore()
         {
-            var user = _vaultSessionService.CurrentUser;
+            var user = _session.CurrentUser;
             if (user == null)
                 return;
 
             var score = VaultScoreCalculatorService.CalculateScore(
-                _vaultSessionService.VaultEntries,
-                _vaultSessionService.MasterPassword,
+                _session.VaultEntries,
+                _session.MasterPassword,
                 user.MfaEnabled);
 
             VaultScore = score.VaultScore;
@@ -133,12 +134,12 @@ namespace GoatVaultClient.ViewModels
         private void ToggleGoat()
         {
             GoatEnabled = !GoatEnabled;
-            _goatTipsService.SetEnabled(GoatEnabled);
+            _goatTips.SetEnabled(GoatEnabled);
         }
 
         private string GetBaseUrl()
         {
-            var baseUrl = _configuration["GOATVAULT_SERVER_BASE_URL"];
+            var baseUrl = _config["GOATVAULT_SERVER_BASE_URL"];
             return string.IsNullOrWhiteSpace(baseUrl) ? throw new Exception("Server base URL not configured") : baseUrl;
         }
 
@@ -148,7 +149,7 @@ namespace GoatVaultClient.ViewModels
             if (IsBusy)
                 return;
 
-            var user = _vaultSessionService.CurrentUser;
+            var user = _session.CurrentUser;
             if (user == null)
             {
                 await MopupService.Instance.PushAsync(new PromptPopup(
@@ -225,23 +226,23 @@ namespace GoatVaultClient.ViewModels
                     Vault = user.Vault
                 };
 
-                await _httpService.PatchAsync<UserResponse>(
+                await _http.PatchAsync<UserResponse>(
                     $"{baseUrl}v1/users/{user.Id}",
                     request
                 );
 
                 // Update local database
-                var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
+                var dbUser = await _vaultCrypto.LoadUserFromLocalAsync(user.Id);
                 if (dbUser != null)
                 {
                     dbUser.MfaEnabled = true;
                     dbUser.MfaSecret = secret;
-                    await _vaultService.UpdateUserInLocalAsync(dbUser);
+                    await _vaultCrypto.UpdateUserInLocalAsync(dbUser);
                 }
 
                 // Update session
-                _vaultSessionService.CurrentUser?.MfaEnabled = true;
-                _vaultSessionService.CurrentUser?.MfaSecret = secret;
+                _session.CurrentUser?.MfaEnabled = true;
+                _session.CurrentUser?.MfaSecret = secret;
                 MfaEnabled = true;
                 RefreshVaultScore();
                 
@@ -271,7 +272,7 @@ namespace GoatVaultClient.ViewModels
             if (IsBusy)
                 return;
 
-            var user = _vaultSessionService.CurrentUser;
+            var user = _session.CurrentUser;
             if (user == null)
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -347,7 +348,7 @@ namespace GoatVaultClient.ViewModels
                 }
 
                 // Load MFA secret from local DB to verify the code
-                var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
+                var dbUser = await _vaultCrypto.LoadUserFromLocalAsync(user.Id);
                 if (dbUser == null || string.IsNullOrWhiteSpace(dbUser.MfaSecret))
                 {
                     await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -385,7 +386,7 @@ namespace GoatVaultClient.ViewModels
                 var baseUrl = GetBaseUrl();
 
                 // Update server with MFA disabled
-                await _httpService.PatchAsync<UserResponse>(
+                await _http.PatchAsync<UserResponse>(
                     $"{baseUrl}v1/users/{user.Id}",
                     new
                     {
@@ -402,11 +403,11 @@ namespace GoatVaultClient.ViewModels
                 // Update local database
                 dbUser.MfaEnabled = false;
                 dbUser.MfaSecret = null;
-                await _vaultService.UpdateUserInLocalAsync(dbUser);
+                await _vaultCrypto.UpdateUserInLocalAsync(dbUser);
 
                 // Update session
-                _vaultSessionService.CurrentUser?.MfaEnabled = false;
-                _vaultSessionService.CurrentUser?.MfaSecret = null;
+                _session.CurrentUser?.MfaEnabled = false;
+                _session.CurrentUser?.MfaSecret = null;
                 MfaEnabled = false;
                 RefreshVaultScore();
 
@@ -484,7 +485,7 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task EditEmailAsync()
         {
-            var user = _vaultSessionService.CurrentUser;
+            var user = _session.CurrentUser;
             if (user == null)
             {
                 await MopupService.Instance.PushAsync(new PromptPopup(
@@ -525,21 +526,21 @@ namespace GoatVaultClient.ViewModels
                     Vault = user.Vault
                 };
 
-                var updatedUser = await _httpService.PatchAsync<UserResponse>(
+                var updatedUser = await _http.PatchAsync<UserResponse>(
                     $"{baseUrl}v1/users/{user.Id}",
                     request
                 );
 
                 // Update local database
-                var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
+                var dbUser = await _vaultCrypto.LoadUserFromLocalAsync(user.Id);
                 if (dbUser != null)
                 {
                     dbUser.Email = newEmail;
-                    await _vaultService.UpdateUserInLocalAsync(dbUser);
+                    await _vaultCrypto.UpdateUserInLocalAsync(dbUser);
                 }
 
                 // Update session and UI
-                _vaultSessionService.CurrentUser?.Email = updatedUser.Email;
+                _session.CurrentUser?.Email = updatedUser.Email;
                 Email = updatedUser.Email;
 
                 await MopupService.Instance.PushAsync(new PromptPopup(
@@ -565,7 +566,7 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task EditMasterPasswordAsync()
         {
-            var user = _vaultSessionService.CurrentUser;
+            var user = _session.CurrentUser;
             if (user == null)
                 return;
 
@@ -590,7 +591,7 @@ namespace GoatVaultClient.ViewModels
                     return;
 
                 // Check if password has been pwned
-                var pwnCount = await _pwnedPasswordService.CheckPasswordAsync(newPassword);
+                var pwnCount = await _pwned.CheckPasswordAsync(newPassword);
                 if (pwnCount > 0)
                 {
                     var prompt = new PromptPopup(
@@ -610,7 +611,7 @@ namespace GoatVaultClient.ViewModels
                 }
 
                 // Re-encrypt vault with new password
-                var newVaultModel = _vaultService.EncryptVault(newPassword, _vaultSessionService.DecryptedVault);
+                var newVaultModel = _vaultCrypto.EncryptVault(newPassword, _session.DecryptedVault);
 
                 // Generate new authentication credentials
                 var newAuthSalt = CryptoService.GenerateAuthSalt();
@@ -625,29 +626,29 @@ namespace GoatVaultClient.ViewModels
                     auth_verifier = newAuthVerifier,
                     email = user.Email,
                     mfa_enabled = user.MfaEnabled,
-                    mfa_secret = user.MfaEnabled ? _vaultSessionService.CurrentUser?.MfaSecret : null,
+                    mfa_secret = user.MfaEnabled ? _session.CurrentUser?.MfaSecret : null,
                     vault = newVaultModel
                 };
 
-                await _httpService.PatchAsync<UserResponse>(
+                await _http.PatchAsync<UserResponse>(
                     $"{baseUrl}v1/users/{user.Id}",
                     request
                 );
 
                 // Update local database
-                var dbUser = await _vaultService.LoadUserFromLocalAsync(user.Id);
+                var dbUser = await _vaultCrypto.LoadUserFromLocalAsync(user.Id);
                 if (dbUser != null)
                 {
                     dbUser.AuthSalt = newAuthSaltBase64;
                     dbUser.Vault = newVaultModel;
-                    dbUser.MfaSecret = user.MfaEnabled ? _vaultSessionService.CurrentUser?.MfaSecret : null;
-                    await _vaultService.UpdateUserInLocalAsync(dbUser);
+                    dbUser.MfaSecret = user.MfaEnabled ? _session.CurrentUser?.MfaSecret : null;
+                    await _vaultCrypto.UpdateUserInLocalAsync(dbUser);
                 }
 
                 // Update session
-                _vaultSessionService.CurrentUser?.AuthSalt = newAuthSaltBase64;
-                _vaultSessionService.CurrentUser?.Vault = newVaultModel;
-                _vaultSessionService.MasterPassword = newPassword;
+                _session.CurrentUser?.AuthSalt = newAuthSaltBase64;
+                _session.CurrentUser?.Vault = newVaultModel;
+                _session.MasterPassword = newPassword;
 
                 // Recalculate all vault-related scores
                 RefreshVaultScore();
@@ -694,7 +695,7 @@ namespace GoatVaultClient.ViewModels
 
             try
             {
-                if (enteredPassword == _vaultSessionService.MasterPassword)
+                if (enteredPassword == _session.MasterPassword)
                     return true;
 
                 await MopupService.Instance.PushAsync(new PromptPopup(
@@ -724,7 +725,7 @@ namespace GoatVaultClient.ViewModels
             try
             {
                 IsBusy = true;
-                await _authenticationService.LogoutAsync();
+                await _auth.LogoutAsync();
             }
             finally
             {

@@ -1,8 +1,6 @@
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Models;
-using GoatVaultCore.Models.API;
-using GoatVaultCore.Services.Secrets;
-using GoatVaultInfrastructure;
+using GoatVaultCore.Services;
 using GoatVaultInfrastructure.Services.API;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -41,16 +39,8 @@ namespace GoatVaultClient.Services
             try
             {
                 logger?.LogInformation("Login attempt initiated.");
-                // Use GetSection and check for null or empty value to avoid CS8600
-                var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
-                var url = urlSection.Value;
-                if (string.IsNullOrWhiteSpace(url))
-                {
-                    await Shell.Current.DisplayAlertAsync("Configuration Error", "Server base URL is not configured.", "OK");
-                    return false;
-                }
 
-                // Double-check connectivity before network call
+                // Check connectivity before network call
                 var hasConnection = connectivityService.CheckConnectivity();
                 if (!hasConnection)
                 {
@@ -61,88 +51,8 @@ namespace GoatVaultClient.Services
                     return false;
                 }
 
-                // Init Auth
-                var initPayload = new AuthInitRequest { Email = email };
-                var initResponse = await httpService.PostAsync<AuthInitResponse>(
-                    $"{url}v1/auth/init",
-                    initPayload
-                );
+                // TODO: Login Online Use Case
 
-                // Generate Verifier
-                var loginVerifier = CryptoService.GenerateAuthVerifier(password, initResponse.AuthSalt);
-
-                // Check if MFA is required
-                string? mfaCode = null;
-                if (initResponse.MfaEnabled)
-                {
-                    if (mfaCodeProvider == null)
-                    {
-                        // Should not happen if VM provides it
-                        throw new InvalidOperationException("MFA is enabled but no code provider was supplied.");
-                    }
-
-                    mfaCode = await mfaCodeProvider();
-
-                    if (string.IsNullOrWhiteSpace(mfaCode))
-                    {
-                        // User cancelled MFA prompt
-                        return false;
-                    }
-                }
-
-                // Verify
-                var verifyPayload = new AuthVerifyRequest
-                {
-                    UserId = Guid.Parse(initResponse.UserId),
-                    AuthVerifier = loginVerifier,
-                    MfaCode = mfaCode
-                };
-
-                var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
-                    $"{url}v1/auth/verify",
-                    verifyPayload
-                );
-
-                // Store tokens and session data
-                authTokenService.SetToken(verifyResponse.AccessToken);
-                authTokenService.SetRefreshToken(verifyResponse.RefreshToken);
-
-                // Store master password in session for vault decryption
-                vaultSessionService.MasterPassword = password;
-
-                // Get User Data
-                var userResponse = await httpService.GetAsync<UserResponse>(
-                    $"{url}v1/users/{initResponse.UserId}"
-                );
-
-                if (userResponse == null)
-                    throw new InvalidOperationException("Failed to load user profile");
-
-                // Set the current user
-                vaultSessionService.CurrentUser = userResponse;
-
-                // Sync Local DB (Delete old if exists, save new)
-                var existingUser = await vaultService.LoadUserFromLocalAsync(userResponse.Id);
-
-                if (existingUser == null)
-                {
-                    await vaultService.SaveUserToLocalAsync(new User
-                    {
-                        Id = userResponse.Id,
-                        Email = userResponse.Email,
-                        AuthSalt = userResponse.AuthSalt,
-                        MfaEnabled = userResponse.MfaEnabled,
-                        MfaSecret = userResponse.MfaSecret,
-                        Vault = userResponse.Vault,
-                        CreatedAt = userResponse.CreatedAt,
-                        UpdatedAt = userResponse.UpdatedAt
-                    });
-                }
-
-                // Decrypt & Store Session
-                vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, password);
-
-                logger?.LogInformation("Login successful for user {UserId}", vaultSessionService.CurrentUser.Id);
                 return true;
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -216,34 +126,8 @@ namespace GoatVaultClient.Services
 
             try
             {
+                // TODO: Login Offline Use Case
                 logger?.LogInformation("Offline login attempt for account {AccountId}", selectedUser.Id);
-
-                // 1. Load the user from local database
-                var dbUser = await vaultService.LoadUserFromLocalAsync(selectedUser.Id);
-
-                if (dbUser == null)
-                {
-                    await Shell.Current.DisplayAlertAsync("Error", "Account not found in local storage.", "OK");
-                    return false;
-                }
-
-                var decryptedVault = vaultService.DecryptVault(dbUser.Vault, password);
-
-                // Password is correct!
-                vaultSessionService.MasterPassword = password;
-                vaultSessionService.DecryptedVault = decryptedVault;
-
-                // Set current user in session (convert DbModel to UserResponse format)
-                vaultSessionService.CurrentUser = new UserResponse
-                {
-                    Id = dbUser.Id,
-                    Email = dbUser.Email,
-                    AuthSalt = dbUser.AuthSalt,
-                    MfaEnabled = dbUser.MfaEnabled,
-                    Vault = dbUser.Vault,
-                    CreatedAt = dbUser.CreatedAt,
-                    UpdatedAt = dbUser.UpdatedAt
-                };
             }
             catch (Exception ex)
             {
@@ -276,13 +160,6 @@ namespace GoatVaultClient.Services
             try
             {
                 logger?.LogInformation("Registration attempt.");
-                // Use GetSection and check for null or empty value to avoid CS8600
-                var urlSection = configuration.GetSection("GOATVAULT_SERVER_BASE_URL");
-                var url = urlSection.Value;
-                if (string.IsNullOrWhiteSpace(url))
-                {
-                    return false;
-                }
 
                 // Check connectivity before network call
                 var hasConnection = connectivityService.CheckConnectivity();
@@ -295,84 +172,9 @@ namespace GoatVaultClient.Services
                     return false;
                 }
 
-                // Check if password has been pwned
-                var pwnCount = await pwnedPasswordService.CheckPasswordAsync(password);
-                if (pwnCount > 0)
-                {
-                    var prompt = new PromptPopup(
-                        "Breached Password",
-                        $"The password you chose was found in breach databases {pwnCount} times. Do you want to continue with registration?",
-                        "Continue",
-                        "Choose another password"
-                    );
-                    await MopupService.Instance.PushAsync(prompt);
-                    var proceed = await prompt.WaitForScan();
-                    if (!proceed)
-                    {
-                        // User chose to pick another password, do not continue registration
-                        return false;
-                    }
-                }
+                // TODO: Register Use Case
 
-                // Generate Auth Salt & Verifier
-                var authSalt = CryptoService.GenerateAuthSalt();
-                var authVerifier = CryptoService.HashPassword(password, authSalt);
-
-                var registerRequest = new AuthRegisterRequest
-                {
-                    AuthSalt = Convert.ToBase64String(authSalt),
-                    AuthVerifier = authVerifier,
-                    Email = email,
-                    Vault = null,
-                };
-
-                // Encrypt vault (Initial empty vault)
-                var vaultPayload = vaultService.EncryptVault(password, null);
-                registerRequest.Vault = vaultPayload;
-
-                // API: Register
-                var registerResponse = await httpService.PostAsync<AuthRegisterResponse>(
-                    $"{url}v1/auth/register",
-                    registerRequest
-                );
-
-                // API: Verify (Get Token)
-                var verifyRequest = new AuthVerifyRequest
-                {
-                    UserId = Guid.Parse(registerResponse.Id),
-                    AuthVerifier = registerRequest.AuthVerifier
-                };
-
-                var verifyResponse = await httpService.PostAsync<AuthVerifyResponse>(
-                    $"{url}v1/auth/verify",
-                    verifyRequest
-                );
-
-                authTokenService.SetToken(verifyResponse.AccessToken);
-                vaultSessionService.MasterPassword = password;
-
-                // API: Get User Profile
-                var userResponse = await httpService.GetAsync<UserResponse>(
-                    $"{url}v1/users/{registerResponse.Id}"
-                );
-
-                // Update session with new user
-                vaultSessionService.CurrentUser = userResponse;
-
-                // Save new user to SQLite
-                await vaultService.SaveUserToLocalAsync(new User
-                {
-                    Id = vaultSessionService.CurrentUser.Id,
-                    Email = vaultSessionService.CurrentUser.Email,
-                    AuthSalt = vaultSessionService.CurrentUser.AuthSalt,
-                    MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
-                    Vault = vaultSessionService.CurrentUser.Vault
-                });
-
-                // Decrypt & Store Session in RAM
-                vaultSessionService.DecryptedVault = vaultService.DecryptVault(vaultSessionService.CurrentUser.Vault, password);
-
-                logger?.LogInformation("Registration successful for user {UserId}", vaultSessionService.CurrentUser.Id);
+                logger?.LogInformation("Registration successful");
                 return true;
             }
             catch (HttpRequestException)
@@ -425,15 +227,7 @@ namespace GoatVaultClient.Services
                 // Show pending popup while we process logout
                 await MopupService.Instance.PushAsync(new PendingPopup("Logging out..."));
 
-                // Save vault before logout
-                await syncingService.Save();
-
-                // Clear auth token
-                authTokenService.ClearToken();
-                authTokenService.ClearRefreshToken();
-
-                // Lock session
-                vaultSessionService.Lock();
+                // TODO: Logout Use Case
 
                 // Pop the pending popup
                 await MopupService.Instance.PopAsync();
@@ -458,8 +252,10 @@ namespace GoatVaultClient.Services
         }
         public async Task<List<User>> GetAllLocalAccountsAsync()
         {
-            var accounts = await vaultService.LoadAllUsersFromLocalAsync();
-            return accounts;
+            // TODO: Implement
+            throw new NotImplementedException("New implementation needed post refactor");
+            // var accounts = await vaultService.LoadAllUsersFromLocalAsync();
+            // return accounts;
         }
         public async Task RemoveLocalAccountAsync(User account)
         {
@@ -476,8 +272,10 @@ namespace GoatVaultClient.Services
             if (!confirm)
                 return;
 
-            // Remove from local database
-            await vaultService.DeleteUserFromLocalAsync(account.Id);
+            // TODO: Implement
+            throw new NotImplementedException("New implementation needed post refactor");
+
+            // await vaultService.DeleteUserFromLocalAsync(account.Id);
         }
     }
 }

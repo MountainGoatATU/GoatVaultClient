@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using OtpNet;
 
-namespace GoatVaultCore.Services.Secrets;
+namespace GoatVaultCore.Services;
 
 public static class TotpService
 {

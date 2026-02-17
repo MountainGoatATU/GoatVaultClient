@@ -2,7 +2,7 @@
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
 
-namespace GoatVaultCore;
+namespace GoatVaultCore.Abstractions;
 
 public interface IServerAuthService
 {

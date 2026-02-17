@@ -1,6 +1,7 @@
-﻿using GoatVaultCore.Models.Vault;
+﻿using GoatVaultCore.Models;
+using GoatVaultCore.Models.Vault;
 
-namespace GoatVaultCore.Services.Secrets
+namespace GoatVaultCore.Services
 {
     public sealed class VaultScoreDetails
     {
@@ -17,15 +18,17 @@ namespace GoatVaultCore.Services.Secrets
     {
         public static VaultScoreDetails CalculateScore(
             IEnumerable<VaultEntry> entries,
-            string masterPassword,
+            MasterKey masterKey,
             bool mfaEnabled,
             bool masterPasswordBreached = false)
         {
-            int total = entries.Count();
-            int breached = entries.Count(e => e.BreachCount > 0);
+            var total = entries.Count();
+            var breached = entries.Count(e => e.BreachCount > 0);
 
             // Master strength via zxcvbn
-            var masterStrength = PasswordStrengthService.Evaluate(masterPassword);
+            // TODO: Fix
+            // var masterStrength = PasswordStrengthService.Evaluate(masterPassword);
+            var masterStrength = PasswordStrengthService.Evaluate("TEMP");
             var masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
 
             double foundationPoints = masterStrength.Score switch

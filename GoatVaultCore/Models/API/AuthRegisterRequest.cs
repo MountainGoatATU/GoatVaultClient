@@ -1,5 +1,4 @@
-﻿using GoatVaultCore.Models.Vault;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace GoatVaultCore.Models.API;
 

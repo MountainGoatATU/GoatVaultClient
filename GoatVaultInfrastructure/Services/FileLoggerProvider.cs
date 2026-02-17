@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
-namespace GoatVaultInfrastructure.Services.Logging;
+namespace GoatVaultInfrastructure.Services;
 
 /// <summary>
 /// Configuration for the file logger provider.

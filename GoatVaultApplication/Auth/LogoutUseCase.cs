@@ -1,9 +1,8 @@
-﻿using GoatVaultCore;
-using GoatVaultCore.Models;
+﻿using GoatVaultCore.Abstractions;
 
 namespace GoatVaultApplication.Auth;
 
-internal class LogoutUseCase(ISessionContext session)
+public class LogoutUseCase(ISessionContext session)
 {
     public Task ExecuteAsync()
     {

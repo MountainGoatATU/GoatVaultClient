@@ -1,15 +1,15 @@
 using GoatVaultClient.Controls.Popups;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Vault;
-using GoatVaultCore.Services.Secrets;
-using GoatVaultInfrastructure.Services.Vault;
+using GoatVaultCore.Services;
 using Mopups.Services;
 
 namespace GoatVaultClient.Services;
 
 public class VaultEntryManagerService(
-    VaultSessionService vaultSessionService,
-    ISyncingService syncingService,
-    PwnedPasswordService pwnedPasswordService)
+    ISessionContext session,
+    ISyncingService syncing,
+    PwnedPasswordService pwned)
 {
     public async Task<bool> CreateEntryAsync(IEnumerable<CategoryItem> categories)
     {
@@ -46,8 +46,8 @@ public class VaultEntryManagerService(
 
         if (!string.IsNullOrEmpty(newEntry.Password))
         {
-            newEntry.BreachCount = (int)await pwnedPasswordService.CheckPasswordAsync(newEntry.Password);
-            
+            newEntry.BreachCount = (int)await pwned.CheckPasswordAsync(newEntry.Password);
+
             // If breached, confirm with user before saving
             if (newEntry.BreachCount > 0)
             {
@@ -68,12 +68,13 @@ public class VaultEntryManagerService(
         }
 
         // Add to list
-        vaultSessionService.DecryptedVault?.Entries.Add(newEntry);
+        session.Vault?.Entries.Add(newEntry);
 
         // Notify that entries changed
-        vaultSessionService.RaiseVaultEntriesChanged();
+        // TODO: Fix
+        // session.RaiseVaultEntriesChanged();
 
-        await syncingService.AutoSaveIfEnabled();
+        await syncing.AutoSaveIfEnabled();
 
         return true;
     }
@@ -82,7 +83,7 @@ public class VaultEntryManagerService(
     {
         if (target == null) return false;
 
-        var entries = vaultSessionService.DecryptedVault?.Entries;
+        var entries = session.Vault?.Entries;
         if (entries == null) return false;
 
         var index = entries.IndexOf(target);
@@ -123,7 +124,7 @@ public class VaultEntryManagerService(
         };
 
         {
-            updatedEntry.BreachCount = (int)await pwnedPasswordService.CheckPasswordAsync(updatedEntry.Password);
+            updatedEntry.BreachCount = (int)await pwned.CheckPasswordAsync(updatedEntry.Password);
 
             // If breached, confirm with user before saving
             if (updatedEntry.BreachCount > 0)
@@ -146,9 +147,10 @@ public class VaultEntryManagerService(
 
         entries[index] = updatedEntry;
         // Notify that entries changed
-        vaultSessionService.RaiseVaultEntriesChanged();
+        // TODO: Fix
+        // session.RaiseVaultEntriesChanged();
 
-        await syncingService.AutoSaveIfEnabled();
+        await syncing.AutoSaveIfEnabled();
 
         return true;
     }
@@ -171,12 +173,13 @@ public class VaultEntryManagerService(
             return false;
 
         // Remove from the list
-        vaultSessionService.DecryptedVault?.Entries.Remove(target);
+        session.Vault?.Entries.Remove(target);
 
         // Notify that entries changed
-        vaultSessionService.RaiseVaultEntriesChanged();
+        // TODO: Fix
+        // session.RaiseVaultEntriesChanged();
 
-        await syncingService.AutoSaveIfEnabled();
+        await syncing.AutoSaveIfEnabled();
 
         return true;
     }

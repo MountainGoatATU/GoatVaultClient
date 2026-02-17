@@ -1,10 +1,9 @@
-﻿using GoatVaultCore;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using GoatVaultCore.Models;
-using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Abstractions;
 
-namespace GoatVaultInfrastructure;
+namespace GoatVaultInfrastructure.Services;
 
 public class VaultCrypto : IVaultCrypto
 {

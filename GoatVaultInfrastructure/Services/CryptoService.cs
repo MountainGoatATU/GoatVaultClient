@@ -1,10 +1,10 @@
-﻿using GoatVaultCore;
+﻿using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using Isopoh.Cryptography.Argon2;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace GoatVaultInfrastructure;
+namespace GoatVaultInfrastructure.Services;
 
 public sealed class CryptoService : ICryptoService
 {

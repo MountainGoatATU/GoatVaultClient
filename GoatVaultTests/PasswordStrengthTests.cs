@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Services.Secrets;
+﻿using GoatVaultCore.Services;
 
 namespace GoatVaultTests;
 

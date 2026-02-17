@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel.DataAnnotations;
-using GoatVaultCore.Services.Secrets;
 using PasswordGenerator;
+using GoatVaultCore.Services;
 
 namespace GoatVaultCore.Models.Vault;
 

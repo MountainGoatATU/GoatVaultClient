@@ -1,7 +1,7 @@
 ﻿using GoatVaultCore.Models;
 using GoatVaultCore.Models.Vault;
 
-namespace GoatVaultCore;
+namespace GoatVaultCore.Abstractions;
 
 public interface ICryptoService
 {

@@ -6,6 +6,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using GoatVaultApplication.Session;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
+using GoatVaultInfrastructure.Services;
+using Email = GoatVaultCore.Models.Email;
 
 // TODO: REFACTOR
 namespace GoatVaultClient.Services
@@ -38,12 +42,13 @@ namespace GoatVaultClient.Services
 
     public class SyncingService(
         IConfiguration configuration,
-        SessionContext session,
-        HttpService httpService,
+        ISessionContext session,
+        IHttpService httpService,
+        IVaultCrypto vaultCrypto,
         ILogger<SyncingService>? logger = null)
         : ObservableObject, ISyncingService
     {
-        private System.Threading.Timer? _periodicSyncTimer;
+        private Timer? _periodicSyncTimer;
 
         private bool _isSyncing;
         public bool IsSyncing
@@ -139,18 +144,14 @@ namespace GoatVaultClient.Services
         #endregion
         #region Public Methods
 
-        /// <summary>
-        /// Saves if auto-save is enabled. Convenience method to reduce repeated checks.
-        /// </summary>
+        // Saves if auto-save is enabled. Convenience method to reduce repeated checks.
         public async Task AutoSaveIfEnabled()
         {
             if (HasAutoSave)
                 await Save();
         }
 
-        /// <summary>
-        /// Starts periodic background syncing at specified interval
-        /// </summary>
+        // Starts periodic background syncing at specified interval
         public void StartPeriodicSync(TimeSpan interval)
         {
             StopPeriodicSync();
@@ -180,9 +181,7 @@ namespace GoatVaultClient.Services
             logger?.LogInformation("Periodic sync started with interval: {interval}", interval);
         }
 
-        /// <summary>
-        /// Stops periodic background syncing
-        /// </summary>
+        // Stops periodic background syncing
         public void StopPeriodicSync()
         {
             _periodicSyncTimer?.Dispose();
@@ -190,9 +189,7 @@ namespace GoatVaultClient.Services
             logger?.LogInformation("Periodic sync stopped");
         }
 
-        /// <summary>
-        /// Main sync method - synchronizes local and server data
-        /// </summary>
+        // Main sync method - synchronizes local and server data
         public async Task Sync()
         {
             if (IsSyncing)
@@ -203,7 +200,7 @@ namespace GoatVaultClient.Services
 
             var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
 
-            if (vaultSessionService.CurrentUser == null || vaultSessionService.DecryptedVault == null)
+            if (session.UserId == null || session.Vault == null)
             {
                 logger?.LogWarning("No user is currently logged in");
                 return;
@@ -218,6 +215,8 @@ namespace GoatVaultClient.Services
 
                 logger?.LogInformation("Starting sync operation");
 
+                // TODO: Fix
+                /* 
                 var localCopy = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser?.Id ?? throw new NullReferenceException());
 
                 var userResponse = await httpService.GetAsync<UserResponse>(
@@ -246,6 +245,7 @@ namespace GoatVaultClient.Services
                     return;
                 }
 
+
                 var compareResult = DateTime.Compare(localCopy.UpdatedAt, userResponse.UpdatedAt);
 
                 switch (compareResult)
@@ -266,6 +266,7 @@ namespace GoatVaultClient.Services
                         await HandleServerNewer(localCopy, userResponse);
                         break;
                 }
+                */
 
                 SyncStatus = SyncStatus.Synced;
                 SyncStatusMessage = "Synced";
@@ -289,7 +290,7 @@ namespace GoatVaultClient.Services
 
         public async Task Save()
         {
-            if (vaultSessionService.CurrentUser == null || vaultSessionService.DecryptedVault == null)
+            if (session.UserId == null || session.Vault == null)
             {
                 logger?.LogWarning("Cannot save: No user logged in");
                 return;
@@ -301,12 +302,14 @@ namespace GoatVaultClient.Services
 
                 var updatedVault = new VaultDecrypted
                 {
-                    Categories = vaultSessionService.DecryptedVault.Categories,
-                    Entries = vaultSessionService.DecryptedVault.Entries
+                    Categories = session.Vault.Categories,
+                    Entries = session.Vault.Entries
                 };
 
-                var encryptedVault = vaultService.EncryptVault(vaultSessionService.MasterPassword, updatedVault);
+                var encryptedVault = vaultCrypto.Encrypt(updatedVault, session.GetMasterKey());
 
+                // TODO: Save
+                /*
                 var localUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
 
                 if (localUser == null)
@@ -317,6 +320,7 @@ namespace GoatVaultClient.Services
                 localUser.UpdatedAt = DateTime.UtcNow;
 
                 await vaultService.UpdateUserInLocalAsync(localUser);
+                */
 
                 LastSaved = DateTime.UtcNow;
                 MarkedAsChanged = true;
@@ -350,42 +354,52 @@ namespace GoatVaultClient.Services
             }
         }
 
-        private async Task HandleLocalNewer(DbModel localCopy, string url)
+        private async Task HandleLocalNewer(User user, string url)
         {
-            var decryptedLocalVault = vaultService.DecryptVault(localCopy.Vault, vaultSessionService.MasterPassword);
+            var decryptedLocalVault = vaultCrypto.Decrypt(user.Vault, session.GetMasterKey());
 
-            vaultSessionService.CurrentUser.Id = localCopy.Id;
-            vaultSessionService.CurrentUser.Email = localCopy.Email;
-            vaultSessionService.CurrentUser.MfaEnabled = localCopy.MfaEnabled;
-            vaultSessionService.CurrentUser.MfaSecret = localCopy.MfaSecret;
-            vaultSessionService.CurrentUser.UpdatedAt = localCopy.UpdatedAt;
-            vaultSessionService.CurrentUser.CreatedAt = localCopy.CreatedAt;
-            vaultSessionService.CurrentUser.Vault = localCopy.Vault;
+            // TODO: Fix
+            /*
+            vaultSessionService.CurrentUser.Id = user.Id;
+            vaultSessionService.CurrentUser.Email = user.Email;
+            vaultSessionService.CurrentUser.MfaEnabled = user.MfaEnabled;
+            vaultSessionService.CurrentUser.MfaSecret = user.MfaSecret;
+            vaultSessionService.CurrentUser.UpdatedAt = user.UpdatedAt;
+            vaultSessionService.CurrentUser.CreatedAt = user.CreatedAt;
+            vaultSessionService.CurrentUser.Vault = user.Vault;
             vaultSessionService.DecryptedVault = decryptedLocalVault;
+            */
 
             await UpdateFromLocalToServer(url);
         }
 
-        private async Task HandleServerNewer(DbModel localCopy, UserResponse userResponse)
+        private async Task HandleServerNewer(User user, UserResponse userOnServer)
         {
-            var decryptedServerVault = vaultService.DecryptVault(userResponse.Vault, vaultSessionService.MasterPassword);
+            var decryptedLocalVault = vaultCrypto.Decrypt(user.Vault, session.GetMasterKey());
 
-            vaultSessionService.CurrentUser.Id = userResponse.Id;
-            vaultSessionService.CurrentUser.Email = userResponse.Email;
-            vaultSessionService.CurrentUser.MfaEnabled = userResponse.MfaEnabled;
-            vaultSessionService.CurrentUser.MfaSecret = userResponse.MfaSecret;
-            vaultSessionService.CurrentUser.UpdatedAt = userResponse.UpdatedAt;
-            vaultSessionService.CurrentUser.CreatedAt = userResponse.CreatedAt;
-            vaultSessionService.CurrentUser.Vault = userResponse.Vault;
+            // TODO: Fix
+            /*
+            vaultSessionService.CurrentUser.Id = userOnServer.Id;
+            vaultSessionService.CurrentUser.Email = userOnServer.Email;
+            vaultSessionService.CurrentUser.MfaEnabled = userOnServer.MfaEnabled;
+            vaultSessionService.CurrentUser.MfaSecret = userOnServer.MfaSecret;
+            vaultSessionService.CurrentUser.UpdatedAt = userOnServer.UpdatedAt;
+            vaultSessionService.CurrentUser.CreatedAt = userOnServer.CreatedAt;
+            vaultSessionService.CurrentUser.Vault = userOnServer.Vault;
             vaultSessionService.DecryptedVault = decryptedServerVault;
+            */
 
-            await UpdateFromServerToLocal(localCopy, userResponse);
+            await UpdateFromServerToLocal(user, userOnServer);
         }
 
         private async Task UpdateFromLocalToServer(string url)
         {
-            var encryptedVault = vaultService.EncryptVault(vaultSessionService.MasterPassword, vaultSessionService.DecryptedVault);
+            if (session.Vault is null)
+                return;
 
+            var encryptedVault = vaultCrypto.Encrypt(session.Vault, session.GetMasterKey());
+
+            /*
             var updateUserRequest = new UserRequest
             {
                 Email = vaultSessionService.CurrentUser.Email,
@@ -398,15 +412,17 @@ namespace GoatVaultClient.Services
                 $"{url}v1/users/{vaultSessionService.CurrentUser.Id}",
                 updateUserRequest
             );
+            */
         }
 
-        private async Task UpdateFromServerToLocal(DbModel localData, UserResponse serverData)
+        private async Task UpdateFromServerToLocal(User user, UserResponse userOnServer)
         {
-            localData.Email = serverData.Email;
-            localData.Vault = serverData.Vault;
-            localData.UpdatedAt = serverData.UpdatedAt;
+            user.Email = new Email(userOnServer.Email);
+            user.Vault = userOnServer.Vault;
+            user.UpdatedAtUtc = userOnServer.UpdatedAt;
 
-            await vaultService.UpdateUserInLocalAsync(localData);
+            // TODO: Fix
+            // await vaultService.UpdateUserInLocalAsync(user);
         }
 
         #endregion

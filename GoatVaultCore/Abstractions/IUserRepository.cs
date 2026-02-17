@@ -1,6 +1,6 @@
 ﻿using GoatVaultCore.Models;
 
-namespace GoatVaultCore;
+namespace GoatVaultCore.Abstractions;
 
 public interface IUserRepository
 {

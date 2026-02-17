@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace GoatVaultCore.Services.Secrets;
+namespace GoatVaultCore.Services;
 
 public class PwnedPasswordService
 {

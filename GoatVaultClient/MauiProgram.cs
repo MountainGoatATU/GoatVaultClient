@@ -3,13 +3,9 @@ using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
-using GoatVaultCore;
-using GoatVaultCore.Services.Secrets;
-using GoatVaultInfrastructure;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.API;
-using GoatVaultInfrastructure.Services.Logging;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +16,9 @@ using System.Reflection;
 using GoatVaultApplication.Auth;
 using GoatVaultApplication.Session;
 using UraniumUI;
-using CryptoService = GoatVaultInfrastructure.CryptoService;
+using CryptoService = GoatVaultInfrastructure.Services.CryptoService;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Services;
 
 namespace GoatVaultClient;
 
@@ -110,7 +108,6 @@ public static class MauiProgram
         #region Builder Services
 
         // Core app services
-        builder.Services.AddSingleton<UserService>();
         builder.Services.AddSingleton<MarkdownHelperService>();
         builder.Services.AddSingleton<ConnectivityService>();
         // builder.Services.AddSingleton<ISyncingService, SyncingService>();

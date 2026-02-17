@@ -1,4 +1,4 @@
-﻿using GoatVaultCore;
+﻿using GoatVaultCore.Abstractions;
 
 namespace GoatVaultApplication.VaultUseCases;
 

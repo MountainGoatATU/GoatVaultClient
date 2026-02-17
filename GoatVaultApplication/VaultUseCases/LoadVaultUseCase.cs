@@ -1,5 +1,5 @@
-﻿using GoatVaultCore;
-using GoatVaultCore.Models.Vault;
+﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
 
 namespace GoatVaultApplication.VaultUseCases;
 
@@ -23,7 +23,7 @@ public class LoadVaultUseCase(
 
         var decryptedVault = crypto.Decrypt(user.Vault, masterKey);
 
-        session.SetVault(decryptedVault);
+        session.UpdateVault(decryptedVault);
 
         return decryptedVault;
     }

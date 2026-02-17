@@ -1,6 +1,5 @@
-﻿using GoatVaultCore;
+﻿using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
-using GoatVaultCore.Models.Vault;
 
 namespace GoatVaultApplication.Session;
 
@@ -15,8 +14,10 @@ public sealed class SessionContext : ISessionContext
     {
         UserId = userId;
         _masterKey = masterKey;
-        Vault = decryptedVault;
+        UpdateVault(decryptedVault);
     }
+
+    public void UpdateVault(VaultDecrypted? decryptedVault) => Vault = decryptedVault;
 
     public MasterKey GetMasterKey() => _masterKey ?? throw new InvalidOperationException("Session not authenticated.");
 
@@ -24,6 +25,6 @@ public sealed class SessionContext : ISessionContext
     {
         _masterKey?.Dispose();
         _masterKey = null;
-        Vault = null;
+        UpdateVault(null);
     }
 }

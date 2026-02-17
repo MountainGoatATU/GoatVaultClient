@@ -1,5 +1,4 @@
-﻿using GoatVaultCore.Models.Vault;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace GoatVaultCore.Models;
 
@@ -14,6 +13,11 @@ public class User
 
     [JsonConverter(typeof(Base64Converter))]
     public byte[] AuthVerifier { get; set; } = [];
+
+    public bool MfaEnabled { get; set; }
+
+    [JsonConverter(typeof(Base64Converter))]
+    public byte[] MfaSecret { get; set; } = [];
 
     // Vault Details
     [JsonConverter(typeof(Base64Converter))]

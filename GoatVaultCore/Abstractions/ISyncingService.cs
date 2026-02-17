@@ -1,4 +1,4 @@
-﻿namespace GoatVaultCore;
+﻿namespace GoatVaultCore.Abstractions;
 
 public interface ISyncingService
 {

@@ -1,9 +1,8 @@
-﻿using GoatVaultCore;
+﻿using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
-using GoatVaultInfrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoatVaultInfrastructure;
+namespace GoatVaultInfrastructure.Database;
 
 public sealed class UserRepository(AppDbContext db) : IUserRepository
 {

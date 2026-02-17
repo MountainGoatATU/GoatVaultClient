@@ -1,5 +1,5 @@
 using GoatVaultCore.Models.Vault;
-using GoatVaultCore.Services.Secrets;
+using GoatVaultCore.Services;
 using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.Services;

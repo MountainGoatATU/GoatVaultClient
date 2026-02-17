@@ -1,8 +1,8 @@
-﻿using GoatVaultCore;
+﻿using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
-using GoatVaultCore.Models.Vault;
-using GoatVaultInfrastructure;
+using GoatVaultCore.Services;
+using GoatVaultInfrastructure.Services;
 
 namespace GoatVaultApplication.Auth;
 
@@ -11,10 +11,18 @@ public class RegisterUseCase(
     ICryptoService crypto,
     IVaultCrypto vaultCrypto,
     ISessionContext session,
-    IServerAuthService serverAuth)
+    IServerAuthService serverAuth,
+    PwnedPasswordService pwned)
 {
     public async Task ExecuteAsync(Email email, string password)
     {
+        // 0. Check pwned
+        var pwnCount = await pwned.CheckPasswordAsync(password);
+        if (pwnCount > 0)
+        {
+            throw new InvalidOperationException("This password has been breached before.");
+        }
+
         // 1. Generate auth salt, auth verifier, & vault salt
         var authSalt = CryptoService.GenerateRandomBytes(32);
         var authVerifier = crypto.GenerateAuthVerifier(password, authSalt);

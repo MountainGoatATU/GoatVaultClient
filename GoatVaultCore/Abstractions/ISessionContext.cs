@@ -1,14 +1,14 @@
 ﻿using GoatVaultCore.Models;
-using GoatVaultCore.Models.Vault;
 
-namespace GoatVaultCore;
+namespace GoatVaultCore.Abstractions;
 
 public interface ISessionContext
 {
     Guid? UserId { get; }
-    MasterKey GetMasterKey();
     VaultDecrypted? Vault { get; }
 
     void Start(Guid userId, MasterKey masterKey, VaultDecrypted vaultDecrypted);
+    void UpdateVault(VaultDecrypted vaultDecrypted);
+    MasterKey GetMasterKey();
     void End();
 }

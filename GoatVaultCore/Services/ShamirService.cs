@@ -3,7 +3,7 @@ using System.Text;
 using SecretSharingDotNet.Cryptography;
 using SecretSharingDotNet.Math;
 
-namespace GoatVaultCore.Services.Secrets;
+namespace GoatVaultCore.Services;
 
 public interface IShamirService
 {
