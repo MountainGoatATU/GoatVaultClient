@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
 
+// TODO: REFACTOR only hold use cases
 namespace GoatVaultClient.Services
 {
     public interface IAuthenticationService
