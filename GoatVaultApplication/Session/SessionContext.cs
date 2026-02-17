@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 
 namespace GoatVaultApplication.Session;
@@ -10,6 +10,8 @@ public sealed class SessionContext : ISessionContext
     public Guid? UserId { get; private set; }
     public VaultDecrypted? Vault { get; private set; }
 
+    public event EventHandler? VaultChanged;
+
     public void Start(Guid userId, MasterKey masterKey, VaultDecrypted decryptedVault)
     {
         UserId = userId;
@@ -17,7 +19,13 @@ public sealed class SessionContext : ISessionContext
         UpdateVault(decryptedVault);
     }
 
-    public void UpdateVault(VaultDecrypted? decryptedVault) => Vault = decryptedVault;
+    public void UpdateVault(VaultDecrypted? decryptedVault)
+    {
+        Vault = decryptedVault;
+        RaiseVaultChanged();
+    }
+
+    public void RaiseVaultChanged() => VaultChanged?.Invoke(this, EventArgs.Empty);
 
     public MasterKey GetMasterKey() => _masterKey ?? throw new InvalidOperationException("Session not authenticated.");
 

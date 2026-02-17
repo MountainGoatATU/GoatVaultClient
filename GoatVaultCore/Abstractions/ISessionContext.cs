@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Models;
+using GoatVaultCore.Models;
 
 namespace GoatVaultCore.Abstractions;
 
@@ -9,6 +9,8 @@ public interface ISessionContext
 
     void Start(Guid userId, MasterKey masterKey, VaultDecrypted vaultDecrypted);
     void UpdateVault(VaultDecrypted vaultDecrypted);
+    void RaiseVaultChanged();
+    event EventHandler? VaultChanged;
     MasterKey GetMasterKey();
     void End();
 }
