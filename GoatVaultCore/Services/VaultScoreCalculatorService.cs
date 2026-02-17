@@ -14,6 +14,7 @@ namespace GoatVaultCore.Services
         public int PasswordCount { get; init; }
     }
 
+    // TODO: Refactor
     public static class VaultScoreCalculatorService
     {
         public static VaultScoreDetails CalculateScore(
