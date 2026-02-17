@@ -1,13 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
 using GoatVaultCore.Models.Vault;
 using GoatVaultInfrastructure.Services.API;
-using GoatVaultInfrastructure.Services.Vault;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
+using GoatVaultApplication.Session;
 
+// TODO: REFACTOR
 namespace GoatVaultClient.Services
 {
     public interface ISyncingService : INotifyPropertyChanged
@@ -38,8 +38,7 @@ namespace GoatVaultClient.Services
 
     public class SyncingService(
         IConfiguration configuration,
-        VaultSessionService vaultSessionService,
-        VaultService vaultService,
+        SessionContext session,
         HttpService httpService,
         ILogger<SyncingService>? logger = null)
         : ObservableObject, ISyncingService
