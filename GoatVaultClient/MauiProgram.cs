@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Reflection;
+using GoatVaultApplication.VaultUseCases;
+using GoatVaultApplication.Account;
 using GoatVaultApplication.Auth;
 using GoatVaultApplication.Session;
 using UraniumUI;
@@ -102,34 +104,48 @@ public static class MauiProgram
         // SQLite DB
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "localVault.db");
         var connectionString = $"Data Source={dbPath}";
-        builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+        builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Transient);
 
         #region Builder Services
 
         // Core app services
-        builder.Services.AddSingleton<MarkdownHelperService>();
         builder.Services.AddSingleton<ConnectivityService>();
         builder.Services.AddSingleton<ISyncingService, SyncingService>();
-        builder.Services.AddScoped<ISessionContext, SessionContext>();
-        builder.Services.AddScoped<IUserRepository, UserRepository>();
-        builder.Services.AddScoped<ICryptoService, CryptoService>();
-        builder.Services.AddScoped<IVaultCrypto, VaultCrypto>();
-        builder.Services.AddScoped<IServerAuthService, ServerAuthService>();
+        builder.Services.AddSingleton<ISessionContext, SessionContext>();
+        builder.Services.AddTransient<IUserRepository, UserRepository>();
+        builder.Services.AddSingleton<ICryptoService, CryptoService>();
+        builder.Services.AddSingleton<IVaultCrypto, VaultCrypto>();
+        builder.Services.AddSingleton<IServerAuthService, ServerAuthService>();
         builder.Services.AddSingleton<IAuthTokenService, AuthTokenService>();
         builder.Services.AddSingleton<JwtUtils>();
 
         // Use cases
-        builder.Services.AddScoped<LoginOfflineUseCase>();
-        builder.Services.AddScoped<LoginOnlineUseCase>();
-        builder.Services.AddScoped<LogoutUseCase>();
-        builder.Services.AddScoped<RegisterUseCase>();
+        builder.Services.AddTransient<LoginOfflineUseCase>();
+        builder.Services.AddTransient<LoginOnlineUseCase>();
+        builder.Services.AddTransient<LogoutUseCase>();
+        builder.Services.AddTransient<RegisterUseCase>();
+
+        builder.Services.AddTransient<AddVaultEntryUseCase>();
+        builder.Services.AddTransient<CalculateVaultScoreUseCase>();
+        builder.Services.AddTransient<DeleteVaultEntryUseCase>();
+        builder.Services.AddTransient<LoadVaultUseCase>();
+        builder.Services.AddTransient<SaveVaultUseCase>();
+        builder.Services.AddTransient<SyncVaultUseCase>();
+        builder.Services.AddTransient<UpdateVaultEntryUseCase>();
+
+        builder.Services.AddTransient<ChangeEmailUseCase>();
+        builder.Services.AddTransient<ChangePasswordUseCase>();
+        builder.Services.AddTransient<DisableMfaUseCase>();
+        builder.Services.AddTransient<EnableMfaUseCase>();
+        builder.Services.AddTransient<LoadUserProfileUseCase>();
 
         // Misc services
         builder.Services.AddSingleton<GoatTipsService>();
         builder.Services.AddSingleton<TotpManagerService>();
-        builder.Services.AddSingleton<CategoryManagerService>();
-        builder.Services.AddSingleton<VaultEntryManagerService>();
-        builder.Services.AddSingleton<PwnedPasswordService>();
+        builder.Services.AddTransient<CategoryManagerService>();
+        builder.Services.AddTransient<VaultEntryManagerService>();
+        builder.Services.AddTransient<PwnedPasswordService>();
+        builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 
         // Test / helper services
         builder.Services.AddSingleton<FakeDataSource>();
@@ -173,10 +189,6 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<GratitudePageViewModel>();
         builder.Services.AddTransient<GratitudePage>();
-        builder.Services.AddTransient<EducationPageViewModel>();
-        builder.Services.AddTransient<EducationPage>();
-        builder.Services.AddTransient<EducationDetailViewModel>();
-        builder.Services.AddTransient<EducationDetailPage>();
         builder.Services.AddTransient<UserPageViewModel>();
         builder.Services.AddTransient<UserPage>();
 
