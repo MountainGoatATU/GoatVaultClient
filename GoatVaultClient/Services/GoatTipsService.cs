@@ -16,11 +16,13 @@ public partial class GoatTipsService : ObservableObject
     private IDispatcherTimer? _timer;
 
     private readonly VaultSessionService _vaultSessionService;
+    private readonly VaultScoreCalculatorService _vaultScoreCalculatorService;
 
-    public GoatTipsService(VaultSessionService vaultSessionService)
+    public GoatTipsService(VaultSessionService vaultSessionService, VaultScoreCalculatorService vaultScoreCalculatorService)
     {
         _vaultSessionService = vaultSessionService;
         IsGoatEnabled = Preferences.Default.Get(GoatEnabledKey, true);
+        _vaultScoreCalculatorService = vaultScoreCalculatorService;
     }
 
     public void SetEnabled(bool enabled)
@@ -89,7 +91,7 @@ public partial class GoatTipsService : ObservableObject
         var masterPassword = _vaultSessionService.MasterPassword;
         var entries = _vaultSessionService.VaultEntries;
 
-        var score = VaultScoreCalculatorService.CalculateScore(
+        var score = _vaultScoreCalculatorService.CalculateScore(
             entries,
             masterPassword,
             user.MfaEnabled);

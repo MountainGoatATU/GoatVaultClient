@@ -13,16 +13,26 @@ namespace GoatVaultCore.Services.Secrets
         public int PasswordCount { get; init; }
     }
 
-    public static class VaultScoreCalculatorService
+    public class VaultScoreCalculatorService
     {
-        public static VaultScoreDetails CalculateScore(
-            IEnumerable<VaultEntry>? entries,
-            string? masterPassword,
-            bool mfaEnabled)
+        private readonly IPasswordStrengthService _passwordStrengthService;
+
+        public VaultScoreCalculatorService(IPasswordStrengthService passwordStrengthService)
         {
-            // Master password strength
-            var masterStrength = PasswordStrengthService.Evaluate(masterPassword);
-            int masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
+            _passwordStrengthService = passwordStrengthService;
+        }
+        public VaultScoreDetails CalculateScore(
+            IEnumerable<VaultEntry> entries,
+            string masterPassword,
+            bool mfaEnabled,
+            bool masterPasswordBreached = false)
+        {
+            int total = entries.Count();
+            int breached = entries.Count(e => e.BreachCount > 0);
+
+            // Master strength via zxcvbn
+            var masterStrength = _passwordStrengthService.Evaluate(masterPassword);
+            var masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
 
             double foundationPoints = masterStrength.Score switch
             {
@@ -44,7 +54,34 @@ namespace GoatVaultCore.Services.Secrets
                 ? ((passwordCount - duplicateCount) / (double)passwordCount) * 200
                 : 200;
 
-            double behaviorPoints = passwordCount > 0
+                passwordCount = allPasswords.Count;
+
+                // Count duplicates for uniqueness
+                duplicateCount += allPasswords.GroupBy(p => p)
+                    .Where(group => group
+                        .Count() > 1).Sum(group => group
+                        .Count() - 1);
+
+                // Sum password strengths
+                totalStrengthScore += allPasswords
+                    .Sum(pwd => _passwordStrengthService
+                        .Evaluate(pwd).Score);
+            }
+
+            // Uniqueness max 200
+            double uniquenessPoints;
+            if (passwordCount > 0)
+            {
+                var uniquenessRatio = (passwordCount - duplicateCount) / (double)passwordCount;
+                uniquenessPoints = uniquenessRatio * 200.0;
+            }
+            else
+            {
+                uniquenessPoints = 200; // Default 200 when no passwords
+            }
+
+            // Average password strength max 200
+            var behaviorPoints = passwordCount > 0
                 ? (totalStrengthScore / (double)(passwordCount * 4)) * 200
                 : 200;
 
