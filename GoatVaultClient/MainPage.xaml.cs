@@ -1,6 +1,6 @@
-using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
+using GoatVaultCore.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient

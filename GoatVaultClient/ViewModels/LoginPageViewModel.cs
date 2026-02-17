@@ -6,6 +6,7 @@ using GoatVaultClient.Services;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
 using System.Collections.ObjectModel;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using Email = GoatVaultCore.Models.Email;
 

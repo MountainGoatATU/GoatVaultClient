@@ -5,6 +5,7 @@ using GoatVaultCore.Models.Vault;
 using System.Collections.ObjectModel;
 using GoatVaultApplication.VaultUseCases;
 using GoatVaultClient.Services;
+using GoatVaultCore.Abstractions;
 
 namespace GoatVaultClient.ViewModels
 {

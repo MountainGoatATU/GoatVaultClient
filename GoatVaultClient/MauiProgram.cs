@@ -16,7 +16,6 @@ using System.Reflection;
 using GoatVaultApplication.Auth;
 using GoatVaultApplication.Session;
 using UraniumUI;
-using CryptoService = GoatVaultInfrastructure.Services.CryptoService;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 
@@ -110,13 +109,20 @@ public static class MauiProgram
         // Core app services
         builder.Services.AddSingleton<MarkdownHelperService>();
         builder.Services.AddSingleton<ConnectivityService>();
-        // builder.Services.AddSingleton<ISyncingService, SyncingService>();
+        builder.Services.AddSingleton<ISyncingService, SyncingService>();
         builder.Services.AddScoped<ISessionContext, SessionContext>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<ICryptoService, CryptoService>();
-        builder.Services.AddScoped<LoginOfflineUseCase>();
+        builder.Services.AddScoped<IVaultCrypto, VaultCrypto>();
+        builder.Services.AddScoped<IServerAuthService, ServerAuthService>();
         builder.Services.AddSingleton<IAuthTokenService, AuthTokenService>();
         builder.Services.AddSingleton<JwtUtils>();
+
+        // Use cases
+        builder.Services.AddScoped<LoginOfflineUseCase>();
+        builder.Services.AddScoped<LoginOnlineUseCase>();
+        builder.Services.AddScoped<LogoutUseCase>();
+        builder.Services.AddScoped<RegisterUseCase>();
 
         // Misc services
         builder.Services.AddSingleton<GoatTipsService>();
