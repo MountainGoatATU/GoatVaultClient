@@ -22,7 +22,7 @@ public class HttpService(
         if (payload != null)
             request.Content = JsonContent.Create(payload);
 
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var stopwatch = Stopwatch.StartNew();
         var response = await client.SendAsync(request);
         stopwatch.Stop();
 

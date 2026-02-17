@@ -1,6 +1,5 @@
 ﻿using GoatVaultCore;
 using GoatVaultCore.Models;
-using GoatVaultCore.Models.Vault;
 using Isopoh.Cryptography.Argon2;
 using System.Security.Cryptography;
 using System.Text;

@@ -1,7 +1,5 @@
 ﻿using GoatVaultCore;
-using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
-using GoatVaultCore.Models.Vault;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;

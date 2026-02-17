@@ -22,10 +22,10 @@ public class RegisterUseCase(
 
         // 2. Create empty vault and encrypt
         var emptyVault = new VaultDecrypted(); // Empty vault structure
-        var masterKey = crypto.DeriveMasterKey(password, vaultSalt); // Vault salt can reuse auth salt or generate separate
+        var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
         var encryptedVault = vaultCrypto.Encrypt(emptyVault, masterKey);
 
-        // 3. Map to server registration DTO
+        // 3. Create registration payload
         var registerPayload = new AuthRegisterRequest()
         {
             Email = email.Value,
