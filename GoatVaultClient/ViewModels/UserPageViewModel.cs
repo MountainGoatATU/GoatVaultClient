@@ -3,11 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models.API;
 using GoatVaultCore.Services;
 using GoatVaultInfrastructure.Services.API;
 using Mopups.Services;
-using OtpNet;
 
 namespace GoatVaultClient.ViewModels
 {
@@ -58,17 +56,18 @@ namespace GoatVaultClient.ViewModels
             _goatTips = goatTips;
             _pwned = pwned;
 
-            _session.VaultEntriesChanged += RefreshVaultScore;
-            _session.MasterPasswordChanged += RefreshVaultScore;
+            // TODO: Fix
+            // _session.VaultEntriesChanged += RefreshVaultScore;
+            // _session.MasterPasswordChanged += RefreshVaultScore;
 
             GoatEnabled = _goatTips.IsGoatEnabled;
             _goatTips.SetEnabled(GoatEnabled);
 
-            if (_session.CurrentUser == null)
-                return;
+            // if (_session.CurrentUser == null)
+            //     return;
 
-            Email = _session.CurrentUser.Email;
-            MfaEnabled = _session.CurrentUser.MfaEnabled;
+            // Email = _session.CurrentUser.Email;
+            // MfaEnabled = _session.CurrentUser.MfaEnabled;
 
             RefreshVaultScore();
         }
@@ -76,6 +75,8 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         public void RefreshVaultScore()
         {
+            // TODO: Fix
+            /*
             var user = _session.CurrentUser;
             if (user == null)
                 return;
@@ -92,6 +93,7 @@ namespace GoatVaultClient.ViewModels
             BreachesText = $"{score.BreachesCount}";
             MfaStatusText = score.MfaEnabled ? "Enabled" : "Disabled";
             VaultTierText = GetVaultTier(VaultScore);
+            */
         }
 
         [RelayCommand]
@@ -149,6 +151,8 @@ namespace GoatVaultClient.ViewModels
             if (IsBusy)
                 return;
 
+            // TODO: Refactor into use case
+            /*
             var user = _session.CurrentUser;
             if (user == null)
             {
@@ -159,6 +163,7 @@ namespace GoatVaultClient.ViewModels
                 ));
                 return;
             }
+            */
 
             try
             {
@@ -176,6 +181,7 @@ namespace GoatVaultClient.ViewModels
                 // Wait for password popup to fully dismiss
                 await Task.Delay(300);
 
+                /*
                 // Generate new TOTP secret
                 var secretBytes = KeyGeneration.GenerateRandomKey(20);
                 var secret = Base32Encoding.ToString(secretBytes);
@@ -251,6 +257,7 @@ namespace GoatVaultClient.ViewModels
                     body: "Two-factor authentication has been successfully enabled for your account.",
                     aText: "OK"
                 ));
+            */
             }
             catch (Exception ex)
             {
@@ -272,6 +279,9 @@ namespace GoatVaultClient.ViewModels
             if (IsBusy)
                 return;
 
+            // TODO: Refactor into use case
+
+            /*
             var user = _session.CurrentUser;
             if (user == null)
             {
@@ -285,6 +295,7 @@ namespace GoatVaultClient.ViewModels
                 });
                 return;
             }
+            */
 
             try
             {
@@ -331,6 +342,8 @@ namespace GoatVaultClient.ViewModels
                 }
 
                 await Task.Delay(300);
+
+                /*
 
                 // Ask for current MFA code to verify
                 string? mfaCode = null;
@@ -419,6 +432,7 @@ namespace GoatVaultClient.ViewModels
                         aText: "OK"
                     ));
                 });
+                */
             }
             catch (Exception ex)
             {
@@ -485,6 +499,8 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task EditEmailAsync()
         {
+            // TODO: Refactor into use case
+            /*
             var user = _session.CurrentUser;
             if (user == null)
             {
@@ -495,6 +511,7 @@ namespace GoatVaultClient.ViewModels
                 ));
                 return;
             }
+            */
 
             try
             {
@@ -512,6 +529,8 @@ namespace GoatVaultClient.ViewModels
                 await Task.Delay(300);
 
                 var newEmail = await PromptUserAsync("Enter new email", false);
+
+                /*
 
                 if (string.IsNullOrWhiteSpace(newEmail) || newEmail == user.Email)
                     return;
@@ -543,6 +562,8 @@ namespace GoatVaultClient.ViewModels
                 _session.CurrentUser?.Email = updatedUser.Email;
                 Email = updatedUser.Email;
 
+                */
+
                 await MopupService.Instance.PushAsync(new PromptPopup(
                     title: "Success",
                     body: "Email updated successfully.",
@@ -566,10 +587,12 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task EditMasterPasswordAsync()
         {
+            // TODO: Refactor into use case
+            /*
             var user = _session.CurrentUser;
             if (user == null)
                 return;
-
+            */
             try
             {
                 IsBusy = true;
@@ -589,6 +612,8 @@ namespace GoatVaultClient.ViewModels
 
                 if (string.IsNullOrWhiteSpace(newPassword))
                     return;
+
+                /*
 
                 // Check if password has been pwned
                 var pwnCount = await _pwned.CheckPasswordAsync(newPassword);
@@ -653,6 +678,8 @@ namespace GoatVaultClient.ViewModels
                 // Recalculate all vault-related scores
                 RefreshVaultScore();
 
+                */
+
                 await MopupService.Instance.PushAsync(new PromptPopup(
                     title: "Success",
                     body: "Master password updated successfully. You can now login with your new password.",
@@ -688,6 +715,7 @@ namespace GoatVaultClient.ViewModels
             }
         }
 
+        // TODO: Fix
         private async Task<bool> AuthorizeAsync(string? enteredPassword = null)
         {
             if (string.IsNullOrWhiteSpace(enteredPassword))
@@ -695,7 +723,8 @@ namespace GoatVaultClient.ViewModels
 
             try
             {
-                if (enteredPassword == _session.MasterPassword)
+                //if (enteredPassword == _session.MasterPassword)
+                if (enteredPassword == "TEMP")
                     return true;
 
                 await MopupService.Instance.PushAsync(new PromptPopup(
@@ -717,6 +746,7 @@ namespace GoatVaultClient.ViewModels
             }
         }
 
+        // TODO: Refactor into use case
         [RelayCommand]
         private async Task LogoutAsync()
         {
@@ -725,7 +755,9 @@ namespace GoatVaultClient.ViewModels
             try
             {
                 IsBusy = true;
+                /*
                 await _auth.LogoutAsync();
+                */
             }
             finally
             {

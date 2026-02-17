@@ -11,12 +11,12 @@ using Email = GoatVaultCore.Models.Email;
 
 namespace GoatVaultClient.ViewModels;
 
-// TODO: Unused UserService injection
+// TODO: Refactor
 public partial class LoginPageViewModel(
-    ISyncingService syncingService,
-    ConnectivityService connectivityService,
-    LoginOnlineUseCase loginOnlineUseCase,
-    LoginOfflineUseCase loginOfflineUseCase,
+    ISyncingService syncing,
+    ConnectivityService connectivity,
+    LoginOnlineUseCase loginOnline,
+    LoginOfflineUseCase loginOffline,
     ILogger<LoginPageViewModel>? logger = null)
     : BaseViewModel
 {
@@ -33,13 +33,13 @@ public partial class LoginPageViewModel(
     public async Task InitializeAsync()
     {
         UpdateConnectivityState();
-        connectivityService.ConnectivityChanged += OnConnectivityChanged;
+        connectivity.ConnectivityChanged += OnConnectivityChanged;
         await LoadLocalUsersAsync();
     }
 
     #region Connectivity
 
-    public void Cleanup() => connectivityService.ConnectivityChanged -= OnConnectivityChanged;
+    public void Cleanup() => connectivity.ConnectivityChanged -= OnConnectivityChanged;
 
     private void OnConnectivityChanged(object? sender, bool isConnected)
     {
@@ -66,7 +66,7 @@ public partial class LoginPageViewModel(
 
     private void UpdateConnectivityState()
     {
-        var networkInfo = connectivityService.GetNetworkInfo();
+        var networkInfo = connectivity.GetNetworkInfo();
         IsOnline = networkInfo.IsConnected;
         ConnectionType = networkInfo.GetConnectionType();
         ConnectivityMessage = IsOnline ? $"Connected via {ConnectionType}" : "No internet connection available";
@@ -76,9 +76,10 @@ public partial class LoginPageViewModel(
 
     private async Task LoadLocalUsersAsync()
     {
-        var users = await syncingService.GetAllLocalUsersAsync();
-        LocalUsers = new ObservableCollection<User>(users);
-        HasLocalUsers = LocalUsers.Count > 0;
+        // TODO: Fix
+        // var users = await syncing.GetAllLocalUsersAsync();
+        // LocalUsers = new ObservableCollection<User>(users);
+        // HasLocalUsers = LocalUsers.Count > 0;
     }
 
     [RelayCommand]
@@ -114,7 +115,7 @@ public partial class LoginPageViewModel(
 
     private async Task LoginOnline()
     {
-        await loginOnlineUseCase.ExecuteAsync(Email, Password, PromptForMfaCode);
+        await loginOnline.ExecuteAsync(Email, Password, PromptForMfaCode);
     }
 
     private async Task LoginOffline()
@@ -122,7 +123,7 @@ public partial class LoginPageViewModel(
         if (SelectedUser == null)
             throw new InvalidOperationException("Select a local account for offline login.");
 
-        await loginOfflineUseCase.ExecuteAsync(SelectedUser.Id, OfflinePassword!);
+        await loginOffline.ExecuteAsync(SelectedUser.Id, OfflinePassword!);
     }
 
     private static async Task<string?> PromptForMfaCode()
@@ -149,7 +150,8 @@ public partial class LoginPageViewModel(
     [RelayCommand]
     private async Task RemoveOfflineUser(User user)
     {
-        await syncingService.RemoveLocalUserAsync(user);
+        // TODO: Fix
+        // await syncing.RemoveLocalUserAsync(user);
         await LoadLocalUsersAsync();
     }
 

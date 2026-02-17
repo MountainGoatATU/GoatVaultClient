@@ -2,10 +2,10 @@ using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Controls;
 
 namespace GoatVaultClient
 {
+    // TODO: Refactor
     public partial class MainPage : ContentPage
     {
         private readonly ISyncingService _syncingService;
@@ -95,7 +95,8 @@ namespace GoatVaultClient
                 if (BindingContext is not MainPageViewModel vm)
                     return;
 
-                vm.LoadVaultData();
+                // TODO: Fix
+                //vm.LoadVaultData();
                 vm.StartRandomGoatComments();
             }
             catch (Exception e)

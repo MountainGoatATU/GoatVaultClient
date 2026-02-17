@@ -1,4 +1,5 @@
 using GoatVaultClient.Controls.Popups;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Services;
 using GoatVaultInfrastructure.Services.API;
@@ -20,11 +21,11 @@ namespace GoatVaultClient.Services
     }
     public class AuthenticationService(
         IConfiguration configuration,
-        AuthTokenService authTokenService,
-        HttpService httpService,
-        ConnectivityService connectivityService,
-        ISyncingService syncingService,
-        PwnedPasswordService pwnedPasswordService,
+        IAuthTokenService authToken,
+        IHttpService http,
+        ConnectivityService connectivity,
+        ISyncingService syncing,
+        PwnedPasswordService pwned,
         ILogger<AuthenticationService>? logger = null
         ) : IAuthenticationService
     {
@@ -41,7 +42,7 @@ namespace GoatVaultClient.Services
                 logger?.LogInformation("Login attempt initiated.");
 
                 // Check connectivity before network call
-                var hasConnection = connectivityService.CheckConnectivity();
+                var hasConnection = connectivity.CheckConnectivity();
                 if (!hasConnection)
                 {
                     await Shell.Current.DisplayAlertAsync(
@@ -162,7 +163,7 @@ namespace GoatVaultClient.Services
                 logger?.LogInformation("Registration attempt.");
 
                 // Check connectivity before network call
-                var hasConnection = connectivityService.CheckConnectivity();
+                var hasConnection = connectivity.CheckConnectivity();
                 if (!hasConnection)
                 {
                     await Shell.Current.DisplayAlertAsync(
