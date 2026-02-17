@@ -7,9 +7,6 @@ public partial class AppShell : Shell
     public AppShell()
     {
         InitializeComponent();
-
-        // Register routes for pages that use relative navigation (not declared in Shell XAML)
-        Routing.RegisterRoute(nameof(EducationDetailPage), typeof(EducationDetailPage));
     }
 
     public void EnableFlyout()
