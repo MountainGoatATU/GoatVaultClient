@@ -33,6 +33,7 @@ public class FakeDataSourceTests
     }
 
     [Theory]
+    [InlineData(0)]
     [InlineData(1)]
     [InlineData(5)]
     [InlineData(10)]
