@@ -37,6 +37,11 @@ public class ServerAuthService(
         return JsonSerializer.Deserialize<UserResponse>(json, JsonOptions) ?? throw new InvalidOperationException("Invalid user response");
     }
 
+    public async Task<UserResponse> UpdateUserAsync(Guid userId, UpdateUserRequest payload, CancellationToken ct = default)
+    {
+        return await PatchAsync<UserResponse>($"v1/users/{userId}", payload, ct);
+    }
+
     public async Task<AuthRegisterResponse> RegisterAsync(AuthRegisterRequest payload, CancellationToken ct = default)
     {
         return await PostAsync<AuthRegisterResponse>("v1/auth/register", payload, ct);
@@ -50,6 +55,20 @@ public class ServerAuthService(
             "application/json");
 
         var resp = await http.PostAsync($"{BaseUrl}/{endpoint}", content, ct);
+        resp.EnsureSuccessStatusCode();
+
+        var json = await resp.Content.ReadAsStringAsync(ct);
+        return JsonSerializer.Deserialize<T>(json, JsonOptions) ?? throw new InvalidOperationException($"Invalid response for {endpoint}");
+    }
+
+    private async Task<T> PatchAsync<T>(string endpoint, object payload, CancellationToken ct)
+    {
+        var content = new StringContent(
+            JsonSerializer.Serialize(payload, JsonOptions),
+            Encoding.UTF8,
+            "application/json");
+
+        var resp = await http.PatchAsync($"{BaseUrl}/{endpoint}", content, ct);
         resp.EnsureSuccessStatusCode();
 
         var json = await resp.Content.ReadAsStringAsync(ct);
