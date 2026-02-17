@@ -10,7 +10,8 @@ public class LoginOnlineUseCase(
     IVaultCrypto vaultCrypto,
     ISessionContext session,
     IServerAuthService serverAuth,
-    IAuthTokenService authTokenService)
+    IAuthTokenService authTokenService,
+    IUserRepository userRepository)
 {
     public async Task ExecuteAsync(
         Email email,
@@ -25,10 +26,10 @@ public class LoginOnlineUseCase(
 
         // 2. Compute proof client-side
         var authSalt = Convert.FromBase64String(authInitResponse.AuthSalt);
-        var authVerifierBytes = crypto.GenerateAuthVerifier(password, authSalt);
+        var authVerifier = crypto.GenerateAuthVerifier(password, authSalt);
 
         var nonce = Convert.FromBase64String(authInitResponse.Nonce);
-        using var hmac = new HMACSHA256(authVerifierBytes);
+        using var hmac = new HMACSHA256(authVerifier);
         var proofBytes = hmac.ComputeHash(nonce);
         var proof = Convert.ToBase64String(proofBytes);
 
@@ -53,16 +54,39 @@ public class LoginOnlineUseCase(
         authTokenService.SetRefreshToken(authVerifyResponse.RefreshToken);
 
         // 5. Get user
-        var user = await serverAuth.GetUserAsync(userId, ct);
-        if (user.Vault == null)
+        var userResponse = await serverAuth.GetUserAsync(userId, ct);
+        if (userResponse.Vault == null)
             throw new InvalidOperationException("Vault is missing.");
 
         // 6. Decrypt vault
-        var vaultSalt = user.Vault.VaultSalt;
+        var vaultSalt = userResponse.Vault.VaultSalt;
         var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
-        var decryptedVault = vaultCrypto.Decrypt(user.Vault, masterKey);
+        var decryptedVault = vaultCrypto.Decrypt(userResponse.Vault, masterKey, vaultSalt);
 
-        // 7. Start session
+        // 7. Save to local DB (for offline login & sync baseline)
+        var localUser = new User
+        {
+            Id = userId,
+            Email = email,
+            AuthSalt = authSalt,
+            AuthVerifier = authVerifier,
+            MfaEnabled = userResponse.MfaEnabled,
+            VaultSalt = vaultSalt,
+            Vault = userResponse.Vault,
+            CreatedAtUtc = userResponse.CreatedAtUtc,
+            UpdatedAtUtc = userResponse.UpdatedAtUtc
+        };
+
+        // Check if exists to preserve MfaSecret if we had it
+        var existing = await userRepository.GetByIdAsync(userId);
+        if (existing != null)
+        {
+            localUser.MfaSecret = existing.MfaSecret;
+        }
+
+        await userRepository.SaveAsync(localUser);
+
+        // 8. Start session
         session.Start(userId, masterKey, decryptedVault);
     }
 }
