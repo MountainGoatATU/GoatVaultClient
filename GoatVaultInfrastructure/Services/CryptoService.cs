@@ -14,7 +14,7 @@ public sealed class CryptoService : ICryptoService
 
     public MasterKey DeriveMasterKey(string password, byte[] vaultSalt) => new(Argon2Hash(password, vaultSalt));
 
-    public bool BytesEqual(byte[] left, byte[] right) => CryptographicOperations.FixedTimeEquals(left, right);
+    public bool BytesEquals(byte[] left, byte[] right) => CryptographicOperations.FixedTimeEquals(left, right);
 
     private static byte[] Argon2Hash(string password, byte[] salt)
     {
