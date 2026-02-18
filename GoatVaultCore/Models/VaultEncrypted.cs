@@ -5,13 +5,13 @@ namespace GoatVaultCore.Models;
 public class VaultEncrypted
 {
     [JsonConverter(typeof(Base64Converter))]
-    public byte[] EncryptedBlob { get; set; }
+    public required byte[] EncryptedBlob { get; set; }
 
     [JsonConverter(typeof(Base64Converter))]
-    public byte[] Nonce { get; set; }
+    public required byte[] Nonce { get; set; }
 
     [JsonConverter(typeof(Base64Converter))]
-    public byte[] AuthTag { get; set; }
+    public required byte[] AuthTag { get; set; }
 
     public VaultEncrypted(byte[] encryptedBlob, byte[] nonce, byte[] authTag)
     {

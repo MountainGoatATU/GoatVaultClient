@@ -1,3 +1,4 @@
+using System.Text;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Api;
 
@@ -9,7 +10,7 @@ public class EnableMfaUseCase(
     ICryptoService crypto,
     IServerAuthService serverAuth)
 {
-    public async Task ExecuteAsync(string currentPassword, string mfaSecret, string verificationCode)
+    public async Task ExecuteAsync(string currentPassword, string mfaSecret)
     {
         if (session.UserId == null)
             throw new InvalidOperationException("No user logged in.");
@@ -35,7 +36,7 @@ public class EnableMfaUseCase(
 
         // 3. Update local DB
         user.MfaEnabled = true;
-        user.MfaSecret = System.Text.Encoding.UTF8.GetBytes(mfaSecret);
+        user.MfaSecret = Encoding.UTF8.GetBytes(mfaSecret);
         user.UpdatedAtUtc = serverUser.UpdatedAtUtc;
 
         await users.SaveAsync(user);

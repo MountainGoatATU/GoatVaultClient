@@ -8,10 +8,8 @@ using GoatVaultInfrastructure.Services;
 namespace GoatVaultApplication.Auth;
 
 public class RegisterUseCase(
-    IUserRepository users,
     ICryptoService crypto,
     IVaultCrypto vaultCrypto,
-    ISessionContext session,
     IServerAuthService serverAuth,
     PwnedPasswordService pwned,
     LoginOnlineUseCase loginOnline)
@@ -31,7 +29,11 @@ public class RegisterUseCase(
         var vaultSalt = CryptoService.GenerateRandomBytes(32);
 
         // 3. Create empty vault and encrypt
-        var emptyVault = new VaultDecrypted(); // Empty vault structure
+        var emptyVault = new VaultDecrypted
+        {
+            Categories = [],
+            Entries = []
+        };
         var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
         var encryptedVault = vaultCrypto.Encrypt(emptyVault, masterKey, vaultSalt);
 

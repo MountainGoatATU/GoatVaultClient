@@ -7,5 +7,5 @@ public class AuthInitResponse
     [JsonPropertyName("_id")] public required string UserId { get; set; }
     public required string AuthSalt { get; set; }
     public required string Nonce { get; set; }
-    public bool MfaEnabled { get; set; }
+    public required bool MfaEnabled { get; set; }
 }

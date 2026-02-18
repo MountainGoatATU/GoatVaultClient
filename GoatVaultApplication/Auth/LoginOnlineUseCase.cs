@@ -71,13 +71,17 @@ public class LoginOnlineUseCase(
         var existing = await userRepository.GetByIdAsync(userId);
         User userToSave;
 
+        var mfaSecret = userResponse.MfaSecret is not null
+            ? Convert.FromBase64String(userResponse.MfaSecret)
+            : [];
+
         if (existing != null)
         {
             existing.Email = email;
             existing.AuthSalt = authSalt;
             existing.AuthVerifier = authVerifier;
             existing.MfaEnabled = userResponse.MfaEnabled;
-            // Preserve existing.MfaSecret if any
+            existing.MfaSecret = mfaSecret;
             existing.VaultSalt = vaultSalt;
             existing.Vault = vaultEncrypted;
             existing.CreatedAtUtc = userResponse.CreatedAtUtc;
@@ -94,6 +98,7 @@ public class LoginOnlineUseCase(
                 AuthSalt = authSalt,
                 AuthVerifier = authVerifier,
                 MfaEnabled = userResponse.MfaEnabled,
+                MfaSecret = mfaSecret,
                 VaultSalt = vaultSalt,
                 Vault = vaultEncrypted,
                 CreatedAtUtc = userResponse.CreatedAtUtc,

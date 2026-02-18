@@ -81,8 +81,8 @@ namespace GoatVaultClient.ViewModels
                  if (_sessionContext.Vault == null)
                      return;
 
-                 _allVaultEntries = _sessionContext.Vault.Entries.ToList();
-                 _allVaultCategories = _sessionContext.Vault.Categories.ToList();
+                 _allVaultEntries = [.. _sessionContext.Vault.Entries];
+                 _allVaultCategories = [.. _sessionContext.Vault.Categories];
                  ReloadVaultData();
              });
         }
@@ -91,10 +91,10 @@ namespace GoatVaultClient.ViewModels
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                await Application.Current.MainPage.DisplayAlert("Session Expired",
+                await Application.Current.MainPage.DisplayAlertAsync("Session Expired",
                     "Your password has changed on another device. Please log in again.", "OK");
 
-                // Navigate to login (using absolute route to clear stack)
+                // Navigate to log in (using absolute route to clear stack)
                 await Shell.Current.GoToAsync("//login");
             });
         }
@@ -118,8 +118,8 @@ namespace GoatVaultClient.ViewModels
             {
                 var vault = await _loadVault.ExecuteAsync();
 
-                _allVaultEntries = vault.Entries.ToList();
-                _allVaultCategories = vault.Categories.ToList();
+                _allVaultEntries = [.. vault.Entries];
+                _allVaultCategories = [.. vault.Categories];
 
                 ReloadVaultData();
             }
@@ -143,8 +143,8 @@ namespace GoatVaultClient.ViewModels
         {
             if (_sessionContext.Vault != null)
             {
-                _allVaultEntries = _sessionContext.Vault.Entries.ToList();
-                _allVaultCategories = _sessionContext.Vault.Categories.ToList();
+                _allVaultEntries = [.. _sessionContext.Vault.Entries];
+                _allVaultCategories = [.. _sessionContext.Vault.Categories];
             }
 
             Passwords = _allVaultEntries.ToObservableCollection();
@@ -210,10 +210,10 @@ namespace GoatVaultClient.ViewModels
         #endregion
 
         #region Goat Comments
-        
+
         public void StartRandomGoatComments()
         {
-            GoatTipsService.StartTips();
+            using var _ = GoatTipsService.StartTips();
             GoatTipsService.PropertyChanged += OnGoatTipsPropertyChanged;
         }
 

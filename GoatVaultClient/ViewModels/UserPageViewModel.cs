@@ -251,7 +251,7 @@ public partial class UserPageViewModel : BaseViewModel
             }
 
             // Enable on backend
-            await _enableMfa.ExecuteAsync(password, secret, code);
+            await _enableMfa.ExecuteAsync(password, secret);
             MfaEnabled = true;
             await ShowSuccessAsync("MFA enabled successfully.");
             await RefreshVaultScoreAsync();

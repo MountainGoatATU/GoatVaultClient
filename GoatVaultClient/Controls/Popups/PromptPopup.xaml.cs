@@ -35,43 +35,57 @@ public partial class PromptPopup : PopupPage
 
     private async void OnAccept()
     {
-        if (_resultSet) return;
-        _resultSet = true;
-
         try
         {
-            await MopupService.Instance.PopAsync();
-            _tcs.TrySetResult(true);
+            if (_resultSet) return;
+            _resultSet = true;
+
+            try
+            {
+                await MopupService.Instance.PopAsync();
+                _tcs.TrySetResult(true);
+            }
+            catch
+            {
+                _tcs.TrySetResult(false);
+            }
         }
         catch (Exception e)
         {
-            _tcs.TrySetResult(false);
+            throw; // TODO handle exception
         }
     }
 
     private async void OnCancel()
     {
-        if (_resultSet) return;
-        _resultSet = true;
-
         try
         {
-            await MopupService.Instance.PopAsync();
-            _tcs.TrySetResult(false);
+            if (_resultSet) return;
+            _resultSet = true;
+
+            try
+            {
+                await MopupService.Instance.PopAsync();
+                _tcs.TrySetResult(false);
+            }
+            catch (Exception e)
+            {
+                _tcs.TrySetResult(false);
+            }
         }
         catch (Exception e)
         {
-            _tcs.TrySetResult(false);
+            throw; // TODO handle exception
         }
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        if (!_resultSet)
-        {
-            _resultSet = true;
-            _tcs.TrySetResult(false);
-        }
+        if (_resultSet)
+            return;
+
+        _resultSet = true;
+        _tcs.TrySetResult(false);
     }
 }

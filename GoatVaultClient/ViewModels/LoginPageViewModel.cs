@@ -164,11 +164,11 @@ public partial class LoginPageViewModel(
     [RelayCommand]
     private async Task RemoveOfflineUser(User user)
     {
-        var confirm = await Shell.Current.DisplayAlert("Remove User", 
+        var confirm = await Shell.Current.DisplayAlertAsync("Remove User",
             $"Are you sure you want to remove {user.Email} from this device?", "Yes", "No");
-            
+
         if (!confirm) return;
-        
+
         await userRepository.DeleteAsync(user);
         await LoadLocalUsersAsync();
     }

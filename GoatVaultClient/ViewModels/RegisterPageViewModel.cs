@@ -39,15 +39,15 @@ public partial class RegisterPageViewModel(
         }
         catch (InvalidOperationException ex)
         {
-            await Shell.Current.DisplayAlert("Registration Failed", ex.Message, "OK");
+            await Shell.Current.DisplayAlertAsync("Registration Failed", ex.Message, "OK");
         }
         catch (HttpRequestException)
         {
-            await Shell.Current.DisplayAlert("Network Error", "Unable to reach server. Please try again later.", "OK");
+            await Shell.Current.DisplayAlertAsync("Network Error", "Unable to reach server. Please try again later.", "OK");
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert("Error", $"An unexpected error occurred: {ex.Message}", "OK");
+            await Shell.Current.DisplayAlertAsync("Error", $"An unexpected error occurred: {ex.Message}", "OK");
         }
         finally
         {

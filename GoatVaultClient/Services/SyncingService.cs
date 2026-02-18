@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.Api;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using Email = GoatVaultCore.Models.Objects.Email;
@@ -11,7 +10,6 @@ using Email = GoatVaultCore.Models.Objects.Email;
 namespace GoatVaultClient.Services;
 
 public class SyncingService(
-    IConfiguration configuration,
     ISessionContext session,
     IServiceProvider services,
     IServerAuthService serverAuth,
@@ -197,9 +195,9 @@ public class SyncingService(
                 var timeDiff = (localUser.UpdatedAtUtc - serverUser.UpdatedAtUtc).TotalSeconds;
 
                 // Log the timestamps for debugging
-                logger?.LogInformation("Sync Check - Local: {LocalTime}, Server: {ServerTime}, Diff: {Diff}s", 
-                    localUser.UpdatedAtUtc.ToString("O"), 
-                    serverUser.UpdatedAtUtc.ToString("O"), 
+                logger?.LogInformation("Sync Check - Local: {LocalTime}, Server: {ServerTime}, Diff: {Diff}s",
+                    localUser.UpdatedAtUtc.ToString("O"),
+                    serverUser.UpdatedAtUtc.ToString("O"),
                     timeDiff);
 
                 if (Math.Abs(timeDiff) < 1.0)
@@ -329,9 +327,11 @@ public class SyncingService(
         var existingUser = await userRepository.GetByIdAsync(Guid.Parse(serverUser.Id));
 
         if (existingUser != null)
-        {
              localUser = existingUser;
-        }
+
+        var mfaSecret = serverUser.MfaSecret is not null
+            ? Convert.FromBase64String(serverUser.MfaSecret)
+            : [];
 
         // 3. Update Local DB
         if (localUser == null)
@@ -342,7 +342,10 @@ public class SyncingService(
                 AuthSalt = Convert.FromBase64String(serverUser.AuthSalt),
                 AuthVerifier = Convert.FromBase64String(serverUser.AuthVerifier),
                 CreatedAtUtc = serverUser.CreatedAtUtc,
-                MfaSecret = []
+                MfaEnabled = serverUser.MfaEnabled,
+                MfaSecret = mfaSecret,
+                VaultSalt = Convert.FromBase64String(serverUser.VaultSalt),
+                UpdatedAtUtc = serverUser.UpdatedAtUtc
             };
         }
         else
@@ -353,8 +356,9 @@ public class SyncingService(
 
         localUser.Email = new Email(serverUser.Email);
         localUser.Vault = serverUser.Vault;
-        localUser.VaultSalt = Convert.FromBase64String(serverUser.VaultSalt); // Use user-level VaultSalt
+        localUser.VaultSalt = Convert.FromBase64String(serverUser.VaultSalt);
         localUser.MfaEnabled = serverUser.MfaEnabled;
+        localUser.MfaSecret = mfaSecret;
         localUser.UpdatedAtUtc = serverUser.UpdatedAtUtc;
 
         await userRepository.SaveAsync(localUser);

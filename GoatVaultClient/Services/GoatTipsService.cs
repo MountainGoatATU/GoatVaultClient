@@ -89,7 +89,7 @@ public partial class GoatTipsService : ObservableObject
     {
         var userId = _session.UserId ?? throw new InvalidOperationException("UserId is null");
         var user = await _users.GetByIdAsync(userId) ?? throw new InvalidOperationException("User is null");
-        var entries = _session.Vault?.Entries;
+        var entries = _session.Vault?.Entries ?? [];
         var masterStrength = _session.MasterPasswordStrength;
 
         var score = VaultScoreCalculatorService.CalculateScore(

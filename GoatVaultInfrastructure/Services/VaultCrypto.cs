@@ -32,6 +32,11 @@ public class VaultCrypto : IVaultCrypto
         using var aesGcm = new AesGcm(key.Key, 16);
         aesGcm.Encrypt(nonce, plaintext, encryptedBlob, authTag);
 
-        return new VaultEncrypted(encryptedBlob, nonce, authTag);
+        return new VaultEncrypted(encryptedBlob, nonce, authTag)
+        {
+            EncryptedBlob = encryptedBlob,
+            AuthTag = authTag,
+            Nonce = nonce
+        };
     }
 }

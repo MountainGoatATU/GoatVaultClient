@@ -2,6 +2,6 @@
 
 public class VaultDecrypted
 {
-    public List<CategoryItem> Categories { get; set; } = [];
-    public List<VaultEntry> Entries { get; set; } = [];
+    public required List<CategoryItem> Categories { get; set; } = [];
+    public required List<VaultEntry> Entries { get; set; } = [];
 }
