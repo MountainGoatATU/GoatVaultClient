@@ -19,15 +19,14 @@ namespace GoatVaultClient.ViewModels
         [ObservableProperty] private string? mfaQrCodeUrl;
 
         [ObservableProperty] private double vaultScore;
-        [ObservableProperty] private string? breachesText;
-        [ObservableProperty] private string? mfaStatusText;
-        [ObservableProperty] private string? reuseRateText;
-        [ObservableProperty] private string? masterPasswordStrength;
-        [ObservableProperty] private string? averagePasswordsStrength;
-        [ObservableProperty] private bool goatEnabled = true;
-
-        [ObservableProperty] private bool showVaultDetails;
+        [ObservableProperty] private double masterPasswordStrength;
+        [ObservableProperty] private double averagePasswordsStrength;
+        [ObservableProperty] private double reuseRate;
+        [ObservableProperty] private int breachesCount;
+        [ObservableProperty] private double mfaPercent;
         [ObservableProperty] private string? vaultTierText;
+
+        [ObservableProperty] private bool goatEnabled = true;
 
         private readonly HttpService _httpService;
         private readonly AuthTokenService _authTokenService;
@@ -80,28 +79,30 @@ namespace GoatVaultClient.ViewModels
         public void RefreshVaultScore()
         {
             var user = _vaultSessionService.CurrentUser;
-            if (user == null)
-                return;
+            if (user == null) return;
 
             var score = _vaultScoreCalculatorService.CalculateScore(
                 _vaultSessionService.VaultEntries,
                 _vaultSessionService.MasterPassword,
-                user.MfaEnabled);
+                user.MfaEnabled
+            );
+
+            MasterPasswordStrength = score.MasterPasswordPercent / 100.0 * 400;
+            AveragePasswordsStrength = score.AveragePasswordsPercent / 100.0 * 200;
+            ReuseRate = score.ReuseRatePercent / 100.0 * 200;
+            MfaPercent = score.MfaEnabled ? 200 : 0;
 
             VaultScore = score.VaultScore;
-            MasterPasswordStrength = $"{score.MasterPasswordPercent}%";
-            AveragePasswordsStrength = $"{score.AveragePasswordsPercent}%";
-            ReuseRateText = $"{score.ReuseRatePercent}%";
-            BreachesText = $"{score.BreachesCount}";
-            MfaStatusText = score.MfaEnabled ? "Enabled" : "Disabled";
-            VaultTierText = GetVaultTier(VaultScore);
+            VaultTierText = $"{GetVaultTier(VaultScore)} ({VaultScore:0}/1000)";
+            BreachesCount = score.BreachesCount;
+
+            OnPropertyChanged(nameof(MasterPasswordCategory));
+            OnPropertyChanged(nameof(AveragePasswordsCategory));
+            OnPropertyChanged(nameof(OriginalityCategory));
+            OnPropertyChanged(nameof(BreachesCategory));
+            OnPropertyChanged(nameof(MfaCategory));
         }
 
-        [RelayCommand]
-        private void ToggleVaultDetails()
-        {
-            ShowVaultDetails = !ShowVaultDetails;
-        }
 
         private static string GetVaultTier(double score)
         {
@@ -115,23 +116,28 @@ namespace GoatVaultClient.ViewModels
             };
         }
 
-        [RelayCommand]
-        private async Task ShowVaultDetailsPopupAsync()
-        {
-            var message =
-                $"Tier: {VaultTierText}\n" +
-                $"\nMaster password: {MasterPasswordStrength}" +
-                $"\nAverage passwords: {AveragePasswordsStrength}" +
-                $"\nOriginality: {ReuseRateText}" +
-                $"\nBreached passwords: {BreachesText}" +
-                $"\nMFA: {MfaStatusText}";
+        public string MasterPasswordCategory =>
+            MasterPasswordStrength >= 300 ? "Very Strong" :
+            MasterPasswordStrength >= 200 ? "Strong" :
+            MasterPasswordStrength >= 100 ? "Weak" : "Poor";
 
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                title: "Vault Score Details",
-                body: message,
-                aText: "OK"
-            ));
-        }
+        public string AveragePasswordsCategory =>
+            AveragePasswordsStrength >= 200 ? "Very Strong" :
+            AveragePasswordsStrength >= 150 ? "Strong" :
+            AveragePasswordsStrength >= 100 ? "Weak" : "Poor";
+
+        public string OriginalityCategory =>
+            ReuseRate >= 200 ? "Very Strong" :
+            ReuseRate >= 150 ? "Strong" :
+            ReuseRate >= 100 ? "Weak" : "Poor";
+
+        public string BreachesCategory =>
+            BreachesCount == 0 ? "Very Strong" :
+            BreachesCount == 1 ? "Strong" :
+            BreachesCount == 2 ? "Weak" : "Poor";
+
+        public string MfaCategory =>
+            MfaEnabled ? "Very Strong" : "Poor";
 
         [RelayCommand]
         private void ToggleGoat()
