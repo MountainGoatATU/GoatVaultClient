@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultCore.Services.Shamir;
 using Microsoft.Extensions.Logging;
+using Xecrets.Slip39;
 
 namespace GoatVaultClient.ViewModels;
 
@@ -12,19 +14,6 @@ public partial class IntroductionPageViewModel(ILogger<IntroductionPageViewModel
         {
             // Navigate to Login Page
             await Shell.Current.GoToAsync("//login");
-        }
-        catch (Exception e)
-        {
-            logger?.LogError(e, "Error navigating to login page");
-        }
-    }
-    [RelayCommand]
-    private async Task NavigateToSecretSharePage()
-    {
-        try
-        {
-            // Navigate to Login Page
-            await Shell.Current.GoToAsync("//splitKey");
         }
         catch (Exception e)
         {

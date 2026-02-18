@@ -3,7 +3,7 @@ using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
-using GoatVaultCore.Services.Secrets;
+using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.API;
@@ -14,12 +14,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
-using SecretSharingDotNet.Math;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Net.Http.Headers;
-using System.Numerics;
 using System.Reflection;
 using UraniumUI;
+using Xecrets.Slip39;
 
 namespace GoatVaultClient;
 
@@ -99,11 +98,20 @@ public static class MauiProgram
         builder.Services.AddTransient<JwtUtils>();
         builder.Services.AddSingleton<ISyncingService, SyncingService>();
 
+
+
         // Test services
         builder.Services.AddSingleton<FakeDataSource>();
+        // Shamir Test
+        builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
+        builder.Services.AddSingleton<IRandom, StrongRandom>();
+        builder.Services.AddTransient<ShamirSSService>();
 
         // TODO: Fix Shamir services
-        builder.Services.AddShamirSecretSharing();
+        builder.Services.AddTransient<SplitSecretViewModel>();
+        builder.Services.AddTransient<SplitSecretPage>();
+        builder.Services.AddTransient<RecoverSecretViewModel>();
+        builder.Services.AddTransient<RecoverSecretPage>();
 
         // UraniumUI dialogs
         builder.Services.AddMopupsDialogs();

@@ -18,6 +18,7 @@
 		<PackageReference Include="Otp.NET" Version="1.4.1" />
 		<PackageReference Include="PasswordGenerator" Version="2.1.0" />
 		<PackageReference Include="SecretSharingDotNet" Version="0.14.0" />
+		<PackageReference Include="Xecrets.Slip39" Version="2.3.1315" />
 		<PackageReference Include="zxcvbn-core" Version="8.0.0-beta0002" />
 	</ItemGroup>
 

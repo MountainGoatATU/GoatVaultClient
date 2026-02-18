@@ -8,11 +8,11 @@ namespace GoatVaultClient.ViewModels;
 
 public partial class RecoverSecretViewModel : BaseViewModel
 {
-    private readonly IEnvelopeSharingService _sharingService;
+    private readonly ShamirSSService _shamirTest;
 
-    public RecoverSecretViewModel(IEnvelopeSharingService sharingService)
+    public RecoverSecretViewModel(ShamirSSService st)
     {
-        _sharingService = sharingService;
+        _shamirTest = st;
     }
 
     // ── Input fields ─────────────────────────────────────────────
@@ -22,8 +22,7 @@ public partial class RecoverSecretViewModel : BaseViewModel
     private string _currentShareInput = string.Empty;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(RecoverCommand))]
-    private string _envelopeInput = string.Empty;
+    private string _passphrase = string.Empty; // Added for SLIP-39
 
     [ObservableProperty]
     private bool _isBusy;
@@ -71,7 +70,6 @@ public partial class RecoverSecretViewModel : BaseViewModel
         OnPropertyChanged(nameof(HasShares));
         RecoverCommand.NotifyCanExecuteChanged();
 
-        // Clear any previous error/result when adding new shares
         HasError = false;
         ErrorMessage = string.Empty;
     }
@@ -82,7 +80,6 @@ public partial class RecoverSecretViewModel : BaseViewModel
         if (share is null) return;
         CollectedShares.Remove(share);
 
-        // Re-index
         for (int i = 0; i < CollectedShares.Count; i++)
         {
             CollectedShares[i] = CollectedShares[i] with { Index = i + 1 };
@@ -93,8 +90,7 @@ public partial class RecoverSecretViewModel : BaseViewModel
         RecoverCommand.NotifyCanExecuteChanged();
     }
 
-    private bool CanRecover() =>
-        CollectedShares.Count >= 2;
+    private bool CanRecover() => CollectedShares.Count >= 2;
 
     [RelayCommand(CanExecute = nameof(CanRecover))]
     private async Task RecoverAsync()
@@ -111,14 +107,14 @@ public partial class RecoverSecretViewModel : BaseViewModel
             var mnemonics = CollectedShares.Select(s => s.Mnemonic).ToList();
 
             var result = await Task.Run(() =>
-                _sharingService.RecoverFromParts(EnvelopeInput.Trim(), mnemonics));
+                _shamirTest.RecoverSecret(mnemonics, Passphrase ?? string.Empty));
 
             RecoveredSecret = result;
             HasRecoveredSecret = true;
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.InnerException?.Message ?? ex.Message;
+            ErrorMessage = ex.Message;
             HasError = true;
         }
         finally
@@ -153,18 +149,10 @@ public partial class RecoverSecretViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task PasteEnvelopeAsync()
-    {
-        var text = await Clipboard.Default.GetTextAsync();
-        if (!string.IsNullOrWhiteSpace(text))
-            EnvelopeInput = text;
-    }
-
-    [RelayCommand]
     private void Reset()
     {
         CurrentShareInput = string.Empty;
-        EnvelopeInput = string.Empty;
+        Passphrase = string.Empty;
         CollectedShares.Clear();
         RecoveredSecret = string.Empty;
         HasRecoveredSecret = false;

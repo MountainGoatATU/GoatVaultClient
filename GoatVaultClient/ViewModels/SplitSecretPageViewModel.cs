@@ -8,11 +8,11 @@ namespace GoatVaultClient.ViewModels;
 
 public partial class SplitSecretViewModel : BaseViewModel
 {
-    private readonly IEnvelopeSharingService _sharingService;
+    private readonly ShamirSSService _shamirTest;
 
-    public SplitSecretViewModel(IEnvelopeSharingService sharingService)
+    public SplitSecretViewModel(ShamirSSService st)
     {
-        _sharingService = sharingService;
+        _shamirTest = st;
     }
 
     // ── Input fields ─────────────────────────────────────────────
@@ -20,6 +20,9 @@ public partial class SplitSecretViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SplitCommand))]
     private string _secretText = string.Empty;
+
+    [ObservableProperty]
+    private string _passphrase = string.Empty; // Added for SLIP-39
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SplitCommand))]
@@ -40,7 +43,7 @@ public partial class SplitSecretViewModel : BaseViewModel
 
     // ── Output ───────────────────────────────────────────────────
 
-    public ObservableCollection<SharePackage> GeneratedShares { get; } = [];
+    public ObservableCollection<RecoveryShare> GeneratedShares { get; } = [];
 
     // ── Slider ranges ────────────────────────────────────────────
 
@@ -48,10 +51,8 @@ public partial class SplitSecretViewModel : BaseViewModel
     public int MaxShares => 10;
     public int MinThreshold => 2;
 
-    /// <summary>Threshold can't exceed total shares.</summary>
     public int MaxThreshold => TotalShares;
 
-    // When TotalShares changes, clamp Threshold and notify MaxThreshold
     partial void OnTotalSharesChanged(int value)
     {
         if (Threshold > value)
@@ -77,12 +78,18 @@ public partial class SplitSecretViewModel : BaseViewModel
 
         try
         {
-            // Run on background thread — Shamir math can be non-trivial
-            var packages = await Task.Run(() =>
-                _sharingService.Split(SecretText, TotalShares, Threshold));
+            // SLIP-39 generation
+            var mnemonics = await Task.Run(() =>
+                _shamirTest.SplitSecret(SecretText, Passphrase ?? string.Empty, TotalShares, Threshold));
 
-            foreach (var pkg in packages)
-                GeneratedShares.Add(pkg);
+            for (int i = 0; i < mnemonics.Count; i++)
+            {
+                GeneratedShares.Add(new RecoveryShare
+                {
+                    Index = i + 1,
+                    Mnemonic = mnemonics[i]
+                });
+            }
 
             HasResults = true;
         }
@@ -99,62 +106,15 @@ public partial class SplitSecretViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task CopyShareAsync(SharePackage? package)
+    private async Task CopyShareAsync(RecoveryShare? share)
     {
-        if (package is null) return;
+        if (share is null) return;
 
-        // Format: mnemonic words on their own (the user writes these down)
-        await Clipboard.Default.SetTextAsync(package.MnemonicShare);
+        await Clipboard.Default.SetTextAsync(share.Mnemonic);
 
-        // Auto-clear clipboard after 60 seconds
         _ = Task.Delay(TimeSpan.FromSeconds(60)).ContinueWith(_ =>
             MainThread.BeginInvokeOnMainThread(async () =>
                 await Clipboard.Default.SetTextAsync(string.Empty)));
-    }
-
-    [RelayCommand]
-    private async Task CopyEnvelopeAsync(SharePackage? package)
-    {
-        if (package == null) return;
-
-        await Clipboard.Default.SetTextAsync(package.EnvelopeBase64);
-
-        // Clear clipboard after 10 seconds (fire and forget task, but handled safely)
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(10000);
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                var current = await Clipboard.Default.GetTextAsync();
-                if (!string.IsNullOrEmpty(current))
-                {
-                    await Clipboard.Default.SetTextAsync(string.Empty);
-                }
-            });
-        });
-    }
-
-    [RelayCommand]
-    private async Task CopyFullPackageAsync(SharePackage? package)
-    {
-        if (package is null) return;
-
-        //var text = $"""
-        //    === {package.DisplayLabel} ===
-        //    Threshold: {package.ThresholdLabel}
-            
-        //    --- MNEMONIC SHARE (KEEP SECRET) ---
-        //    {package.MnemonicShare}
-            
-        //    --- ENVELOPE (share with all holders) ---
-        //    {package.EnvelopeBase64}
-        //    """;
-
-        //await Clipboard.Default.SetTextAsync(text);
-
-        //_ = Task.Delay(TimeSpan.FromSeconds(60)).ContinueWith(_ =>
-        //    MainThread.BeginInvokeOnMainThread(async () =>
-        //        await Clipboard.Default.SetTextAsync(string.Empty)));
     }
 
     [RelayCommand]
@@ -167,6 +127,7 @@ public partial class SplitSecretViewModel : BaseViewModel
     private void Reset()
     {
         SecretText = string.Empty;
+        Passphrase = string.Empty;
         TotalShares = 5;
         Threshold = 3;
         GeneratedShares.Clear();
