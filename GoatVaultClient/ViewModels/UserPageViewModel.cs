@@ -28,10 +28,10 @@ public partial class UserPageViewModel : BaseViewModel
     [ObservableProperty] private string email = string.Empty;
     [ObservableProperty] private bool mfaEnabled;
     [ObservableProperty] private bool goatEnabled;
-    
+
     [ObservableProperty] private double vaultScore;
     [ObservableProperty] private string? vaultTierText;
-    
+
     [ObservableProperty] private bool showVaultDetails;
     [ObservableProperty] private ObservableCollection<VaultMetricItem> vaultMetrics = [];
 
@@ -97,7 +97,7 @@ public partial class UserPageViewModel : BaseViewModel
         try
         {
             var details = await _calculateVaultScore.ExecuteAsync();
-            
+
             // Updates to observable properties bound to UI must be on main thread
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
@@ -167,7 +167,7 @@ public partial class UserPageViewModel : BaseViewModel
     private async Task EditEmailAsync()
     {
         if (IsBusy) return;
-        
+
         var password = await PromptPasswordAsync("Confirm Password");
         if (password == null) return;
 
@@ -318,38 +318,38 @@ public partial class UserPageViewModel : BaseViewModel
 
     #region UI Helpers
 
-    private async Task<string?> PromptPasswordAsync(string title)
+    private static async Task<string?> PromptPasswordAsync(string title)
     {
         var popup = new AuthorizePopup(title, isPassword: true);
         await MopupService.Instance.PushAsync(popup);
         return await popup.WaitForScan();
     }
 
-    private async Task<string?> PromptInputAsync(string title)
+    private static async Task<string?> PromptInputAsync(string title)
     {
         var popup = new AuthorizePopup(title, isPassword: false);
         await MopupService.Instance.PushAsync(popup);
         return await popup.WaitForScan();
     }
 
-    private async Task ShowErrorAsync(string message)
+    private static async Task ShowErrorAsync(string message)
     {
         await MopupService.Instance.PushAsync(new PromptPopup("Error", message, "OK"));
     }
 
-    private async Task ShowSuccessAsync(string message)
+    private static async Task ShowSuccessAsync(string message)
     {
         await MopupService.Instance.PushAsync(new PromptPopup("Success", message, "OK"));
     }
 
-    private async Task<bool> ShowConfirmationAsync(string title, string message)
+    private static async Task<bool> ShowConfirmationAsync(string title, string message)
     {
         var popup = new PromptPopup(title, message, "Yes", "No");
         await MopupService.Instance.PushAsync(popup);
         return await popup.WaitForScan();
     }
 
-    private async Task ShowMfaSetupDialogAsync(string secret, string email)
+    private static async Task ShowMfaSetupDialogAsync(string secret)
     {
          var message = $"""
                         Scan this QR code with your authenticator app:
@@ -373,7 +373,7 @@ public partial class UserPageViewModel : BaseViewModel
         );
         await MopupService.Instance.PushAsync(setupPopup);
         await setupPopup.WaitForScan();
-        
+
         await Clipboard.Default.SetTextAsync(secret);
         await ShowSuccessAsync("Secret copied to clipboard.");
     }
