@@ -70,7 +70,7 @@
     <ShellContent
         ContentTemplate="{DataTemplate pages:GratitudePage}"
         FlyoutItemIsVisible="False"
-        Route="register"
+        Route="gratitude"
         Shell.NavBarIsVisible="False" />
 
     <!--  ============================================================  -->

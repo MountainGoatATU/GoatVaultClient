@@ -149,6 +149,7 @@ public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb,
                 AuthSalt = user.AuthSalt,
                 MfaEnabled = user.MfaEnabled,
                 MfaSecret = user.MfaSecret,
+                ShamirEnabled = user.ShamirEnabled,
                 Vault = encryptedModel,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -159,6 +160,7 @@ public class VaultService(IConfiguration configuration, GoatVaultDb goatVaultDb,
                 Email = user.Email,
                 MfaEnabled = user.MfaEnabled,
                 MfaSecret = user.MfaSecret,
+                ShamirEnabled = user.ShamirEnabled,
                 Vault = encryptedModel
             };
 

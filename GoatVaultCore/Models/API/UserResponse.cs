@@ -10,6 +10,7 @@ public class UserResponse
     [JsonPropertyName("email")] public required string Email { get; set; }
     [JsonPropertyName("mfa_enabled")] public required bool MfaEnabled { get; set; }
     [JsonPropertyName("mfa_secret")] public string? MfaSecret { get; set; }
+    [JsonPropertyName("shamir_enabled")] public required bool ShamirEnabled { get; set; }
     [JsonPropertyName("vault")] public required VaultModel Vault { get; set; }
     [JsonPropertyName("created_at")] public required DateTime CreatedAt { get; set; }
     [JsonPropertyName("updated_at")] public required DateTime UpdatedAt { get; set; }
