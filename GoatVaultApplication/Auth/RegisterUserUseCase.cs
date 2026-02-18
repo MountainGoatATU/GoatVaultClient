@@ -17,24 +17,24 @@ public class RegisterUseCase(
 {
     public async Task ExecuteAsync(Email email, string password)
     {
-        // 0. Check pwned
+        // 1. Check pwned
         var pwnCount = await pwned.CheckPasswordAsync(password);
         if (pwnCount > 0)
         {
             throw new InvalidOperationException("This password has been breached before.");
         }
 
-        // 1. Generate auth salt, auth verifier, & vault salt
+        // 2. Generate auth salt, auth verifier, & vault salt
         var authSalt = CryptoService.GenerateRandomBytes(32);
         var authVerifier = crypto.GenerateAuthVerifier(password, authSalt);
         var vaultSalt = CryptoService.GenerateRandomBytes(32);
 
-        // 2. Create empty vault and encrypt
+        // 3. Create empty vault and encrypt
         var emptyVault = new VaultDecrypted(); // Empty vault structure
         var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
         var encryptedVault = vaultCrypto.Encrypt(emptyVault, masterKey, vaultSalt);
 
-        // 3. Create registration payload
+        // 4. Create registration payload
         var registerPayload = new AuthRegisterRequest()
         {
             Email = email.Value,
@@ -44,10 +44,10 @@ public class RegisterUseCase(
             Vault = encryptedVault
         };
 
-        // 4. Call server
+        // 5. Call server
         await serverAuth.RegisterAsync(registerPayload);
 
-        // 5. Automatically log in to establish session and get auth token
+        // 6. Automatically log in to establish session and get auth token
         await loginOnline.ExecuteAsync(email, password);
     }
 }

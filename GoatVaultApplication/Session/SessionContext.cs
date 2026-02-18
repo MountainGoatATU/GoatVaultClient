@@ -9,13 +9,15 @@ public sealed class SessionContext : ISessionContext
 
     public Guid? UserId { get; private set; }
     public VaultDecrypted? Vault { get; private set; }
+    public int MasterPasswordStrength { get; private set; }
 
     public event EventHandler? VaultChanged;
 
-    public void Start(Guid userId, MasterKey masterKey, VaultDecrypted decryptedVault)
+    public void Start(Guid userId, MasterKey masterKey, VaultDecrypted decryptedVault, int masterPasswordStrength)
     {
         UserId = userId;
         _masterKey = masterKey;
+        MasterPasswordStrength = masterPasswordStrength;
         UpdateVault(decryptedVault);
     }
 

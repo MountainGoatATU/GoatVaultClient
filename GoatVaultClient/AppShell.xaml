@@ -32,14 +32,14 @@
     <!-- FLYOUT HEADER                                                 -->
     <!-- ============================================================ -->
     <Shell.FlyoutHeader>
-        <Grid HeightRequest="120"
+        <Grid HeightRequest="60"
               BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary}, Dark={StaticResource DarkPrimary}}"
               Padding="20">
             <VerticalStackLayout VerticalOptions="Center" Spacing="8">
                 <Label Text="GoatVault"
                        TextColor="{AppThemeBinding Light={StaticResource LightOnPrimary}, Dark={StaticResource DarkOnPrimary}}"
                        FontSize="20"
-                       FontAttributes="Bold" />
+                       FontAttributes="Bold"/>
             </VerticalStackLayout>
         </Grid>
     </Shell.FlyoutHeader>
@@ -73,7 +73,7 @@
     <FlyoutItem Route="main" FlyoutDisplayOptions="AsMultipleItems">
 
         <ShellContent Route="home"
-                      Title="Vault"
+                      Title="Passwords"
                       Shell.NavBarIsVisible="False"
                       Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Lock}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
                       ContentTemplate="{DataTemplate local:MainPage}" />

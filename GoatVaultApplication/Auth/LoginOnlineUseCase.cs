@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
+using GoatVaultCore.Services;
 
 namespace GoatVaultApplication.Auth;
 
@@ -59,10 +60,9 @@ public class LoginOnlineUseCase(
             throw new InvalidOperationException("Vault is missing.");
 
         // 6. Decrypt vault
-        // VaultSalt is now directly on the user response
         var vaultEncrypted = userResponse.Vault;
         var vaultSalt = Convert.FromBase64String(userResponse.VaultSalt);
-        
+
         var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
         var decryptedVault = vaultCrypto.Decrypt(vaultEncrypted, masterKey);
 
@@ -72,7 +72,6 @@ public class LoginOnlineUseCase(
 
         if (existing != null)
         {
-            // Update existing tracked entity to avoid EF Core tracking conflict
             existing.Email = email;
             existing.AuthSalt = authSalt;
             existing.AuthVerifier = authVerifier;
@@ -82,7 +81,7 @@ public class LoginOnlineUseCase(
             existing.Vault = vaultEncrypted;
             existing.CreatedAtUtc = userResponse.CreatedAtUtc;
             existing.UpdatedAtUtc = userResponse.UpdatedAtUtc;
-            
+
             userToSave = existing;
         }
         else
@@ -103,7 +102,10 @@ public class LoginOnlineUseCase(
 
         await userRepository.SaveAsync(userToSave);
 
-        // 8. Start session
-        session.Start(userId, masterKey, decryptedVault);
+        // 8. Calculate Master Password Strength
+        var strength = PasswordStrengthService.Evaluate(password).Score;
+
+        // 9. Start session
+        session.Start(userId, masterKey, decryptedVault, strength);
     }
 }

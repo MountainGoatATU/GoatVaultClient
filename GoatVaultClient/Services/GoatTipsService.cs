@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 
@@ -89,12 +89,12 @@ public partial class GoatTipsService : ObservableObject
     {
         var userId = _session.UserId ?? throw new InvalidOperationException("UserId is null");
         var user = await _users.GetByIdAsync(userId) ?? throw new InvalidOperationException("User is null");
-        var key = _session.GetMasterKey() ?? throw new InvalidOperationException("Master key is null");
         var entries = _session.Vault?.Entries;
+        var masterStrength = _session.MasterPasswordStrength;
 
         var score = VaultScoreCalculatorService.CalculateScore(
             entries,
-            key,
+            masterStrength,
             user.MfaEnabled);
 
         // Build list of all current problems

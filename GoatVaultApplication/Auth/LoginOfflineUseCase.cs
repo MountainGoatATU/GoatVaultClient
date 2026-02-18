@@ -1,4 +1,5 @@
-﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Services;
 
 namespace GoatVaultApplication.Auth;
 
@@ -22,6 +23,7 @@ public sealed class LoginOfflineUseCase(
         var decryptedVault = vaultCrypto.Decrypt(user.Vault, masterKey);
 
         // 3. Start session
-        session.Start(user.Id, masterKey, decryptedVault);
+        var strength = PasswordStrengthService.Evaluate(password).Score;
+        session.Start(user.Id, masterKey, decryptedVault, strength);
     }
 }

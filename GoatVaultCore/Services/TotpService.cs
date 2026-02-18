@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using OtpNet;
 
 namespace GoatVaultCore.Services;
@@ -103,5 +103,11 @@ public static class TotpService
         {
             return false;
         }
+    }
+
+    public static string GenerateSecret(int length = 20)
+    {
+        var secretBytes = KeyGeneration.GenerateRandomKey(length);
+        return Base32Encoding.ToString(secretBytes);
     }
 }
