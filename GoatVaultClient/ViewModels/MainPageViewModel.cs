@@ -14,8 +14,8 @@ namespace GoatVaultClient.ViewModels
     {
         #region Properties
         // Observables
-        [ObservableProperty] private ObservableCollection<CategoryItem> categories = [];
-        [ObservableProperty] private ObservableCollection<VaultEntry> passwords = [];
+        [ObservableProperty] private ObservableCollection<CategoryItem> categories = new();
+        [ObservableProperty] private ObservableCollection<VaultEntry> passwords = new();
         [ObservableProperty] private CategoryItem? selectedCategory;
         [ObservableProperty] private VaultEntry? selectedEntry;
         [ObservableProperty] private string? searchText;
@@ -63,6 +63,15 @@ namespace GoatVaultClient.ViewModels
             _vaultEntryManagerService = vaultEntryManagerService;
             _pwnedPasswordService = pwnedPasswordService;
 
+            _syncingService.SyncCompleted += (s, e) =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    SelectedEntry = null; // Clear selection to prevent editing a dead reference
+                    ReloadVaultData();
+                });
+            };
+
             LoadVaultData();
             StartRandomGoatComments();
         }
@@ -97,22 +106,6 @@ namespace GoatVaultClient.ViewModels
         #region Synchronous methods
         public void LoadVaultData()
         {
-            if (!Categories.Any() && !Passwords.Any())
-            {
-                // TODO: TEST DATA IF USER NOT LOGGED IN
-                // Seeding Categories
-                Categories.Clear();
-                Categories.Add(new CategoryItem { Name = "All" });
-                Categories = _fakeDataSource.GetFolderItems().ToObservableCollection();
-
-                // Adding Default Category
-                PresortCategories(true);
-
-                // Seeding Passwords
-                Passwords.Clear();
-                Passwords = _fakeDataSource.GetVaultEntryItems(10).ToObservableCollection();
-                PresortEntries(true);
-            }
             ReloadVaultData();
         }
         private void ReloadVaultData()
@@ -130,12 +123,24 @@ namespace GoatVaultClient.ViewModels
             _allVaultCategories = _vaultSessionService.DecryptedVault.Categories.ToList();
 
             // Set observable collections
-            Passwords = _allVaultEntries.ToObservableCollection();
-            Categories = _allVaultCategories.ToObservableCollection();
+            UpdateCollection(Categories, _allVaultCategories);
+            UpdateCollection(Passwords, _allVaultEntries);
 
             // Presort to match UI
             PresortEntries(true);
             PresortCategories(true);
+        }
+
+        private void UpdateCollection<T>(ObservableCollection<T> collection, IEnumerable<T> newItems)
+        {
+            collection.Clear();
+            if (newItems != null)
+            {
+                foreach (var item in newItems)
+                {
+                    collection.Add(item);
+                }
+            }
         }
 
         private void PresortCategories(bool matchUi = false)
@@ -145,10 +150,12 @@ namespace GoatVaultClient.ViewModels
                 _categoriesSortAsc = !_categoriesSortAsc;
             }
 
-            Categories = VaultFilterService.FilterAndSortCategories(
-                Categories,
+            var sortedCategories = VaultFilterService.FilterAndSortCategories(
+                _allVaultCategories,
                 SearchText,
                 _categoriesSortAsc);
+
+            UpdateCollection(Categories, sortedCategories);
         }
 
         private void PresortEntries(bool matchUi = false)
@@ -158,11 +165,13 @@ namespace GoatVaultClient.ViewModels
                 _passwordsSortAsc = !_passwordsSortAsc;
             }
 
-            Passwords = VaultFilterService.FilterAndSortEntries(
-                Passwords,
-                null,
-                null,
+            var sortedEntries = VaultFilterService.FilterAndSortEntries(
+                _allVaultEntries,
+                SearchText,
+                SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name,
                 _passwordsSortAsc);
+
+            UpdateCollection(Passwords, sortedEntries);
         }
 
         partial void OnSelectedCategoryChanged(CategoryItem? value)
@@ -175,11 +184,13 @@ namespace GoatVaultClient.ViewModels
             }
             else
             {
-                Passwords = VaultFilterService.FilterAndSortEntries(
+                var filteredEntries = VaultFilterService.FilterAndSortEntries(
                     _allVaultEntries,
-                    null, // SearchText is cleared above
+                    SearchText,
                     value?.Name,
                     _passwordsSortAsc);
+
+                UpdateCollection(Passwords, filteredEntries);
             }
         }
 
@@ -188,17 +199,19 @@ namespace GoatVaultClient.ViewModels
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 // Filter Categories
-                Categories = VaultFilterService.FilterAndSortCategories(
+                var filteredCategories = VaultFilterService.FilterAndSortCategories(
                     _allVaultCategories, // Filter from ALL
                     SearchText,
                     _categoriesSortAsc);
+                UpdateCollection(Categories, filteredCategories);
 
                 // Filter Passwords
-                Passwords = VaultFilterService.FilterAndSortEntries(
+               var filteredEntries = VaultFilterService.FilterAndSortEntries(
                     _allVaultEntries, // Filter from ALL
                     SearchText,
-                    SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name,
+                    SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name, // Keep category filter
                     _passwordsSortAsc);
+                UpdateCollection(Passwords, filteredEntries);
             }
             else
             {
@@ -291,11 +304,6 @@ namespace GoatVaultClient.ViewModels
             var changed = await _vaultEntryManagerService.CreateEntryAsync(Categories);
             if (changed)
             {
-                // Sort to match UI
-                PresortEntries(true);
-
-                // Update UI
-                Passwords = _allVaultEntries.ToObservableCollection();
                 ReloadVaultData();
             }
         }
