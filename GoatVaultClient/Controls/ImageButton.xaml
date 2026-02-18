@@ -8,20 +8,16 @@
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
-
                     <VisualState x:Name="Normal">
                         <VisualState.Setters>
                             <Setter Property="BackgroundColor" Value="Transparent" />
                         </VisualState.Setters>
                     </VisualState>
-
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
                             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource LightSecondary}, Dark={x:StaticResource DarkSecondary}}"/>
-                            <!-- <Setter Property="Color" Value="{AppThemeBinding Light={x:StaticResource LightOnSecondary}, Dark={x:StaticResource DarkOnSecondary}}" /> -->
                         </VisualState.Setters>
                     </VisualState>
-
                 </VisualStateGroup>
             </VisualStateGroupList>
         </VisualStateManager.VisualStateGroups>
@@ -30,7 +26,10 @@
         </material:ButtonView.StrokeShape>
         <Image VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="{x:StaticResource iconDesktop}" WidthRequest="{x:StaticResource iconDesktop}">
             <Image.Source>
-                <FontImageSource FontFamily="MaterialRounded" Glyph="{Binding IconGlyph, Source={x:Reference this}}" Color="{Binding Color}" Size="{x:StaticResource iconDesktopResolution}"/>
+                <FontImageSource FontFamily="MaterialRounded"
+                                 Glyph="{Binding IconGlyph, Source={x:Reference this}}"
+                                 Color="{AppThemeBinding Light={x:StaticResource Gray900}, Dark={x:StaticResource Gray100}}"
+                                 Size="{x:StaticResource iconDesktopResolution}"/>
             </Image.Source>
         </Image>
     </material:ButtonView>
