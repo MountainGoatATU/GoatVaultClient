@@ -3,6 +3,7 @@ using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
+using GoatVaultCore.Services.Secrets;
 using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
@@ -129,7 +130,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<CategoryManagerService>();
         builder.Services.AddSingleton<VaultEntryManagerService>();
         builder.Services.AddSingleton<PwnedPasswordService>();
-        builder.Services.AddSingleton<PasswordStrengthService>();
+        builder.Services.AddSingleton<IPasswordStrengthService,PasswordStrengthService>();
         builder.Services.AddSingleton<VaultScoreCalculatorService>();
 
         // Register pages

@@ -17,6 +17,7 @@ public class DbModel
     [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; set; }
 
     [JsonPropertyName("mfa_secret")] public string? MfaSecret { get; set; }
+    [JsonPropertyName("shamir_enabled")] public bool ShamirEnabled { get; set; }
 
     [Column(TypeName = "TEXT")] public string VaultJson { get; set; } = string.Empty;
 

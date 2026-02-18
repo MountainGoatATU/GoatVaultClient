@@ -223,6 +223,7 @@ namespace GoatVaultClient.Services
                     Email = dbUser.Email,
                     AuthSalt = dbUser.AuthSalt,
                     MfaEnabled = dbUser.MfaEnabled,
+                    ShamirEnabled = dbUser.ShamirEnabled,
                     Vault = dbUser.Vault,
                     CreatedAt = dbUser.CreatedAt,
                     UpdatedAt = dbUser.UpdatedAt
