@@ -8,8 +8,8 @@ namespace GoatVaultCore.Models.Vault;
 
 public partial class VaultEntryForm : VaultEntry
 {
-
-    public VaultEntryForm(List<CategoryItem>? categories)
+    private readonly IPasswordStrengthService _passwordStrengthService;
+    public VaultEntryForm(List<CategoryItem>? categories, IPasswordStrengthService passwordStrengthService)
     {
         AvailableCategories = categories ?? [];
 
@@ -32,6 +32,8 @@ public partial class VaultEntryForm : VaultEntry
                     break;
             }
         };
+
+        _passwordStrengthService = passwordStrengthService;
     }
 
     [ObservableProperty] [property: Required] private List<CategoryItem> _availableCategories;
@@ -57,7 +59,7 @@ public partial class VaultEntryForm : VaultEntry
             return;
         }
 
-        var result = PasswordStrengthService.Evaluate(Password);
+        var result = _passwordStrengthService.Evaluate(Password);
 
         CrackTime = $"Crack time: {result.CrackTimeText}";
 

@@ -13,7 +13,7 @@ namespace GoatVaultCore.Services.Secrets
         public int PasswordCount { get; init; }
     }
 
-    public static class VaultScoreCalculatorService
+    public class VaultScoreCalculatorService
     {
         public static VaultScoreDetails CalculateScore(
             IEnumerable<VaultEntry>? entries,
@@ -23,6 +23,24 @@ namespace GoatVaultCore.Services.Secrets
             // Master password strength
             var masterStrength = PasswordStrengthService.Evaluate(masterPassword);
             int masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
+        private readonly IPasswordStrengthService _passwordStrengthService;
+
+        public VaultScoreCalculatorService(IPasswordStrengthService passwordStrengthService)
+        {
+            _passwordStrengthService = passwordStrengthService;
+        }
+        public VaultScoreDetails CalculateScore(
+            IEnumerable<VaultEntry> entries,
+            string masterPassword,
+            bool mfaEnabled,
+            bool masterPasswordBreached = false)
+        {
+            int total = entries.Count();
+            int breached = entries.Count(e => e.BreachCount > 0);
+
+            // Master strength via zxcvbn
+            var masterStrength = _passwordStrengthService.Evaluate(masterPassword);
+            var masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
 
             double foundationPoints = masterStrength.Score switch
             {
@@ -39,6 +57,11 @@ namespace GoatVaultCore.Services.Secrets
             // Duplicates and strength
             int duplicateCount = passwordList.GroupBy(p => p).Where(g => g.Count() > 1).Sum(g => g.Count() - 1);
             int totalStrengthScore = 2 * (passwordList.Sum(p => PasswordStrengthService.Evaluate(p).Score));
+                // Sum password strengths
+                totalStrengthScore += allPasswords
+                    .Sum(pwd => _passwordStrengthService
+                        .Evaluate(pwd).Score);
+            }
 
             double uniquenessPoints = passwordCount > 0
                 ? ((passwordCount - duplicateCount) / (double)passwordCount) * 200

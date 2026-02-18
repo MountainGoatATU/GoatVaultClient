@@ -4,92 +4,266 @@ using GoatVaultInfrastructure.Services.Vault;
 
 namespace GoatVaultTests;
 
-public class VaultSessionServiceTests
+public class VaultSessionServiceAdditionalTests
 {
     [Fact]
-    public void Lock_ClearsAllSessionData()
+    public void AddEntry_AddsVaultEntryAndRaisesEvent()
     {
         // Arrange
         var service = new VaultSessionService
         {
-            DecryptedVault = new VaultData { Categories = [], Entries = [] },
-            CurrentUser = new UserResponse
-            {
-                Id = "test-id",
-                Email = "test@example.com",
-                AuthSalt = "salt",
-                Vault = new VaultModel(),
-                MfaEnabled = false,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            },
-            MasterPassword = "password123"
+            DecryptedVault = new VaultData { Entries = [] }
         };
-
-        // Act
-        service.Lock();
-
-        // Assert
-        Assert.Null(service.DecryptedVault);
-        Assert.Null(service.CurrentUser);
-        Assert.Null(service.MasterPassword);
-    }
-
-    [Fact]
-    public void SetDecryptedVault_StoresVaultData()
-    {
-        // Arrange
-        var service = new VaultSessionService();
-        var vaultData = new VaultData
+        var entry = new VaultEntry
         {
-            Categories = [new CategoryItem { Name = "Work" }, new CategoryItem { Name = "Personal" }],
-            Entries = []
+            Site = "example2.com",
+            UserName = "testuser",
+            Password = "SuperSecure123!",
+            Description = "Test entry",
+            Category = "Work",
+            HasMfa = true,
+            MfaSecret = "ABCDEF123456",
+            CurrentTotpCode = "123456",
+            TotpTimeRemaining = 30,
+            BreachCount = 0
         };
+        bool eventRaised = false;
+        service.VaultEntriesChanged += () => eventRaised = true;
 
         // Act
-        service.DecryptedVault = vaultData;
+        service.AddEntry(entry);
 
         // Assert
-        Assert.NotNull(service.DecryptedVault);
-        Assert.Equal(2, service.DecryptedVault.Categories.Count);
+        Assert.Single(service.VaultEntries);
+        Assert.Contains(entry, service.VaultEntries);
+        Assert.True(eventRaised, "VaultEntriesChanged event should be raised");
     }
 
     [Fact]
-    public void SetCurrentUser_StoresUserData()
+    public void RemoveEntry_RemovesVaultEntryAndRaisesEvent()
     {
         // Arrange
-        var service = new VaultSessionService();
-        var user = new UserResponse
+        var entry = new VaultEntry
         {
-            Id = "user-123",
-            Email = "user@example.com",
-            AuthSalt = "salt-value",
-            Vault = new VaultModel(),
-            MfaEnabled = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            Site = "example.com",
+            UserName = "testuser",
+            Password = "SuperSecure123!",
+            Description = "Test entry",
+            Category = "Work",
+            HasMfa = true,
+            MfaSecret = "ABCDEF123456",
+            CurrentTotpCode = "123456",
+            TotpTimeRemaining = 30,
+            BreachCount = 0
         };
+        var service = new VaultSessionService
+        {
+            DecryptedVault = new VaultData { Entries = [entry] }
+        };
+        bool eventRaised = false;
+        service.VaultEntriesChanged += () => eventRaised = true;
 
         // Act
-        service.CurrentUser = user;
+        service.RemoveEntry(entry);
 
         // Assert
-        Assert.NotNull(service.CurrentUser);
-        Assert.Equal("user-123", service.CurrentUser.Id);
-        Assert.Equal("user@example.com", service.CurrentUser.Email);
+        Assert.Empty(service.VaultEntries);
+        Assert.True(eventRaised, "VaultEntriesChanged event should be raised");
     }
 
     [Fact]
-    public void SetMasterPassword_StoresPassword()
+    public void UpdateEntry_UpdatesExistingEntryAndRaisesEvent()
+    {
+        // Arrange
+        var oldEntry = new VaultEntry
+        {
+            Site = "example.com",
+            UserName = "testuser",
+            Password = "SuperSecure123!",
+            Description = "Test entry",
+            Category = "Work",
+            HasMfa = true,
+            MfaSecret = "ABCDEF123456",
+            CurrentTotpCode = "123456",
+            TotpTimeRemaining = 30,
+            BreachCount = 0
+        };
+
+        var newEntry = new VaultEntry
+        {
+            Site = "example2.com",
+            UserName = "testuser",
+            Password = "SuperSecure123!",
+            Description = "Test entry",
+            Category = "Work",
+            HasMfa = true,
+            MfaSecret = "ABCDEF123456",
+            CurrentTotpCode = "123456",
+            TotpTimeRemaining = 30,
+            BreachCount = 0
+        };
+        var service = new VaultSessionService
+        {
+            DecryptedVault = new VaultData { Entries = [oldEntry] }
+        };
+        bool eventRaised = false;
+        service.VaultEntriesChanged += () => eventRaised = true;
+
+        // Act
+        service.UpdateEntry(oldEntry, newEntry);
+
+        // Assert
+        Assert.Single(service.VaultEntries);
+        Assert.Equal("example2.com", service.VaultEntries[0].Site);
+        Assert.True(eventRaised, "VaultEntriesChanged event should be raised");
+    }
+
+    [Fact]
+    public void ChangeMasterPassword_UpdatesPasswordAndRaisesEvent()
     {
         // Arrange
         var service = new VaultSessionService();
-        const string password = "SuperSecurePassword123!";
+        const string newPassword = "NewSuperSecret!";
+        bool eventRaised = false;
+        service.MasterPasswordChanged += () => eventRaised = true;
 
         // Act
-        service.MasterPassword = password;
+        service.ChangeMasterPassword(newPassword);
 
         // Assert
-        Assert.Equal(password, service.MasterPassword);
+        Assert.Equal(newPassword, service.MasterPassword);
+        Assert.True(eventRaised, "MasterPasswordChanged event should be raised");
+    }
+
+    [Fact]
+    public void VaultEntries_ReturnsEmptyListWhenDecryptedVaultIsNull()
+    {
+        // Arrange
+        var service = new VaultSessionService { DecryptedVault = null };
+
+        // Act
+        var entries = service.VaultEntries;
+
+        // Assert
+        Assert.Empty(entries);
+    }
+
+    [Fact]
+    public void AddEntry_DoesNothingWhenDecryptedVaultIsNull()
+    {
+        // Arrange
+        var service = new VaultSessionService { DecryptedVault = null };
+        var entry = new VaultEntry
+        {
+            Site = "example.com",
+            UserName = "testuser",
+            Password = "SuperSecure123!",
+            Description = "Test entry",
+            Category = "Work",
+            HasMfa = true,
+            MfaSecret = "ABCDEF123456",
+            CurrentTotpCode = "123456",
+            TotpTimeRemaining = 30,
+            BreachCount = 0
+        };
+        bool eventRaised = false;
+        service.VaultEntriesChanged += () => eventRaised = true;
+
+        // Act
+        service.AddEntry(entry);
+
+        // Assert
+        Assert.Empty(service.VaultEntries);
+        Assert.False(eventRaised);
+    }
+
+    [Fact]
+    public void RemoveEntry_DoesNothingWhenDecryptedVaultIsNull()
+    {
+        // Arrange
+        var service = new VaultSessionService { DecryptedVault = null };
+        var entry = new VaultEntry
+        {
+            Site = "example.com",
+            UserName = "testuser",
+            Password = "SuperSecure123!",
+            Description = "Test entry",
+            Category = "Work",
+            HasMfa = true,
+            MfaSecret = "ABCDEF123456",
+            CurrentTotpCode = "123456",
+            TotpTimeRemaining = 30,
+            BreachCount = 0
+        };
+        bool eventRaised = false;
+        service.VaultEntriesChanged += () => eventRaised = true;
+
+        // Act
+        service.RemoveEntry(entry);
+
+        // Assert
+        Assert.Empty(service.VaultEntries);
+        Assert.False(eventRaised);
+    }
+
+    [Fact]
+    public void UpdateEntry_DoesNothingWhenEntryNotFound()
+    {
+        // Arrange
+        var service = new VaultSessionService
+        {
+            DecryptedVault = new VaultData 
+            { 
+                Entries = [new VaultEntry 
+                {
+                    Site = "example2.com",
+                    UserName = "testuser",
+                    Password = "SuperSecure123!",
+                    Description = "Test entry",
+                    Category = "Work",
+                    HasMfa = true,
+                    MfaSecret = "ABCDEF123456",
+                    CurrentTotpCode = "123456",
+                    TotpTimeRemaining = 30,
+                    BreachCount = 0 }
+                ]
+            }
+        };
+
+        var entryToUpdate = new VaultEntry
+        {
+            Site = "example2.com",
+            UserName = "testuser",
+            Password = "SuperSecure123!",
+            Description = "Test entry",
+            Category = "Work",
+            HasMfa = true,
+            MfaSecret = "ABCDEF123456",
+            CurrentTotpCode = "123456",
+            TotpTimeRemaining = 30,
+            BreachCount = 0
+        };
+        var newEntry = new VaultEntry
+        {
+            Site = "example.com",
+            UserName = "testuser",
+            Password = "SuperSecure123!",
+            Description = "Test entry",
+            Category = "Work",
+            HasMfa = true,
+            MfaSecret = "ABCDEF123456",
+            CurrentTotpCode = "123456",
+            TotpTimeRemaining = 30,
+            BreachCount = 0
+        };
+        bool eventRaised = false;
+        service.VaultEntriesChanged += () => eventRaised = true;
+
+        // Act
+        service.UpdateEntry(entryToUpdate, newEntry);
+
+        // Assert
+        Assert.DoesNotContain(newEntry, service.VaultEntries);
+        Assert.True(eventRaised, "VaultEntriesChanged should still be invoked even if entry not found");
     }
 }

@@ -111,4 +111,29 @@ public class CryptoServiceTests
         var decoded = Convert.FromBase64String(verifier);
         Assert.NotEmpty(decoded);
     }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(16)]
+    [InlineData(32)]
+    [InlineData(64)]
+    public void GenerateRandomBytes_ReturnsCorrectLength(int length)
+    {
+        // Act
+        var bytes = CryptoService.GenerateRandomBytes(length);
+
+        // Assert
+        Assert.NotNull(bytes);
+        Assert.Equal(length, bytes.Length);
+    }
+
+    [Fact]
+    public void GenerateRandomBytes_ShouldNotReturnAllZeros()
+    {
+        // Act
+        var bytes = CryptoService.GenerateRandomBytes(32);
+
+        // Assert
+        Assert.Contains(bytes, b => b != 0);
+    }
 }

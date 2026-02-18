@@ -36,6 +36,7 @@ namespace GoatVaultClient.ViewModels
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly GoatTipsService _goatTipsService;
         private readonly PwnedPasswordService _pwnedPasswordService;
+        private readonly VaultScoreCalculatorService _vaultScoreCalculatorService;
 
         public UserPageViewModel(
             HttpService httpService,
@@ -45,7 +46,8 @@ namespace GoatVaultClient.ViewModels
             VaultService vaultService,
             Microsoft.Extensions.Configuration.IConfiguration configuration,
             GoatTipsService goatTipsService,
-            PwnedPasswordService pwnedPasswordService)
+            PwnedPasswordService pwnedPasswordService,
+            VaultScoreCalculatorService vaultScoreCalculatorService)
         {
             _httpService = httpService;
             _authTokenService = authTokenService;
@@ -68,6 +70,8 @@ namespace GoatVaultClient.ViewModels
             Email = _vaultSessionService.CurrentUser.Email;
             MfaEnabled = _vaultSessionService.CurrentUser.MfaEnabled;
 
+            _vaultScoreCalculatorService = vaultScoreCalculatorService;
+
             RefreshVaultScore();
         }
 
@@ -77,7 +81,7 @@ namespace GoatVaultClient.ViewModels
             var user = _vaultSessionService.CurrentUser;
             if (user == null) return;
 
-            var score = VaultScoreCalculatorService.CalculateScore(
+            var score = _vaultScoreCalculatorService.CalculateScore(
                 _vaultSessionService.VaultEntries,
                 _vaultSessionService.MasterPassword,
                 user.MfaEnabled
