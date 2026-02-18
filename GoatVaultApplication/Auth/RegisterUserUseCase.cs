@@ -12,7 +12,8 @@ public class RegisterUseCase(
     IVaultCrypto vaultCrypto,
     ISessionContext session,
     IServerAuthService serverAuth,
-    PwnedPasswordService pwned)
+    PwnedPasswordService pwned,
+    LoginOnlineUseCase loginOnline)
 {
     public async Task ExecuteAsync(Email email, string password)
     {
@@ -44,23 +45,9 @@ public class RegisterUseCase(
         };
 
         // 4. Call server
-        var response = await serverAuth.RegisterAsync(registerPayload);
+        await serverAuth.RegisterAsync(registerPayload);
 
-        // 5. Map to local user entity
-        var localUser = new User
-        {
-            Id = Guid.Parse(response.Id),
-            Email = email,
-            AuthSalt = authSalt,
-            AuthVerifier = authVerifier,
-            VaultSalt = vaultSalt,
-            Vault = encryptedVault
-        };
-
-        // 6. Save locally
-        await users.SaveAsync(localUser);
-
-        // 7. Start session
-        session.Start(localUser.Id, masterKey, emptyVault);
+        // 5. Automatically log in to establish session and get auth token
+        await loginOnline.ExecuteAsync(email, password);
     }
 }

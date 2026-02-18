@@ -66,7 +66,7 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 fonts.AddFont("JetBrainsMono-Regular.ttf", "JetBrainsMonoRegular");
-                fonts.AddFont("JetBrainsMon-Semibold.ttf", "JetBrainsMonoSemibold");
+                fonts.AddFont("JetBrainsMono-Semibold.ttf", "JetBrainsMonoSemibold");
                 fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular");
                 fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
                 fonts.AddFontAwesomeIconFonts();

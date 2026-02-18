@@ -19,7 +19,7 @@
            IntroductionPage → LoginPage ↔ RegisterPage
         
         2. POST-AUTH FLOW (FlyoutBehavior=Flyout):
-           Hamburger menu with: Home | Vault | User
+           Hamburger menu with: Vault | User
            FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
         
         Navigation stack is cleared on:
@@ -73,15 +73,15 @@
     <FlyoutItem Route="main" FlyoutDisplayOptions="AsMultipleItems">
 
         <ShellContent Route="home"
-                      Title="Home"
+                      Title="Vault"
                       Shell.NavBarIsVisible="False"
-                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Home}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Lock}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
                       ContentTemplate="{DataTemplate local:MainPage}" />
 
         <ShellContent Route="user"
-                      Title="Profile"
+                      Title="Account"
                       Shell.NavBarIsVisible="False"
-                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Person}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Security}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
                       ContentTemplate="{DataTemplate pages:UserPage}" />
 
     </FlyoutItem>
