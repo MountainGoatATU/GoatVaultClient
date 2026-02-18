@@ -1,5 +1,4 @@
-﻿using GoatVaultCore.Models.Objects;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 
 namespace GoatVaultInfrastructure.Services.Api;
 

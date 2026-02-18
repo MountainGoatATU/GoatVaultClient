@@ -1,12 +1,12 @@
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Services;
+using GoatVaultCore.Models;
 
 namespace GoatVaultApplication.VaultUseCases;
 
 public class CalculateVaultScoreUseCase(
     ISessionContext session,
     IUserRepository users,
-    VaultScoreCalculatorService vaultScoreCalculator)
+    IVaultScoreCalculatorService vaultScoreCalculator)
 {
     public async Task<VaultScoreDetails> ExecuteAsync()
     {

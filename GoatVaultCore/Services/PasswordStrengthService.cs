@@ -1,11 +1,8 @@
-﻿using Zxcvbn;
+﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
+using Zxcvbn;
 
 namespace GoatVaultCore.Services;
-
-public interface IPasswordStrengthService
-{
-    PasswordStrength Evaluate(string? password);
-}
 
 public class PasswordStrengthService : IPasswordStrengthService
 {
@@ -28,10 +25,4 @@ public class PasswordStrengthService : IPasswordStrengthService
             CrackTimeText = result.CrackTimeDisplay.OfflineSlowHashing1e4PerSecond
         };
     }
-}
-
-public struct PasswordStrength
-{
-    public int Score { get; set; }
-    public string? CrackTimeText { get; set; }
 }

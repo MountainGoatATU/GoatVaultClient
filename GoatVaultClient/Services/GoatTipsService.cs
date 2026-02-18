@@ -17,12 +17,12 @@ public partial class GoatTipsService : ObservableObject
 
     private readonly ISessionContext _session;
     private readonly IUserRepository _users;
-    private readonly VaultScoreCalculatorService _vaultScoreCalculator;
+    private readonly IVaultScoreCalculatorService _vaultScoreCalculator;
 
     public GoatTipsService(
         ISessionContext session,
         IUserRepository users,
-        VaultScoreCalculatorService vaultScoreCalculator)
+        IVaultScoreCalculatorService vaultScoreCalculator)
     {
         _session = session;
         _users = users;

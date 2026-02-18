@@ -1,5 +1,4 @@
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Services;
 
 namespace GoatVaultApplication.Auth;
 

@@ -1,20 +1,12 @@
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 
 namespace GoatVaultCore.Services;
 
-public sealed class VaultScoreDetails
-{
-    public double VaultScore { get; init; }
-    public int MasterPasswordPercent { get; init; }
-    public int AveragePasswordsPercent { get; init; }
-    public int ReuseRatePercent { get; init; }
-    public bool MfaEnabled { get; init; }
-    public int BreachesCount { get; init; }
-    public int PasswordCount { get; init; }
-}
-
 // TODO: Refactor
-public class VaultScoreCalculatorService(IPasswordStrengthService passwordStrength)
+public class VaultScoreCalculatorService(
+    IPasswordStrengthService passwordStrength
+    ) : IVaultScoreCalculatorService
 {
     public VaultScoreDetails CalculateScore(
         IEnumerable<VaultEntry>? entries,

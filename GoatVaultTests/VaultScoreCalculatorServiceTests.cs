@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
-using GoatVaultCore.Models.Vault;
-using GoatVaultCore.Services.Secrets;
+﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
+using GoatVaultCore.Services;
 using Moq;
-using Xunit;
 
 namespace GoatVaultTests
 {
     public class VaultScoreCalculatorServiceTests
     {
         private readonly Mock<IPasswordStrengthService> _strengthMock;
-        private readonly VaultScoreCalculatorService _service;
+        private readonly IVaultScoreCalculatorService _service;
 
         public VaultScoreCalculatorServiceTests()
         {
@@ -185,19 +184,12 @@ namespace GoatVaultTests
 
         private static List<VaultEntry> CreateEntries(params (string Name, string Password, int BreachCount)[] items)
         {
-            var list = new List<VaultEntry>();
-
-            foreach (var item in items)
+            return items.Select(item => new VaultEntry
             {
-                list.Add(new VaultEntry
-                {
-                    UserName = item.Name,
-                    Password = item.Password,
-                    BreachCount = item.BreachCount
-                });
-            }
-
-            return list;
+                UserName = item.Name,
+                Password = item.Password,
+                BreachCount = item.BreachCount
+            }).ToList();
         }
     }
 }

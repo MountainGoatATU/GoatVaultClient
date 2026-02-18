@@ -3,7 +3,6 @@ using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.Api;
 using GoatVaultCore.Models.Objects;
-using GoatVaultCore.Services;
 
 namespace GoatVaultApplication.Auth;
 

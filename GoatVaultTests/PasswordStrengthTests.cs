@@ -1,4 +1,5 @@
-﻿using GoatVaultCore.Services;
+﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Services;
 
 namespace GoatVaultTests;
 
