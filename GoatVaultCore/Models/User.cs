@@ -19,6 +19,7 @@ public class User
 
     [JsonConverter(typeof(Base64Converter))]
     public required byte[] MfaSecret { get; set; } = [];
+    public required bool ShamirEnabled { get; set; }
 
     // Vault Details
     [JsonConverter(typeof(Base64Converter))]

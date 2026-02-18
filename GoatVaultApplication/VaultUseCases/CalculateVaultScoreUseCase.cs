@@ -5,7 +5,8 @@ namespace GoatVaultApplication.VaultUseCases;
 
 public class CalculateVaultScoreUseCase(
     ISessionContext session,
-    IUserRepository users)
+    IUserRepository users,
+    VaultScoreCalculatorService vaultScoreCalculator)
 {
     public async Task<VaultScoreDetails> ExecuteAsync()
     {
@@ -20,7 +21,7 @@ public class CalculateVaultScoreUseCase(
 
         // Use the domain service to calculate the score
         // We need to modify the service to accept the score instead of the password string/key
-        return VaultScoreCalculatorService.CalculateScore(
+        return vaultScoreCalculator.CalculateScore(
             session.Vault.Entries,
             masterPasswordStrength,
             mfaEnabled);

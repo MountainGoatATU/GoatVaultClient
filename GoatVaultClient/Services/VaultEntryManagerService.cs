@@ -13,13 +13,14 @@ public class VaultEntryManagerService(
     UpdateVaultEntryUseCase updateEntry,
     DeleteVaultEntryUseCase deleteEntry,
     ISyncingService syncing,
-    PwnedPasswordService pwned)
+    PwnedPasswordService pwned,
+    IPasswordStrengthService passwordStrength)
 {
     public async Task<bool> CreateEntryAsync(IEnumerable<CategoryItem> categories)
     {
         var categoriesList = categories.ToList();
 
-        var formModel = new VaultEntryForm(categoriesList)
+        var formModel = new VaultEntryForm(categoriesList, passwordStrength)
         {
             // Optional: Set a default selected category
             Category = categoriesList.FirstOrDefault()?.Name ?? ""
@@ -94,7 +95,7 @@ public class VaultEntryManagerService(
 
         var categoriesList = categories.ToList();
 
-        var formModel = new VaultEntryForm(categoriesList)
+        var formModel = new VaultEntryForm(categoriesList, passwordStrength)
         {
             UserName = target.UserName,
             Site = target.Site,

@@ -3,7 +3,6 @@ using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
-using GoatVaultCore.Services.Secrets;
 using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
@@ -14,8 +13,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using SkiaSharp.Views.Maui.Controls.Hosting;
-using System.Net.Http.Headers;
-using System.Numerics;
 using System.Reflection;
 using GoatVaultApplication.VaultUseCases;
 using GoatVaultApplication.Account;
@@ -120,7 +117,6 @@ public static class MauiProgram
         builder.Services.AddTransient<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<ICryptoService, CryptoService>();
         builder.Services.AddSingleton<IVaultCrypto, VaultCrypto>();
-        // builder.Services.AddSingleton<IServerAuthService, ServerAuthService>();
         builder.Services.AddSingleton<IAuthTokenService, AuthTokenService>();
         builder.Services.AddSingleton<JwtUtils>();
 
@@ -151,8 +147,6 @@ public static class MauiProgram
         builder.Services.AddTransient<VaultEntryManagerService>();
         builder.Services.AddTransient<PwnedPasswordService>();
         builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
-        // Test / helper services
-        // Test services
         // Shamir Test
         builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
         builder.Services.AddSingleton<IRandom, StrongRandom>();
@@ -163,7 +157,6 @@ public static class MauiProgram
         builder.Services.AddTransient<SplitSecretPage>();
         builder.Services.AddTransient<RecoverSecretViewModel>();
         builder.Services.AddTransient<RecoverSecretPage>();
-
 
         // UraniumUI
         builder.Services.AddMopupsDialogs();
@@ -187,11 +180,10 @@ public static class MauiProgram
 
         builder.Services.AddHttpClient<IServerAuthService, ServerAuthService>()
             .AddHttpMessageHandler<AuthenticatedHttpHandler>();
-
         builder.Services.AddHttpClient<IHttpService, HttpService>()
             .AddHttpMessageHandler<AuthenticatedHttpHandler>();
+
         #region App pages & view models
-        builder.Services.AddSingleton<PwnedPasswordService>();
 
         builder.Services.AddTransient<SyncStatusBarViewModel>();
         builder.Services.AddTransient<MainPageViewModel>();

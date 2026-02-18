@@ -1,7 +1,6 @@
 ﻿using GoatVaultClient.Pages;
 using GoatVaultClient.ViewModels;
 using GoatVaultCore.Services.Shamir;
-using GoatVaultCore.Shamir.Services;
 using SecretSharingDotNet.Cryptography;
 using SecretSharingDotNet.Cryptography.ShamirsSecretSharing;
 using SecretSharingDotNet.Math;

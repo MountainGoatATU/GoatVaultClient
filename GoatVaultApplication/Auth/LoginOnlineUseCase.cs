@@ -12,8 +12,9 @@ public class LoginOnlineUseCase(
     IVaultCrypto vaultCrypto,
     ISessionContext session,
     IServerAuthService serverAuth,
-    IAuthTokenService authTokenService,
-    IUserRepository userRepository)
+    IAuthTokenService authToken,
+    IUserRepository users,
+    IPasswordStrengthService passwordStrength)
 {
     public async Task ExecuteAsync(
         Email email,
@@ -52,8 +53,8 @@ public class LoginOnlineUseCase(
             UserId = userId, Proof = proof, MfaCode = mfaCode
         };
         var authVerifyResponse = await serverAuth.VerifyAsync(authVerifyRequest, ct);
-        authTokenService.SetToken(authVerifyResponse.AccessToken);
-        authTokenService.SetRefreshToken(authVerifyResponse.RefreshToken);
+        authToken.SetToken(authVerifyResponse.AccessToken);
+        authToken.SetRefreshToken(authVerifyResponse.RefreshToken);
 
         // 5. Get user
         var userResponse = await serverAuth.GetUserAsync(userId, ct);
@@ -68,7 +69,7 @@ public class LoginOnlineUseCase(
         var decryptedVault = vaultCrypto.Decrypt(vaultEncrypted, masterKey);
 
         // 7. Save to local DB (for offline login & sync baseline)
-        var existing = await userRepository.GetByIdAsync(userId);
+        var existing = await users.GetByIdAsync(userId);
         User userToSave;
 
         var mfaSecret = userResponse.MfaSecret is not null
@@ -82,6 +83,7 @@ public class LoginOnlineUseCase(
             existing.AuthVerifier = authVerifier;
             existing.MfaEnabled = userResponse.MfaEnabled;
             existing.MfaSecret = mfaSecret;
+            existing.ShamirEnabled = userResponse.ShamirEnabled;
             existing.VaultSalt = vaultSalt;
             existing.Vault = vaultEncrypted;
             existing.CreatedAtUtc = userResponse.CreatedAtUtc;
@@ -99,6 +101,7 @@ public class LoginOnlineUseCase(
                 AuthVerifier = authVerifier,
                 MfaEnabled = userResponse.MfaEnabled,
                 MfaSecret = mfaSecret,
+                ShamirEnabled = userResponse.ShamirEnabled,
                 VaultSalt = vaultSalt,
                 Vault = vaultEncrypted,
                 CreatedAtUtc = userResponse.CreatedAtUtc,
@@ -106,10 +109,10 @@ public class LoginOnlineUseCase(
             };
         }
 
-        await userRepository.SaveAsync(userToSave);
+        await users.SaveAsync(userToSave);
 
         // 8. Calculate Master Password Strength
-        var strength = PasswordStrengthService.Evaluate(password).Score;
+        var strength = passwordStrength.Evaluate(password).Score;
 
         // 9. Start session
         session.Start(userId, masterKey, decryptedVault, strength);

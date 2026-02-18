@@ -10,7 +10,8 @@ public class ChangePasswordUseCase(
     IUserRepository users,
     ICryptoService crypto,
     IVaultCrypto vaultCrypto,
-    IServerAuthService serverAuth)
+    IServerAuthService serverAuth,
+    IPasswordStrengthService passwordStrength)
 {
     public async Task ExecuteAsync(string currentPassword, string newPassword)
     {
@@ -63,7 +64,7 @@ public class ChangePasswordUseCase(
         await users.SaveAsync(user);
 
         // 8. Calculate new password strength
-        var strength = PasswordStrengthService.Evaluate(newPassword).Score;
+        var strength = passwordStrength.Evaluate(newPassword).Score;
 
         // 9. Update session - needs new master key to continue working without re-login
         session.Start(user.Id, newMasterKey, decryptedVault, strength);

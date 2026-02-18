@@ -7,7 +7,8 @@ public sealed class LoginOfflineUseCase(
     IUserRepository users,
     ICryptoService crypto,
     IVaultCrypto vaultCrypto,
-    ISessionContext session)
+    ISessionContext session,
+    IPasswordStrengthService passwordStrength)
 {
     public async Task ExecuteAsync(Guid localUserId, string password)
     {
@@ -23,7 +24,7 @@ public sealed class LoginOfflineUseCase(
         var decryptedVault = vaultCrypto.Decrypt(user.Vault, masterKey);
 
         // 3. Start session
-        var strength = PasswordStrengthService.Evaluate(password).Score;
+        var strength = passwordStrength.Evaluate(password).Score;
         session.Start(user.Id, masterKey, decryptedVault, strength);
     }
 }

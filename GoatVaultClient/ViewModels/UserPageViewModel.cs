@@ -8,7 +8,6 @@ using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 using Mopups.Services;
-using System.Collections.ObjectModel;
 using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
@@ -27,15 +26,18 @@ public partial class UserPageViewModel : BaseViewModel
 
     [ObservableProperty] private string email = string.Empty;
     [ObservableProperty] private bool mfaEnabled;
-    [ObservableProperty] private bool goatEnabled;
+    [ObservableProperty] private string? mfaSecret;
+    [ObservableProperty] private string? mfaQrCodeUrl;
 
-        [ObservableProperty] private double vaultScore;
-        [ObservableProperty] private double masterPasswordStrength;
-        [ObservableProperty] private double averagePasswordsStrength;
-        [ObservableProperty] private double reuseRate;
-        [ObservableProperty] private int breachesCount;
-        [ObservableProperty] private double mfaPercent;
-        [ObservableProperty] private string? vaultTierText;
+    [ObservableProperty] private double vaultScore;
+    [ObservableProperty] private double masterPasswordStrength;
+    [ObservableProperty] private double averagePasswordsStrength;
+    [ObservableProperty] private double reuseRate;
+    [ObservableProperty] private int breachesCount;
+    [ObservableProperty] private double mfaPercent;
+    [ObservableProperty] private string? vaultTierText;
+
+    [ObservableProperty] private bool goatEnabled;
 
     public UserPageViewModel(
         LoadUserProfileUseCase loadUserProfile,
@@ -103,60 +105,70 @@ public partial class UserPageViewModel : BaseViewModel
             // Updates to observable properties bound to UI must be on main thread
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
+                MasterPasswordStrength = details.MasterPasswordPercent / 100.0 * 400;
+                AveragePasswordsStrength = details.AveragePasswordsPercent / 100.0 * 200;
+                ReuseRate = details.ReuseRatePercent / 100.0 * 200;
+                MfaPercent = details.MfaEnabled ? 200 : 0;
+
                 VaultScore = details.VaultScore;
-                VaultTierText = GetVaultTier(VaultScore);
+                VaultTierText = $"{GetVaultTier(VaultScore)} ({VaultScore:0}/1000)";
+                BreachesCount = details.BreachesCount;
 
-                var metricItem = new VaultMetricItem
-                {
-                    MasterPasswordStrength = $"{details.MasterPasswordPercent}%",
-                    AveragePasswordsStrength = $"{details.AveragePasswordsPercent}%",
-                    ReuseRateText = $"{details.ReuseRatePercent}%",
-                    BreachesText = $"{details.BreachesCount}",
-                    MfaStatusText = details.MfaEnabled ? "Enabled" : "Disabled"
-                };
-
-                VaultMetrics.Clear();
-                VaultMetrics.Add(metricItem);
+                OnPropertyChanged(nameof(MasterPasswordCategory));
+                OnPropertyChanged(nameof(AveragePasswordsCategory));
+                OnPropertyChanged(nameof(OriginalityCategory));
+                OnPropertyChanged(nameof(BreachesCategory));
+                OnPropertyChanged(nameof(MfaCategory));
             });
         }
-        catch (Exception)
+        catch
         {
             // Ignore if session ended or error
         }
     }
 
-    [RelayCommand]
-    private async Task ShowVaultDetailsPopupAsync()
+    private static string GetVaultTier(double score) => score switch
     {
-        if (VaultMetrics.Count == 0) return;
-        var m = VaultMetrics[0];
+        >= 900 => "The Summit Sovereign (900+)",
+        >= 750 => "The Ridge Walker (750-899)",
+        >= 500 => "The Cliffside Scrambler (500-749)",
+        >= 300 => "The Treeline Grazer (300-499)",
+        _ => "The Dead Meat (< 300)"
+    };
 
-        var message =
-            $"Tier: {VaultTierText}\n" +
-            $"\nMaster password: {m.MasterPasswordStrength}" +
-            $"\nAverage passwords: {m.AveragePasswordsStrength}" +
-            $"\nOriginality: {m.ReuseRateText}" +
-            $"\nBreached passwords: {m.BreachesText}" +
-            $"\nMFA: {m.MfaStatusText}";
-
-        await MopupService.Instance.PushAsync(new PromptPopup(
-            title: "Vault Score Details",
-            body: message,
-            aText: "OK"
-        ));
-    }
-
-    private static string GetVaultTier(double score)
+    public string MasterPasswordCategory => MasterPasswordStrength switch
     {
-        return score switch
-        {
-            >= 900 => "The Summit Sovereign (900+)",
-            >= 750 => "The Ridge Walker (750-899)",
-            >= 500 => "The Cliffside Scrambler (500-749)",
-            >= 300 => "The Treeline Grazer (300-499)",
-            _ => "The Dead Meat (< 300)"
-        };
-    }
+        300 => "Very Strong",
+        200 => "Strong",
+        100 => "Weak",
+        _ => "Poor"
+    };
+
+    public string AveragePasswordsCategory => AveragePasswordsStrength switch
+    {
+        200 => "Very Strong",
+        150 => "Strong",
+        100 => "Weak",
+        _ => "Poor"
+    };
+
+    public string OriginalityCategory => ReuseRate switch
+    {
+        200 => "Very Strong",
+        150 => "Strong",
+        100 => "Weak",
+        _ => "Poor"
+    };
+
+    public string BreachesCategory => BreachesCount switch
+    {
+        0 => "Very Strong",
+        1 => "Strong",
+        2 => "Weak",
+        _ => "Poor"
+    };
+
+    public string MfaCategory => MfaEnabled ? "Very Strong" : "Poor";
 
     [RelayCommand]
     private void ToggleGoat()
@@ -239,7 +251,7 @@ public partial class UserPageViewModel : BaseViewModel
             var secret = TotpService.GenerateSecret();
 
             // Show QR/Secret to user
-            await ShowMfaSetupDialogAsync(secret, Email);
+            await ShowMfaSetupDialogAsync(secret);
 
             // Ask for verification code
             var code = await PromptInputAsync("Enter 6-digit code from authenticator app");
@@ -381,13 +393,4 @@ public partial class UserPageViewModel : BaseViewModel
     }
 
     #endregion
-}
-
-public class VaultMetricItem
-{
-    public string MasterPasswordStrength { get; set; } = string.Empty;
-    public string AveragePasswordsStrength { get; set; } = string.Empty;
-    public string ReuseRateText { get; set; } = string.Empty;
-    public string BreachesText { get; set; } = string.Empty;
-    public string MfaStatusText { get; set; } = string.Empty;
 }
