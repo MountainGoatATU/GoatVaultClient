@@ -54,40 +54,13 @@ namespace GoatVaultCore.Services.Secrets
 
             // Duplicates and strength
             int duplicateCount = passwordList.GroupBy(p => p).Where(g => g.Count() > 1).Sum(g => g.Count() - 1);
-            int totalStrengthScore = 2 * (passwordList.Sum(p => PasswordStrengthService.Evaluate(p).Score));
-
+            int totalStrengthScore = passwordList.Sum(p => _passwordStrengthService.Evaluate(p).Score);
+            
             double uniquenessPoints = passwordCount > 0
                 ? ((passwordCount - duplicateCount) / (double)passwordCount) * 200
                 : 200;
 
-                passwordCount = allPasswords.Count;
-
-                // Count duplicates for uniqueness
-                duplicateCount += allPasswords.GroupBy(p => p)
-                    .Where(group => group
-                        .Count() > 1).Sum(group => group
-                        .Count() - 1);
-
-                // Sum password strengths
-                totalStrengthScore += allPasswords
-                    .Sum(pwd => _passwordStrengthService
-                        .Evaluate(pwd).Score);
-            }
-
-            // Uniqueness max 200
-            double uniquenessPoints;
-            if (passwordCount > 0)
-            {
-                var uniquenessRatio = (passwordCount - duplicateCount) / (double)passwordCount;
-                uniquenessPoints = uniquenessRatio * 200.0;
-            }
-            else
-            {
-                uniquenessPoints = 200; // Default 200 when no passwords
-            }
-
-            // Average password strength max 200
-            var behaviorPoints = passwordCount > 0
+            double behaviorPoints = passwordCount > 0
                 ? (totalStrengthScore / (double)(passwordCount * 4)) * 200
                 : 200;
 
