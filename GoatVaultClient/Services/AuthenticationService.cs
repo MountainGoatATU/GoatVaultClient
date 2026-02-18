@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Mopups.Services;
 
 using GoatVaultApplication.Auth;
-using Email = GoatVaultCore.Models.Email;
+using Email = GoatVaultCore.Models.Objects.Email;
 
 // TODO: REFACTOR only hold use cases
 namespace GoatVaultClient.Services

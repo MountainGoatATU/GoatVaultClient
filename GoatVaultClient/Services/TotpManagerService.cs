@@ -1,4 +1,4 @@
-using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Models;
 using GoatVaultCore.Services;
 using Microsoft.Extensions.Logging;
 

@@ -1,4 +1,4 @@
-﻿namespace GoatVaultCore.Models;
+﻿namespace GoatVaultCore.Models.Objects;
 
 public sealed class Email
 {

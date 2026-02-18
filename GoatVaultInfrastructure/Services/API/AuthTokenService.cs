@@ -1,6 +1,6 @@
 using GoatVaultCore.Abstractions;
 
-namespace GoatVaultInfrastructure.Services.API;
+namespace GoatVaultInfrastructure.Services.Api;
 
 public class AuthTokenService : IAuthTokenService
 {

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using GoatVaultCore.Models;
+using GoatVaultCore.Models.Objects;
 
 namespace GoatVaultInfrastructure.Database;
 

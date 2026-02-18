@@ -1,6 +1,4 @@
-﻿using GoatVaultCore.Models.Vault;
-
-namespace GoatVaultCore.Models;
+﻿namespace GoatVaultCore.Models;
 
 public class VaultDecrypted
 {

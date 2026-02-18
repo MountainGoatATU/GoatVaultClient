@@ -1,7 +1,7 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Models;
 using System.Collections.ObjectModel;
 using GoatVaultApplication.VaultUseCases;
 using GoatVaultClient.Services;
@@ -78,12 +78,12 @@ namespace GoatVaultClient.ViewModels
         {
              MainThread.BeginInvokeOnMainThread(() =>
              {
-                 if (_sessionContext.Vault != null)
-                 {
-                     _allVaultEntries = _sessionContext.Vault.Entries.ToList();
-                     _allVaultCategories = _sessionContext.Vault.Categories.ToList();
-                     ReloadVaultData();
-                 }
+                 if (_sessionContext.Vault == null)
+                     return;
+
+                 _allVaultEntries = _sessionContext.Vault.Entries.ToList();
+                 _allVaultCategories = _sessionContext.Vault.Categories.ToList();
+                 ReloadVaultData();
              });
         }
 

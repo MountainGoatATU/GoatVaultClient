@@ -1,6 +1,6 @@
-namespace GoatVaultCore.Models.API;
+namespace GoatVaultCore.Models.Api;
 
 public class AuthRefreshRequest
 {
-    public string RefreshToken { get; set; }
+    public required string RefreshToken { get; set; }
 }

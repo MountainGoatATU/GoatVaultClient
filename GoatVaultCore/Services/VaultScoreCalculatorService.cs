@@ -1,5 +1,4 @@
 using GoatVaultCore.Models;
-using GoatVaultCore.Models.Vault;
 
 namespace GoatVaultCore.Services
 {
@@ -23,6 +22,9 @@ namespace GoatVaultCore.Services
             bool mfaEnabled,
             bool masterPasswordBreached = false)
         {
+            // Ensure entries is not null
+            entries ??= [];
+
             var total = entries.Count();
             var breached = entries.Count(e => e.BreachCount > 0);
 
@@ -49,7 +51,7 @@ namespace GoatVaultCore.Services
             var totalStrengthScore = 0;
             var duplicateCount = 0;
 
-            if (entries != null && entries.Any())
+            if (entries.Any())
             {
                 var allPasswords = entries
                     .Where(e => !string.IsNullOrEmpty(e.Password))

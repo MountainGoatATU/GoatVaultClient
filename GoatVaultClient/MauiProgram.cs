@@ -5,7 +5,7 @@ using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
-using GoatVaultInfrastructure.Services.API;
+using GoatVaultInfrastructure.Services.Api;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

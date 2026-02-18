@@ -1,5 +1,5 @@
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models.API;
+using GoatVaultCore.Models.Api;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
@@ -17,6 +17,7 @@ public class ServerAuthService(
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true
+        // DefaultIgnoreCondition removed. Individual DTOs control serialization.
     };
 
     public async Task<AuthInitResponse> InitAsync(AuthInitRequest payload, CancellationToken ct = default)
@@ -37,7 +38,7 @@ public class ServerAuthService(
         return JsonSerializer.Deserialize<UserResponse>(json, JsonOptions) ?? throw new InvalidOperationException("Invalid user response");
     }
 
-    public async Task<UserResponse> UpdateUserAsync(Guid userId, UpdateUserRequest payload, CancellationToken ct = default)
+    public async Task<UserResponse> UpdateUserAsync(Guid userId, object payload, CancellationToken ct = default)
     {
         return await PatchAsync<UserResponse>($"v1/users/{userId}", payload, ct);
     }

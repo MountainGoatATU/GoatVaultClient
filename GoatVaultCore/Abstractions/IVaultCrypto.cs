@@ -1,4 +1,5 @@
 using GoatVaultCore.Models;
+using GoatVaultCore.Models.Objects;
 
 namespace GoatVaultCore.Abstractions;
 

@@ -1,5 +1,5 @@
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models.API;
+using GoatVaultCore.Models.Api;
 using GoatVaultCore.Services;
 using GoatVaultInfrastructure.Services;
 
@@ -43,7 +43,7 @@ public class ChangePasswordUseCase(
         var newEncryptedVault = vaultCrypto.Encrypt(decryptedVault, newMasterKey, newVaultSalt);
 
         // 6. Update server
-        var updateRequest = new UpdateUserRequest
+        var updateRequest = new ChangeMasterPasswordRequest
         {
             AuthSalt = Convert.ToBase64String(newAuthSalt),
             AuthVerifier = Convert.ToBase64String(newAuthVerifier),
@@ -65,8 +65,7 @@ public class ChangePasswordUseCase(
         // 8. Calculate new password strength
         var strength = PasswordStrengthService.Evaluate(newPassword).Score;
 
-        // 9. Update session
-        // Session needs the new master key to continue working without re-login
+        // 9. Update session - needs new master key to continue working without re-login
         session.Start(user.Id, newMasterKey, decryptedVault, strength);
     }
 }

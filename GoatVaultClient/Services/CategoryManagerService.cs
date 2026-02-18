@@ -1,6 +1,6 @@
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Models;
 using Mopups.Services;
 
 namespace GoatVaultClient.Services;

@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using GoatVaultCore.Models;
 using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models.Objects;
 
 namespace GoatVaultInfrastructure.Services;
 

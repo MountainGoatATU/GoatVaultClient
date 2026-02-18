@@ -1,6 +1,5 @@
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models.API;
-using GoatVaultCore.Services;
+using GoatVaultCore.Models.Api;
 
 namespace GoatVaultApplication.Account;
 
@@ -26,16 +25,10 @@ public class DisableMfaUseCase(
         }
 
         // 2. Update server
-        var updateRequest = new UpdateUserRequest
+        var updateRequest = new DisableMfaRequest
         {
             MfaEnabled = false,
-            // MfaSecret = "" // Send empty string or null?
-            // The server logic should handle clearing it if MfaEnabled is false.
-            // Or we explicitly clear it.
-            MfaSecret = string.Empty // Sending empty string to explicitly clear if server supports it.
-            // If server treats empty string as valid secret, that's bad.
-            // But typical update logic ignores nulls.
-            // We should rely on MfaEnabled=false.
+            MfaSecret = null
         };
 
         var serverUser = await serverAuth.UpdateUserAsync(user.Id, updateRequest);

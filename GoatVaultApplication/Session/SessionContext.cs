@@ -1,5 +1,6 @@
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
+using GoatVaultCore.Models.Objects;
 
 namespace GoatVaultApplication.Session;
 

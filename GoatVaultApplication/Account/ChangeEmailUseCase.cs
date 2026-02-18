@@ -1,7 +1,6 @@
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models;
-using GoatVaultCore.Models.API;
-using GoatVaultCore.Services;
+using GoatVaultCore.Models.Api;
+using GoatVaultCore.Models.Objects;
 
 namespace GoatVaultApplication.Account;
 
@@ -27,7 +26,7 @@ public class ChangeEmailUseCase(
         }
 
         // 2. Update server
-        var updateRequest = new UpdateUserRequest
+        var updateRequest = new ChangeEmailRequest
         {
             Email = newEmail.Value
         };

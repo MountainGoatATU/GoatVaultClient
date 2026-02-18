@@ -2,11 +2,11 @@ using GoatVaultApplication.VaultUseCases;
 using CommunityToolkit.Mvvm.ComponentModel;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
-using GoatVaultCore.Models.API;
+using GoatVaultCore.Models.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
-using Email = GoatVaultCore.Models.Email;
+using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.Services;
 
@@ -21,70 +21,61 @@ public class SyncingService(
 {
     private Timer? _periodicSyncTimer;
 
-    private bool _isSyncing;
     public bool IsSyncing
     {
-        get => _isSyncing;
-        private set => SetProperty(ref _isSyncing, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
-    private SyncStatus _syncStatus = SyncStatus.Unsynced;
     public SyncStatus SyncStatus
     {
-        get => _syncStatus;
-        private set => SetProperty(ref _syncStatus, value);
-    }
+        get;
+        private set => SetProperty(ref field, value);
+    } = SyncStatus.Unsynced;
 
-    private DateTime _lastSynced;
     public DateTime LastSynced
     {
-        get => _lastSynced;
+        get;
         private set
         {
-            if (SetProperty(ref _lastSynced, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(LastSyncedFormatted));
         }
     }
 
-    private DateTime _lastSaved;
     public DateTime LastSaved
     {
-        get => _lastSaved;
-        private set => SetProperty(ref _lastSaved, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
-    private string _syncStatusMessage = "Not synced";
     public string SyncStatusMessage
     {
-        get => _syncStatusMessage;
-        private set => SetProperty(ref _syncStatusMessage, value);
-    }
+        get;
+        private set => SetProperty(ref field, value);
+    } = "Not synced";
 
-    private bool _hasAutoSave = true;
     public bool HasAutoSave
     {
-        get => _hasAutoSave;
-        set => SetProperty(ref _hasAutoSave, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
-    private bool _hasAutoSync = true;
     public bool HasAutoSync
     {
-        get => _hasAutoSync;
+        get;
         set
         {
-            if (SetProperty(ref _hasAutoSync, value) && !value)
+            if (SetProperty(ref field, value) && !value)
                 StopPeriodicSync();
         }
-    }
+    } = true;
 
     #region Properties
 
     public bool MarkedAsChanged { get; private set; }
 
-    /// <summary>
-    /// Human-readable last synced time
-    /// </summary>
+    // Human-readable last synced time
     public string LastSyncedFormatted
     {
         get
@@ -305,15 +296,7 @@ public class SyncingService(
 
     private async Task HandleLocalNewer(User localUser, IUserRepository userRepository)
     {
-        if (localUser.Vault == null) return;
-
-        var request = new UpdateUserRequest
-        {
-            Vault = localUser.Vault,
-            VaultSalt = Convert.ToBase64String(localUser.VaultSalt), // Send VaultSalt separately
-            Email = localUser.Email.Value,
-            MfaEnabled = localUser.MfaEnabled
-        };
+        var request = new UpdateVaultRequest { Vault = localUser.Vault };
 
         var updatedServerUser = await serverAuth.UpdateUserAsync(localUser.Id, request);
 
@@ -336,12 +319,12 @@ public class SyncingService(
         {
              logger?.LogWarning("Failed to decrypt server vault. The password might have changed on another device.");
              AuthenticationRequired?.Invoke(this, EventArgs.Empty);
-             throw; 
+             throw;
         }
 
         // 2. Update Session
         session.UpdateVault(decryptedVault);
-        
+
         // Re-fetch the user to ensure we are updating the tracked entity if it exists
         var existingUser = await userRepository.GetByIdAsync(Guid.Parse(serverUser.Id));
 
@@ -357,9 +340,8 @@ public class SyncingService(
             {
                 Id = Guid.Parse(serverUser.Id),
                 AuthSalt = Convert.FromBase64String(serverUser.AuthSalt),
-                // AuthVerifier and MfaSecret are not returned by GetUser
+                AuthVerifier = Convert.FromBase64String(serverUser.AuthVerifier),
                 CreatedAtUtc = serverUser.CreatedAtUtc,
-                AuthVerifier = [], // Initialize to empty for now
                 MfaSecret = []
             };
         }

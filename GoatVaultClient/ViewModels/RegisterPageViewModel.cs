@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Auth;
-using Email = GoatVaultCore.Models.Email;
+using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
 

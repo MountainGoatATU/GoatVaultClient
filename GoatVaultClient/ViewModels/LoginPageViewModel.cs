@@ -8,7 +8,7 @@ using Mopups.Services;
 using System.Collections.ObjectModel;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
-using Email = GoatVaultCore.Models.Email;
+using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
 

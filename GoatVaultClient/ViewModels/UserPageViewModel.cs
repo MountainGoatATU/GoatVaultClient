@@ -9,7 +9,7 @@ using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 using Mopups.Services;
 using System.Collections.ObjectModel;
-using Email = GoatVaultCore.Models.Email;
+using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
 
@@ -235,7 +235,7 @@ public partial class UserPageViewModel : BaseViewModel
 
             // Generate secret locally
             var secret = TotpService.GenerateSecret();
-            
+
             // Show QR/Secret to user
             await ShowMfaSetupDialogAsync(secret, Email);
 

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace GoatVaultInfrastructure.Services.API;
+namespace GoatVaultInfrastructure.Services.Api;
 
 public class HttpService(
     HttpClient client,

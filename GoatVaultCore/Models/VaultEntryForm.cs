@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using PasswordGenerator;
 using GoatVaultCore.Services;
 
-namespace GoatVaultCore.Models.Vault;
+namespace GoatVaultCore.Models;
 
 public partial class VaultEntryForm : VaultEntry
 {

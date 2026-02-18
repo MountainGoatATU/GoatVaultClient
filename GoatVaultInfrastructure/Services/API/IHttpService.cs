@@ -1,4 +1,4 @@
-﻿namespace GoatVaultInfrastructure.Services.API;
+﻿namespace GoatVaultInfrastructure.Services.Api;
 
 public interface IHttpService
 {

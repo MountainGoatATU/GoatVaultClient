@@ -1,5 +1,5 @@
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Models;
 
 namespace GoatVaultApplication.VaultUseCases;
 

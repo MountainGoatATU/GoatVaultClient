@@ -1,7 +1,7 @@
-﻿using GoatVaultCore.Models.API;
+﻿using GoatVaultCore.Models.Objects;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace GoatVaultInfrastructure.Services.API;
+namespace GoatVaultInfrastructure.Services.Api;
 
 public class JwtUtils
 {

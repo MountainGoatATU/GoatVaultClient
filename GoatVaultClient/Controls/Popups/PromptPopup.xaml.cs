@@ -31,29 +31,47 @@ public partial class PromptPopup : PopupPage
         BindingContext = this;
     }
 
+    private bool _resultSet = false;
+
     private async void OnAccept()
     {
+        if (_resultSet) return;
+        _resultSet = true;
+
         try
         {
-            _tcs.TrySetResult(true);
             await MopupService.Instance.PopAsync();
+            _tcs.TrySetResult(true);
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _tcs.TrySetResult(false);
         }
     }
 
     private async void OnCancel()
     {
+        if (_resultSet) return;
+        _resultSet = true;
+
         try
         {
-            _tcs.TrySetResult(false);
             await MopupService.Instance.PopAsync();
+            _tcs.TrySetResult(false);
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _tcs.TrySetResult(false);
+        }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (!_resultSet)
+        {
+            _resultSet = true;
+            _tcs.TrySetResult(false);
         }
     }
 }

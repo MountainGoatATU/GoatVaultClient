@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace GoatVaultCore.Models.API;
+namespace GoatVaultCore.Models.Api;
 
 public class AuthVerifyRequest
 {

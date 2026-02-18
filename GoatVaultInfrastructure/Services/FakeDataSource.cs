@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Models;
 
 namespace GoatVaultInfrastructure.Services;
 

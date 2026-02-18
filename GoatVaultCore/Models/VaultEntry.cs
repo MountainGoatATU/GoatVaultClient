@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace GoatVaultCore.Models.Vault;
+namespace GoatVaultCore.Models;
 
 public partial class VaultEntry : ObservableObject
 {

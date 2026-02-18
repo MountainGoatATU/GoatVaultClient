@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace GoatVaultCore.Models;
+namespace GoatVaultCore.Models.Objects;
 
 public sealed class MasterKey(byte[] key) : IDisposable
 {

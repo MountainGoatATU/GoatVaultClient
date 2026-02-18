@@ -1,5 +1,5 @@
-﻿using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models.Objects;
 using Isopoh.Cryptography.Argon2;
 using System.Security.Cryptography;
 using System.Text;
@@ -36,7 +36,7 @@ public sealed class CryptoService : ICryptoService
         using var argon2 = new Argon2(config);
         using var hash = argon2.Hash();
 
-        return hash.Buffer;
+        return hash.Buffer.ToArray();
     }
 
     public static byte[] GenerateRandomBytes(int length)
