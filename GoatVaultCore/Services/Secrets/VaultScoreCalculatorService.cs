@@ -41,14 +41,20 @@ namespace GoatVaultCore.Services.Secrets
                 _ => 0
             };
 
+            bool masterBreached = entries.Any(e => !string.IsNullOrEmpty(e.Password) && e.Password == masterPassword && e.BreachCount > 0);
+            if (masterBreached)
+            {
+                foundationPoints = 0;
+                masterPercent = 0;
+            }
+
             var passwordList = entries?.Where(e => !string.IsNullOrEmpty(e.Password)).Select(e => e.Password!).ToList()
                                ?? new List<string>();
             int passwordCount = passwordList.Count;
 
             // Duplicates and strength
             int duplicateCount = passwordList.GroupBy(p => p).Where(g => g.Count() > 1).Sum(g => g.Count() - 1);
-            int totalStrengthScore = 2 * (passwordList.Sum(p => _passwordStrengthService.Evaluate(p).Score));
-               
+            int totalStrengthScore = passwordList.Sum(p => _passwordStrengthService.Evaluate(p).Score);
             
             double uniquenessPoints = passwordCount > 0
                 ? ((passwordCount - duplicateCount) / (double)passwordCount) * 200
