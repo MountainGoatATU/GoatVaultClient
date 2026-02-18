@@ -337,6 +337,7 @@ namespace GoatVaultClient.Services
             vaultSessionService.CurrentUser.Email = localCopy.Email;
             vaultSessionService.CurrentUser.MfaEnabled = localCopy.MfaEnabled;
             vaultSessionService.CurrentUser.MfaSecret = localCopy.MfaSecret;
+            vaultSessionService.CurrentUser.ShamirEnabled = localCopy.ShamirEnabled;
             vaultSessionService.CurrentUser.UpdatedAt = localCopy.UpdatedAt;
             vaultSessionService.CurrentUser.CreatedAt = localCopy.CreatedAt;
             vaultSessionService.CurrentUser.Vault = localCopy.Vault;
@@ -353,6 +354,7 @@ namespace GoatVaultClient.Services
             vaultSessionService.CurrentUser.Email = userResponse.Email;
             vaultSessionService.CurrentUser.MfaEnabled = userResponse.MfaEnabled;
             vaultSessionService.CurrentUser.MfaSecret = userResponse.MfaSecret;
+            vaultSessionService.CurrentUser.ShamirEnabled = localCopy.ShamirEnabled;
             vaultSessionService.CurrentUser.UpdatedAt = userResponse.UpdatedAt;
             vaultSessionService.CurrentUser.CreatedAt = userResponse.CreatedAt;
             vaultSessionService.CurrentUser.Vault = userResponse.Vault;
@@ -370,6 +372,7 @@ namespace GoatVaultClient.Services
                 Email = vaultSessionService.CurrentUser.Email,
                 MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
                 MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
+                ShamirEnabled = vaultSessionService.CurrentUser.ShamirEnabled,
                 Vault = encryptedVault,
             };
 
