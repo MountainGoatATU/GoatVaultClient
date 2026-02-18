@@ -93,12 +93,41 @@
     <!--  ============================================================  -->
     <Shell.FlyoutFooter>
         <Grid Padding="20" HeightRequest="60">
+            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
             <Label
                 FontSize="12"
                 Text="© 2026 GoatVault"
                 TextColor="{AppThemeBinding Light={StaticResource Gray500},
                                             Dark={StaticResource Gray400}}"
                 VerticalOptions="Center" />
+            
+            <!-- Logout button with icon and text -->
+            <HorizontalStackLayout
+                Grid.Column="1"
+                Spacing="5"
+                VerticalOptions="Center">
+
+                <Label
+                    FontFamily="MaterialSharp"
+                    Text=""
+                    FontSize="20"
+                    TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+
+                <Label
+                    Text="Logout"
+                    FontSize="14"
+                    TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                    VerticalOptions="Center" />
+
+                <HorizontalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                </HorizontalStackLayout.GestureRecognizers>
+            </HorizontalStackLayout>
         </Grid>
     </Shell.FlyoutFooter>
 
