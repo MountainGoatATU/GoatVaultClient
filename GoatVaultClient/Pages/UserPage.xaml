@@ -1,197 +1,393 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-             xmlns:controls="clr-namespace:GoatVaultClient.Controls"
-             xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
-             x:Class="GoatVaultClient.Pages.UserPage"
-             x:DataType="vm:UserPageViewModel"
-             BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}">
+<ContentPage
+    x:Class="GoatVaultClient.Pages.UserPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+    x:DataType="vm:UserPageViewModel"
+    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
+                                      Dark={StaticResource DarkSurface}}">
 
     <ScrollView>
-        <VerticalStackLayout Spacing="{StaticResource sLarge}" Padding="{StaticResource pLarge}">
+        <VerticalStackLayout Padding="{StaticResource pLarge}" Spacing="{StaticResource sLarge}">
 
-            <!-- Vault Score Section -->
-            <controls:Component>
-                <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <Label Text="Vault Score"
-                           FontAttributes="Bold"
-                           FontSize="24"
-                           HorizontalOptions="Center"/>
-
-                    <!-- Gauge, tappable to show popup -->
-                    <Grid>
-                        <lvc:PieChart InitialRotation="-90"
-                                      MinValue="0"
-                                      MaxValue="1000"
-                                      HeightRequest="150"
-                                      WidthRequest="150">
+            <!--  Vault Score Section  -->
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    HorizontalOptions="Center"
+                    Text="{Binding VaultTierText}" />
+                <Grid ColumnDefinitions="*,*,*,*,*" RowDefinitions="Auto">
+                    <VerticalStackLayout
+                        Grid.Column="0"
+                        HorizontalOptions="Center"
+                        Spacing="6">
+                        <lvc:PieChart
+                            HeightRequest="150"
+                            InitialRotation="-90"
+                            MaxValue="400"
+                            MinValue="0"
+                            WidthRequest="150">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
-                                    <lvc:XamlGaugeSeries GaugeValue="{Binding VaultScore}"
-                                                         DataLabelsSize="20"
-                                                         MaxRadialColumnWidth="50"/>
-                                    <lvc:XamlGaugeBackgroundSeries MaxRadialColumnWidth="50" Fill="LightGray"/>
+                                    <lvc:XamlGaugeSeries
+                                        DataLabelsSize="20"
+                                        GaugeValue="{Binding MasterPasswordStrength}"
+                                        MaxRadialColumnWidth="50" />
+                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
-                            <lvc:PieChart.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding ShowVaultDetailsPopupCommand}" NumberOfTapsRequired="1"/>
-                            </lvc:PieChart.GestureRecognizers>
                         </lvc:PieChart>
+                        <Label
+                            FontSize="14"
+                            HorizontalOptions="Center"
+                            Text="Master Password Strength" />
+                        <Label
+                            FontSize="13"
+                            HorizontalOptions="Center"
+                            Text="{Binding MasterPasswordCategory}"
+                            TextColor="Gray" />
+                    </VerticalStackLayout>
 
-                    </Grid>
+                    <VerticalStackLayout
+                        Grid.Column="1"
+                        HorizontalOptions="Center"
+                        Spacing="6">
+                        <lvc:PieChart
+                            HeightRequest="150"
+                            InitialRotation="-90"
+                            MaxValue="200"
+                            MinValue="0"
+                            WidthRequest="150">
+                            <lvc:PieChart.Series>
+                                <lvc:SeriesCollection>
+                                    <lvc:XamlGaugeSeries
+                                        DataLabelsSize="20"
+                                        GaugeValue="{Binding AveragePasswordsStrength}"
+                                        MaxRadialColumnWidth="50" />
+                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                </lvc:SeriesCollection>
+                            </lvc:PieChart.Series>
+                        </lvc:PieChart>
+                        <Label
+                            FontSize="14"
+                            HorizontalOptions="Center"
+                            Text="Average Password Strength" />
+                        <Label
+                            FontSize="13"
+                            HorizontalOptions="Center"
+                            Text="{Binding AveragePasswordsCategory}"
+                            TextColor="Gray" />
+                    </VerticalStackLayout>
 
-                    <CollectionView ItemsSource="{Binding VaultMetrics}"
-                                    IsVisible="{Binding ShowVaultDetails}"
-                                    Margin="0,12,0,0"
-                                    WidthRequest="280">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <VerticalStackLayout Spacing="4" Margin="0,8,0,0">
-                                    <Label Text="{Binding MasterPasswordStrength, StringFormat='Master Password: {0}'}"/>
-                                    <Label Text="{Binding AveragePasswordsStrength, StringFormat='Average Passwords: {0}'}"/>
-                                    <Label Text="{Binding ReuseRateText, StringFormat='Originality: {0}'}"/>
-                                    <Label Text="{Binding BreachesText, StringFormat='Breached Passwords: {0}'}"/>
-                                    <Label Text="{Binding MfaStatusText, StringFormat='MFA: {0}'}"/>
-                                </VerticalStackLayout>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-            </controls:Component>
+                    <VerticalStackLayout
+                        Grid.Column="2"
+                        HorizontalOptions="Center"
+                        Spacing="6">
+                        <lvc:PieChart
+                            HeightRequest="150"
+                            InitialRotation="-90"
+                            MaxValue="200"
+                            MinValue="0"
+                            WidthRequest="150">
+                            <lvc:PieChart.Series>
+                                <lvc:SeriesCollection>
+                                    <lvc:XamlGaugeSeries
+                                        DataLabelsSize="20"
+                                        GaugeValue="{Binding ReuseRate}"
+                                        MaxRadialColumnWidth="50" />
+                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                </lvc:SeriesCollection>
+                            </lvc:PieChart.Series>
+                        </lvc:PieChart>
+                        <Label
+                            FontSize="14"
+                            HorizontalOptions="Center"
+                            Text="Password Originality" />
+                        <Label
+                            FontSize="13"
+                            HorizontalOptions="Center"
+                            Text="{Binding OriginalityCategory}"
+                            TextColor="Gray" />
+                    </VerticalStackLayout>
 
-            <!-- Account Settings Section -->
-            <controls:ComponentHeader Title="Account Settings"/>
+                    <VerticalStackLayout
+                        Grid.Column="3"
+                        HorizontalOptions="Center"
+                        Spacing="6">
+                        <lvc:PieChart
+                            HeightRequest="150"
+                            InitialRotation="-90"
+                            MaxValue="100"
+                            MinValue="0"
+                            WidthRequest="150">
+                            <lvc:PieChart.Series>
+                                <lvc:SeriesCollection>
+                                    <lvc:XamlGaugeSeries
+                                        DataLabelsSize="20"
+                                        GaugeValue="{Binding BreachesCount}"
+                                        MaxRadialColumnWidth="50" />
+                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                </lvc:SeriesCollection>
+                            </lvc:PieChart.Series>
+                        </lvc:PieChart>
+                        <Label
+                            FontSize="14"
+                            HorizontalOptions="Center"
+                            Text="Compromised Passwords" />
+                        <Label
+                            FontSize="13"
+                            HorizontalOptions="Center"
+                            Text="{Binding BreachesCategory}"
+                            TextColor="Gray" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        Grid.Column="4"
+                        HorizontalOptions="Center"
+                        Spacing="6">
+                        <lvc:PieChart
+                            HeightRequest="150"
+                            InitialRotation="-90"
+                            MaxValue="200"
+                            MinValue="0"
+                            WidthRequest="150">
+                            <lvc:PieChart.Series>
+                                <lvc:SeriesCollection>
+                                    <lvc:XamlGaugeSeries
+                                        DataLabelsSize="20"
+                                        GaugeValue="{Binding MfaPercent}"
+                                        MaxRadialColumnWidth="50" />
+                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                </lvc:SeriesCollection>
+                            </lvc:PieChart.Series>
+                        </lvc:PieChart>
+                        <Label
+                            FontSize="14"
+                            HorizontalOptions="Center"
+                            Text="MFA" />
+                        <Label
+                            FontSize="13"
+                            HorizontalOptions="Center"
+                            Text="{Binding MfaCategory}"
+                            TextColor="Gray" />
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+
+            <!--  Account Settings Section  -->
+            <controls:ComponentHeader Title="Account Settings" />
             <controls:Component>
-                <VerticalStackLayout Spacing="20" Padding="20">
-                    
-                    <!-- Email -->
+                <VerticalStackLayout Padding="20" Spacing="20">
+
+                    <!--  Email  -->
                     <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
-                        <Label Text="Email"
-                               FontAttributes="Bold"
-                               VerticalOptions="Center"/>
-                        <Label Grid.Column="1"
-                               Text="{Binding Email}"
-                               VerticalOptions="Center"
-                               FontSize="14"/>
-                        <controls:ImageButton Grid.Column="2"
-                                              IconGlyph="{x:Static m:MaterialRounded.Edit}"
-                                              Command="{Binding EditEmailCommand}"/>
+                        <Label
+                            FontAttributes="Bold"
+                            Text="Email"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="1"
+                            FontSize="14"
+                            Text="{Binding Email}"
+                            VerticalOptions="Center" />
+                        <controls:ImageButton
+                            Grid.Column="2"
+                            Command="{Binding EditEmailCommand}"
+                            IconGlyph="{x:Static m:MaterialRounded.Edit}" />
                     </Grid>
 
-                    <!-- Master Password -->
+                    <!--  Master Password  -->
                     <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
-                        <Label Text="Master Password"
-                               FontAttributes="Bold"
-                               VerticalOptions="Center"/>
-                        <Label Grid.Column="1"
-                               Text="••••••••••••"
-                               VerticalOptions="Center"
-                               FontSize="14"/>
-                        <controls:ImageButton Grid.Column="2"
-                                              IconGlyph="{x:Static m:MaterialRounded.Edit}"
-                                              Command="{Binding EditMasterPasswordCommand}"/>
+                        <Label
+                            FontAttributes="Bold"
+                            Text="Master Password"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="1"
+                            FontSize="14"
+                            Text="••••••••••••"
+                            VerticalOptions="Center" />
+                        <controls:ImageButton
+                            Grid.Column="2"
+                            Command="{Binding EditMasterPasswordCommand}"
+                            IconGlyph="{x:Static m:MaterialRounded.Edit}" />
                     </Grid>
 
-                    <!-- Enable Goat -->
+                    <!--  Enable Goat  -->
                     <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
-                        <Label Text="Enable Goat"
-                               FontAttributes="Bold"
-                               VerticalOptions="Center" />
+                        <Label
+                            FontAttributes="Bold"
+                            Text="Enable Goat"
+                            VerticalOptions="Center" />
 
-                        <!-- Status text -->
-                        <Label Grid.Column="1"
-                               VerticalOptions="Center"
-                               FontSize="14"
-                               Text="Disabled">
+                        <!--  Status text  -->
+                        <Label
+                            Grid.Column="1"
+                            FontSize="14"
+                            Text="Disabled"
+                            VerticalOptions="Center">
                             <Label.Triggers>
-                                <DataTrigger TargetType="Label"
-                                             Binding="{Binding GoatEnabled}"
-                                             Value="True">
+                                <DataTrigger
+                                    Binding="{Binding GoatEnabled}"
+                                    TargetType="Label"
+                                    Value="True">
                                     <Setter Property="Text" Value="Enabled" />
                                 </DataTrigger>
                             </Label.Triggers>
                         </Label>
 
-                        <!-- Button text -->
-                        <Button Grid.Column="2"
-                                Command="{Binding ToggleGoatCommand}"
-                                BackgroundColor="{Binding GoatEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
-                                TextColor="White"
-                                WidthRequest="100"
-                                HeightRequest="40"
-                                Text="Enable">
+                        <!--  Button text  -->
+                        <Button
+                            Grid.Column="2"
+                            BackgroundColor="{Binding GoatEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
+                            Command="{Binding ToggleGoatCommand}"
+                            HeightRequest="40"
+                            Text="Enable"
+                            TextColor="White"
+                            WidthRequest="100">
                             <Button.Triggers>
-                                <DataTrigger TargetType="Button"
-                                             Binding="{Binding GoatEnabled}"
-                                             Value="True">
+                                <DataTrigger
+                                    Binding="{Binding GoatEnabled}"
+                                    TargetType="Button"
+                                    Value="True">
                                     <Setter Property="Text" Value="Disable" />
                                 </DataTrigger>
                             </Button.Triggers>
                         </Button>
                     </Grid>
-                    
+
                 </VerticalStackLayout>
             </controls:Component>
 
-            <!-- Two-Factor Authentication Section -->
-            <controls:ComponentHeader Title="Two-Factor Authentication"/>
+            <!--  Two-Factor Authentication Section  -->
+            <controls:ComponentHeader Title="Two-Factor Authentication" />
             <controls:Component>
-                <VerticalStackLayout Spacing="15" Padding="20">
-                    <!-- MFA Status -->
+                <VerticalStackLayout Padding="20" Spacing="15">
+                    <!--  MFA Status  -->
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                        <Label Text="Status"
-                               FontSize="14"
-                               FontAttributes="Bold"
-                               VerticalOptions="Center"/>
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="14"
+                            Text="Status"
+                            VerticalOptions="Center" />
                         <HorizontalStackLayout Grid.Column="1" Spacing="8">
-                            <Border BackgroundColor="{Binding MfaEnabled, Converter={StaticResource BoolToColorConverter}}"
-                                    WidthRequest="12"
-                                    HeightRequest="12"
-                                    StrokeShape="RoundRectangle 6"
-                                    VerticalOptions="Center"/>
-                            <Label Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaStatusConverter}}"
-                                   FontSize="14"
-                                   VerticalOptions="Center"/>
+                            <Border
+                                BackgroundColor="{Binding MfaEnabled, Converter={StaticResource BoolToColorConverter}}"
+                                HeightRequest="12"
+                                StrokeShape="RoundRectangle 6"
+                                VerticalOptions="Center"
+                                WidthRequest="12" />
+                            <Label
+                                FontSize="14"
+                                Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaStatusConverter}}"
+                                VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </Grid>
 
-                    <!-- MFA Description -->
-                    <Label Text="Two-factor authentication adds an extra layer of security to your account by requiring a time-based code from your authenticator app in addition to your password."
-                           FontSize="12"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
-                           LineBreakMode="WordWrap"/>
+                    <!--  MFA Description  -->
+                    <Label
+                        FontSize="12"
+                        LineBreakMode="WordWrap"
+                        Text="Two-factor authentication adds an extra layer of security to your account by requiring a time-based code from your authenticator app in addition to your password."
+                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                    Dark={StaticResource Gray400}}" />
 
-                    <!-- Enable/Disable Button -->
-                    <Button Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
-                            Command="{Binding EnableMfaCommand}"
-                            IsVisible="{Binding MfaEnabled, Converter={StaticResource InvertedBoolConverter}}"
-                            IsEnabled="{Binding IsNotBusy}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                            TextColor="White"
-                            Margin="0,10,0,0"/>
+                    <!--  Enable/Disable Button  -->
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary},
+                                                          Dark={StaticResource PrimaryDark}}"
+                        Command="{Binding EnableMfaCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        IsVisible="{Binding MfaEnabled, Converter={StaticResource InvertedBoolConverter}}"
+                        Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
+                        TextColor="White" />
 
-                    <Button Text="Disable MFA"
-                            Command="{Binding DisableMfaCommand}"
-                            IsVisible="{Binding MfaEnabled}"
-                            IsEnabled="{Binding IsNotBusy}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                            TextColor="White"
-                            Margin="0,10,0,0"/>
-                    
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                                                          Dark={StaticResource ErrorDark}}"
+                        Command="{Binding DisableMfaCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        IsVisible="{Binding MfaEnabled}"
+                        Text="Disable MFA"
+                        TextColor="White" />
+
                 </VerticalStackLayout>
             </controls:Component>
 
-            <!-- Logout Section -->
+            <controls:ComponentHeader Title="Two-Factor Authentication" />
+            <controls:Component>
+                <VerticalStackLayout Padding="20" Spacing="15">
+                    <!--  MFA Status  -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="14"
+                            Text="Status"
+                            VerticalOptions="Center" />
+                        <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                            <Border
+                                BackgroundColor="{Binding MfaEnabled, Converter={StaticResource BoolToColorConverter}}"
+                                HeightRequest="12"
+                                StrokeShape="RoundRectangle 6"
+                                VerticalOptions="Center"
+                                WidthRequest="12" />
+                            <Label
+                                FontSize="14"
+                                Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaStatusConverter}}"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!--  MFA Description  -->
+                    <Label
+                        FontSize="12"
+                        LineBreakMode="WordWrap"
+                        Text="Two-factor authentication adds an extra layer of security to your account by requiring a time-based code from your authenticator app in addition to your password."
+                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                    Dark={StaticResource Gray400}}" />
+
+                    <!--  Enable/Disable Button  -->
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary},
+                                                          Dark={StaticResource PrimaryDark}}"
+                        Command="{Binding EnableMfaCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        IsVisible="{Binding MfaEnabled, Converter={StaticResource InvertedBoolConverter}}"
+                        Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
+                        TextColor="White" />
+
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                                                          Dark={StaticResource ErrorDark}}"
+                        Command="{Binding DisableMfaCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        IsVisible="{Binding MfaEnabled}"
+                        Text="Disable MFA"
+                        TextColor="White" />
+
+                </VerticalStackLayout>
+            </controls:Component>
+
+            <!--  Logout Section  -->
             <controls:Component>
                 <VerticalStackLayout Padding="20">
-                    <Button Text="Logout"
-                            Command="{Binding LogoutCommand}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
-                            TextColor="White"/>
+                    <Button
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                          Dark={StaticResource Gray400}}"
+                        Command="{Binding LogoutCommand}"
+                        Text="Logout"
+                        TextColor="White" />
                 </VerticalStackLayout>
             </controls:Component>
 

@@ -3,6 +3,8 @@ using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.controls;
+using GoatVaultCore.Services.Secrets;
+using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.Api;
@@ -12,12 +14,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using System.Net.Http.Headers;
+using System.Numerics;
 using System.Reflection;
 using GoatVaultApplication.VaultUseCases;
 using GoatVaultApplication.Account;
 using GoatVaultApplication.Auth;
 using GoatVaultApplication.Session;
 using UraniumUI;
+using Xecrets.Slip39;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 
@@ -146,13 +151,19 @@ public static class MauiProgram
         builder.Services.AddTransient<VaultEntryManagerService>();
         builder.Services.AddTransient<PwnedPasswordService>();
         builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
-
         // Test / helper services
-        builder.Services.AddSingleton<FakeDataSource>();
-        // builder.Services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
-        // builder.Services.AddSingleton<IMakeSharesUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
-        // builder.Services.AddSingleton<IReconstructionUseCase<BigInteger>, ShamirsSecretSharing<BigInteger>>();
-        // builder.Services.AddTransient<ShamirService>();
+        // Test services
+        // Shamir Test
+        builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
+        builder.Services.AddSingleton<IRandom, StrongRandom>();
+        builder.Services.AddTransient<ShamirSSService>();
+
+        // TODO: Fix Shamir services
+        builder.Services.AddTransient<SplitSecretViewModel>();
+        builder.Services.AddTransient<SplitSecretPage>();
+        builder.Services.AddTransient<RecoverSecretViewModel>();
+        builder.Services.AddTransient<RecoverSecretPage>();
+
 
         // UraniumUI
         builder.Services.AddMopupsDialogs();
@@ -179,8 +190,8 @@ public static class MauiProgram
 
         builder.Services.AddHttpClient<IHttpService, HttpService>()
             .AddHttpMessageHandler<AuthenticatedHttpHandler>();
-
         #region App pages & view models
+        builder.Services.AddSingleton<PwnedPasswordService>();
 
         builder.Services.AddTransient<SyncStatusBarViewModel>();
         builder.Services.AddTransient<MainPageViewModel>();

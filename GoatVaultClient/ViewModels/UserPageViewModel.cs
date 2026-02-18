@@ -29,11 +29,13 @@ public partial class UserPageViewModel : BaseViewModel
     [ObservableProperty] private bool mfaEnabled;
     [ObservableProperty] private bool goatEnabled;
 
-    [ObservableProperty] private double vaultScore;
-    [ObservableProperty] private string? vaultTierText;
-
-    [ObservableProperty] private bool showVaultDetails;
-    [ObservableProperty] private ObservableCollection<VaultMetricItem> vaultMetrics = [];
+        [ObservableProperty] private double vaultScore;
+        [ObservableProperty] private double masterPasswordStrength;
+        [ObservableProperty] private double averagePasswordsStrength;
+        [ObservableProperty] private double reuseRate;
+        [ObservableProperty] private int breachesCount;
+        [ObservableProperty] private double mfaPercent;
+        [ObservableProperty] private string? vaultTierText;
 
     public UserPageViewModel(
         LoadUserProfileUseCase loadUserProfile,

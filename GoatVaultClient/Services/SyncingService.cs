@@ -344,6 +344,7 @@ public class SyncingService(
                 CreatedAtUtc = serverUser.CreatedAtUtc,
                 MfaEnabled = serverUser.MfaEnabled,
                 MfaSecret = mfaSecret,
+                ShamirEnabled = serverUser.ShamirEnabled,
                 VaultSalt = Convert.FromBase64String(serverUser.VaultSalt),
                 UpdatedAtUtc = serverUser.UpdatedAtUtc
             };
@@ -359,6 +360,7 @@ public class SyncingService(
         localUser.VaultSalt = Convert.FromBase64String(serverUser.VaultSalt);
         localUser.MfaEnabled = serverUser.MfaEnabled;
         localUser.MfaSecret = mfaSecret;
+        localUser.ShamirEnabled = serverUser.ShamirEnabled;
         localUser.UpdatedAtUtc = serverUser.UpdatedAtUtc;
 
         await userRepository.SaveAsync(localUser);

@@ -5,9 +5,9 @@ namespace GoatVaultCore.Services
     public sealed class VaultScoreDetails
     {
         public double VaultScore { get; init; }
-        public int ReuseRatePercent { get; init; }
         public int MasterPasswordPercent { get; init; }
         public int AveragePasswordsPercent { get; init; }
+        public int ReuseRatePercent { get; init; }
         public bool MfaEnabled { get; init; }
         public int BreachesCount { get; init; }
         public int PasswordCount { get; init; }
@@ -16,7 +16,13 @@ namespace GoatVaultCore.Services
     // TODO: Refactor
     public static class VaultScoreCalculatorService
     {
-        public static VaultScoreDetails CalculateScore(
+        private readonly IPasswordStrengthService _passwordStrengthService;
+
+        public VaultScoreCalculatorService(IPasswordStrengthService passwordStrengthService)
+        {
+            _passwordStrengthService = passwordStrengthService;
+        }
+        public VaultScoreDetails CalculateScore(
             IEnumerable<VaultEntry> entries,
             int masterPasswordScore, // 0-4
             bool mfaEnabled,
@@ -39,19 +45,18 @@ namespace GoatVaultCore.Services
                 _ => 0
             };
 
-            // If master password is breached, zero points
-            if (masterPasswordBreached)
+            bool masterBreached = entries.Any(e => !string.IsNullOrEmpty(e.Password) && e.Password == masterPassword && e.BreachCount > 0);
+            if (masterBreached)
             {
                 foundationPoints = 0;
                 masterPercent = 0;
             }
 
-            // Passwords
-            var passwordCount = 0;
-            var totalStrengthScore = 0;
-            var duplicateCount = 0;
+            var passwordList = entries?.Where(e => !string.IsNullOrEmpty(e.Password)).Select(e => e.Password!).ToList()
+                               ?? new List<string>();
+            int passwordCount = passwordList.Count;
 
-            if (entries.Any())
+            if (entries != null && entries.Any())
             {
                 var allPasswords = entries
                     .Where(e => !string.IsNullOrEmpty(e.Password))
@@ -60,52 +65,28 @@ namespace GoatVaultCore.Services
 
                 passwordCount = allPasswords.Count;
 
-                // Count duplicates for uniqueness
-                duplicateCount += allPasswords.GroupBy(p => p)
-                    .Where(group => group
-                        .Count() > 1).Sum(group => group
-                        .Count() - 1);
-
-                // Sum password strengths
-                totalStrengthScore += allPasswords
-                    .Sum(pwd => PasswordStrengthService
-                        .Evaluate(pwd).Score);
-            }
-
-            // Uniqueness max 200
-            double uniquenessPoints;
-            if (passwordCount > 0)
-            {
-                var uniquenessRatio = (passwordCount - duplicateCount) / (double)passwordCount;
-                uniquenessPoints = uniquenessRatio * 200.0;
-            }
-            else
-            {
-                uniquenessPoints = 200; // Default 200 when no passwords
-            }
-
-            // Average password strength max 200
-            var behaviorPoints = passwordCount > 0
+            double behaviorPoints = passwordCount > 0
                 ? (totalStrengthScore / (double)(passwordCount * 4)) * 200
                 : 200;
 
-            var breachPenalty = breached * 20;
+            // MFA points
+            double mfaPoints = mfaEnabled ? 200 : 0;
 
-            var mfaPoints = mfaEnabled ? 200 : 0;
+            // Breach penalty
+            int breachedPasswordsCount = entries?.Count(e => !string.IsNullOrEmpty(e.Password) && e.BreachCount > 0) ?? 0;
+            double breachPenalty = breachedPasswordsCount * 20;
 
-            var rawScore = foundationPoints + uniquenessPoints + behaviorPoints + mfaPoints - breachPenalty;
+            // Final score calculation
+            double rawScore = foundationPoints + uniquenessPoints + behaviorPoints + mfaPoints - breachPenalty;
+            if (!mfaEnabled && rawScore > 800) rawScore = 800;
+            double finalScore = Math.Max(rawScore, 0);
 
-            if (!mfaEnabled && rawScore > 800)
-                rawScore = 800;
-
-            var finalScore = Math.Max(rawScore, 0);
-
-            // Percentages for breakdown
-            var averagePercent = passwordCount > 0
+            // Percentages
+            int averagePercent = passwordCount > 0
                 ? (int)Math.Round((totalStrengthScore / (double)passwordCount / 4.0) * 100, MidpointRounding.AwayFromZero)
                 : 100;
 
-            var reuseRatePercent = passwordCount > 0
+            int reuseRatePercent = passwordCount > 0
                 ? (int)Math.Round(((passwordCount - duplicateCount) / (double)passwordCount) * 100, MidpointRounding.AwayFromZero)
                 : 100;
 
@@ -116,7 +97,7 @@ namespace GoatVaultCore.Services
                 AveragePasswordsPercent = averagePercent,
                 ReuseRatePercent = reuseRatePercent,
                 MfaEnabled = mfaEnabled,
-                BreachesCount = breached,
+                BreachesCount = breachedPasswordsCount,
                 PasswordCount = passwordCount
             };
         }

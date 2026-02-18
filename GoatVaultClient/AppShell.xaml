@@ -3,34 +3,34 @@
     x:Class="GoatVaultClient.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:GoatVaultClient"
     xmlns:m="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-    xmlns:local="clr-namespace:GoatVaultClient" 
     xmlns:pages="clr-namespace:GoatVaultClient.Pages"
     Title="GoatVault"
-    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}"
-    Shell.TabBarIsVisible="False"
+    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
+                                      Dark={x:StaticResource DarkSurface}}"
     Shell.FlyoutBehavior="Disabled"
-    >
+    Shell.TabBarIsVisible="False">
     <!--
         NAVIGATION ARCHITECTURE (Flyout):
         ═══════════════════════════════════════════════════════════
         
         1. PRE-AUTH FLOW (FlyoutBehavior=Disabled):
-           IntroductionPage → LoginPage ↔ RegisterPage
+        IntroductionPage → LoginPage ↔ RegisterPage
         
         2. POST-AUTH FLOW (FlyoutBehavior=Flyout):
            Hamburger menu with: Vault | User
            FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
         
         Navigation stack is cleared on:
-           - Login/Register → Main  (//main/home)  + enable flyout
-           - Logout from UserPage   (//intro)       + disable flyout
+        - Login/Register → Main  (//main/home)  + enable flyout
+        - Logout from UserPage   (//intro)       + disable flyout
         ═══════════════════════════════════════════════════════════
     -->
 
-    <!-- ============================================================ -->
-    <!-- FLYOUT HEADER                                                 -->
-    <!-- ============================================================ -->
+    <!--  ============================================================  -->
+    <!--  FLYOUT HEADER  -->
+    <!--  ============================================================  -->
     <Shell.FlyoutHeader>
         <Grid HeightRequest="60"
               BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary}, Dark={StaticResource DarkPrimary}}"
@@ -44,33 +44,35 @@
         </Grid>
     </Shell.FlyoutHeader>
 
-    <!-- ============================================================ -->
-    <!-- PRE-AUTH: Hidden from flyout menu                             -->
-    <!-- ============================================================ -->
-    <ShellContent Route="intro"
-                  ContentTemplate="{DataTemplate pages:IntroductionPage}"
-                  Shell.NavBarIsVisible="False"
-                  FlyoutItemIsVisible="False" />
+    <!--  ============================================================  -->
+    <!--  PRE-AUTH: Hidden from flyout menu  -->
+    <!--  ============================================================  -->
 
-    <ShellContent Route="login"
-                  ContentTemplate="{DataTemplate pages:LoginPage}"
-                  Shell.NavBarIsVisible="False"
-                  FlyoutItemIsVisible="False" />
+    <ShellContent
+        ContentTemplate="{DataTemplate pages:IntroductionPage}"
+        FlyoutItemIsVisible="False"
+        Route="intro"
+        Shell.NavBarIsVisible="False" />
+    <ShellContent
+        ContentTemplate="{DataTemplate pages:LoginPage}"
+        FlyoutItemIsVisible="False"
+        Route="login"
+        Shell.NavBarIsVisible="False" />
+    <ShellContent
+        ContentTemplate="{DataTemplate pages:RegisterPage}"
+        FlyoutItemIsVisible="False"
+        Route="register"
+        Shell.NavBarIsVisible="False" />
+    <ShellContent
+        ContentTemplate="{DataTemplate pages:GratitudePage}"
+        FlyoutItemIsVisible="False"
+        Route="gratitude"
+        Shell.NavBarIsVisible="False" />
 
-    <ShellContent Route="register"
-                  ContentTemplate="{DataTemplate pages:RegisterPage}"
-                  Shell.NavBarIsVisible="False"
-                  FlyoutItemIsVisible="False" />
-
-    <ShellContent Route="gratitude"
-              ContentTemplate="{DataTemplate pages:GratitudePage}"
-              Shell.NavBarIsVisible="False"
-              FlyoutItemIsVisible="False" />
-
-    <!-- ============================================================ -->
-    <!-- POST-AUTH: Flyout menu items                                  -->
-    <!-- ============================================================ -->
-    <FlyoutItem Route="main" FlyoutDisplayOptions="AsMultipleItems">
+    <!--  ============================================================  -->
+    <!--  POST-AUTH: Flyout menu items  -->
+    <!--  ============================================================  -->
+    <FlyoutItem FlyoutDisplayOptions="AsMultipleItems" Route="main">
 
         <ShellContent Route="home"
                       Title="Passwords"
@@ -86,15 +88,17 @@
 
     </FlyoutItem>
 
-    <!-- ============================================================ -->
-    <!-- FLYOUT FOOTER                                                 -->
-    <!-- ============================================================ -->
+    <!--  ============================================================  -->
+    <!--  FLYOUT FOOTER  -->
+    <!--  ============================================================  -->
     <Shell.FlyoutFooter>
         <Grid Padding="20" HeightRequest="60">
-            <Label Text="© 2026 GoatVault"
-                   FontSize="12"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
-                   VerticalOptions="Center" />
+            <Label
+                FontSize="12"
+                Text="© 2026 GoatVault"
+                TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                            Dark={StaticResource Gray400}}"
+                VerticalOptions="Center" />
         </Grid>
     </Shell.FlyoutFooter>
 

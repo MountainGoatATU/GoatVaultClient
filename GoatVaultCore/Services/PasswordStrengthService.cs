@@ -2,9 +2,14 @@
 
 namespace GoatVaultCore.Services;
 
-public static class PasswordStrengthService
+public interface IPasswordStrengthService
 {
-    public static PasswordStrength Evaluate(string? password)
+    PasswordStrength Evaluate(string? password);
+}
+
+public class PasswordStrengthService : IPasswordStrengthService
+{
+    public PasswordStrength Evaluate(string? password)
     {
         if (string.IsNullOrWhiteSpace(password))
         {

@@ -23,6 +23,7 @@ public partial class GoatTipsService : ObservableObject
         _session = session;
         _users = users;
         IsGoatEnabled = Preferences.Default.Get(GoatEnabledKey, true);
+        _vaultScoreCalculatorService = vaultScoreCalculatorService;
     }
 
     public void SetEnabled(bool enabled)
@@ -92,7 +93,7 @@ public partial class GoatTipsService : ObservableObject
         var entries = _session.Vault?.Entries ?? [];
         var masterStrength = _session.MasterPasswordStrength;
 
-        var score = VaultScoreCalculatorService.CalculateScore(
+        var score = _vaultScoreCalculatorService.CalculateScore(
             entries,
             masterStrength,
             user.MfaEnabled);

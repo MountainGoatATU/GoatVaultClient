@@ -10,6 +10,7 @@ public class UserResponse
     public required string Email { get; set; }
     public required bool MfaEnabled { get; set; }
     public required string? MfaSecret { get; set; }
+    public required bool ShamirEnabled { get; set; }
     public required string VaultSalt { get; set; }
     public required VaultEncrypted Vault { get; set; }
     public required DateTime CreatedAtUtc { get; set; }
