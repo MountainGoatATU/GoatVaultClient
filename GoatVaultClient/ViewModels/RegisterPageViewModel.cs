@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 
 namespace GoatVaultClient.ViewModels;
@@ -46,5 +47,11 @@ public partial class RegisterPageViewModel(
     {
         // Navigate back to Login
         await Shell.Current.GoToAsync("//login");
+    }
+    [RelayCommand]
+    private static async Task GoToRecover()
+    {
+        // Navigate back to Login
+        await Shell.Current.GoToAsync(nameof(RecoverSecretPage));
     }
 }

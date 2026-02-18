@@ -69,6 +69,28 @@ public partial class App : Application
         }
     }
 
+    protected override async void OnStart()
+    {
+        base.OnStart();
+
+        // Retrieve the "IsFirstRun" flag. If it doesn't exist, it defaults to true.
+        bool isFirstRun = Preferences.Default.Get("IsFirstRun", true);
+
+        if (isFirstRun)
+        {
+            // Set the flag to false so this block never runs again
+            Preferences.Default.Set("IsFirstRun", false);
+
+            // Route to the Introduction / Onboarding flow
+            await Shell.Current.GoToAsync("//intro");
+        }
+        else
+        {
+            // Route directly to the Login page for returning users
+            await Shell.Current.GoToAsync("//login");
+        }
+    }
+
     protected override void OnSleep()
     {
         // Save when app goes to background

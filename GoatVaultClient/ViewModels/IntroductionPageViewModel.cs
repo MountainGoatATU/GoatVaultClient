@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultCore.Services.Shamir;
 using Microsoft.Extensions.Logging;
+using Xecrets.Slip39;
 
 namespace GoatVaultClient.ViewModels;
 

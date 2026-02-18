@@ -1,64 +1,85 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-             xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
-             xmlns:controls="clr-namespace:GoatVaultClient.Controls"
-             xmlns:converters="clr-namespace:GoatVaultClient.Converters"
-             xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
-             x:Class="GoatVaultClient.MainPage"
-             BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
+<ContentPage
+    x:Class="GoatVaultClient.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:converters="clr-namespace:GoatVaultClient.Converters"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
+    xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
+                                      Dark={x:StaticResource DarkSurface}}">
 
     <Grid>
         <VerticalStackLayout>
-            <controls:SyncStatusBar x:Name="SyncStatusBar"/>
+            <controls:SyncStatusBar x:Name="SyncStatusBar" />
 
             <controls:Component BorderMargin="24,0,24,0">
-                <SearchBar Placeholder="Search passwords..." Text="{Binding SearchText}" HeightRequest="48" />
+                <SearchBar
+                    HeightRequest="48"
+                    Placeholder="Search passwords..."
+                    Text="{Binding SearchText}" />
             </controls:Component>
-            <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto, 0.5*, 0.5*" Margin="{StaticResource layoutMargin}" BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface}, Dark={x:StaticResource DarkSurface}}">
+            <Grid
+                Margin="{StaticResource layoutMargin}"
+                BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
+                                                  Dark={x:StaticResource DarkSurface}}"
+                ColumnDefinitions="Auto, 0.5*, 0.5*"
+                RowDefinitions="Auto,Auto,*">
 
-                <!-- Categories List-->
-                <controls:Component Grid.Row="1" Grid.Column="0" >
+                <!--  Categories List  -->
+                <controls:Component Grid.Row="1" Grid.Column="0">
                     <VerticalStackLayout>
                         <controls:ComponentHeader Title="Categories">
                             <controls:ComponentHeader.Actions>
                                 <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
-                                    <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sort}"
-                                                  Command="{Binding SortCategoriesCommand}"/>
-                                    <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Add}"
-                                                  Command="{Binding CreateCategoryCommand}"/>
+                                    <controls:ImageButton Command="{Binding SortCategoriesCommand}" IconGlyph="{x:Static m:MaterialRounded.Sort}" />
+                                    <controls:ImageButton Command="{Binding CreateCategoryCommand}" IconGlyph="{x:Static m:MaterialRounded.Add}" />
                                 </HorizontalStackLayout>
                             </controls:ComponentHeader.Actions>
-                        </controls:ComponentHeader >
-                        <CollectionView x:Name="CategoriesCollection" ItemsSource="{Binding Categories}" SelectionMode="Single" SelectedItem="{Binding SelectedCategory}">
+                        </controls:ComponentHeader>
+                        <CollectionView
+                            x:Name="CategoriesCollection"
+                            ItemsSource="{Binding Categories}"
+                            SelectedItem="{Binding SelectedCategory}"
+                            SelectionMode="Single">
                             <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="{x:StaticResource sContent}" />
+                                <LinearItemsLayout ItemSpacing="{x:StaticResource sContent}" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
-                                    <controls:CategoryItemCell Text="{Binding Name}"
-                                                       IconGlyph="{x:Static m:MaterialRounded.Folder}"         
-                                                       ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}">
-                                        <!-- Context Menu-->
+                                    <controls:CategoryItemCell
+                                        ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
+                                        IconGlyph="{x:Static m:MaterialRounded.Folder}"
+                                        Text="{Binding Name}">
+                                        <!--  Context Menu  -->
                                         <FlyoutBase.ContextFlyout>
                                             <MenuFlyout>
-                                                <MenuFlyoutItem Text="Edit"
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
-                                                                CommandParameter="{Binding .}">
+                                                <MenuFlyoutItem
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Text="Edit">
                                                     <MenuFlyoutItem.IconImageSource>
-                                                        <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Edit}" Color="{StaticResource Primary}"/>
+                                                        <FontImageSource
+                                                            FontFamily="MaterialRounded"
+                                                            Glyph="{x:Static m:MaterialRounded.Edit}"
+                                                            Color="{StaticResource Primary}" />
                                                     </MenuFlyoutItem.IconImageSource>
                                                 </MenuFlyoutItem>
 
-                                                <MenuFlyoutItem Text="Delete"
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}"
-                                                                CommandParameter="{Binding .}">
+                                                <MenuFlyoutItem
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Text="Delete">
                                                     <MenuFlyoutItem.IconImageSource>
-                                                        <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Delete}" Color="{StaticResource Error}"/>
+                                                        <FontImageSource
+                                                            FontFamily="MaterialRounded"
+                                                            Glyph="{x:Static m:MaterialRounded.Delete}"
+                                                            Color="{StaticResource Error}" />
                                                     </MenuFlyoutItem.IconImageSource>
                                                 </MenuFlyoutItem>
                                             </MenuFlyout>
@@ -69,44 +90,54 @@
                         </CollectionView>
                     </VerticalStackLayout>
                 </controls:Component>
-                <!-- Passsword Entries List -->
+                <!--  Passsword Entries List  -->
                 <controls:Component Grid.Row="1" Grid.Column="1">
                     <VerticalStackLayout>
                         <controls:ComponentHeader Title="Passwords">
                             <controls:ComponentHeader.Actions>
-                                <HorizontalStackLayout Spacing="{x:StaticResource sContent}"
-                                               VerticalOptions="Center">
-                                    <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Sort}"
-                                                  Command="{Binding SortEntriesCommand}"/>
-                                    <controls:ImageButton IconGlyph="{x:Static m:MaterialRounded.Add}"
-                                                  Command="{Binding CreateEntryCommand}"/>
+                                <HorizontalStackLayout Spacing="{x:StaticResource sContent}" VerticalOptions="Center">
+                                    <controls:ImageButton Command="{Binding SortEntriesCommand}" IconGlyph="{x:Static m:MaterialRounded.Sort}" />
+                                    <controls:ImageButton Command="{Binding CreateEntryCommand}" IconGlyph="{x:Static m:MaterialRounded.Add}" />
                                 </HorizontalStackLayout>
                             </controls:ComponentHeader.Actions>
                         </controls:ComponentHeader>
-                        <CollectionView x:Name="EntriesCollection" ItemsSource="{Binding Passwords}" SelectionMode="Single" SelectedItem="{Binding SelectedEntry}">
+                        <CollectionView
+                            x:Name="EntriesCollection"
+                            ItemsSource="{Binding Passwords}"
+                            SelectedItem="{Binding SelectedEntry}"
+                            SelectionMode="Single">
                             <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="{x:StaticResource sContent}" />
+                                <LinearItemsLayout ItemSpacing="{x:StaticResource sContent}" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
-                                    <controls:CategoryItemCell Text="{Binding Site}"
-                                       IconGlyph="{x:Static m:MaterialRounded.Key}"         
-                                       ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}">
-                                        <!-- Context Menu-->
+                                    <controls:CategoryItemCell
+                                        ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
+                                        IconGlyph="{x:Static m:MaterialRounded.Key}"
+                                        Text="{Binding Site}">
+                                        <!--  Context Menu  -->
                                         <FlyoutBase.ContextFlyout>
                                             <MenuFlyout>
-                                                <MenuFlyoutItem Text="Edit"
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
-                                                                CommandParameter="{Binding .}">
+                                                <MenuFlyoutItem
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Text="Edit">
                                                     <MenuFlyoutItem.IconImageSource>
-                                                        <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Edit}" Color="{StaticResource Primary}"/>
+                                                        <FontImageSource
+                                                            FontFamily="MaterialRounded"
+                                                            Glyph="{x:Static m:MaterialRounded.Edit}"
+                                                            Color="{StaticResource Primary}" />
                                                     </MenuFlyoutItem.IconImageSource>
                                                 </MenuFlyoutItem>
-                                                <MenuFlyoutItem Text="Delete"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
-                                                                      CommandParameter="{Binding .}">
+                                                <MenuFlyoutItem
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Text="Delete">
                                                     <MenuFlyoutItem.IconImageSource>
-                                                        <FontImageSource FontFamily="MaterialRounded" Glyph="{x:Static m:MaterialRounded.Delete}" Color="{StaticResource Error}"/>
+                                                        <FontImageSource
+                                                            FontFamily="MaterialRounded"
+                                                            Glyph="{x:Static m:MaterialRounded.Delete}"
+                                                            Color="{StaticResource Error}" />
                                                     </MenuFlyoutItem.IconImageSource>
                                                 </MenuFlyoutItem>
                                             </MenuFlyout>
@@ -117,17 +148,18 @@
                         </CollectionView>
                     </VerticalStackLayout>
                 </controls:Component>
-                <!-- Password Entry Details View -->
-                <controls:Component Grid.Row="1" 
-                                    Grid.Column="2" 
-                                    BorderMargin="0"
-                                    IsVisible="{Binding SelectedEntry, Converter={StaticResource IsNotNullConverter}}">
-                    <controls:EntryDetailView Grid.Column="2" 
-                          BindingContext="{Binding SelectedEntry}">
+                <!--  Password Entry Details View  -->
+                <controls:Component
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    BorderMargin="0"
+                    IsVisible="{Binding SelectedEntry, Converter={StaticResource IsNotNullConverter}}">
+                    <controls:EntryDetailView Grid.Column="2" BindingContext="{Binding SelectedEntry}">
                         <controls:EntryDetailView.Triggers>
-                            <DataTrigger TargetType="controls:EntryDetailView" 
-                                 Binding="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectedEntry}"
-                                 Value="{x:Null}">
+                            <DataTrigger
+                                Binding="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectedEntry}"
+                                TargetType="controls:EntryDetailView"
+                                Value="{x:Null}">
                                 <Setter Property="IsVisible" Value="False" />
                             </DataTrigger>
                         </controls:EntryDetailView.Triggers>
@@ -135,25 +167,49 @@
                 </controls:Component>
             </Grid>
         </VerticalStackLayout>
-        <AbsoluteLayout InputTransparent="True" Margin="20" x:Name="GoatContainer">
-            <!-- Goat Lottie animation -->
+        <AbsoluteLayout
+            x:Name="GoatContainer"
+            Margin="20"
+            InputTransparent="True">
+            <!--  Goat Lottie animation  -->
             <skia:SKLottieView
                 x:Name="GoatMascot"
-                Source="goat.json"
-                RepeatCount="-1"
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                HeightRequest="120"
-                WidthRequest="120"
                 AbsoluteLayout.LayoutBounds="1,1,120,120"
-                AbsoluteLayout.LayoutFlags="PositionProportional"/>
-            <!-- Speech bubble above the goat -->
-            <StackLayout x:Name="GoatBubbleStack" Spacing="0" Opacity="0" Orientation="Vertical" AbsoluteLayout.LayoutBounds="1,0.8,AutoSize,AutoSize" AbsoluteLayout.LayoutFlags="PositionProportional">
-                <Border BackgroundColor="White" StrokeShape="RoundRectangle 12" Padding="12" HorizontalOptions="End">
-                    <Label Text="{Binding GoatComment}" TextColor="Black" FontAttributes="Bold" LineBreakMode="WordWrap" MaxLines="3"/>
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                HeightRequest="120"
+                HorizontalOptions="End"
+                RepeatCount="-1"
+                Source="goat.json"
+                VerticalOptions="End"
+                WidthRequest="120" />
+            <!--  Speech bubble above the goat  -->
+            <StackLayout
+                x:Name="GoatBubbleStack"
+                AbsoluteLayout.LayoutBounds="1,0.8,AutoSize,AutoSize"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                Opacity="0"
+                Orientation="Vertical"
+                Spacing="0">
+                <Border
+                    Padding="12"
+                    BackgroundColor="White"
+                    HorizontalOptions="End"
+                    StrokeShape="RoundRectangle 12">
+                    <Label
+                        FontAttributes="Bold"
+                        LineBreakMode="WordWrap"
+                        MaxLines="3"
+                        Text="{Binding GoatComment}"
+                        TextColor="Black" />
                 </Border>
-                <!-- Small triangle pointing to the goat -->
-                <BoxView WidthRequest="12" HeightRequest="12" BackgroundColor="White" Rotation="45" HorizontalOptions="End" Margin="0,-8,16,0"/>
+                <!--  Small triangle pointing to the goat  -->
+                <BoxView
+                    Margin="0,-8,16,0"
+                    BackgroundColor="White"
+                    HeightRequest="12"
+                    HorizontalOptions="End"
+                    Rotation="45"
+                    WidthRequest="12" />
             </StackLayout>
         </AbsoluteLayout>
     </Grid>
