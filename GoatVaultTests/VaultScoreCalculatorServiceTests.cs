@@ -71,7 +71,7 @@ namespace GoatVaultTests
                 .Returns(new PasswordStrength { Score = 4 });
 
             // Act
-            var result = _service.CalculateScore(entries, "master", true, masterPasswordBreached: true);
+            var result = _service.CalculateScore(entries, "master", true);
 
             // Foundation should be zeroed
             Assert.Equal(0, result.MasterPasswordPercent);

@@ -15,14 +15,6 @@ namespace GoatVaultCore.Services.Secrets
 
     public class VaultScoreCalculatorService
     {
-        public static VaultScoreDetails CalculateScore(
-            IEnumerable<VaultEntry>? entries,
-            string? masterPassword,
-            bool mfaEnabled)
-        {
-            // Master password strength
-            var masterStrength = PasswordStrengthService.Evaluate(masterPassword);
-            int masterPercent = (int)Math.Round((masterStrength.Score / 4.0) * 100, MidpointRounding.AwayFromZero);
         private readonly IPasswordStrengthService _passwordStrengthService;
 
         public VaultScoreCalculatorService(IPasswordStrengthService passwordStrengthService)
@@ -32,8 +24,7 @@ namespace GoatVaultCore.Services.Secrets
         public VaultScoreDetails CalculateScore(
             IEnumerable<VaultEntry> entries,
             string masterPassword,
-            bool mfaEnabled,
-            bool masterPasswordBreached = false)
+            bool mfaEnabled)
         {
             int total = entries.Count();
             int breached = entries.Count(e => e.BreachCount > 0);
@@ -56,13 +47,9 @@ namespace GoatVaultCore.Services.Secrets
 
             // Duplicates and strength
             int duplicateCount = passwordList.GroupBy(p => p).Where(g => g.Count() > 1).Sum(g => g.Count() - 1);
-            int totalStrengthScore = 2 * (passwordList.Sum(p => PasswordStrengthService.Evaluate(p).Score));
-                // Sum password strengths
-                totalStrengthScore += allPasswords
-                    .Sum(pwd => _passwordStrengthService
-                        .Evaluate(pwd).Score);
-            }
-
+            int totalStrengthScore = 2 * (passwordList.Sum(p => _passwordStrengthService.Evaluate(p).Score));
+               
+            
             double uniquenessPoints = passwordCount > 0
                 ? ((passwordCount - duplicateCount) / (double)passwordCount) * 200
                 : 200;
