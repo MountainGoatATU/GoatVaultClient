@@ -135,33 +135,33 @@ public partial class UserPageViewModel : BaseViewModel
 
     public string MasterPasswordCategory => MasterPasswordStrength switch
     {
-        300 => "Very Strong",
-        200 => "Strong",
-        100 => "Weak",
+        >= 300 => "Very Strong",
+        >= 200 => "Strong",
+        >= 100 => "Weak",
         _ => "Poor"
     };
 
     public string AveragePasswordsCategory => AveragePasswordsStrength switch
     {
-        200 => "Very Strong",
-        150 => "Strong",
-        100 => "Weak",
+        >= 200 => "Very Strong",
+        >= 150 => "Strong",
+        >= 100 => "Weak",
         _ => "Poor"
     };
 
     public string OriginalityCategory => ReuseRate switch
     {
-        200 => "Very Strong",
-        150 => "Strong",
-        100 => "Weak",
+        >= 200 => "Very Strong",
+        >= 150 => "Strong",
+        >= 100 => "Weak",
         _ => "Poor"
     };
 
     public string BreachesCategory => BreachesCount switch
     {
-        0 => "Very Strong",
-        1 => "Strong",
-        2 => "Weak",
+        <= 0 => "Very Strong",
+        <= 1 => "Strong",
+        <= 2 => "Weak",
         _ => "Poor"
     };
 
