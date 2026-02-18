@@ -39,6 +39,7 @@ public class RegisterUseCase(
             Email = email.Value,
             AuthSalt = Convert.ToBase64String(authSalt),
             AuthVerifier = Convert.ToBase64String(authVerifier),
+            VaultSalt = Convert.ToBase64String(vaultSalt),
             Vault = encryptedVault
         };
 

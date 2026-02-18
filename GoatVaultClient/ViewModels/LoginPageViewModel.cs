@@ -18,6 +18,7 @@ public partial class LoginPageViewModel(
     ConnectivityService connectivity,
     LoginOnlineUseCase loginOnline,
     LoginOfflineUseCase loginOffline,
+    IUserRepository userRepository,
     ILogger<LoginPageViewModel>? logger = null)
     : BaseViewModel
 {
@@ -77,10 +78,9 @@ public partial class LoginPageViewModel(
 
     private async Task LoadLocalUsersAsync()
     {
-        // TODO: Fix
-        // var users = await syncing.GetAllLocalUsersAsync();
-        // LocalUsers = new ObservableCollection<User>(users);
-        // HasLocalUsers = LocalUsers.Count > 0;
+        var users = await userRepository.GetAllAsync();
+        LocalUsers = new ObservableCollection<User>(users);
+        HasLocalUsers = LocalUsers.Count > 0;
     }
 
     [RelayCommand]
@@ -92,9 +92,17 @@ public partial class LoginPageViewModel(
             IsBusy = true;
 
             if (IsOnline)
+            {
                 await LoginOnline();
+                syncing.StartPeriodicSync(TimeSpan.FromMinutes(2)); // Start auto-sync
+            }
             else
+            {
                 await LoginOffline();
+                // We might want to sync if connection comes back? 
+                // For now, only start periodic sync if online login, as it implies we have fresh token?
+                // Actually LoginOffline doesn't get a token usually unless we refresh it.
+            }
 
             // Navigate to main
             await Shell.Current.GoToAsync("//main/home");
@@ -156,8 +164,12 @@ public partial class LoginPageViewModel(
     [RelayCommand]
     private async Task RemoveOfflineUser(User user)
     {
-        // TODO: Fix
-        // await syncing.RemoveLocalUserAsync(user);
+        var confirm = await Shell.Current.DisplayAlert("Remove User", 
+            $"Are you sure you want to remove {user.Email} from this device?", "Yes", "No");
+            
+        if (!confirm) return;
+        
+        await userRepository.DeleteAsync(user);
         await LoadLocalUsersAsync();
     }
 

@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Abstractions;
 
 namespace GoatVaultInfrastructure.Services.API;
 

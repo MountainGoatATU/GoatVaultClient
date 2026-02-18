@@ -59,32 +59,49 @@ public class LoginOnlineUseCase(
             throw new InvalidOperationException("Vault is missing.");
 
         // 6. Decrypt vault
-        var vaultSalt = userResponse.Vault.VaultSalt;
+        // VaultSalt is now directly on the user response
+        var vaultEncrypted = userResponse.Vault;
+        var vaultSalt = Convert.FromBase64String(userResponse.VaultSalt);
+        
         var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
-        var decryptedVault = vaultCrypto.Decrypt(userResponse.Vault, masterKey, vaultSalt);
+        var decryptedVault = vaultCrypto.Decrypt(vaultEncrypted, masterKey);
 
         // 7. Save to local DB (for offline login & sync baseline)
-        var localUser = new User
-        {
-            Id = userId,
-            Email = email,
-            AuthSalt = authSalt,
-            AuthVerifier = authVerifier,
-            MfaEnabled = userResponse.MfaEnabled,
-            VaultSalt = vaultSalt,
-            Vault = userResponse.Vault,
-            CreatedAtUtc = userResponse.CreatedAtUtc,
-            UpdatedAtUtc = userResponse.UpdatedAtUtc
-        };
-
-        // Check if exists to preserve MfaSecret if we had it
         var existing = await userRepository.GetByIdAsync(userId);
+        User userToSave;
+
         if (existing != null)
         {
-            localUser.MfaSecret = existing.MfaSecret;
+            // Update existing tracked entity to avoid EF Core tracking conflict
+            existing.Email = email;
+            existing.AuthSalt = authSalt;
+            existing.AuthVerifier = authVerifier;
+            existing.MfaEnabled = userResponse.MfaEnabled;
+            // Preserve existing.MfaSecret if any
+            existing.VaultSalt = vaultSalt;
+            existing.Vault = vaultEncrypted;
+            existing.CreatedAtUtc = userResponse.CreatedAtUtc;
+            existing.UpdatedAtUtc = userResponse.UpdatedAtUtc;
+            
+            userToSave = existing;
+        }
+        else
+        {
+            userToSave = new User
+            {
+                Id = userId,
+                Email = email,
+                AuthSalt = authSalt,
+                AuthVerifier = authVerifier,
+                MfaEnabled = userResponse.MfaEnabled,
+                VaultSalt = vaultSalt,
+                Vault = vaultEncrypted,
+                CreatedAtUtc = userResponse.CreatedAtUtc,
+                UpdatedAtUtc = userResponse.UpdatedAtUtc
+            };
         }
 
-        await userRepository.SaveAsync(localUser);
+        await userRepository.SaveAsync(userToSave);
 
         // 8. Start session
         session.Start(userId, masterKey, decryptedVault);

@@ -13,12 +13,15 @@ public sealed class SaveVaultUseCase(
         var vault = session.Vault
                     ?? throw new InvalidOperationException("Vault not loaded.");
 
-        var user = await users.GetByIdAsync(session.UserId!.Value)
-                   ?? throw new InvalidOperationException("User not found.");
+        var user = await users.GetByIdAsync(session.UserId!.Value);
+
+        if (user == null)
+            throw new InvalidOperationException("User not found.");
 
         var encrypted = crypto.Encrypt(vault, masterKey, user.VaultSalt);
 
         user.Vault = encrypted;
+        user.UpdatedAtUtc = DateTime.UtcNow;
 
         await users.SaveAsync(user);
     }

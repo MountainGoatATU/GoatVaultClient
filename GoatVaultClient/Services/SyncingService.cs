@@ -3,9 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.API;
-using GoatVaultInfrastructure.Services.API;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 using Email = GoatVaultCore.Models.Email;
 
 namespace GoatVaultClient.Services;
@@ -14,7 +14,7 @@ public class SyncingService(
     IConfiguration configuration,
     ISessionContext session,
     IServiceProvider services,
-    IHttpService http,
+    IServerAuthService serverAuth,
     IVaultCrypto vaultCrypto,
     ILogger<SyncingService>? logger = null)
     : ObservableObject, ISyncingService
@@ -111,6 +111,7 @@ public class SyncingService(
     public event EventHandler? SyncStarted;
     public event EventHandler? SyncCompleted;
     public event EventHandler<SyncFailedEventArgs>? SyncFailed;
+    public event EventHandler? AuthenticationRequired;
 
     #endregion
     #region Public Methods
@@ -169,8 +170,6 @@ public class SyncingService(
             return;
         }
 
-        var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
-
         if (session.UserId == null || session.Vault == null)
         {
             logger?.LogWarning("No user is currently logged in");
@@ -186,58 +185,47 @@ public class SyncingService(
 
             logger?.LogInformation("Starting sync operation");
 
-            // TODO: Fix
-            /*
-            var localCopy = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser?.Id ?? throw new NullReferenceException());
+            using var scope = services.CreateScope();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
-            var userResponse = await http.GetAsync<UserResponse>(
-                $"{url}v1/users/{vaultSessionService.CurrentUser.Id}"
-            );
+            // 1. Get server version
+            var serverUser = await serverAuth.GetUserAsync(session.UserId.Value);
 
-            if (userResponse == null)
-                throw new InvalidOperationException("Failed to load user profile");
+            // 2. Get local version
+            var localUser = await userRepository.GetByIdAsync(session.UserId.Value);
 
-            if (localCopy == null)
+            if (localUser == null)
             {
-                logger?.LogInformation("Local copy missing - pulling server copy");
+                // Should not happen if session is active
+                logger?.LogWarning("Local user not found, pulling from server.");
+                await HandleServerNewer(null, serverUser, userRepository);
+            }
+            else
+            {
+                // Use a tolerance for comparison (e.g., 1 second) to handle precision differences
+                var timeDiff = (localUser.UpdatedAtUtc - serverUser.UpdatedAtUtc).TotalSeconds;
 
-                await vaultService.SaveUserToLocalAsync(new DbModel
+                // Log the timestamps for debugging
+                logger?.LogInformation("Sync Check - Local: {LocalTime}, Server: {ServerTime}, Diff: {Diff}s", 
+                    localUser.UpdatedAtUtc.ToString("O"), 
+                    serverUser.UpdatedAtUtc.ToString("O"), 
+                    timeDiff);
+
+                if (Math.Abs(timeDiff) < 1.0)
                 {
-                    Id = userResponse.Id,
-                    Email = userResponse.Email,
-                    Vault = userResponse.Vault,
-                    AuthSalt = userResponse.AuthSalt,
-                    UpdatedAtUtc = userResponse.UpdatedAtUtc,
-                    CreatedAtUtc = userResponse.CreatedAtUtc,
-                    MfaEnabled = userResponse.MfaEnabled,
-                    MfaSecret = userResponse.MfaSecret
-                });
-
-                return;
+                     logger?.LogInformation("Data already in sync (within tolerance)");
+                }
+                else if (timeDiff > 0)
+                {
+                    logger?.LogInformation("Local data is newer ({Local} > {Server}), pushing to server", localUser.UpdatedAtUtc, serverUser.UpdatedAtUtc);
+                    await HandleLocalNewer(localUser, userRepository);
+                }
+                else
+                {
+                    logger?.LogInformation("Server data is newer ({Server} > {Local}), pulling from server", serverUser.UpdatedAtUtc, localUser.UpdatedAtUtc);
+                    await HandleServerNewer(localUser, serverUser, userRepository);
+                }
             }
-
-
-            var compareResult = DateTime.Compare(localCopy.UpdatedAt, userResponse.UpdatedAt);
-
-            switch (compareResult)
-            {
-                case 0:
-                    logger?.LogInformation("Data already in sync");
-                    SyncStatus = SyncStatus.Synced;
-                    SyncStatusMessage = "Synced";
-                    LastSynced = DateTime.UtcNow;
-                    SyncCompleted?.Invoke(this, EventArgs.Empty);
-                    return;
-                case > 0:
-                    logger?.LogInformation("Local data is newer, updating server");
-                    await HandleLocalNewer(localCopy, url);
-                    break;
-                default:
-                    logger?.LogInformation("Server data is newer, updating local");
-                    await HandleServerNewer(localCopy, userResponse);
-                    break;
-            }
-            */
 
             SyncStatus = SyncStatus.Synced;
             SyncStatusMessage = "Synced";
@@ -259,6 +247,7 @@ public class SyncingService(
         }
     }
 
+
     public async Task Save()
     {
         if (session.UserId == null || session.Vault == null)
@@ -271,14 +260,7 @@ public class SyncingService(
         {
             logger?.LogInformation("Saving vault locally");
 
-            var updatedVault = new VaultDecrypted
-            {
-                Categories = session.Vault.Categories,
-                Entries = session.Vault.Entries
-            };
-
-            // var encryptedVault = vaultCrypto.Encrypt(updatedVault, session.GetMasterKey());
-
+            // Trigger the use case that encrypts and saves to local DB
             using var scope = services.CreateScope();
             var saveVault = scope.ServiceProvider.GetRequiredService<SaveVaultUseCase>();
             await saveVault.ExecuteAsync();
@@ -290,6 +272,12 @@ public class SyncingService(
             SyncStatusMessage = "Changes pending";
 
             logger?.LogInformation("Vault saved successfully");
+
+            // Trigger sync to push changes if auto-sync is on
+            if (HasAutoSync)
+            {
+                 _ = Task.Run(Sync);
+            }
         }
         catch (Exception ex)
         {
@@ -315,75 +303,79 @@ public class SyncingService(
         }
     }
 
-    private async Task HandleLocalNewer(User user, string url)
+    private async Task HandleLocalNewer(User localUser, IUserRepository userRepository)
     {
-        var decryptedLocalVault = vaultCrypto.Decrypt(user.Vault, session.GetMasterKey());
+        if (localUser.Vault == null) return;
 
-        // TODO: Fix
-        /*
-        vaultSessionService.CurrentUser.Id = user.Id;
-        vaultSessionService.CurrentUser.Email = user.Email;
-        vaultSessionService.CurrentUser.MfaEnabled = user.MfaEnabled;
-        vaultSessionService.CurrentUser.MfaSecret = user.MfaSecret;
-        vaultSessionService.CurrentUser.UpdatedAtUtc = user.UpdatedAtUtc;
-        vaultSessionService.CurrentUser.CreatedAtUtc = user.CreatedAtUtc;
-        vaultSessionService.CurrentUser.Vault = user.Vault;
-        vaultSessionService.DecryptedVault = decryptedLocalVault;
-        */
-
-        await UpdateFromLocalToServer(url);
-    }
-
-    private async Task HandleServerNewer(User user, UserResponse userOnServer)
-    {
-        var decryptedLocalVault = vaultCrypto.Decrypt(user.Vault, session.GetMasterKey());
-
-        // TODO: Fix
-        /*
-        vaultSessionService.CurrentUser.Id = userOnServer.Id;
-        vaultSessionService.CurrentUser.Email = userOnServer.Email;
-        vaultSessionService.CurrentUser.MfaEnabled = userOnServer.MfaEnabled;
-        vaultSessionService.CurrentUser.MfaSecret = userOnServer.MfaSecret;
-        vaultSessionService.CurrentUser.UpdatedAt = userOnServer.UpdatedAt;
-        vaultSessionService.CurrentUser.CreatedAt = userOnServer.CreatedAt;
-        vaultSessionService.CurrentUser.Vault = userOnServer.Vault;
-        vaultSessionService.DecryptedVault = decryptedServerVault;
-        */
-
-        await UpdateFromServerToLocal(user, userOnServer);
-    }
-
-    private async Task UpdateFromLocalToServer(string url)
-    {
-        if (session.Vault is null)
-            return;
-
-        // var encryptedVault = vaultCrypto.Encrypt(session.Vault, session.GetMasterKey());
-
-        /*
-        var updateUserRequest = new UserRequest
+        var request = new UpdateUserRequest
         {
-            Email = vaultSessionService.CurrentUser.Email,
-            MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
-            MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
-            Vault = encryptedVault,
+            Vault = localUser.Vault,
+            VaultSalt = Convert.ToBase64String(localUser.VaultSalt), // Send VaultSalt separately
+            Email = localUser.Email.Value,
+            MfaEnabled = localUser.MfaEnabled
         };
 
-        await http.PatchAsync<UserResponse>(
-            $"{url}v1/users/{vaultSessionService.CurrentUser.Id}",
-            updateUserRequest
-        );
-        */
+        var updatedServerUser = await serverAuth.UpdateUserAsync(localUser.Id, request);
+
+        // Update local timestamp
+        localUser.UpdatedAtUtc = updatedServerUser.UpdatedAtUtc;
+        await userRepository.SaveAsync(localUser);
     }
 
-    private async Task UpdateFromServerToLocal(User user, UserResponse userOnServer)
+    private async Task HandleServerNewer(User? localUser, UserResponse serverUser, IUserRepository userRepository)
     {
-        user.Email = new Email(userOnServer.Email);
-        user.Vault = userOnServer.Vault;
-        user.UpdatedAtUtc = userOnServer.UpdatedAtUtc;
+        // 1. Decrypt new vault
+        var masterKey = session.GetMasterKey();
 
-        // TODO: Fix
-        // await vaultService.UpdateUserInLocalAsync(user);
+        VaultDecrypted decryptedVault;
+        try
+        {
+            decryptedVault = vaultCrypto.Decrypt(serverUser.Vault, masterKey);
+        }
+        catch (CryptographicException)
+        {
+             logger?.LogWarning("Failed to decrypt server vault. The password might have changed on another device.");
+             AuthenticationRequired?.Invoke(this, EventArgs.Empty);
+             throw; 
+        }
+
+        // 2. Update Session
+        session.UpdateVault(decryptedVault);
+        
+        // Re-fetch the user to ensure we are updating the tracked entity if it exists
+        var existingUser = await userRepository.GetByIdAsync(Guid.Parse(serverUser.Id));
+
+        if (existingUser != null)
+        {
+             localUser = existingUser;
+        }
+
+        // 3. Update Local DB
+        if (localUser == null)
+        {
+            localUser = new User
+            {
+                Id = Guid.Parse(serverUser.Id),
+                AuthSalt = Convert.FromBase64String(serverUser.AuthSalt),
+                // AuthVerifier and MfaSecret are not returned by GetUser
+                CreatedAtUtc = serverUser.CreatedAtUtc,
+                AuthVerifier = [], // Initialize to empty for now
+                MfaSecret = []
+            };
+        }
+        else
+        {
+             // Preserve existing AuthVerifier/MfaSecret if updating existing user
+             localUser.AuthSalt = Convert.FromBase64String(serverUser.AuthSalt);
+        }
+
+        localUser.Email = new Email(serverUser.Email);
+        localUser.Vault = serverUser.Vault;
+        localUser.VaultSalt = Convert.FromBase64String(serverUser.VaultSalt); // Use user-level VaultSalt
+        localUser.MfaEnabled = serverUser.MfaEnabled;
+        localUser.UpdatedAtUtc = serverUser.UpdatedAtUtc;
+
+        await userRepository.SaveAsync(localUser);
     }
 
     #endregion

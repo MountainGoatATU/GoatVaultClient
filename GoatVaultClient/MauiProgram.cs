@@ -115,7 +115,7 @@ public static class MauiProgram
         builder.Services.AddTransient<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<ICryptoService, CryptoService>();
         builder.Services.AddSingleton<IVaultCrypto, VaultCrypto>();
-        builder.Services.AddSingleton<IServerAuthService, ServerAuthService>();
+        // builder.Services.AddSingleton<IServerAuthService, ServerAuthService>();
         builder.Services.AddSingleton<IAuthTokenService, AuthTokenService>();
         builder.Services.AddSingleton<JwtUtils>();
 
@@ -160,21 +160,25 @@ public static class MauiProgram
 
         #endregion
 
-        // HTTP
-        var serverBaseUrl = builder.Configuration["API_BASE_URL"];
+        builder.Services.AddTransient<AuthenticatedHttpHandler>(sp =>
+        {
+            var serverBaseUrl = sp.GetRequiredService<IConfiguration>()["API_BASE_URL"];
+            var authService = sp.GetRequiredService<IAuthTokenService>();
+            var jwtUtils = sp.GetRequiredService<JwtUtils>();
+            var logger = sp.GetService<ILogger<AuthenticatedHttpHandler>>();
+            return new AuthenticatedHttpHandler(
+                authService,
+                jwtUtils,
+                $"{serverBaseUrl}v1/auth/refresh",
+                logger
+            );
+        });
+
+        builder.Services.AddHttpClient<IServerAuthService, ServerAuthService>()
+            .AddHttpMessageHandler<AuthenticatedHttpHandler>();
+
         builder.Services.AddHttpClient<IHttpService, HttpService>()
-            .AddHttpMessageHandler(sp =>
-            {
-                var authService = sp.GetRequiredService<IAuthTokenService>();
-                var jwtUtils = sp.GetRequiredService<JwtUtils>();
-                var logger = sp.GetService<ILogger<AuthenticatedHttpHandler>>();
-                return new AuthenticatedHttpHandler(
-                    authService,
-                    jwtUtils,
-                    $"{serverBaseUrl}v1/auth/refresh",
-                    logger
-                );
-            });
+            .AddHttpMessageHandler<AuthenticatedHttpHandler>();
 
         #region App pages & view models
 

@@ -1,9 +1,6 @@
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
-using GoatVaultCore.Services;
-using GoatVaultInfrastructure.Services.API;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
 

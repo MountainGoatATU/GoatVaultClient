@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace GoatVaultCore.Abstractions;
 
@@ -26,6 +26,7 @@ public interface ISyncingService : INotifyPropertyChanged
     event EventHandler? SyncStarted;
     event EventHandler? SyncCompleted;
     event EventHandler<SyncFailedEventArgs>? SyncFailed;
+    event EventHandler? AuthenticationRequired;
 }
 
 public enum SyncStatus

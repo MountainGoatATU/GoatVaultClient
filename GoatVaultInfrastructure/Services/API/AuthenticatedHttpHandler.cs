@@ -1,4 +1,4 @@
-﻿using GoatVaultCore.Models.API;
+using GoatVaultCore.Models.API;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -16,6 +16,12 @@ public class AuthenticatedHttpHandler(
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var token = authTokenService.GetToken();
+        
+        if (logger != null)
+        {
+            var fragment = !string.IsNullOrEmpty(token) && token.Length > 10 ? token[..10] : "null/empty";
+            logger.LogInformation("AuthenticatedHttpHandler processing request to {Uri}. Token: {TokenFragment}...", request.RequestUri, fragment);
+        }
 
         if (!string.IsNullOrWhiteSpace(token) && jwtUtils.IsExpired(token))
         {

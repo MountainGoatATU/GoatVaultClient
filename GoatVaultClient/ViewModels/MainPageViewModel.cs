@@ -9,7 +9,7 @@ using GoatVaultCore.Abstractions;
 
 namespace GoatVaultClient.ViewModels
 {
-    public partial class MainPageViewModel : BaseViewModel
+    public partial class MainPageViewModel : BaseViewModel, IDisposable
     {
         private readonly LoadVaultUseCase _loadVault;
         private readonly ISessionContext _sessionContext;
@@ -68,6 +68,7 @@ namespace GoatVaultClient.ViewModels
             // _pwnedPasswordService = pwnedPasswordService;
 
             _sessionContext.VaultChanged += OnVaultChanged;
+            _syncingService.AuthenticationRequired += OnAuthenticationRequired;
 
             StartRandomGoatComments();
             Task.Run(async () => await InitializeAsync());
@@ -84,6 +85,25 @@ namespace GoatVaultClient.ViewModels
                      ReloadVaultData();
                  }
              });
+        }
+
+        private async void OnAuthenticationRequired(object? sender, EventArgs e)
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await Application.Current.MainPage.DisplayAlert("Session Expired",
+                    "Your password has changed on another device. Please log in again.", "OK");
+
+                // Navigate to login (using absolute route to clear stack)
+                await Shell.Current.GoToAsync("//login");
+            });
+        }
+
+        public void Dispose()
+        {
+            _sessionContext.VaultChanged -= OnVaultChanged;
+            _syncingService.AuthenticationRequired -= OnAuthenticationRequired;
+            GoatTipsService.PropertyChanged -= OnGoatTipsPropertyChanged;
         }
 
         private async Task InitializeAsync() => await LoadVaultAsync();
@@ -190,29 +210,30 @@ namespace GoatVaultClient.ViewModels
         #endregion
 
         #region Goat Comments
-
+        
         public void StartRandomGoatComments()
         {
             GoatTipsService.StartTips();
+            GoatTipsService.PropertyChanged += OnGoatTipsPropertyChanged;
+        }
 
-            GoatTipsService.PropertyChanged += (s, e) =>
+        private void OnGoatTipsPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
             {
-                switch (e.PropertyName)
-                {
-                    case nameof(GoatTipsService.CurrentTip):
-                        if (GoatTipsService.CurrentTip != null)
-                            GoatComment = GoatTipsService.CurrentTip;
-                        break;
+                case nameof(GoatTipsService.CurrentTip):
+                    if (GoatTipsService.CurrentTip != null)
+                        GoatComment = GoatTipsService.CurrentTip;
+                    break;
 
-                    case nameof(GoatTipsService.IsTipVisible):
-                    case nameof(GoatTipsService.IsGoatEnabled):
-                        var show = GoatTipsService is { IsGoatEnabled: true, IsTipVisible: true };
-                        IsGoatCommentVisible = show;
-                        if (!show)
-                            GoatComment = string.Empty;
-                        break;
-                }
-            };
+                case nameof(GoatTipsService.IsTipVisible):
+                case nameof(GoatTipsService.IsGoatEnabled):
+                    var show = GoatTipsService is { IsGoatEnabled: true, IsTipVisible: true };
+                    IsGoatCommentVisible = show;
+                    if (!show)
+                        GoatComment = string.Empty;
+                    break;
+            }
         }
 
         #endregion
