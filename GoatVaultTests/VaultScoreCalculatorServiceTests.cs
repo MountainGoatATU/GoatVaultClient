@@ -62,7 +62,10 @@ namespace GoatVaultTests
         public void CalculateScore_MasterPasswordBreached_ZeroesFoundation()
         {
             // Arrange
-            var entries = CreateEntries(("site", "pass1", 0));
+            var entries = CreateEntries(
+                ("site", "pass1", 0),
+                ("master-site", "master", 1)
+            );
 
             _strengthMock.Setup(x => x.Evaluate("master"))
                 .Returns(new PasswordStrength { Score = 4 });

@@ -41,6 +41,13 @@ namespace GoatVaultCore.Services.Secrets
                 _ => 0
             };
 
+            bool masterBreached = entries.Any(e => !string.IsNullOrEmpty(e.Password) && e.Password == masterPassword && e.BreachCount > 0);
+            if (masterBreached)
+            {
+                foundationPoints = 0;
+                masterPercent = 0;
+            }
+
             var passwordList = entries?.Where(e => !string.IsNullOrEmpty(e.Password)).Select(e => e.Password!).ToList()
                                ?? new List<string>();
             int passwordCount = passwordList.Count;
