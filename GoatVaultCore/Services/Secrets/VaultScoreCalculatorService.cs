@@ -24,8 +24,7 @@ namespace GoatVaultCore.Services.Secrets
         public VaultScoreDetails CalculateScore(
             IEnumerable<VaultEntry> entries,
             string masterPassword,
-            bool mfaEnabled,
-            bool masterPasswordBreached = false)
+            bool mfaEnabled)
         {
             int total = entries.Count();
             int breached = entries.Count(e => e.BreachCount > 0);
