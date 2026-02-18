@@ -51,40 +51,26 @@
     <!--  ============================================================  -->
     <!--  PRE-AUTH: Hidden from flyout menu  -->
     <!--  ============================================================  -->
+
     <ShellContent
         ContentTemplate="{DataTemplate pages:IntroductionPage}"
         FlyoutItemIsVisible="False"
         Route="intro"
         Shell.NavBarIsVisible="False" />
-
-    <ShellContent
-        ContentTemplate="{DataTemplate pages:RecoverSecretPage}"
-        FlyoutItemIsVisible="False"
-        Route="recoverKey"
-        Shell.NavBarIsVisible="False" />
-
-    <ShellContent
-        ContentTemplate="{DataTemplate pages:SplitSecretPage}"
-        FlyoutItemIsVisible="False"
-        Route="splitKey"
-        Shell.NavBarIsVisible="False" />
-
     <ShellContent
         ContentTemplate="{DataTemplate pages:LoginPage}"
         FlyoutItemIsVisible="False"
         Route="login"
         Shell.NavBarIsVisible="False" />
-
     <ShellContent
         ContentTemplate="{DataTemplate pages:RegisterPage}"
         FlyoutItemIsVisible="False"
         Route="register"
         Shell.NavBarIsVisible="False" />
-
     <ShellContent
         ContentTemplate="{DataTemplate pages:GratitudePage}"
         FlyoutItemIsVisible="False"
-        Route="gratitude"
+        Route="register"
         Shell.NavBarIsVisible="False" />
 
     <!--  ============================================================  -->
@@ -120,6 +106,12 @@
                                    Color={AppThemeBinding Light={StaticResource LightOnSurface},
                                                           Dark={StaticResource DarkOnSurface}}}"
             Route="user"
+            Shell.NavBarIsVisible="False" />
+
+        <ShellContent
+            ContentTemplate="{DataTemplate pages:SplitSecretPage}"
+            FlyoutItemIsVisible="False"
+            Route="splitKey"
             Shell.NavBarIsVisible="False" />
 
     </FlyoutItem>
