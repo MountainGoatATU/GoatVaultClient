@@ -22,7 +22,7 @@
                        HorizontalOptions="Center"/>
                 <Grid ColumnDefinitions="*,*,*,*,*" RowDefinitions="Auto">
                     <VerticalStackLayout Grid.Column="0" Spacing="6" HorizontalOptions="Center">
-                        <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="100" HeightRequest="150" WidthRequest="150">
+                        <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="400" HeightRequest="150" WidthRequest="150">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries GaugeValue="{Binding MasterPasswordStrength}" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
@@ -31,10 +31,11 @@
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
                         <Label Text="Master Password Strength" FontSize="14" HorizontalOptions="Center"/>
+                        <Label Text="{Binding MasterPasswordCategory}" FontSize="13" TextColor="Gray" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Grid.Column="1" Spacing="6" HorizontalOptions="Center">
-                        <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="100" HeightRequest="150" WidthRequest="150">
+                        <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="200" HeightRequest="150" WidthRequest="150">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries GaugeValue="{Binding AveragePasswordsStrength}" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
@@ -43,10 +44,11 @@
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
                         <Label Text="Average Password Strength" FontSize="14" HorizontalOptions="Center"/>
+                        <Label Text="{Binding AveragePasswordsCategory}" FontSize="13" TextColor="Gray" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Grid.Column="2" Spacing="6" HorizontalOptions="Center">
-                        <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="100" HeightRequest="150" WidthRequest="150">
+                        <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="200" HeightRequest="150" WidthRequest="150">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries GaugeValue="{Binding ReuseRate}" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
@@ -55,6 +57,7 @@
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
                         <Label Text="Password Originality" FontSize="14" HorizontalOptions="Center"/>
+                        <Label Text="{Binding OriginalityCategory}" FontSize="13" TextColor="Gray" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Grid.Column="3" Spacing="6" HorizontalOptions="Center">
@@ -67,10 +70,11 @@
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
                         <Label Text="Compromised Passwords" FontSize="14" HorizontalOptions="Center"/>
+                        <Label Text="{Binding BreachesCategory}" FontSize="13" TextColor="Gray" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Grid.Column="4" Spacing="6" HorizontalOptions="Center">
-                        <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="100" HeightRequest="150" WidthRequest="150">
+                        <lvc:PieChart InitialRotation="-90" MinValue="0" MaxValue="200" HeightRequest="150" WidthRequest="150">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries GaugeValue="{Binding MfaPercent}" DataLabelsSize="20" MaxRadialColumnWidth="50"/>
@@ -79,6 +83,7 @@
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
                         <Label Text="MFA" FontSize="14" HorizontalOptions="Center"/>
+                        <Label Text="{Binding MfaCategory}" FontSize="13" TextColor="Gray" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </Grid>
             </VerticalStackLayout>

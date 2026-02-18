@@ -91,6 +91,12 @@ namespace GoatVaultClient.ViewModels
             VaultScore = score.VaultScore;
             VaultTierText = $"{GetVaultTier(VaultScore)} ({VaultScore:0}/1000)";
             BreachesCount = score.BreachesCount;
+
+            OnPropertyChanged(nameof(MasterPasswordCategory));
+            OnPropertyChanged(nameof(AveragePasswordsCategory));
+            OnPropertyChanged(nameof(OriginalityCategory));
+            OnPropertyChanged(nameof(BreachesCategory));
+            OnPropertyChanged(nameof(MfaCategory));
         }
 
 
@@ -105,6 +111,29 @@ namespace GoatVaultClient.ViewModels
                 _ => "The Dead Meat (< 300)"
             };
         }
+
+        public string MasterPasswordCategory =>
+            MasterPasswordStrength >= 300 ? "Very Strong" :
+            MasterPasswordStrength >= 200 ? "Strong" :
+            MasterPasswordStrength >= 100 ? "Weak" : "Poor";
+
+        public string AveragePasswordsCategory =>
+            AveragePasswordsStrength >= 200 ? "Very Strong" :
+            AveragePasswordsStrength >= 150 ? "Strong" :
+            AveragePasswordsStrength >= 100 ? "Weak" : "Poor";
+
+        public string OriginalityCategory =>
+            ReuseRate >= 200 ? "Very Strong" :
+            ReuseRate >= 150 ? "Strong" :
+            ReuseRate >= 100 ? "Weak" : "Poor";
+
+        public string BreachesCategory =>
+            BreachesCount == 0 ? "Very Strong" :
+            BreachesCount == 1 ? "Strong" :
+            BreachesCount == 2 ? "Weak" : "Poor";
+
+        public string MfaCategory =>
+            MfaEnabled ? "Very Strong" : "Poor";
 
         [RelayCommand]
         private void ToggleGoat()
