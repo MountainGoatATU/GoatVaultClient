@@ -68,10 +68,7 @@ public partial class UserPageViewModel : BaseViewModel
         Task.Run(InitializeAsync);
     }
 
-    private void OnVaultChanged(object? sender, EventArgs e)
-    {
-        Task.Run(RefreshVaultScoreAsync);
-    }
+    private void OnVaultChanged(object? sender, EventArgs e) => Task.Run(RefreshVaultScoreAsync);
 
     private async Task InitializeAsync()
     {
