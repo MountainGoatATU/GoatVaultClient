@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultCore.Models.Shamir;
 using GoatVaultCore.Services.Shamir;
@@ -64,12 +64,11 @@ public partial class SplitSecretViewModel(ShamirSSService st) : BaseViewModel
     [RelayCommand(CanExecute = nameof(CanSplit))]
     private async Task SplitAsync()
     {
-        IsBusy = true;
         HasError = false;
         ErrorMessage = string.Empty;
         GeneratedShares.Clear();
 
-        try
+        await SafeExecuteAsync(async () =>
         {
             // SLIP-39 generation
             var mnemonics = await Task.Run(() =>
@@ -85,17 +84,7 @@ public partial class SplitSecretViewModel(ShamirSSService st) : BaseViewModel
             }
 
             HasResults = true;
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-            HasError = true;
-            HasResults = false;
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     [RelayCommand]

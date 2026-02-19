@@ -3,19 +3,15 @@ using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class OnboardingPageViewModel(ILogger<OnboardingPageViewModel>? logger = null) : BaseViewModel
+public partial class OnboardingPageViewModel : BaseViewModel
 {
     [RelayCommand]
     private async Task GetStarted()
     {
-        try
+        await SafeExecuteAsync(async () =>
         {
             // Navigate to Login Page
             await Shell.Current.GoToAsync("//login");
-        }
-        catch (Exception e)
-        {
-            logger?.LogError(e, "Error navigating to login page");
-        }
+        });
     }
 }
