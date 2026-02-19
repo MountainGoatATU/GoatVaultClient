@@ -1,11 +1,10 @@
-﻿using GoatVaultCore.Abstractions;
-using GoatVaultCore.Services;
+﻿using GoatVaultCore.Services;
 
 namespace GoatVaultTests;
 
 public class PasswordStrengthTests
 {
-    private readonly IPasswordStrengthService _service = new PasswordStrengthService();
+    private readonly PasswordStrengthService _passwordStrength = new PasswordStrengthService();
 
     [Theory]
     [InlineData("IAtePizzaTodayAndItWasGood123!", 3, 4)]
@@ -18,7 +17,7 @@ public class PasswordStrengthTests
         int maxScore)
     {
         // Act
-        var result = _service.Evaluate(password);
+        var result = _passwordStrength.Evaluate(password);
 
         // Assert
         Assert.InRange(result.Score, minScore, maxScore);

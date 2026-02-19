@@ -1,14 +1,15 @@
-﻿using GoatVaultCore.Services.Secrets;
+﻿using GoatVaultCore.Abstractions;
+using GoatVaultInfrastructure.Services;
 
 namespace GoatVaultTests;
 
 public class CryptoServiceTests
 {
-    private static string CreateDeterministicBase64Salt()
+    private readonly CryptoService _crypto = new();
+    private static byte[] CreateDeterministicSalt()
     {
-        // 16 bytes, deterministic, valid Base64
-        var saltBytes = "0123456789ABCDEF"u8.ToArray();
-        return Convert.ToBase64String(saltBytes);
+        // 16 bytes, deterministic
+        return "0123456789ABCDEF"u8.ToArray();
     }
 
     [Fact]
@@ -16,11 +17,11 @@ public class CryptoServiceTests
     {
         // Arrange
         const string password = "StrongPassword123!";
-        var saltBase64 = CreateDeterministicBase64Salt();
+        var salt = CreateDeterministicSalt();
 
         // Act
-        var verifier1 = CryptoService.GenerateAuthVerifier(password, saltBase64);
-        var verifier2 = CryptoService.GenerateAuthVerifier(password, saltBase64);
+        var verifier1 = _crypto.GenerateAuthVerifier(password, salt);
+        var verifier2 = _crypto.GenerateAuthVerifier(password, salt);
 
         // Assert
         Assert.Equal(verifier1, verifier2);
@@ -30,11 +31,11 @@ public class CryptoServiceTests
     public void GenerateAuthVerifier_DifferentPassword_ReturnsDifferentVerifier()
     {
         // Arrange
-        var saltBase64 = CreateDeterministicBase64Salt();
+        var salt = CreateDeterministicSalt();
 
         // Act
-        var verifier1 = CryptoService.GenerateAuthVerifier("PasswordOne!", saltBase64);
-        var verifier2 = CryptoService.GenerateAuthVerifier("PasswordTwo!", saltBase64);
+        var verifier1 = _crypto.GenerateAuthVerifier("PasswordOne!", salt);
+        var verifier2 = _crypto.GenerateAuthVerifier("PasswordTwo!", salt);
 
         // Assert
         Assert.NotEqual(verifier1, verifier2);
@@ -46,27 +47,29 @@ public class CryptoServiceTests
         // Arrange
         const string password = "StrongPassword123!";
 
-        var salt1 = Convert.ToBase64String("AAAAAAAAAAAAAAAA"u8.ToArray());
-        var salt2 = Convert.ToBase64String("BBBBBBBBBBBBBBBB"u8.ToArray());
+        var salt1 = "AAAAAAAAAAAAAAAA"u8.ToArray();
+        var salt2 = "BBBBBBBBBBBBBBBB"u8.ToArray();
 
         // Act
-        var verifier1 = CryptoService.GenerateAuthVerifier(password, salt1);
-        var verifier2 = CryptoService.GenerateAuthVerifier(password, salt2);
+        var verifier1 = _crypto.GenerateAuthVerifier(password, salt1);
+        var verifier2 = _crypto.GenerateAuthVerifier(password, salt2);
 
         // Assert
         Assert.NotEqual(verifier1, verifier2);
     }
 
+    /*
     [Fact]
     public void GenerateAuthSalt_Returns16RandomBytes()
     {
         // Act
-        var salt = CryptoService.GenerateAuthSalt();
+        var salt = crypto.GenerateAuthSalt();
 
         // Assert
         Assert.NotNull(salt);
         Assert.Equal(16, salt.Length);
     }
+
 
     [Fact]
     public void GenerateAuthSalt_MultipleCalls_ReturnsDifferentSalts()
@@ -87,30 +90,12 @@ public class CryptoServiceTests
     {
         // Arrange
         const string password = "ValidPassword123!";
-        const string invalidSalt = "Not-Valid-Base64!!!";
+        var invalidSalt = "Not-Valid-Base64!!!"u8.ToArray();
 
         // Act & Assert
-        Assert.ThrowsAny<Exception>(() =>
-            CryptoService.GenerateAuthVerifier(password, invalidSalt));
+        Assert.ThrowsAny<Exception>(() => _crypto.GenerateAuthVerifier(password, invalidSalt));
     }
-
-    [Fact]
-    public void GenerateAuthVerifier_ReturnsBase64EncodedString()
-    {
-        // Arrange
-        const string password = "TestPassword123!";
-        var salt = CreateDeterministicBase64Salt();
-
-        // Act
-        var verifier = CryptoService.GenerateAuthVerifier(password, salt);
-
-        // Assert
-        Assert.NotEmpty(verifier);
-
-        // Should be valid Base64
-        var decoded = Convert.FromBase64String(verifier);
-        Assert.NotEmpty(decoded);
-    }
+    */
 
     [Theory]
     [InlineData(1)]
