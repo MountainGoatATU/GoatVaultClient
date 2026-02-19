@@ -1,6 +1,8 @@
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Api;
+using GoatVaultInfrastructure.Services.Api.Models;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 
@@ -27,7 +29,7 @@ public class ServerAuthService(
     public async Task<UserResponse> GetUserAsync(Guid userId, CancellationToken ct = default)
     {
         var response = await http.GetAsync($"{BaseUrl}/v1/users/{userId}", ct);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessAsync(response, ct);
         var json = await response.Content.ReadAsStringAsync(ct);
         return JsonSerializer.Deserialize<UserResponse>(json, JsonOptions) ?? throw new InvalidOperationException("Invalid user response");
     }
@@ -44,7 +46,7 @@ public class ServerAuthService(
             "application/json");
 
         var resp = await http.PostAsync($"{BaseUrl}/{endpoint}", content, ct);
-        resp.EnsureSuccessStatusCode();
+        await EnsureSuccessAsync(resp, ct);
 
         var json = await resp.Content.ReadAsStringAsync(ct);
         return JsonSerializer.Deserialize<T>(json, JsonOptions) ?? throw new InvalidOperationException($"Invalid response for {endpoint}");
@@ -58,9 +60,71 @@ public class ServerAuthService(
             "application/json");
 
         var resp = await http.PatchAsync($"{BaseUrl}/{endpoint}", content, ct);
-        resp.EnsureSuccessStatusCode();
+        await EnsureSuccessAsync(resp, ct);
 
         var json = await resp.Content.ReadAsStringAsync(ct);
         return JsonSerializer.Deserialize<T>(json, JsonOptions) ?? throw new InvalidOperationException($"Invalid response for {endpoint}");
+    }
+
+    private async Task EnsureSuccessAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var content = await response.Content.ReadAsStringAsync(ct);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+        {
+            try
+            {
+                var validationErrors = JsonSerializer.Deserialize<HttpValidationError>(content, JsonOptions);
+                if (validationErrors != null)
+                {
+                    throw new ApiException("Validation Error", (int)response.StatusCode, validationErrors);
+                }
+            }
+            catch (JsonException)
+            {
+                // Fallback to generic error if deserialization fails
+            }
+        }
+
+        // Try to parse a generic 'detail' string from JSON if available
+        string message = string.Empty;
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                using var doc = JsonDocument.Parse(content);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object && doc.RootElement.TryGetProperty("detail", out var detailElement))
+                {
+                    if (detailElement.ValueKind == JsonValueKind.String)
+                        message = detailElement.GetString() ?? string.Empty;
+                    else
+                        message = detailElement.ToString();
+                }
+            }
+        }
+        catch
+        {
+            // If content is not JSON or doesn't have 'detail', use raw content or status
+            message = content;
+        }
+
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            // Fallback to the standard HttpRequestException format which users are familiar with
+            message = $"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).";
+        }
+        else
+        {
+            // If we have a message (either extracted detail or raw content), append status code if not already present
+            if (!message.Contains(((int)response.StatusCode).ToString()))
+            {
+                 message = $"{message} ({(int)response.StatusCode})";
+            }
+        }
+
+        throw new ApiException(message, (int)response.StatusCode);
     }
 }

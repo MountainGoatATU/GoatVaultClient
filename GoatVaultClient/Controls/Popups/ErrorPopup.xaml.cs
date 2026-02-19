@@ -50,16 +50,25 @@ public partial class ErrorPopup : PopupPage
 
     private static IEnumerable<string> ExtractErrors(ApiException ex)
     {
+        var errors = new List<string>();
+
         if (ex.Errors?.Detail != null)
         {
-            return ex.Errors.Detail.Select(e =>
+            errors.AddRange(ex.Errors.Detail.Select(e =>
             {
-                // Join location parts (e.g. "body", "email") with dots, skipping the first part if it's "body" or similar common root if desired.
-                // For now, just join them all.
                 var loc = string.Join(".", e.Loc);
                 return string.IsNullOrEmpty(loc) ? e.Msg : $"{loc}: {e.Msg}";
-            });
+            }));
         }
-        return [];
+
+        // If no validation errors, include the raw message as detail if available.
+        // This ensures the user sees the specific error (e.g. "Response status code...") 
+        // underneath the friendly title.
+        if (errors.Count == 0 && !string.IsNullOrWhiteSpace(ex.Message))
+        {
+             errors.Add(ex.Message);
+        }
+
+        return errors;
     }
 }
