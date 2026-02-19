@@ -67,6 +67,7 @@ namespace GoatVaultClient.ViewModels
             _vaultEntryManagerService = vaultEntryManagerService;
             // _pwnedPasswordService = pwnedPasswordService;
 
+            // TODO: Check if logic is the same here
             _sessionContext.VaultChanged += OnVaultChanged;
             _syncingService.AuthenticationRequired += OnAuthenticationRequired;
 
@@ -83,6 +84,7 @@ namespace GoatVaultClient.ViewModels
 
                  _allVaultEntries = [.. _sessionContext.Vault.Entries];
                  _allVaultCategories = [.. _sessionContext.Vault.Categories];
+                 SelectedEntry = null; // Clear selection to prevent editing a dead reference
                  ReloadVaultData();
              });
         }
@@ -147,32 +149,51 @@ namespace GoatVaultClient.ViewModels
                 _allVaultCategories = [.. _sessionContext.Vault.Categories];
             }
 
-            Passwords = _allVaultEntries.ToObservableCollection();
-            Categories = _allVaultCategories.ToObservableCollection();
+            UpdateCollection(Passwords, _allVaultEntries);
+            UpdateCollection(Categories, _allVaultCategories);
+
+            // TODO: Old pre-refactor code
+            // Passwords = _allVaultEntries.ToObservableCollection();
+            // Categories = _allVaultCategories.ToObservableCollection();
 
             PresortEntries(true);
             PresortCategories(true);
+        }
+
+        private void UpdateCollection<T>(ObservableCollection<T> collection, IEnumerable<T>? newItems)
+        {
+            collection.Clear();
+
+            if (newItems == null)
+                return;
+
+            foreach (var item in newItems)
+                collection.Add(item);
         }
 
         private void PresortCategories(bool matchUi = false)
         {
             if (!matchUi) _categoriesSortAsc = !_categoriesSortAsc;
 
-            Categories = VaultFilterService.FilterAndSortCategories(
+            var sortedCategories = VaultFilterService.FilterAndSortCategories(
                 _allVaultCategories,
                 SearchText,
                 _categoriesSortAsc);
+
+            UpdateCollection(Categories, sortedCategories);
         }
 
         private void PresortEntries(bool matchUi = false)
         {
             if (!matchUi) _passwordsSortAsc = !_passwordsSortAsc;
 
-            Passwords = VaultFilterService.FilterAndSortEntries(
+            var sortedEntries = VaultFilterService.FilterAndSortEntries(
                 _allVaultEntries,
                 SearchText,
                 SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name,
                 _passwordsSortAsc);
+
+            UpdateCollection(Passwords, sortedEntries);
         }
 
         partial void OnSelectedCategoryChanged(CategoryItem? value)
@@ -180,17 +201,39 @@ namespace GoatVaultClient.ViewModels
             SearchText = "";
 
             if (value?.Name == "All")
+            {
                 ReloadVaultData();
+            }
             else
-                PresortEntries(true);
+            {
+                var filteredEntries = VaultFilterService.FilterAndSortEntries(
+                    _allVaultEntries,
+                    SearchText,
+                    value?.Name,
+                    _passwordsSortAsc);
+
+                UpdateCollection(Passwords, filteredEntries);
+            }
         }
 
         partial void OnSearchTextChanged(string? value)
         {
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                PresortCategories(true);
-                PresortEntries(true);
+                var filteredCategories = VaultFilterService.FilterAndSortCategories(
+                    _allVaultCategories, // Filter from ALL
+                    SearchText,
+                    _categoriesSortAsc);
+
+                UpdateCollection(Categories, filteredCategories);
+
+                var filteredEntries = VaultFilterService.FilterAndSortEntries(
+                    _allVaultEntries, // Filter from ALL
+                    SearchText,
+                    SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name, // Keep category filter
+                    _passwordsSortAsc);
+
+                UpdateCollection(Passwords, filteredEntries);
             }
             else
             {
@@ -300,9 +343,11 @@ namespace GoatVaultClient.ViewModels
         [RelayCommand]
         private async Task CreateEntry()
         {
-            if (await _vaultEntryManagerService.CreateEntryAsync(Categories))
+            var changed = await _vaultEntryManagerService.CreateEntryAsync(Categories);
+            if (changed)
             {
-                PresortEntries(true);
+                // TODO: Old pre-refactor code
+                // PresortEntries(true);
                 ReloadVaultData();
             }
         }
