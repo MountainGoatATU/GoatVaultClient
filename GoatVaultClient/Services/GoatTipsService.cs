@@ -51,6 +51,7 @@ public partial class GoatTipsService : ObservableObject
 
     public async Task StartTips()
     {
+        // Prevent multiple timers from being created
         if (_timer != null)
             return;
 
@@ -58,38 +59,67 @@ public partial class GoatTipsService : ObservableObject
         if (_timer == null)
             return;
 
-        var counter = 0;
-        _timer.Interval = TimeSpan.FromSeconds(1);
+        // Counts 5-second ticks. Used to control the 60-second display cycle.
+        var tick = 0;
+
+        // Timer fires every 5 seconds.
+        _timer.Interval = TimeSpan.FromSeconds(5);
+
+        // Prevent overlapping async executions if a tick takes longer than 5 seconds.
+        var isRunning = false;
 
         _timer.Tick += async (_, _) =>
         {
-            if (!IsGoatEnabled || _session.UserId == null)
-            {
-                IsTipVisible = false;
-                CurrentTip = string.Empty;
+            // Skip this tick if previous execution hasn't finished.
+            if (isRunning)
                 return;
-            }
 
-            counter++;
+            isRunning = true;
 
-            switch (counter % 10)
+            try
             {
-                case 0:
-                    CurrentTip = await GetContextualTip();
-                    IsTipVisible = true;
-                    break;
+                // If tips are disabled or no user session exists, ensure no tip is displayed.
+                if (!IsGoatEnabled || _session.UserId == null)
+                {
+                    HideTip();
+                    return;
+                }
 
-                case 5:
-                    IsTipVisible = false;
-                    CurrentTip = string.Empty;
-                    break;
+                // Advance the cycle counter (1 tick = 5 seconds)
+                tick++;
+
+                // 12 ticks = 60 seconds total cycle
+                switch (tick % 12)
+                {
+                    // Beginning of cycle → show new contextual tip
+                    case 0:
+                        await ShowTip();
+                        break;
+                    // One tick later (5 seconds) → hide tip
+                    case 1:
+                        HideTip();
+                        break;
+                }
             }
-
-            if (counter >= 10)
-                counter = 0;
+            finally
+            {
+                isRunning = false;
+            }
         };
 
         _timer.Start();
+    }
+
+    private async Task ShowTip()
+    {
+        CurrentTip = await GetContextualTip();
+        IsTipVisible = true;
+    }
+
+    private void HideTip()
+    {
+        CurrentTip = string.Empty;
+        IsTipVisible = false;
     }
 
     private async Task<string> GetContextualTip()
