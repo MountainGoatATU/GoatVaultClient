@@ -199,6 +199,8 @@ public static class MauiProgram
         builder.Services.AddTransient<GratitudePage>();
         builder.Services.AddTransient<SecurityPageViewModel>();
         builder.Services.AddTransient<SecurityPage>();
+        builder.Services.AddTransient<SettingsPageViewModel>();
+        builder.Services.AddTransient<SettingsPage>();
 
         #endregion
 
