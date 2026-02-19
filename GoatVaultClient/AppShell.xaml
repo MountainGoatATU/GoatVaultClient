@@ -78,13 +78,17 @@
                       Title="Vault"
                       Shell.NavBarIsVisible="False"
                       Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Lock}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
-                      ContentTemplate="{DataTemplate pages:VaultPage}" />
+                      ContentTemplate="{DataTemplate local:MainPage}" />
 
         <ShellContent Route="security"
                       Title="Security"
                       Shell.NavBarIsVisible="False"
                       Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Security}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
                       ContentTemplate="{DataTemplate pages:SecurityPage}" />
+
+        <ShellContent Title="Settings"
+                      Shell.NavBarIsVisible="False"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Settings}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"/>
 
     </FlyoutItem>
 

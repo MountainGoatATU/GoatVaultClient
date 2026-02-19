@@ -188,8 +188,8 @@ public static class MauiProgram
         #region App pages & view models
 
         builder.Services.AddTransient<SyncStatusBarViewModel>();
-        builder.Services.AddTransient<VaultPageViewModel>();
-        builder.Services.AddTransient<VaultPage>();
+        builder.Services.AddTransient<MainPageViewModel>();
+        builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<OnboardingPageViewModel>();
         builder.Services.AddTransient<OnboardingPage>();
         builder.Services.AddTransient<RegisterPageViewModel>();
