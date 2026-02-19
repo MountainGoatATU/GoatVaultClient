@@ -147,6 +147,7 @@ public static class MauiProgram
         builder.Services.AddTransient<IVaultScoreCalculatorService, VaultScoreCalculatorService>();
         builder.Services.AddTransient<IPasswordStrengthService, PasswordStrengthService>();
         builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+        builder.Services.AddTransient<IRandomTipService, RandomTipService>();
         // Shamir Test
         builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
         builder.Services.AddSingleton<IRandom, StrongRandom>();

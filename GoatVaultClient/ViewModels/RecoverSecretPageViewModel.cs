@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultCore.Models.Shamir;
 using GoatVaultCore.Services.Shamir;
@@ -90,14 +90,13 @@ public partial class RecoverSecretViewModel(ShamirSSService st) : BaseViewModel
     [RelayCommand(CanExecute = nameof(CanRecover))]
     private async Task RecoverAsync()
     {
-        IsBusy = true;
         HasError = false;
         ErrorMessage = string.Empty;
         HasRecoveredSecret = false;
         RecoveredSecret = string.Empty;
         IsSecretVisible = false;
 
-        try
+        await SafeExecuteAsync(async () =>
         {
             var mnemonics = CollectedShares.Select(s => s.Mnemonic).ToList();
 
@@ -106,16 +105,7 @@ public partial class RecoverSecretViewModel(ShamirSSService st) : BaseViewModel
 
             RecoveredSecret = result;
             HasRecoveredSecret = true;
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-            HasError = true;
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     [RelayCommand]

@@ -49,7 +49,7 @@ public partial class LoginPageViewModel(
 
         if (!isConnected)
         {
-            MainThread.BeginInvokeOnMainThread(async () =>
+            MainThread.BeginInvokeOnMainThread(async void () =>
             {
                 try
                 {
@@ -86,12 +86,8 @@ public partial class LoginPageViewModel(
     [RelayCommand]
     private async Task Login()
     {
-        if (IsBusy)
-            return;
-        try
+        await SafeExecuteAsync(async () =>
         {
-            IsBusy = true;
-
             if (IsOnline)
             {
                 await LoginOnline();
@@ -107,20 +103,7 @@ public partial class LoginPageViewModel(
 
             // Navigate to main
             await Shell.Current.GoToAsync("//main/home");
-        }
-        catch (UnauthorizedAccessException)
-        {
-            await Shell.Current.DisplayAlertAsync("Login Failed", "Invalid credentials or MFA.", "OK");
-        }
-        catch (Exception e)
-        {
-            logger?.LogError(e, "Unexpected error during login");
-            await Shell.Current.DisplayAlertAsync("Error", e.Message, "OK");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     private async Task LoginOnline()

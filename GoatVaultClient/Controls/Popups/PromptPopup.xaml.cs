@@ -10,7 +10,7 @@ public partial class PromptPopup : PopupPage
     private readonly ILogger<SingleInputPopup>? _logger;
     private readonly TaskCompletionSource<bool> _tcs = new();
     public Task<bool> WaitForScan() => _tcs.Task;
-    public string Title { get; set; }
+    public new string Title { get; set; }
     public string Body { get; set; }
     public string AcceptText { get; set; }
     public string CancelText { get; set; }

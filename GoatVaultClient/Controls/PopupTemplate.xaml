@@ -30,11 +30,29 @@
                                            HorizontalOptions="End">
                         <Button Text="{TemplateBinding CancelText}" 
                                 Command="{TemplateBinding CancelCommand}"
-                                StyleClass="OutlinedButton"/>
+                                StyleClass="OutlinedButton">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding Text, Source={RelativeSource Self}}" Value="">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding Text, Source={RelativeSource Self}}" Value="{x:Null}">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
                         <Button Grid.Column="1"
                                 Text="{TemplateBinding AcceptText}" 
                                 Command="{TemplateBinding AcceptCommand}"
-                                StyleClass="FilledButton"/>
+                                StyleClass="FilledButton">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding Text, Source={RelativeSource Self}}" Value="">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding Text, Source={RelativeSource Self}}" Value="{x:Null}">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
                     </HorizontalStackLayout>
                 </Grid>
             </Border>

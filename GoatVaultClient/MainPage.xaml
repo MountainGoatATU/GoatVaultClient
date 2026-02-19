@@ -90,7 +90,7 @@
                         </CollectionView>
                     </VerticalStackLayout>
                 </controls:Component>
-                <!--  Passsword Entries List  -->
+                <!--  Pas   sword Entries List  -->
                 <controls:Component Grid.Row="1" Grid.Column="1">
                     <VerticalStackLayout>
                         <controls:ComponentHeader Title="Passwords">
