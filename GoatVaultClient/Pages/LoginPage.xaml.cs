@@ -32,7 +32,7 @@ public partial class LoginPage : ContentPage
             {
                 _logger?.LogError(ex, "Error initializing login page");
                 await MopupService.Instance.PushAsync(new PromptPopup(
-                    title: "Error",
+                    popupTitle: "Error",
                     body: "Failed to initialize login page. Please restart the application.",
                     aText: "OK"
                 ));

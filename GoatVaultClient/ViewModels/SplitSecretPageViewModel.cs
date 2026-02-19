@@ -2,11 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultCore.Models.Shamir;
 using GoatVaultCore.Services.Shamir;
+using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class SplitSecretViewModel(ShamirSSService st) : BaseViewModel
+public partial class SplitSecretViewModel(ShamirSSService st, ILogger<SplitSecretViewModel>? logger = null) : BaseViewModel
 {
     // ── Input fields ─────────────────────────────────────────────
 
@@ -40,9 +41,9 @@ public partial class SplitSecretViewModel(ShamirSSService st) : BaseViewModel
 
     // ── Slider ranges ────────────────────────────────────────────
 
-    public int MinShares => 2;
-    public int MaxShares => 10;
-    public int MinThreshold => 2;
+    public static int MinShares => 2;
+    public static int MaxShares => 10;
+    public static int MinThreshold => 2;
 
     public int MaxThreshold => TotalShares;
 
@@ -115,7 +116,7 @@ public partial class SplitSecretViewModel(ShamirSSService st) : BaseViewModel
                 }
                 catch (Exception e)
                 {
-                    throw; // TODO handle exception
+                    logger?.LogError(e, "Error awaiting Clipboard.Default.SetTextAsync(string.Empty) during CopyShareAsync() of SplitSecretViewModel");
                 }
             }));
     }

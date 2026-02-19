@@ -10,7 +10,7 @@ public partial class PromptPopup : PopupPage
     private readonly ILogger<SingleInputPopup>? _logger;
     private readonly TaskCompletionSource<bool> _tcs = new();
     public Task<bool> WaitForScan() => _tcs.Task;
-    public string Title { get; set; }
+    public string PopupTitle { get; set; }
     public string Body { get; set; }
     public string AcceptText { get; set; }
     public string CancelText { get; set; }
@@ -18,11 +18,11 @@ public partial class PromptPopup : PopupPage
     public ICommand? AcceptCommand { get; private set; }
     public ICommand? CancelCommand { get; private set; }
 
-    public PromptPopup(string title, string body, string aText, string? cText = null, ILogger<SingleInputPopup>? logger = null)
+    public PromptPopup(string popupTitle, string body, string aText, string? cText = null, ILogger<SingleInputPopup>? logger = null)
     {
         _logger = logger;
 
-        Title = title;
+        PopupTitle = popupTitle;
         Body = body;
         AcceptText = aText;
         CancelText = cText ?? "Cancel";
@@ -76,6 +76,7 @@ public partial class PromptPopup : PopupPage
             }
             catch (Exception e)
             {
+                _logger?.LogError(e, "Error awaiting MopupService.Instance.PopAsync() during OnCancel() of PromptPopup");
                 _tcs.TrySetResult(false);
             }
         }

@@ -386,7 +386,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         // A real implementation would generate a QR image.
 
         var setupPopup = new PromptPopup(
-            title: "Setup MFA",
+            popupTitle: "Setup MFA",
             body: message,
             aText: "OK"
         );

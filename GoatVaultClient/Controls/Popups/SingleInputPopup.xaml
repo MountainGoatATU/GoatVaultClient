@@ -10,7 +10,7 @@
                   CloseWhenBackgroundIsClicked="True">
 
 
-    <controls:PopupTemplate Title="{Binding Title}"
+    <controls:PopupTemplate Title="{Binding PopupTitle}"
                             FrameWidth="500"
                             AcceptCommand="{Binding AcceptCommand}"
                             CancelCommand="{Binding CancelCommand}"
