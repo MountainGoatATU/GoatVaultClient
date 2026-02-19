@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    x:Class="GoatVaultClient.Pages.UserPage"
+    x:Class="GoatVaultClient.Pages.SecurityPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
@@ -9,7 +9,7 @@
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-    x:DataType="vm:UserPageViewModel"
+    x:DataType="vm:SecurityPageViewModel"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
 
@@ -181,8 +181,8 @@
                 </Grid>
             </VerticalStackLayout>
 
-            <!--  Account Settings Section  -->
-            <controls:ComponentHeader Title="Account Settings" />
+            <!--  Account Credentials Section  -->
+            <controls:ComponentHeader Title="Account Credentials" />
             <controls:Component>
                 <VerticalStackLayout Padding="20" Spacing="20">
 

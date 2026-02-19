@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class IntroductionPageViewModel(ILogger<IntroductionPageViewModel>? logger = null) : BaseViewModel
+public partial class OnboardingPageViewModel(ILogger<OnboardingPageViewModel>? logger = null) : BaseViewModel
 {
     [RelayCommand]
     private async Task GetStarted()

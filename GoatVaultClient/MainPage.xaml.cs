@@ -1,5 +1,5 @@
 using GoatVaultClient.ViewModels;
-using GoatVaultClient.ViewModels.controls;
+using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Abstractions;
 using Microsoft.Extensions.Logging;
 

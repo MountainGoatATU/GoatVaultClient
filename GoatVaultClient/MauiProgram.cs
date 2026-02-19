@@ -2,7 +2,7 @@ using CommunityToolkit.Maui;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
-using GoatVaultClient.ViewModels.controls;
+using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
@@ -188,18 +188,18 @@ public static class MauiProgram
         #region App pages & view models
 
         builder.Services.AddTransient<SyncStatusBarViewModel>();
-        builder.Services.AddTransient<MainPageViewModel>();
-        builder.Services.AddTransient<MainPage>();
-        builder.Services.AddTransient<IntroductionPageViewModel>();
-        builder.Services.AddTransient<IntroductionPage>();
+        builder.Services.AddTransient<VaultPageViewModel>();
+        builder.Services.AddTransient<VaultPage>();
+        builder.Services.AddTransient<OnboardingPageViewModel>();
+        builder.Services.AddTransient<OnboardingPage>();
         builder.Services.AddTransient<RegisterPageViewModel>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<LoginPageViewModel>();
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<GratitudePageViewModel>();
         builder.Services.AddTransient<GratitudePage>();
-        builder.Services.AddTransient<UserPageViewModel>();
-        builder.Services.AddTransient<UserPage>();
+        builder.Services.AddTransient<SecurityPageViewModel>();
+        builder.Services.AddTransient<SecurityPage>();
 
         #endregion
 

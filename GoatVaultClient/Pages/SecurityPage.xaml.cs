@@ -2,9 +2,9 @@ using GoatVaultClient.ViewModels;
 
 namespace GoatVaultClient.Pages
 {
-    public partial class UserPage : ContentPage
+    public partial class SecurityPage : ContentPage
     {
-        public UserPage(UserPageViewModel vm)
+        public SecurityPage(SecurityPageViewModel vm)
         {
             InitializeComponent();
             BindingContext = vm;

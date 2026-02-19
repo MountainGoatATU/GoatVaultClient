@@ -16,15 +16,15 @@
         ═══════════════════════════════════════════════════════════
         
         1. PRE-AUTH FLOW (FlyoutBehavior=Disabled):
-        IntroductionPage → LoginPage ↔ RegisterPage
+        OnboardingPage → LoginPage ↔ RegisterPage
         
         2. POST-AUTH FLOW (FlyoutBehavior=Flyout):
-           Hamburger menu with: Vault | User
+           Hamburger menu with: Vault | Security
            FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
         
         Navigation stack is cleared on:
         - Login/Register → Main  (//main/home)  + enable flyout
-        - Logout from UserPage   (//intro)       + disable flyout
+        - Logout from SecurityPage   (//intro)       + disable flyout
         ═══════════════════════════════════════════════════════════
     -->
 
@@ -49,7 +49,7 @@
     <!--  ============================================================  -->
 
     <ShellContent
-        ContentTemplate="{DataTemplate pages:IntroductionPage}"
+        ContentTemplate="{DataTemplate pages:OnboardingPage}"
         FlyoutItemIsVisible="False"
         Route="intro"
         Shell.NavBarIsVisible="False" />
@@ -75,16 +75,16 @@
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems" Route="main">
 
         <ShellContent Route="home"
-                      Title="Passwords"
+                      Title="Vault"
                       Shell.NavBarIsVisible="False"
                       Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Lock}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
-                      ContentTemplate="{DataTemplate local:MainPage}" />
+                      ContentTemplate="{DataTemplate pages:VaultPage}" />
 
-        <ShellContent Route="user"
-                      Title="Account"
+        <ShellContent Route="security"
+                      Title="Security"
                       Shell.NavBarIsVisible="False"
                       Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Security}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
-                      ContentTemplate="{DataTemplate pages:UserPage}" />
+                      ContentTemplate="{DataTemplate pages:SecurityPage}" />
 
     </FlyoutItem>
 
@@ -132,13 +132,13 @@
     </Shell.FlyoutFooter>
 
     <!--<FlyoutItem Title="Introduction" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Handshake}}">
-        <ShellContent ContentTemplate="{DataTemplate pages:IntroductionPage}" Route="IntroductionPage" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Key}}" />
+        <ShellContent ContentTemplate="{DataTemplate pages:OnboardingPage}" Route="OnboardingPage" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Key}}" />
     </FlyoutItem>
     <FlyoutItem Title="Vault" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Home}}">
         <ShellContent Title="Vault" ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" Icon="user_icon.png" />
     </FlyoutItem>
     </FlyoutItem>
     <FlyoutItem Title="User" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Account_circle}}">
-        <ShellContent Title="UserSettings" ContentTemplate="{DataTemplate pages:UserPage}" Route="UserPage" />
+        <ShellContent Title="UserSettings" ContentTemplate="{DataTemplate pages:SecurityPage}" Route="SecurityPage" />
     </FlyoutItem>-->
 </Shell>

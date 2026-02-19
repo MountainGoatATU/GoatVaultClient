@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using GoatVaultCore.Abstractions;
 
-namespace GoatVaultClient.ViewModels.controls
+namespace GoatVaultClient.ViewModels.Controls
 {
     /// <summary>
     /// ViewModel for the SyncStatusBar control

@@ -12,7 +12,7 @@ using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class UserPageViewModel : BaseViewModel
+public partial class SecurityPageViewModel : BaseViewModel
 {
     private readonly LoadUserProfileUseCase _loadUserProfile;
     private readonly CalculateVaultScoreUseCase _calculateVaultScore;
@@ -39,7 +39,7 @@ public partial class UserPageViewModel : BaseViewModel
 
     [ObservableProperty] private bool goatEnabled;
 
-    public UserPageViewModel(
+    public SecurityPageViewModel(
         LoadUserProfileUseCase loadUserProfile,
         CalculateVaultScoreUseCase calculateVaultScore,
         ChangeEmailUseCase changeEmail,
