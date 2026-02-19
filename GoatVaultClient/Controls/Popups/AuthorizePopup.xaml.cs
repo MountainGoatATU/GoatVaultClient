@@ -9,13 +9,13 @@ namespace GoatVaultClient.Controls.Popups;
 
 public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
 {
-    public static readonly BindableProperty PopupTitleProperty = BindableProperty.Create(
-        nameof(PopupTitle), typeof(string), typeof(AuthorizePopup), "Authorization");
+    public static readonly BindableProperty TitleProperty = BindableProperty.Create(
+        nameof(Title), typeof(string), typeof(AuthorizePopup), "Authorization");
 
-    public string PopupTitle
+    public string Title
     {
-        get => (string)GetValue(PopupTitleProperty);
-        set => SetValue(PopupTitleProperty, value);
+        get => (string)GetValue(TitleProperty);
+        set => SetValue(TitleProperty, value);
     }
 
     private readonly TaskCompletionSource<string?> _tcs = new();
@@ -38,7 +38,7 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
 
         _logger?.LogTrace("AuthorizePopup created (Title: {Title}, IsPassword: {IsPassword})", title, isPassword);
 
-        PopupTitle = title;
+        Title = title;
 
         if (InputEntry != null)
         {

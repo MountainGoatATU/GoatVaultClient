@@ -213,7 +213,7 @@ public class AuthenticationService(
 
             // Confirm logout action
             var confirmPopup = new PromptPopup(
-                popupTitle: "Logout",
+                title: "Logout",
                 body: "Are you sure you want to logout? All changes will be saved.",
                 aText: "Logout",
                 cText: "Cancel"
@@ -246,7 +246,7 @@ public class AuthenticationService(
         {
             logger?.LogError(ex, "Logout failed");
             await MopupService.Instance.PushAsync(new PromptPopup(
-                popupTitle: "Error",
+                title: "Error",
                 body: "Failed to logout properly. Please try again.",
                 aText: "OK"
             ));
@@ -257,7 +257,7 @@ public class AuthenticationService(
     {
         // Confirm deletion
         var confirmPopup = new PromptPopup(
-                popupTitle: "Remove Local Account",
+                title: "Remove Local Account",
                 body: "Are you sure you want to delete this account from local storage? All changes will be saved.",
                 aText: "Delete",
                 cText: "Cancel"

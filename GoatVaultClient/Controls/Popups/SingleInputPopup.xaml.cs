@@ -11,13 +11,13 @@ public partial class SingleInputPopup : PopupPage
     private readonly TaskCompletionSource<string?> _tcs = new();
     private readonly ILogger<SingleInputPopup>? _logger;
     public Task<string?> WaitForScan() => _tcs.Task;
-    public string? PopupTitle { get; set; }
+    public string? Title { get; set; }
     public string? InputFieldTitle { get; set; }
     public string? InputFieldText { get; set; }
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
     public SingleInputPopup(
-        string popupTitle = "",
+        string title = "",
         string inputFieldTitle = "",
         string inputFieldText = "",
         ILogger<SingleInputPopup>? logger = null)
@@ -26,7 +26,7 @@ public partial class SingleInputPopup : PopupPage
 
         InitializeComponent();
 
-        PopupTitle = popupTitle;
+        Title = title;
         InputFieldTitle = inputFieldTitle;
         InputFieldText = inputFieldText;
 

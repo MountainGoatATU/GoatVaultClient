@@ -10,7 +10,7 @@
                   BackgroundColor="#80000000"
                   CloseWhenBackgroundIsClicked="False">
 
-    <controls:PopupTemplate Title="{Binding PopupTitle}"
+    <controls:PopupTemplate Title="{Binding Title}"
                             FrameWidth="500"
                             AcceptCommand="{Binding AcceptCommand}"
                             CancelCommand="{Binding CancelCommand}"

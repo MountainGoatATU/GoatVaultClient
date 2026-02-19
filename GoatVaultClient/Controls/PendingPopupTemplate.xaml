@@ -14,7 +14,7 @@
                 </Border.StrokeShape>
                 <Grid RowDefinitions="Auto, *, Auto" RowSpacing="{x:StaticResource sContent}" Padding="{x:StaticResource sContent}">
                     <Label Grid.Row="0"
-                           Text="{TemplateBinding PopupTitle}" 
+                           Text="{TemplateBinding Title}" 
                            Style="{x:StaticResource MaterialHeadlineMedium}"
                            Padding="20"
                            HorizontalOptions="Center"/>
