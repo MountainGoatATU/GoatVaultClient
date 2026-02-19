@@ -1,8 +1,6 @@
-﻿using System.Text.Json.Serialization;
-
-namespace GoatVaultCore.Models.API;
+namespace GoatVaultCore.Models.Api;
 
 public class AuthRefreshRequest
 {
-    [JsonPropertyName("refresh_token")] public string RefreshToken { get; set; }
+    public required string RefreshToken { get; set; }
 }

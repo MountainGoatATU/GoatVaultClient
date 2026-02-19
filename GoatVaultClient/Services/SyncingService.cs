@@ -1,410 +1,370 @@
+using GoatVaultApplication.VaultUseCases;
 using CommunityToolkit.Mvvm.ComponentModel;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
-using GoatVaultCore.Models.API;
-using GoatVaultCore.Models.Vault;
-using GoatVaultInfrastructure.Services.API;
-using GoatVaultInfrastructure.Services.Vault;
-using Microsoft.Extensions.Configuration;
+using GoatVaultCore.Models.Api;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel;
+using System.Security.Cryptography;
+using Email = GoatVaultCore.Models.Objects.Email;
 
-namespace GoatVaultClient.Services
+namespace GoatVaultClient.Services;
+
+public class SyncingService(
+    ISessionContext session,
+    IServiceProvider services,
+    IServerAuthService serverAuth,
+    IVaultCrypto vaultCrypto,
+    ILogger<SyncingService>? logger = null)
+    : ObservableObject, ISyncingService
 {
-    public interface ISyncingService : INotifyPropertyChanged
+    private Timer? _periodicSyncTimer;
+
+    public bool IsSyncing
     {
-        // Methods
-        Task Sync();
-        Task Save();
-        Task AutoSaveIfEnabled();
-        void StartPeriodicSync(TimeSpan interval);
-        void StopPeriodicSync();
-
-        // Properties
-        bool MarkedAsChanged { get; }
-        bool HasAutoSave { get; }
-        bool HasAutoSync { get; }
-        DateTime LastSynced { get; }
-        DateTime LastSaved { get; }
-        SyncStatus SyncStatus { get; }
-        bool IsSyncing { get; }
-        string SyncStatusMessage { get; }
-        string LastSyncedFormatted { get; }
-
-        // Events
-        event EventHandler? SyncStarted;
-        event EventHandler? SyncCompleted;
-        event EventHandler<SyncFailedEventArgs>? SyncFailed;
+        get;
+        private set => SetProperty(ref field, value);
     }
 
-    public class SyncingService(
-        IConfiguration configuration,
-        VaultSessionService vaultSessionService,
-        VaultService vaultService,
-        HttpService httpService,
-        ILogger<SyncingService>? logger = null)
-        : ObservableObject, ISyncingService
+    public SyncStatus SyncStatus
     {
-        private System.Threading.Timer? _periodicSyncTimer;
+        get;
+        private set => SetProperty(ref field, value);
+    } = SyncStatus.Unsynced;
 
-        private bool _isSyncing;
-        public bool IsSyncing
+    public DateTime LastSynced
+    {
+        get;
+        private set
         {
-            get => _isSyncing;
-            private set => SetProperty(ref _isSyncing, value);
+            if (SetProperty(ref field, value))
+                OnPropertyChanged(nameof(LastSyncedFormatted));
         }
+    }
 
-        private SyncStatus _syncStatus = SyncStatus.Unsynced;
-        public SyncStatus SyncStatus
+    public DateTime LastSaved
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    }
+
+    public string SyncStatusMessage
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    } = "Not synced";
+
+    public bool HasAutoSave
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
+
+    public bool HasAutoSync
+    {
+        get;
+        set
         {
-            get => _syncStatus;
-            private set => SetProperty(ref _syncStatus, value);
+            if (SetProperty(ref field, value) && !value)
+                StopPeriodicSync();
         }
+    } = true;
 
-        private DateTime _lastSynced;
-        public DateTime LastSynced
+    #region Properties
+
+    public bool MarkedAsChanged { get; private set; }
+
+    // Human-readable last synced time
+    public string LastSyncedFormatted
+    {
+        get
         {
-            get => _lastSynced;
-            private set
+            if (LastSynced == default)
+                return "Never";
+
+            var timeSince = DateTime.UtcNow - LastSynced;
+
+            return timeSince.TotalMinutes switch
             {
-                if (SetProperty(ref _lastSynced, value))
-                    OnPropertyChanged(nameof(LastSyncedFormatted));
-            }
-        }
-
-        private DateTime _lastSaved;
-        public DateTime LastSaved
-        {
-            get => _lastSaved;
-            private set => SetProperty(ref _lastSaved, value);
-        }
-
-        private string _syncStatusMessage = "Not synced";
-        public string SyncStatusMessage
-        {
-            get => _syncStatusMessage;
-            private set => SetProperty(ref _syncStatusMessage, value);
-        }
-
-        private bool _hasAutoSave = true;
-        public bool HasAutoSave
-        {
-            get => _hasAutoSave;
-            set => SetProperty(ref _hasAutoSave, value);
-        }
-
-        private bool _hasAutoSync = true;
-        public bool HasAutoSync
-        {
-            get => _hasAutoSync;
-            set
-            {
-                if (SetProperty(ref _hasAutoSync, value) && !value)
-                    StopPeriodicSync();
-            }
-        }
-
-        #region Properties
-
-        public bool MarkedAsChanged { get; private set; }
-
-        /// <summary>
-        /// Human-readable last synced time
-        /// </summary>
-        public string LastSyncedFormatted
-        {
-            get
-            {
-                if (LastSynced == default)
-                    return "Never";
-
-                var timeSince = DateTime.UtcNow - LastSynced;
-
-                return timeSince.TotalMinutes switch
-                {
-                    < 1 => "Just now",
-                    < 60 => $"{(int)timeSince.TotalMinutes}m ago",
-                    _ => timeSince.TotalHours < 24
-                        ? $"{(int)timeSince.TotalHours}h ago"
-                        : $"{(int)timeSince.TotalDays}d ago"
-                };
-            }
-        }
-
-        #endregion
-        #region Events
-
-        public event EventHandler? SyncStarted;
-        public event EventHandler? SyncCompleted;
-        public event EventHandler<SyncFailedEventArgs>? SyncFailed;
-
-        #endregion
-        #region Public Methods
-
-        /// <summary>
-        /// Saves if auto-save is enabled. Convenience method to reduce repeated checks.
-        /// </summary>
-        public async Task AutoSaveIfEnabled()
-        {
-            if (HasAutoSave)
-                await Save();
-        }
-
-        /// <summary>
-        /// Starts periodic background syncing at specified interval
-        /// </summary>
-        public void StartPeriodicSync(TimeSpan interval)
-        {
-            StopPeriodicSync();
-
-            if (!HasAutoSync)
-            {
-                logger?.LogInformation("Auto-sync is disabled. Periodic sync will not start.");
-                return;
-            }
-
-            _periodicSyncTimer = new System.Threading.Timer(
-                async void (_) =>
-                {
-                    try
-                    {
-                        await PeriodicSyncCallback();
-                    }
-                    catch (Exception e)
-                    {
-                        throw; // TODO handle exception
-                    }
-                },
-                null,
-                interval,
-                interval);
-
-            logger?.LogInformation("Periodic sync started with interval: {interval}", interval);
-        }
-
-        /// <summary>
-        /// Stops periodic background syncing
-        /// </summary>
-        public void StopPeriodicSync()
-        {
-            _periodicSyncTimer?.Dispose();
-            _periodicSyncTimer = null;
-            logger?.LogInformation("Periodic sync stopped");
-        }
-
-        /// <summary>
-        /// Main sync method - synchronizes local and server data
-        /// </summary>
-        public async Task Sync()
-        {
-            if (IsSyncing)
-            {
-                logger?.LogWarning("Sync already in progress");
-                return;
-            }
-
-            var url = configuration.GetSection("GOATVAULT_SERVER_BASE_URL").Value;
-
-            if (vaultSessionService.CurrentUser == null && vaultSessionService.DecryptedVault == null)
-            {
-                logger?.LogWarning("No user is currently logged in");
-                return;
-            }
-
-            try
-            {
-                IsSyncing = true;
-                SyncStatus = SyncStatus.Syncing;
-                SyncStatusMessage = "Syncing...";
-                SyncStarted?.Invoke(this, EventArgs.Empty);
-
-                logger?.LogInformation("Starting sync operation");
-
-                var localCopy = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
-
-                var userResponse = await httpService.GetAsync<UserResponse>(
-                    $"{url}v1/users/{vaultSessionService.CurrentUser.Id}"
-                );
-
-                if (userResponse == null || localCopy == null)
-                    throw new InvalidOperationException("Failed to retrieve user data to compare");
-
-                var compareResult = DateTime.Compare(localCopy.UpdatedAt, userResponse.UpdatedAt);
-
-                switch (compareResult)
-                {
-                    case 0:
-                        logger?.LogInformation("Data already in sync");
-                        SyncStatus = SyncStatus.Synced;
-                        SyncStatusMessage = "Synced";
-                        LastSynced = DateTime.UtcNow;
-                        SyncCompleted?.Invoke(this, EventArgs.Empty);
-                        return;
-                    case > 0:
-                        logger?.LogInformation("Local data is newer, updating server");
-                        await HandleLocalNewer(localCopy, url);
-                        break;
-                    default:
-                        logger?.LogInformation("Server data is newer, updating local");
-                        await HandleServerNewer(localCopy, userResponse);
-                        break;
-                }
-
-                SyncStatus = SyncStatus.Synced;
-                SyncStatusMessage = "Synced";
-                LastSynced = DateTime.UtcNow;
-                SyncCompleted?.Invoke(this, EventArgs.Empty);
-
-                logger?.LogInformation("Sync completed successfully");
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(ex, "Sync failed");
-                SyncStatus = SyncStatus.Failed;
-                SyncStatusMessage = "Sync failed";
-                SyncFailed?.Invoke(this, new SyncFailedEventArgs(ex));
-            }
-            finally
-            {
-                IsSyncing = false;
-            }
-        }
-
-        public async Task Save()
-        {
-            if (vaultSessionService.CurrentUser == null || vaultSessionService.DecryptedVault == null)
-            {
-                logger?.LogWarning("Cannot save: No user logged in");
-                return;
-            }
-
-            try
-            {
-                logger?.LogInformation("Saving vault locally");
-
-                var updatedVault = new VaultData
-                {
-                    Categories = vaultSessionService.DecryptedVault.Categories,
-                    Entries = vaultSessionService.DecryptedVault.Entries
-                };
-
-                var encryptedVault = vaultService.EncryptVault(vaultSessionService.MasterPassword, updatedVault);
-
-                var localUser = await vaultService.LoadUserFromLocalAsync(vaultSessionService.CurrentUser.Id);
-
-                localUser.Email = vaultSessionService.CurrentUser.Email;
-                localUser.Vault = encryptedVault;
-                localUser.UpdatedAt = DateTime.UtcNow;
-
-                await vaultService.UpdateUserInLocalAsync(localUser);
-
-                LastSaved = DateTime.UtcNow;
-                MarkedAsChanged = true;
-
-                SyncStatus = SyncStatus.Unsynced;
-                SyncStatusMessage = "Changes pending";
-
-                logger?.LogInformation("Vault saved successfully");
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(ex, "Failed to save vault");
-            }
-        }
-
-        #endregion
-        #region Private Methods
-
-        private async Task PeriodicSyncCallback()
-        {
-            if (!HasAutoSync)
-                return;
-
-            try
-            {
-                await Sync();
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(ex, "Periodic sync failed");
-            }
-        }
-
-        private async Task HandleLocalNewer(DbModel localCopy, string url)
-        {
-            var decryptedLocalVault = vaultService.DecryptVault(localCopy.Vault, vaultSessionService.MasterPassword);
-
-            vaultSessionService.CurrentUser.Id = localCopy.Id;
-            vaultSessionService.CurrentUser.Email = localCopy.Email;
-            vaultSessionService.CurrentUser.MfaEnabled = localCopy.MfaEnabled;
-            vaultSessionService.CurrentUser.MfaSecret = localCopy.MfaSecret;
-            vaultSessionService.CurrentUser.ShamirEnabled = localCopy.ShamirEnabled;
-            vaultSessionService.CurrentUser.UpdatedAt = localCopy.UpdatedAt;
-            vaultSessionService.CurrentUser.CreatedAt = localCopy.CreatedAt;
-            vaultSessionService.CurrentUser.Vault = localCopy.Vault;
-            vaultSessionService.DecryptedVault = decryptedLocalVault;
-
-            await UpdateFromLocalToServer(url);
-        }
-
-        private async Task HandleServerNewer(DbModel localCopy, UserResponse userResponse)
-        {
-            var decryptedServerVault = vaultService.DecryptVault(userResponse.Vault, vaultSessionService.MasterPassword);
-
-            vaultSessionService.CurrentUser.Id = userResponse.Id;
-            vaultSessionService.CurrentUser.Email = userResponse.Email;
-            vaultSessionService.CurrentUser.MfaEnabled = userResponse.MfaEnabled;
-            vaultSessionService.CurrentUser.MfaSecret = userResponse.MfaSecret;
-            vaultSessionService.CurrentUser.ShamirEnabled = localCopy.ShamirEnabled;
-            vaultSessionService.CurrentUser.UpdatedAt = userResponse.UpdatedAt;
-            vaultSessionService.CurrentUser.CreatedAt = userResponse.CreatedAt;
-            vaultSessionService.CurrentUser.Vault = userResponse.Vault;
-            vaultSessionService.DecryptedVault = decryptedServerVault;
-
-            await UpdateFromServerToLocal(localCopy, userResponse);
-        }
-
-        private async Task UpdateFromLocalToServer(string url)
-        {
-            var encryptedVault = vaultService.EncryptVault(vaultSessionService.MasterPassword, vaultSessionService.DecryptedVault);
-
-            var updateUserRequest = new UserRequest
-            {
-                Email = vaultSessionService.CurrentUser.Email,
-                MfaEnabled = vaultSessionService.CurrentUser.MfaEnabled,
-                MfaSecret = vaultSessionService.CurrentUser.MfaSecret,
-                ShamirEnabled = vaultSessionService.CurrentUser.ShamirEnabled,
-                Vault = encryptedVault,
+                < 1 => "Just now",
+                < 60 => $"{(int)timeSince.TotalMinutes}m ago",
+                _ => timeSince.TotalHours < 24
+                    ? $"{(int)timeSince.TotalHours}h ago"
+                    : $"{(int)timeSince.TotalDays}d ago"
             };
-
-            await httpService.PatchAsync<UserResponse>(
-                $"{url}v1/users/{vaultSessionService.CurrentUser.Id}",
-                updateUserRequest
-            );
         }
+    }
 
-        private async Task UpdateFromServerToLocal(DbModel localData, UserResponse serverData)
+    #endregion
+    #region Events
+
+    public event EventHandler? SyncStarted;
+    public event EventHandler? SyncCompleted;
+    public event EventHandler<SyncFailedEventArgs>? SyncFailed;
+    public event EventHandler? AuthenticationRequired;
+
+    #endregion
+    #region Public Methods
+
+    // Saves if auto-save is enabled. Convenience method to reduce repeated checks.
+    public async Task AutoSaveIfEnabled()
+    {
+        if (HasAutoSave)
+            await Save();
+    }
+
+    // Starts periodic background syncing at specified interval
+    public void StartPeriodicSync(TimeSpan interval)
+    {
+        StopPeriodicSync();
+
+        if (!HasAutoSync)
         {
-            localData.Email = serverData.Email;
-            localData.Vault = serverData.Vault;
-            localData.UpdatedAt = serverData.UpdatedAt;
-
-            await vaultService.UpdateUserInLocalAsync(localData);
+            logger?.LogInformation("Auto-sync is disabled. Periodic sync will not start.");
+            return;
         }
 
-        #endregion
+        _periodicSyncTimer = new Timer(
+            async void (_) =>
+            {
+                try
+                {
+                    await PeriodicSyncCallback();
+                }
+                catch (Exception e)
+                {
+                    throw; // TODO handle exception
+                }
+            },
+            null,
+            interval,
+            interval);
+
+        logger?.LogInformation("Periodic sync started with interval: {interval}", interval);
     }
 
-    public enum SyncStatus
+    // Stops periodic background syncing
+    public void StopPeriodicSync()
     {
-        Synced,
-        Unsynced,
-        Syncing,
-        Failed
+        _periodicSyncTimer?.Dispose();
+        _periodicSyncTimer = null;
+        logger?.LogInformation("Periodic sync stopped");
     }
 
-    public class SyncFailedEventArgs(Exception exception) : EventArgs
+    // Main sync method - synchronizes local and server data
+    public async Task Sync()
     {
-        public Exception Exception { get; } = exception;
-        public string ErrorMessage => Exception?.Message ?? "Unknown error";
+        if (IsSyncing)
+        {
+            logger?.LogWarning("Sync already in progress");
+            return;
+        }
+
+        if (session.UserId == null || session.Vault == null)
+        {
+            logger?.LogWarning("No user is currently logged in");
+            return;
+        }
+
+        try
+        {
+            IsSyncing = true;
+            SyncStatus = SyncStatus.Syncing;
+            SyncStatusMessage = "Syncing...";
+            SyncStarted?.Invoke(this, EventArgs.Empty);
+
+            logger?.LogInformation("Starting sync operation");
+
+            using var scope = services.CreateScope();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+
+            // 1. Get server version
+            var serverUser = await serverAuth.GetUserAsync(session.UserId.Value);
+
+            // 2. Get local version
+            var localUser = await userRepository.GetByIdAsync(session.UserId.Value);
+
+            if (localUser == null)
+            {
+                // Should not happen if session is active
+                logger?.LogWarning("Local user not found, pulling from server.");
+                await HandleServerNewer(null, serverUser, userRepository);
+            }
+            else
+            {
+                // Use a tolerance for comparison (e.g., 1 second) to handle precision differences
+                var timeDiff = (localUser.UpdatedAtUtc - serverUser.UpdatedAtUtc).TotalSeconds;
+
+                // Log the timestamps for debugging
+                logger?.LogInformation("Sync Check - Local: {LocalTime}, Server: {ServerTime}, Diff: {Diff}s",
+                    localUser.UpdatedAtUtc.ToString("O"),
+                    serverUser.UpdatedAtUtc.ToString("O"),
+                    timeDiff);
+
+                if (Math.Abs(timeDiff) < 1.0)
+                {
+                     logger?.LogInformation("Data already in sync (within tolerance)");
+                }
+                else if (timeDiff > 0)
+                {
+                    logger?.LogInformation("Local data is newer ({Local} > {Server}), pushing to server", localUser.UpdatedAtUtc, serverUser.UpdatedAtUtc);
+                    await HandleLocalNewer(localUser, userRepository);
+                }
+                else
+                {
+                    logger?.LogInformation("Server data is newer ({Server} > {Local}), pulling from server", serverUser.UpdatedAtUtc, localUser.UpdatedAtUtc);
+                    await HandleServerNewer(localUser, serverUser, userRepository);
+                }
+            }
+
+            SyncStatus = SyncStatus.Synced;
+            SyncStatusMessage = "Synced";
+            LastSynced = DateTime.UtcNow;
+            SyncCompleted?.Invoke(this, EventArgs.Empty);
+
+            logger?.LogInformation("Sync completed successfully");
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Sync failed");
+            SyncStatus = SyncStatus.Failed;
+            SyncStatusMessage = "Sync failed";
+            SyncFailed?.Invoke(this, new SyncFailedEventArgs(ex));
+        }
+        finally
+        {
+            IsSyncing = false;
+        }
     }
+
+
+    public async Task Save()
+    {
+        if (session.UserId == null || session.Vault == null)
+        {
+            logger?.LogWarning("Cannot save: No user logged in");
+            return;
+        }
+
+        try
+        {
+            logger?.LogInformation("Saving vault locally");
+
+            // Trigger the use case that encrypts and saves to local DB
+            using var scope = services.CreateScope();
+            var saveVault = scope.ServiceProvider.GetRequiredService<SaveVaultUseCase>();
+            await saveVault.ExecuteAsync();
+
+            LastSaved = DateTime.UtcNow;
+            MarkedAsChanged = true;
+
+            SyncStatus = SyncStatus.Unsynced;
+            SyncStatusMessage = "Changes pending";
+
+            logger?.LogInformation("Vault saved successfully");
+
+            // Trigger sync to push changes if auto-sync is on
+            if (HasAutoSync)
+            {
+                 _ = Task.Run(Sync);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Failed to save vault");
+        }
+    }
+
+    #endregion
+    #region Private Methods
+
+    private async Task PeriodicSyncCallback()
+    {
+        if (!HasAutoSync)
+            return;
+
+        try
+        {
+            await Sync();
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Periodic sync failed");
+        }
+    }
+
+    private async Task HandleLocalNewer(User localUser, IUserRepository userRepository)
+    {
+        var request = new UpdateVaultRequest { Vault = localUser.Vault };
+
+        var updatedServerUser = await serverAuth.UpdateUserAsync(localUser.Id, request);
+
+        // Update local timestamp
+        localUser.UpdatedAtUtc = updatedServerUser.UpdatedAtUtc;
+        await userRepository.SaveAsync(localUser);
+    }
+
+    private async Task HandleServerNewer(User? localUser, UserResponse serverUser, IUserRepository userRepository)
+    {
+        // 1. Decrypt new vault
+        var masterKey = session.GetMasterKey();
+
+        VaultDecrypted decryptedVault;
+        try
+        {
+            decryptedVault = vaultCrypto.Decrypt(serverUser.Vault, masterKey);
+        }
+        catch (CryptographicException)
+        {
+             logger?.LogWarning("Failed to decrypt server vault. The password might have changed on another device.");
+             AuthenticationRequired?.Invoke(this, EventArgs.Empty);
+             throw;
+        }
+
+        // 2. Update Session
+        session.UpdateVault(decryptedVault);
+
+        // Re-fetch the user to ensure we are updating the tracked entity if it exists
+        var existingUser = await userRepository.GetByIdAsync(Guid.Parse(serverUser.Id));
+
+        if (existingUser != null)
+             localUser = existingUser;
+
+        var mfaSecret = serverUser.MfaSecret is not null
+            ? Convert.FromBase64String(serverUser.MfaSecret)
+            : [];
+
+        // 3. Update Local DB
+        if (localUser == null)
+        {
+            localUser = new User
+            {
+                Id = Guid.Parse(serverUser.Id),
+                AuthSalt = Convert.FromBase64String(serverUser.AuthSalt),
+                AuthVerifier = Convert.FromBase64String(serverUser.AuthVerifier),
+                CreatedAtUtc = serverUser.CreatedAtUtc,
+                MfaEnabled = serverUser.MfaEnabled,
+                MfaSecret = mfaSecret,
+                ShamirEnabled = serverUser.ShamirEnabled,
+                VaultSalt = Convert.FromBase64String(serverUser.VaultSalt),
+                UpdatedAtUtc = serverUser.UpdatedAtUtc
+            };
+        }
+        else
+        {
+             // Preserve existing AuthVerifier/MfaSecret if updating existing user
+             localUser.AuthSalt = Convert.FromBase64String(serverUser.AuthSalt);
+        }
+
+        localUser.Email = new Email(serverUser.Email);
+        localUser.Vault = serverUser.Vault;
+        localUser.VaultSalt = Convert.FromBase64String(serverUser.VaultSalt);
+        localUser.MfaEnabled = serverUser.MfaEnabled;
+        localUser.MfaSecret = mfaSecret;
+        localUser.ShamirEnabled = serverUser.ShamirEnabled;
+        localUser.UpdatedAtUtc = serverUser.UpdatedAtUtc;
+
+        await userRepository.SaveAsync(localUser);
+    }
+
+    #endregion
 }

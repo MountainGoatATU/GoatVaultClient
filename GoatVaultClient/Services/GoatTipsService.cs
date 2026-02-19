@@ -1,6 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using GoatVaultCore.Services.Secrets;
-using GoatVaultInfrastructure.Services.Vault;
+using CommunityToolkit.Mvvm.ComponentModel;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Services;
 
 namespace GoatVaultClient.Services;
 
@@ -15,14 +15,19 @@ public partial class GoatTipsService : ObservableObject
     private readonly Random _random = new();
     private IDispatcherTimer? _timer;
 
-    private readonly VaultSessionService _vaultSessionService;
-    private readonly VaultScoreCalculatorService _vaultScoreCalculatorService;
+    private readonly ISessionContext _session;
+    private readonly IUserRepository _users;
+    private readonly IVaultScoreCalculatorService _vaultScoreCalculator;
 
-    public GoatTipsService(VaultSessionService vaultSessionService, VaultScoreCalculatorService vaultScoreCalculatorService)
+    public GoatTipsService(
+        ISessionContext session,
+        IUserRepository users,
+        IVaultScoreCalculatorService vaultScoreCalculator)
     {
-        _vaultSessionService = vaultSessionService;
+        _session = session;
+        _users = users;
+        _vaultScoreCalculator = vaultScoreCalculator;
         IsGoatEnabled = Preferences.Default.Get(GoatEnabledKey, true);
-        _vaultScoreCalculatorService = vaultScoreCalculatorService;
     }
 
     public void SetEnabled(bool enabled)
@@ -42,7 +47,7 @@ public partial class GoatTipsService : ObservableObject
 
     public void ApplyEnabledState(bool enabled) => SetEnabled(enabled);
 
-    public void StartTips()
+    public async Task StartTips()
     {
         if (_timer != null)
             return;
@@ -54,9 +59,9 @@ public partial class GoatTipsService : ObservableObject
         var counter = 0;
         _timer.Interval = TimeSpan.FromSeconds(1);
 
-        _timer.Tick += (_, _) =>
+        _timer.Tick += async (_, _) =>
         {
-            if (!IsGoatEnabled || _vaultSessionService.CurrentUser == null)
+            if (!IsGoatEnabled || _session.UserId == null)
             {
                 IsTipVisible = false;
                 CurrentTip = string.Empty;
@@ -68,7 +73,7 @@ public partial class GoatTipsService : ObservableObject
             switch (counter % 10)
             {
                 case 0:
-                    CurrentTip = GetContextualTip();
+                    CurrentTip = await GetContextualTip();
                     IsTipVisible = true;
                     break;
 
@@ -85,15 +90,16 @@ public partial class GoatTipsService : ObservableObject
         _timer.Start();
     }
 
-    private string GetContextualTip()
+    private async Task<string> GetContextualTip()
     {
-        var user = _vaultSessionService.CurrentUser;
-        var masterPassword = _vaultSessionService.MasterPassword;
-        var entries = _vaultSessionService.VaultEntries;
+        var userId = _session.UserId ?? throw new InvalidOperationException("UserId is null");
+        var user = await _users.GetByIdAsync(userId) ?? throw new InvalidOperationException("User is null");
+        var entries = _session.Vault?.Entries ?? [];
+        var masterStrength = _session.MasterPasswordStrength;
 
-        var score = _vaultScoreCalculatorService.CalculateScore(
+        var score = _vaultScoreCalculator.CalculateScore(
             entries,
-            masterPassword,
+            masterStrength,
             user.MfaEnabled);
 
         // Build list of all current problems

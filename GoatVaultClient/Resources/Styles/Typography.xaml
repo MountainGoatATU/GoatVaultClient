@@ -1,18 +1,17 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                    x:Class="GoatVaultClient_v3.Resources.Styles.Typography"
-                    >
+                    x:Class="GoatVaultClient_v3.Resources.Styles.Typography">
 
     <OnPlatform x:Key="MaterialRegularFont" x:TypeArguments="x:String">
         <On Platform="Android" Value="JetBrainsMonoRegular" />
         <On Platform="iOS" Value="JetBrainsMonoRegular" />
-        <On Platform="WinUI" Value="JetBrainsMono-Regular.ttf#JetBrainsMono" />
+        <On Platform="WinUI" Value="JetBrainsMonoRegular" />
     </OnPlatform>
 
     <OnPlatform x:Key="MaterialMediumFont" x:TypeArguments="x:String">
         <On Platform="Android" Value="JetBrainsMonoSemibold" />
         <On Platform="iOS" Value="JetBrainsMonoSemibold" />
-        <On Platform="WinUI" Value="JetBrainsMono-Semibold.ttf#JetBrainsMono" />
+        <On Platform="WinUI" Value="JetBrainsMonoSemibold" />
     </OnPlatform>
 
     <Style x:Key="MaterialLabelBase" TargetType="Label">

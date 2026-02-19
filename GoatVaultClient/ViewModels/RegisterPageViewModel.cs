@@ -1,12 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultApplication.Auth;
 using GoatVaultClient.Pages;
-using GoatVaultClient.Services;
+using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
 
 public partial class RegisterPageViewModel(
-    IAuthenticationService authenticationService)
+    RegisterUseCase register)
     : BaseViewModel
 {
     // Services
@@ -30,11 +31,24 @@ public partial class RegisterPageViewModel(
             // Set Busy
             IsBusy = true;
 
-            // Call Register method from AuthenticationService
-            if (Email != null) await authenticationService.RegisterAsync(Email, Password, ConfirmPassword);
+            // Call Register use case
+            if (Email is not null && Password is not null)
+                await register.ExecuteAsync(new Email(Email), Password);
 
             // On success, navigate to Gratitude page
             await Shell.Current.GoToAsync("//gratitude");
+        }
+        catch (InvalidOperationException ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Registration Failed", ex.Message, "OK");
+        }
+        catch (HttpRequestException)
+        {
+            await Shell.Current.DisplayAlertAsync("Network Error", "Unable to reach server. Please try again later.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Error", $"An unexpected error occurred: {ex.Message}", "OK");
         }
         finally
         {

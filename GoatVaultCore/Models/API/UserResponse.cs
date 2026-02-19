@@ -1,17 +1,18 @@
-﻿using GoatVaultCore.Models.Vault;
 using System.Text.Json.Serialization;
 
-namespace GoatVaultCore.Models.API;
+namespace GoatVaultCore.Models.Api;
 
 public class UserResponse
 {
     [JsonPropertyName("_id")] public required string Id { get; set; }
-    [JsonPropertyName("auth_salt")] public required string AuthSalt { get; set; }
-    [JsonPropertyName("email")] public required string Email { get; set; }
-    [JsonPropertyName("mfa_enabled")] public required bool MfaEnabled { get; set; }
-    [JsonPropertyName("mfa_secret")] public string? MfaSecret { get; set; }
-    [JsonPropertyName("shamir_enabled")] public required bool ShamirEnabled { get; set; }
-    [JsonPropertyName("vault")] public required VaultModel Vault { get; set; }
-    [JsonPropertyName("created_at")] public required DateTime CreatedAt { get; set; }
-    [JsonPropertyName("updated_at")] public required DateTime UpdatedAt { get; set; }
+    public required string AuthSalt { get; set; }
+    public required string AuthVerifier { get; set; }
+    public required string Email { get; set; }
+    public required bool MfaEnabled { get; set; }
+    public required string? MfaSecret { get; set; }
+    public required bool ShamirEnabled { get; set; }
+    public required string VaultSalt { get; set; }
+    public required VaultEncrypted Vault { get; set; }
+    public required DateTime CreatedAtUtc { get; set; }
+    public required DateTime UpdatedAtUtc { get; set; }
 }

@@ -1,10 +1,11 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
-namespace GoatVaultCore.Models.API;
+namespace GoatVaultCore.Models.Api;
 
 public class AuthInitResponse
 {
     [JsonPropertyName("_id")] public required string UserId { get; set; }
-    [JsonPropertyName("auth_salt")] public required string AuthSalt { get; set; }
-    [JsonPropertyName("mfa_enabled")] public bool MfaEnabled { get; set; }
+    public required string AuthSalt { get; set; }
+    public required string Nonce { get; set; }
+    public required bool MfaEnabled { get; set; }
 }

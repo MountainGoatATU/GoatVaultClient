@@ -6,15 +6,8 @@ using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class SplitSecretViewModel : BaseViewModel
+public partial class SplitSecretViewModel(ShamirSSService st) : BaseViewModel
 {
-    private readonly ShamirSSService _shamirTest;
-
-    public SplitSecretViewModel(ShamirSSService st)
-    {
-        _shamirTest = st;
-    }
-
     // ── Input fields ─────────────────────────────────────────────
 
     [ObservableProperty]
@@ -80,9 +73,9 @@ public partial class SplitSecretViewModel : BaseViewModel
         {
             // SLIP-39 generation
             var mnemonics = await Task.Run(() =>
-                _shamirTest.SplitSecret(SecretText, Passphrase ?? string.Empty, TotalShares, Threshold));
+                st.SplitSecret(SecretText, Passphrase ?? string.Empty, TotalShares, Threshold));
 
-            for (int i = 0; i < mnemonics.Count; i++)
+            for (var i = 0; i < mnemonics.Count; i++)
             {
                 GeneratedShares.Add(new RecoveryShare
                 {
@@ -113,8 +106,17 @@ public partial class SplitSecretViewModel : BaseViewModel
         await Clipboard.Default.SetTextAsync(share.Mnemonic);
 
         _ = Task.Delay(TimeSpan.FromSeconds(60)).ContinueWith(_ =>
-            MainThread.BeginInvokeOnMainThread(async () =>
-                await Clipboard.Default.SetTextAsync(string.Empty)));
+            MainThread.BeginInvokeOnMainThread(async void () =>
+            {
+                try
+                {
+                    await Clipboard.Default.SetTextAsync(string.Empty);
+                }
+                catch (Exception e)
+                {
+                    throw; // TODO handle exception
+                }
+            }));
     }
 
     [RelayCommand]

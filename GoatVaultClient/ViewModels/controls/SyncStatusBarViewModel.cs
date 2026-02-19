@@ -1,12 +1,9 @@
-﻿using GoatVaultClient.Services;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows.Input;
+using GoatVaultCore.Abstractions;
 
-namespace GoatVaultClient.ViewModels.controls
+namespace GoatVaultClient.ViewModels.Controls
 {
     /// <summary>
     /// ViewModel for the SyncStatusBar control
@@ -41,7 +38,7 @@ namespace GoatVaultClient.ViewModels.controls
             }, CanExecuteSync);
 
             // Start a timer to update the "Last synced" time display every minute
-            _updateTimer = new System.Threading.Timer(
+            _updateTimer = new Timer(
                 _ => OnPropertyChanged(nameof(LastSyncedFormatted)),
                 null,
                 TimeSpan.FromMinutes(1),
@@ -60,7 +57,7 @@ namespace GoatVaultClient.ViewModels.controls
             {
                 await _syncingService.Sync();
             }
-            catch (Exception ex)
+            catch
             {
                 // Error is already handled in the service
                 // Could show a toast notification here if desired
@@ -99,7 +96,7 @@ namespace GoatVaultClient.ViewModels.controls
         /// <summary>
         /// Controls visibility of sync button based on auto-sync setting
         /// </summary>
-        public bool ShowSyncButton => true; // Always show, but can be controlled by settings
+        public static bool ShowSyncButton => true; // Always show, but can be controlled by settings
 
         /// <summary>
         /// Controls whether sync button is enabled
@@ -109,7 +106,7 @@ namespace GoatVaultClient.ViewModels.controls
         /// <summary>
         /// Controls visibility of sync status indicator
         /// </summary>
-        public bool ShowSyncStatus => true;
+        public static bool ShowSyncStatus => true;
 
         /// <summary>
         /// Controls visibility of last updated label
@@ -125,7 +122,7 @@ namespace GoatVaultClient.ViewModels.controls
 
         #region Event Handlers
 
-        private void OnSyncingServicePropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnSyncingServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             // Forward relevant property changes to update UI
             switch (e.PropertyName)
@@ -157,29 +154,29 @@ namespace GoatVaultClient.ViewModels.controls
             }
         }
 
-        private void OnSyncStarted(object sender, EventArgs e)
+        private void OnSyncStarted(object? sender, EventArgs e)
         {
             // Could trigger UI feedback here, like showing a subtle animation
         }
 
-        private void OnSyncCompleted(object sender, EventArgs e)
+        private void OnSyncCompleted(object? sender, EventArgs e)
         {
             // Could trigger success feedback here, like a brief toast
         }
 
-        private void OnSyncFailed(object sender, SyncFailedEventArgs e)
+        private void OnSyncFailed(object? sender, SyncFailedEventArgs e)
         {
             // Could show error notification here
-            // Example: await DisplayAlert("Sync Failed", e.ErrorMessage, "OK");
+            // Example: await DisplayAlertAsync("Sync Failed", e.ErrorMessage, "OK");
         }
 
         #endregion
 
         #region INotifyPropertyChanged
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -2,26 +2,52 @@ using CommunityToolkit.Maui;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
-using GoatVaultClient.ViewModels.controls;
-using GoatVaultCore.Services.Secrets;
+using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
-using GoatVaultInfrastructure.Services.API;
-using GoatVaultInfrastructure.Services.Logging;
-using GoatVaultInfrastructure.Services.Vault;
+using GoatVaultInfrastructure.Services.Api;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using SkiaSharp.Views.Maui.Controls.Hosting;
-using System.Net.Http.Headers;
 using System.Reflection;
+using GoatVaultApplication.VaultUseCases;
+using GoatVaultApplication.Account;
+using GoatVaultApplication.Auth;
+using GoatVaultApplication.Session;
 using UraniumUI;
 using Xecrets.Slip39;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Services;
 
 namespace GoatVaultClient;
+
+public static class MauiAppBuilderExtensions
+{
+    public static MauiAppBuilder AddEmbeddedAppSettings(this MauiAppBuilder builder, string fileName = "appsettings.json")
+    {
+        // Load embedded JSON
+        using var stream = Assembly
+            .GetExecutingAssembly()
+            .GetManifestResourceStream($"GoatVaultClient.{fileName}");
+        if (stream != null)
+        {
+            var config = new ConfigurationBuilder()
+                .AddJsonStream(stream)
+                .Build();
+            builder.Configuration.AddConfiguration(config);
+        }
+
+        // Override with Preferences (runtime override)
+        var serverUrl = Preferences.Get("API_BASE_URL", builder.Configuration["API_BASE_URL"]);
+        builder.Configuration["API_BASE_URL"] = serverUrl;
+
+        return builder;
+    }
+}
 
 public static class MauiProgram
 {
@@ -42,13 +68,16 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 fonts.AddFont("JetBrainsMono-Regular.ttf", "JetBrainsMonoRegular");
-                fonts.AddFont("JetBrainsMon-Semibold.ttf", "JetBrainsMonoSemibold");
+                fonts.AddFont("JetBrainsMono-Semibold.ttf", "JetBrainsMonoSemibold");
                 fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular");
                 fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
                 fonts.AddFontAwesomeIconFonts();
                 fonts.AddMaterialSymbolsFonts();
                 fonts.AddFluentIconFonts();
             });
+
+        #region Logging
+
         // Configure logging
         var logDirectory = Path.Combine(FileSystem.AppDataDirectory, "logs");
 #if DEBUG
@@ -69,40 +98,57 @@ public static class MauiProgram
 #endif
         }));
 
-        // App settings configuration
-        builder.AddAppSettings();
+        #endregion
 
-        // Setup SQLite local database
+        // Embedded config
+        builder.AddEmbeddedAppSettings();
+
+        // SQLite DB
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "localVault.db");
         var connectionString = $"Data Source={dbPath}";
+        builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Transient);
 
-        builder.Services.AddDbContext<GoatVaultDb>(options =>
-            options.UseSqlite(connectionString));
+        #region Builder Services
 
-        // Register HttpService with HttpClientFactory
-        builder.Services.AddHttpClient<HttpService>(client =>
-        {
-            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-            client.Timeout = TimeSpan.FromSeconds(10);
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(
-                "Mozilla/5.0 (MAUI; Android/iOS/Desktop) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0 Safari/537.36");
-        });
-
-        // Register app services
-        builder.Services.AddSingleton<VaultService>();
-        builder.Services.AddSingleton<UserService>();
-        builder.Services.AddSingleton<AuthTokenService>();
-        builder.Services.AddSingleton<VaultSessionService>();
-        builder.Services.AddSingleton<MarkdownHelperService>();
+        // Core app services
         builder.Services.AddSingleton<ConnectivityService>();
-        builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
-        builder.Services.AddTransient<JwtUtils>();
         builder.Services.AddSingleton<ISyncingService, SyncingService>();
+        builder.Services.AddSingleton<ISessionContext, SessionContext>();
+        builder.Services.AddTransient<IUserRepository, UserRepository>();
+        builder.Services.AddSingleton<ICryptoService, CryptoService>();
+        builder.Services.AddSingleton<IVaultCrypto, VaultCrypto>();
+        builder.Services.AddSingleton<IAuthTokenService, AuthTokenService>();
+        builder.Services.AddSingleton<JwtUtils>();
 
+        // Use cases
+        builder.Services.AddTransient<LoginOfflineUseCase>();
+        builder.Services.AddTransient<LoginOnlineUseCase>();
+        builder.Services.AddTransient<LogoutUseCase>();
+        builder.Services.AddTransient<RegisterUseCase>();
 
+        builder.Services.AddTransient<AddVaultEntryUseCase>();
+        builder.Services.AddTransient<CalculateVaultScoreUseCase>();
+        builder.Services.AddTransient<DeleteVaultEntryUseCase>();
+        builder.Services.AddTransient<LoadVaultUseCase>();
+        builder.Services.AddTransient<SaveVaultUseCase>();
+        builder.Services.AddTransient<SyncVaultUseCase>();
+        builder.Services.AddTransient<UpdateVaultEntryUseCase>();
 
-        // Test services
-        builder.Services.AddSingleton<FakeDataSource>();
+        builder.Services.AddTransient<ChangeEmailUseCase>();
+        builder.Services.AddTransient<ChangePasswordUseCase>();
+        builder.Services.AddTransient<DisableMfaUseCase>();
+        builder.Services.AddTransient<EnableMfaUseCase>();
+        builder.Services.AddTransient<LoadUserProfileUseCase>();
+
+        // Misc services
+        builder.Services.AddSingleton<GoatTipsService>();
+        builder.Services.AddSingleton<TotpManagerService>();
+        builder.Services.AddTransient<CategoryManagerService>();
+        builder.Services.AddTransient<VaultEntryManagerService>();
+        builder.Services.AddTransient<PwnedPasswordService>();
+        builder.Services.AddTransient<IVaultScoreCalculatorService, VaultScoreCalculatorService>();
+        builder.Services.AddTransient<IPasswordStrengthService, PasswordStrengthService>();
+        builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
         // Shamir Test
         builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
         builder.Services.AddSingleton<IRandom, StrongRandom>();
@@ -114,52 +160,55 @@ public static class MauiProgram
         builder.Services.AddTransient<RecoverSecretViewModel>();
         builder.Services.AddTransient<RecoverSecretPage>();
 
-        // UraniumUI dialogs
+        // UraniumUI
         builder.Services.AddMopupsDialogs();
         builder.Services.AddCommunityToolkitDialogs();
 
-        // Ensure DB creation when app starts
-        using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+        #endregion
+
+        builder.Services.AddTransient<AuthenticatedHttpHandler>(sp =>
         {
-            var db = scope.ServiceProvider.GetRequiredService<GoatVaultDb>();
-            db.Database.EnsureCreated();
-        }
+            var serverBaseUrl = sp.GetRequiredService<IConfiguration>()["API_BASE_URL"];
+            var authService = sp.GetRequiredService<IAuthTokenService>();
+            var jwtUtils = sp.GetRequiredService<JwtUtils>();
+            var logger = sp.GetService<ILogger<AuthenticatedHttpHandler>>();
+            return new AuthenticatedHttpHandler(
+                authService,
+                jwtUtils,
+                $"{serverBaseUrl}v1/auth/refresh",
+                logger
+            );
+        });
 
-        builder.Services.AddSingleton<GoatTipsService>();
-        builder.Services.AddSingleton<TotpManagerService>();
-        builder.Services.AddSingleton<CategoryManagerService>();
-        builder.Services.AddSingleton<VaultEntryManagerService>();
-        builder.Services.AddSingleton<PwnedPasswordService>();
-        builder.Services.AddSingleton<IPasswordStrengthService,PasswordStrengthService>();
-        builder.Services.AddSingleton<VaultScoreCalculatorService>();
+        builder.Services.AddHttpClient<IServerAuthService, ServerAuthService>()
+            .AddHttpMessageHandler<AuthenticatedHttpHandler>();
+        builder.Services.AddHttpClient<IHttpService, HttpService>()
+            .AddHttpMessageHandler<AuthenticatedHttpHandler>();
 
-        // Register pages
+        #region App pages & view models
+
         builder.Services.AddTransient<SyncStatusBarViewModel>();
         builder.Services.AddTransient<MainPageViewModel>();
         builder.Services.AddTransient<MainPage>();
-        builder.Services.AddTransient<IntroductionPageViewModel>();
-        builder.Services.AddTransient<IntroductionPage>();
+        builder.Services.AddTransient<OnboardingPageViewModel>();
+        builder.Services.AddTransient<OnboardingPage>();
         builder.Services.AddTransient<RegisterPageViewModel>();
         builder.Services.AddTransient<RegisterPage>();
         builder.Services.AddTransient<LoginPageViewModel>();
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<GratitudePageViewModel>();
         builder.Services.AddTransient<GratitudePage>();
-        builder.Services.AddTransient<EducationPageViewModel>();
-        builder.Services.AddTransient<EducationPage>();
-        builder.Services.AddTransient<EducationDetailViewModel>();
-        builder.Services.AddTransient<EducationDetailPage>();
-        builder.Services.AddTransient<UserPageViewModel>();
-        builder.Services.AddTransient<UserPage>();
+        builder.Services.AddTransient<SecurityPageViewModel>();
+        builder.Services.AddTransient<SecurityPage>();
 
-        // Build the app
+        #endregion
+
+        // Build & ensure DB
         var app = builder.Build();
-
-        // Initialize database after app is built
         try
         {
             using var scope = app.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<GoatVaultDb>();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             db.Database.EnsureCreated();
 
             var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MauiProgram");
@@ -171,31 +220,6 @@ public static class MauiProgram
             logger?.LogCritical(ex, "Failed to initialize database");
         }
 
-        // Done!
         return app;
-
-
-    }
-    extension(MauiAppBuilder builder)
-    {
-        private void AddJsonSettings(string fileName)
-        {
-            using var stream = Assembly
-                .GetExecutingAssembly()
-                .GetManifestResourceStream($"GoatVaultClient.{fileName}");
-
-            if (stream == null)
-                return;
-
-            var config = new ConfigurationBuilder()
-                .AddJsonStream(stream)
-                .Build();
-            builder.Configuration.AddConfiguration(config);
-        }
-
-        private void AddAppSettings()
-        {
-            builder.AddJsonSettings("appsettings.json");
-        }
     }
 }

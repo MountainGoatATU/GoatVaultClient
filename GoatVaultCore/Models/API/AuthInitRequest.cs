@@ -1,8 +1,6 @@
-﻿using System.Text.Json.Serialization;
-
-namespace GoatVaultCore.Models.API;
+namespace GoatVaultCore.Models.Api;
 
 public class AuthInitRequest
 {
-    [JsonPropertyName("email")] public required string Email { get; set; }
+    public required string Email { get; set; }
 }

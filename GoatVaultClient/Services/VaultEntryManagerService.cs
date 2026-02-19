@@ -1,22 +1,26 @@
+using GoatVaultApplication.VaultUseCases;
 using GoatVaultClient.Controls.Popups;
-using GoatVaultCore.Models.Vault;
-using GoatVaultCore.Services.Secrets;
-using GoatVaultInfrastructure.Services.Vault;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
+using GoatVaultCore.Services;
 using Mopups.Services;
 
 namespace GoatVaultClient.Services;
 
 public class VaultEntryManagerService(
-    VaultSessionService vaultSessionService,
-    ISyncingService syncingService,
-    PwnedPasswordService pwnedPasswordService,
-    IPasswordStrengthService passwordStrengthService)
+    ISessionContext session,
+    AddVaultEntryUseCase addEntry,
+    UpdateVaultEntryUseCase updateEntry,
+    DeleteVaultEntryUseCase deleteEntry,
+    ISyncingService syncing,
+    PwnedPasswordService pwned,
+    IPasswordStrengthService passwordStrength)
 {
     public async Task<bool> CreateEntryAsync(IEnumerable<CategoryItem> categories)
     {
         var categoriesList = categories.ToList();
 
-        var formModel = new VaultEntryForm(categoriesList, passwordStrengthService)
+        var formModel = new VaultEntryForm(categoriesList, passwordStrength)
         {
             // Optional: Set a default selected category
             Category = categoriesList.FirstOrDefault()?.Name ?? ""
@@ -47,8 +51,8 @@ public class VaultEntryManagerService(
 
         if (!string.IsNullOrEmpty(newEntry.Password))
         {
-            newEntry.BreachCount = (int)await pwnedPasswordService.CheckPasswordAsync(newEntry.Password);
-            
+            newEntry.BreachCount = (int)await pwned.CheckPasswordAsync(newEntry.Password);
+
             // If breached, confirm with user before saving
             if (newEntry.BreachCount > 0)
             {
@@ -69,12 +73,12 @@ public class VaultEntryManagerService(
         }
 
         // Add to list
-        vaultSessionService.DecryptedVault?.Entries.Add(newEntry);
+        await addEntry.ExecuteAsync(newEntry);
 
         // Notify that entries changed
-        vaultSessionService.RaiseVaultEntriesChanged();
+        // session.RaiseVaultEntriesChanged(); // Handled by use case
 
-        await syncingService.AutoSaveIfEnabled();
+        await syncing.AutoSaveIfEnabled();
 
         return true;
     }
@@ -83,7 +87,7 @@ public class VaultEntryManagerService(
     {
         if (target == null) return false;
 
-        var entries = vaultSessionService.DecryptedVault?.Entries;
+        var entries = session.Vault?.Entries;
         if (entries == null) return false;
 
         var index = entries.IndexOf(target);
@@ -91,7 +95,7 @@ public class VaultEntryManagerService(
 
         var categoriesList = categories.ToList();
 
-        var formModel = new VaultEntryForm(categoriesList, passwordStrengthService)
+        var formModel = new VaultEntryForm(categoriesList, passwordStrength)
         {
             UserName = target.UserName,
             Site = target.Site,
@@ -124,7 +128,7 @@ public class VaultEntryManagerService(
         };
 
         {
-            updatedEntry.BreachCount = (int)await pwnedPasswordService.CheckPasswordAsync(updatedEntry.Password);
+            updatedEntry.BreachCount = (int)await pwned.CheckPasswordAsync(updatedEntry.Password);
 
             // If breached, confirm with user before saving
             if (updatedEntry.BreachCount > 0)
@@ -145,11 +149,12 @@ public class VaultEntryManagerService(
             }
         }
 
-        entries[index] = updatedEntry;
-        // Notify that entries changed
-        vaultSessionService.RaiseVaultEntriesChanged();
+        await updateEntry.ExecuteAsync(target, updatedEntry);
 
-        await syncingService.AutoSaveIfEnabled();
+        // Notify that entries changed
+        // session.RaiseVaultEntriesChanged(); // Handled by use case
+
+        await syncing.AutoSaveIfEnabled();
 
         return true;
     }
@@ -172,12 +177,12 @@ public class VaultEntryManagerService(
             return false;
 
         // Remove from the list
-        vaultSessionService.DecryptedVault?.Entries.Remove(target);
+        await deleteEntry.ExecuteAsync(target);
 
         // Notify that entries changed
-        vaultSessionService.RaiseVaultEntriesChanged();
+        // session.RaiseVaultEntriesChanged(); // Handled by use case
 
-        await syncingService.AutoSaveIfEnabled();
+        await syncing.AutoSaveIfEnabled();
 
         return true;
     }

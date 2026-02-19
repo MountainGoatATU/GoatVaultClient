@@ -1,60 +1,47 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultClient.Services;
-using GoatVaultCore.Models;
-using GoatVaultInfrastructure.Services.Vault;
-using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
-using Mopups.Services;
+using GoatVaultApplication.Auth;
 using GoatVaultClient.Controls.Popups;
+using GoatVaultClient.Services;
+using Microsoft.Extensions.Logging;
+using Mopups.Services;
+using System.Collections.ObjectModel;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
+using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
 
-// TODO: Unused UserService injection
+// TODO: Refactor
 public partial class LoginPageViewModel(
-    IAuthenticationService authenticationService,
-    ISyncingService syncingService,
-    VaultService vaultService,
-    ConnectivityService connectivityService,
+    ISyncingService syncing,
+    ConnectivityService connectivity,
+    LoginOnlineUseCase loginOnline,
+    LoginOfflineUseCase loginOffline,
+    IUserRepository userRepository,
     ILogger<LoginPageViewModel>? logger = null)
     : BaseViewModel
 {
-    // Dependencies
-
-    // Observable Properties
-    [ObservableProperty] private string? _email;
+    [ObservableProperty] private string? _emailText;
     [ObservableProperty] private string? _password;
-    [ObservableProperty] private bool _isConnected = true;
+    [ObservableProperty] private bool _isOnline = true;
     [ObservableProperty] private string _connectivityMessage = string.Empty;
     [ObservableProperty] private string _connectionType = string.Empty;
-    [ObservableProperty] private ObservableCollection<DbModel> _localAccounts = [];
-    [ObservableProperty] private DbModel? _selectedAccount;
-    [ObservableProperty] private bool _hasLocalAccounts;
+    [ObservableProperty] private ObservableCollection<User> _localUsers = [];
+    [ObservableProperty] private User? _selectedUser;
+    [ObservableProperty] private bool _hasLocalUsers;
     [ObservableProperty] private string? _offlinePassword;
 
     public async Task InitializeAsync()
     {
-        try
-        {
-            // Get initial state
-            UpdateConnectivityState();
-
-            // Subscribe to changes
-            connectivityService.ConnectivityChanged += OnConnectivityChanged;
-
-            // Load local accounts
-            await LoadLocalAccountsAsync();
-        }
-        catch (Exception e)
-        {
-            logger?.LogError(e, "Error initializing LoginPageViewModel");
-        }
+        UpdateConnectivityState();
+        connectivity.ConnectivityChanged += OnConnectivityChanged;
+        await LoadLocalUsersAsync();
     }
 
-    public void Cleanup()
-    {
-        connectivityService.ConnectivityChanged -= OnConnectivityChanged;
-    }
+    #region Connectivity
+
+    public void Cleanup() => connectivity.ConnectivityChanged -= OnConnectivityChanged;
 
     private void OnConnectivityChanged(object? sender, bool isConnected)
     {
@@ -81,62 +68,53 @@ public partial class LoginPageViewModel(
 
     private void UpdateConnectivityState()
     {
-        var networkInfo = connectivityService.GetNetworkInfo();
-        IsConnected = networkInfo.IsConnected;
+        var networkInfo = connectivity.GetNetworkInfo();
+        IsOnline = networkInfo.IsConnected;
         ConnectionType = networkInfo.GetConnectionType();
-
-        ConnectivityMessage = IsConnected
-            ? $"Connected via {ConnectionType}"
-            : "No internet connection available";
+        ConnectivityMessage = IsOnline ? $"Connected via {ConnectionType}" : "No internet connection available";
     }
 
-    private async Task LoadLocalAccountsAsync()
+    #endregion
+
+    private async Task LoadLocalUsersAsync()
     {
-        LocalAccounts.Clear();
-        LocalAccounts = await authenticationService.GetAllLocalAccountsAsync()
-            .ContinueWith(t => new ObservableCollection<DbModel>(t.Result));
-        if (LocalAccounts.Count != 0)
-        {
-            HasLocalAccounts = true;
-        }
+        var users = await userRepository.GetAllAsync();
+        LocalUsers = new ObservableCollection<User>(users);
+        HasLocalUsers = LocalUsers.Count > 0;
     }
 
     [RelayCommand]
     private async Task Login()
     {
-        // Prevent multiple simultaneous logins
-        if (IsBusy)
-            return;
-
+        if (IsBusy) return;
         try
         {
             IsBusy = true;
 
-            // Define the MFA provider function
-            async Task<string?> MfaProvider()
+            if (IsOnline)
             {
-                logger?.LogDebug("MFA enabled, prompting user for code");
-                string? mfaCode = null;
-
-                // Need to invoke on main thread as this is UI
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    var mfaPopup = new AuthorizePopup("Enter your 6-digit authenticator code", isPassword: false);
-                    await MopupService.Instance.PushAsync(mfaPopup);
-                    mfaCode = await mfaPopup.WaitForScan();
-                });
-
-                return mfaCode;
+                await LoginOnline();
+                syncing.StartPeriodicSync(TimeSpan.FromMinutes(2)); // Start auto-sync
+            }
+            else
+            {
+                await LoginOffline();
+                // We might want to sync if connection comes back? 
+                // For now, only start periodic sync if online login, as it implies we have fresh token?
+                // Actually LoginOffline doesn't get a token usually unless we refresh it.
             }
 
-            // Call the service
-            var success = await authenticationService.LoginAsync(Email, Password, MfaProvider);
-
-            if (success)
-            {
-                // Navigate to vault
-                await Shell.Current.GoToAsync("//main/home");
-            }
+            // Navigate to main
+            await Shell.Current.GoToAsync("//main/home");
+        }
+        catch (UnauthorizedAccessException)
+        {
+            await Shell.Current.DisplayAlertAsync("Login Failed", "Invalid credentials or MFA.", "OK");
+        }
+        catch (Exception e)
+        {
+            logger?.LogError(e, "Unexpected error during login");
+            await Shell.Current.DisplayAlertAsync("Error", e.Message, "OK");
         }
         finally
         {
@@ -144,70 +122,63 @@ public partial class LoginPageViewModel(
         }
     }
 
-    // Offline Login Command
-    [RelayCommand]
+    private async Task LoginOnline()
+    {
+        if (string.IsNullOrWhiteSpace(EmailText))
+            throw new InvalidOperationException("Email is required.");
+        if (string.IsNullOrWhiteSpace(Password))
+            throw new InvalidOperationException("Password is required.");
+
+        await loginOnline.ExecuteAsync(new Email(EmailText), Password, PromptForMfaCode);
+    }
+
     private async Task LoginOffline()
     {
-        // Prevent multiple simultaneous logins
-        if (IsBusy)
-            return;
-        try
-        {
-            // Set Busy
-            IsBusy = true;
+        if (SelectedUser == null)
+            throw new InvalidOperationException("Select a local account for offline login.");
 
-            // Attempt Login offline
-            var result = await authenticationService.LoginOfflineAsync(Email, OfflinePassword, SelectedAccount);
-            if (result)
-            {
-                // Navigate to Main page
-                await Shell.Current.GoToAsync("//main/home");
-            }
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        await loginOffline.ExecuteAsync(SelectedUser.Id, OfflinePassword!);
     }
 
-    /// <summary>
-    /// Quick login by selecting a local account (online mode)
-    /// This will autofill the email field
-    /// </summary>
-    [RelayCommand]
-    private void SelectLocalAccount(DbModel account)
+    private static async Task<string?> PromptForMfaCode()
     {
-        if (!IsConnected)
+        var mfaPopup = new AuthorizePopup("Enter 6-digit MFA code", isPassword: false);
+        await MopupService.Instance.PushAsync(mfaPopup);
+        return await mfaPopup.WaitForScan();
+    }
+
+    [RelayCommand]
+    private void SelectLocalUser(User user)
+    {
+        if (!IsOnline)
         {
-            // In offline mode, use offline login
-            SelectedAccount = account;
+            SelectedUser = user;
         }
         else
         {
-            // In online mode, auto-fill email
-            Email = account.Email;
-            SelectedAccount = null; // Clear selection for online login
+            EmailText = user.Email.Value;
+            SelectedUser = null; // Clear selection for online login
         }
     }
 
     [RelayCommand]
-    private async Task RemoveOfflineAccount(DbModel account)
+    private async Task RemoveOfflineUser(User user)
     {
-        // Remove from service
-        await authenticationService.RemoveLocalAccountAsync(account);
-        // Refresh list
-        await LoadLocalAccountsAsync();
+        var confirm = await Shell.Current.DisplayAlertAsync("Remove User",
+            $"Are you sure you want to remove {user.Email} from this device?", "Yes", "No");
+
+        if (!confirm) return;
+
+        await userRepository.DeleteAsync(user);
+        await LoadLocalUsersAsync();
     }
 
     [RelayCommand]
     private async Task GoToRegister()
     {
-        if (!IsConnected)
+        if (!IsOnline)
         {
-            await Shell.Current.DisplayAlertAsync(
-                "No Connection",
-                "Registration requires an internet connection.",
-                "OK");
+            await Shell.Current.DisplayAlertAsync("No Connection", "Registration requires an internet connection.", "OK");
             return;
         }
 
@@ -221,21 +192,9 @@ public partial class LoginPageViewModel(
         }
     }
 
-    /// <summary>
-    /// Refresh local accounts list
-    /// </summary>
     [RelayCommand]
-    private async Task RefreshLocalAccounts()
-    {
-        await LoadLocalAccountsAsync();
-    }
+    private async Task RefreshLocalUsers() => await LoadLocalUsersAsync();
 
-    /// <summary>
-    /// Clear offline account selection (cancel offline login)
-    /// </summary>
     [RelayCommand]
-    private void ClearSelection()
-    {
-        SelectedAccount = null;
-    }
+    private void ClearSelection() => SelectedUser = null;
 }

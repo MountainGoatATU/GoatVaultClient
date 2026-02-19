@@ -1,14 +1,6 @@
-﻿namespace GoatVaultInfrastructure.Services.API;
+using GoatVaultCore.Abstractions;
 
-public interface IAuthTokenService
-{
-    string GetToken();
-    string GetRefreshToken();
-    void SetToken(string token);
-    void SetRefreshToken(string refreshToken);
-    void ClearToken();
-    void ClearRefreshToken();
-}
+namespace GoatVaultInfrastructure.Services.Api;
 
 public class AuthTokenService : IAuthTokenService
 {
@@ -19,5 +11,5 @@ public class AuthTokenService : IAuthTokenService
     public void SetToken(string token) => _token = token;
     public void SetRefreshToken(string refreshToken) => _refreshToken = refreshToken;
     public void ClearToken() => _token = string.Empty;
-    public void ClearRefreshToken() => _refreshToken = string.Empty;    
+    public void ClearRefreshToken() => _refreshToken = string.Empty;
 }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="GoatVaultClient.Pages.OnboardingPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+    x:DataType="vm:OnboardingPageViewModel"
+    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
+                                      Dark={x:StaticResource DarkSurface}}">
+
+    <Grid Padding="30">
+        <VerticalStackLayout
+            HorizontalOptions="Center"
+            Spacing="30"
+            VerticalOptions="Center">
+
+            <material:ButtonView
+                BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight},
+                                                  Dark={StaticResource ButtonBackgroundDark}}"
+                HeightRequest="140"
+                WidthRequest="140">
+                <material:ButtonView.StrokeShape>
+                    <RoundRectangle CornerRadius="70" />
+                </material:ButtonView.StrokeShape>
+                <Image Aspect="AspectFit" Source="vault_icon.png" />
+            </material:ButtonView>
+
+            <Label
+                FontAttributes="Bold"
+                HorizontalOptions="Center"
+                Style="{x:StaticResource MaterialDisplayLarge}"
+                Text="Welcome to Goat Vault!" />
+            <Label
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                Style="{x:StaticResource MaterialBodyMedium}"
+                Text="Securely store and manage all your passwords in one place." />
+
+            <material:ButtonView
+                BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight},
+                                                  Dark={StaticResource ButtonBackgroundDark}}"
+                HeightRequest="55"
+                WidthRequest="220">
+                <material:ButtonView.StrokeShape>
+                    <RoundRectangle CornerRadius="27" />
+                </material:ButtonView.StrokeShape>
+                <Label
+                    FontSize="18"
+                    HorizontalOptions="Center"
+                    Text="Get Started"
+                    TextColor="White"
+                    VerticalOptions="Center" />
+
+                <material:ButtonView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GetStartedCommand}" />
+                </material:ButtonView.GestureRecognizers>
+            </material:ButtonView>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

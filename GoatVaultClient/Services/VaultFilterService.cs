@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Core.Extensions;
-using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Models;
 
 namespace GoatVaultClient.Services;
 

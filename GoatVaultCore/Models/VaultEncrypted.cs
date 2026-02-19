@@ -1,0 +1,28 @@
+using System.Text.Json.Serialization;
+
+namespace GoatVaultCore.Models;
+
+public class VaultEncrypted
+{
+    [JsonConverter(typeof(Base64Converter))]
+    public required byte[] EncryptedBlob { get; set; }
+
+    [JsonConverter(typeof(Base64Converter))]
+    public required byte[] Nonce { get; set; }
+
+    [JsonConverter(typeof(Base64Converter))]
+    public required byte[] AuthTag { get; set; }
+
+    public VaultEncrypted(byte[] encryptedBlob, byte[] nonce, byte[] authTag)
+    {
+        EncryptedBlob = encryptedBlob ?? throw new ArgumentNullException(nameof(encryptedBlob));
+        Nonce = nonce ?? throw new ArgumentNullException(nameof(nonce));
+        AuthTag = authTag ?? throw new ArgumentNullException(nameof(authTag));
+
+        if (Nonce.Length != 12) // AES-GCM standard nonce
+            throw new ArgumentException("Nonce must be 12 bytes.", nameof(nonce));
+
+        if (AuthTag.Length != 16) // AES-GCM standard tag
+            throw new ArgumentException("Tag must be 16 bytes.", nameof(authTag));
+    }
+}

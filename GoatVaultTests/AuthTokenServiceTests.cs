@@ -1,5 +1,4 @@
-﻿using Xunit;
-using GoatVaultInfrastructure.Services.API;
+﻿using GoatVaultInfrastructure.Services.Api;
 
 namespace GoatVaultTests
 {
@@ -50,7 +49,7 @@ namespace GoatVaultTests
         {
             // Arrange
             var service = new AuthTokenService();
-            var refreshToken = "test-refresh-token";
+            const string refreshToken = "test-refresh-token";
 
             // Act
             service.SetRefreshToken(refreshToken);
@@ -92,8 +91,8 @@ namespace GoatVaultTests
         {
             // Arrange
             var service = new AuthTokenService();
-            var token = "access-token";
-            var refreshToken = "refresh-token";
+            const string token = "access-token";
+            const string refreshToken = "refresh-token";
 
             // Act
             service.SetToken(token);

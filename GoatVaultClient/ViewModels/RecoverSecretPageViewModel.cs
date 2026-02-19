@@ -6,15 +6,8 @@ using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class RecoverSecretViewModel : BaseViewModel
+public partial class RecoverSecretViewModel(ShamirSSService st) : BaseViewModel
 {
-    private readonly ShamirSSService _shamirTest;
-
-    public RecoverSecretViewModel(ShamirSSService st)
-    {
-        _shamirTest = st;
-    }
-
     // ── Input fields ─────────────────────────────────────────────
 
     [ObservableProperty]
@@ -107,7 +100,7 @@ public partial class RecoverSecretViewModel : BaseViewModel
             var mnemonics = CollectedShares.Select(s => s.Mnemonic).ToList();
 
             var result = await Task.Run(() =>
-                _shamirTest.RecoverSecret(mnemonics, Passphrase ?? string.Empty));
+                st.RecoverSecret(mnemonics, Passphrase ?? string.Empty));
 
             RecoveredSecret = result;
             HasRecoveredSecret = true;

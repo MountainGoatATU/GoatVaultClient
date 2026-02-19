@@ -1,13 +1,14 @@
 using GoatVaultClient.Controls.Popups;
-using GoatVaultCore.Models.Vault;
-using GoatVaultInfrastructure.Services.Vault;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
 using Mopups.Services;
 
 namespace GoatVaultClient.Services;
 
+// TODO: refactor?
 public class CategoryManagerService(
-    VaultSessionService vaultSessionService,
-    ISyncingService syncingService)
+    ISessionContext session,
+    ISyncingService syncing)
 {
     public async Task<bool> CreateCategoryAsync(IEnumerable<CategoryItem> existingCategories)
     {
@@ -27,9 +28,10 @@ public class CategoryManagerService(
             var temp = new CategoryItem { Name = result };
 
             // Add to global list
-            vaultSessionService.DecryptedVault?.Categories.Add(temp);
+            session.Vault?.Categories.Add(temp);
+            session.RaiseVaultChanged();
 
-            await syncingService.AutoSaveIfEnabled();
+            await syncing.AutoSaveIfEnabled();
 
             return true;
         }
@@ -56,7 +58,7 @@ public class CategoryManagerService(
         }
 
         // Find the index of the category in the vault
-        var categories = vaultSessionService.DecryptedVault?.Categories;
+        var categories = session.Vault?.Categories;
         if (categories == null) return false;
 
         var index = categories.IndexOf(target);
@@ -78,7 +80,7 @@ public class CategoryManagerService(
 
         // Check if any passwords use this category
         // We check the source of truth
-        var vaultEntries = vaultSessionService.DecryptedVault?.Entries;
+        var vaultEntries = session.Vault?.Entries;
         if (vaultEntries == null) return false;
 
         var hasDependentPasswords = vaultEntries.Any(c => c.Category == oldName);
@@ -103,7 +105,7 @@ public class CategoryManagerService(
         }
 
         // Update category name
-        categories[index].Name = response;
+        categories?[index].Name = response;
 
         // Update passwords
         foreach (var pwd in vaultEntries.Where(c => c.Category == oldName))
@@ -111,7 +113,9 @@ public class CategoryManagerService(
             pwd.Category = reassign ? response : string.Empty;
         }
 
-        await syncingService.AutoSaveIfEnabled();
+        session.RaiseVaultChanged();
+
+        await syncing.AutoSaveIfEnabled();
 
         return true;
     }
@@ -142,8 +146,8 @@ public class CategoryManagerService(
 
         if (!response) return false;
 
-        var vaultEntries = vaultSessionService.DecryptedVault?.Entries;
-        var categories = vaultSessionService.DecryptedVault?.Categories;
+        var vaultEntries = session.Vault?.Entries;
+        var categories = session.Vault?.Categories;
 
         if (vaultEntries?.Any(c => c.Category == target.Name) == true)
         {
@@ -172,8 +176,10 @@ public class CategoryManagerService(
         // Remove category
         categories?.Remove(target);
 
+        session.RaiseVaultChanged();
+
         // Save the changes
-        await syncingService.AutoSaveIfEnabled();
+        await syncing.AutoSaveIfEnabled();
 
         return true;
     }

@@ -4,17 +4,12 @@ using Xecrets.Slip39;
 
 namespace GoatVaultCore.Services.Shamir
 {
-    public class ShamirSSService
+    public class ShamirSSService(IShamirsSecretSharing sss)
     {
-        private readonly IShamirsSecretSharing _sss;
-        public ShamirSSService(IShamirsSecretSharing sss)
-        {
-            _sss = sss;
-        }
         public List<string> SplitSecret(string secret, string passPhrase, int totalShares, int threshold)
         {
             // Convert secret to bytes
-            byte[] paddedSecretBytes = PadSecret(secret);
+            var paddedSecretBytes = PadSecret(secret);
 
             // SLIP-39 enforces that the secret is a multiple of 16 bits (usually 128 to 512 bits)
             if (paddedSecretBytes.Length < 16)
@@ -22,7 +17,7 @@ namespace GoatVaultCore.Services.Shamir
 
             // SLIP-39 supports "Super Shamir" (groups of groups). 
             // For standard M-of-N, we use 1 group.
-            Share[][] generatedShares = _sss.GenerateShares(
+            var generatedShares = sss.GenerateShares(
                 extendable: true,
                 iterationExponent: 0,
                 groupThreshold: 1,
@@ -32,15 +27,7 @@ namespace GoatVaultCore.Services.Shamir
             );
 
             // shares[0] contains the generated mnemonics for our single group
-            List<string> mnemonicList = new List<string>();
-            foreach (var group in generatedShares)
-            {
-                foreach (var share in group)
-                {
-                    mnemonicList.Add(share.ToString());
-                }
-            }
-            return mnemonicList;
+            return (from @group in generatedShares from share in @group select share.ToString()).ToList();
         }
 
         // <summary>
@@ -53,13 +40,9 @@ namespace GoatVaultCore.Services.Shamir
                 throw new ArgumentException("Shares are required for recovery.");
 
             // The SLIP-39 library will validate the shares and throw exceptions if they are invalid or insufficient.
-            var allParsedShares = new List<Share>();
-            foreach (var mnemonic in mnemonicShares)
-            {
-                allParsedShares.Add(Share.Parse(mnemonic));
-            }
+            var allParsedShares = mnemonicShares.ConvertAll(Share.Parse);
 
-            Share[] sharesToCombine = allParsedShares
+            var sharesToCombine = allParsedShares
                 .GroupBy(s => s.Prefix.GroupIndex)
                 .SelectMany(group => group.Take(group.First().Prefix.MemberThreshold))
                 .ToArray();
@@ -68,8 +51,8 @@ namespace GoatVaultCore.Services.Shamir
             {
                 // The SLIP-39 library will automatically read the threshold from the 
                 // mnemonics, validate the Reed-Solomon checksums, and interpolate the Galois Field.
-                var groupedShares = _sss.CombineShares(sharesToCombine, passphrase);
-                byte[] recoveredPaddedSecret = groupedShares.Secret;
+                var groupedShares = sss.CombineShares(sharesToCombine, passphrase);
+                var recoveredPaddedSecret = groupedShares.Secret;
 
                 if (recoveredPaddedSecret == null || recoveredPaddedSecret.Length == 0)
                     throw new InvalidOperationException("Failed to recover secret. Insufficient shares provided to meet the threshold.");
@@ -85,15 +68,15 @@ namespace GoatVaultCore.Services.Shamir
         }
         private static byte[] PadSecret(string secret)
         {
-            byte[] rawBytes = Encoding.UTF8.GetBytes(secret);
+            var rawBytes = Encoding.UTF8.GetBytes(secret);
 
             // We use 2 bytes at the start to store the actual length of the secret
-            int requiredLength = rawBytes.Length + 2;
+            var requiredLength = rawBytes.Length + 2;
 
             // SLIP-39 requires length >= 16 bytes AND an even number of bytes
-            int paddedLength = Math.Max(16, requiredLength + (requiredLength % 2));
+            var paddedLength = Math.Max(16, requiredLength + (requiredLength % 2));
 
-            byte[] padded = new byte[paddedLength];
+            var padded = new byte[paddedLength];
 
             // Write length prefix (Big-Endian)
             padded[0] = (byte)(rawBytes.Length >> 8);
@@ -117,7 +100,7 @@ namespace GoatVaultCore.Services.Shamir
                 throw new FormatException("Recovered data is too short to be a padded secret.");
 
             // Read the actual length of the secret from the first 2 bytes
-            int originalLength = (recoveredBytes[0] << 8) | recoveredBytes[1];
+            var originalLength = (recoveredBytes[0] << 8) | recoveredBytes[1];
 
             // Safety check against corruption
             if (originalLength > recoveredBytes.Length - 2 || originalLength < 0)

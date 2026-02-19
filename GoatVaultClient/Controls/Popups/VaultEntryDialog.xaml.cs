@@ -1,7 +1,7 @@
 using System.Windows.Input;
 using Mopups.Services;
 using Mopups.Pages;
-using GoatVaultCore.Models.Vault;
+using GoatVaultCore.Models;
 
 namespace GoatVaultClient.Controls.Popups;
 

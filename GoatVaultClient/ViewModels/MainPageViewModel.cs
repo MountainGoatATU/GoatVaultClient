@@ -1,21 +1,23 @@
-using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultCore.Models.Vault;
-using GoatVaultInfrastructure.Services;
-using GoatVaultInfrastructure.Services.Vault;
+using GoatVaultCore.Models;
 using System.Collections.ObjectModel;
+using GoatVaultApplication.VaultUseCases;
 using GoatVaultClient.Services;
-using GoatVaultCore.Services.Secrets;
+using GoatVaultCore.Abstractions;
 
 namespace GoatVaultClient.ViewModels
 {
-    public partial class MainPageViewModel : BaseViewModel
+    public partial class MainPageViewModel : BaseViewModel, IDisposable
     {
+        private readonly LoadVaultUseCase _loadVault;
+        private readonly ISessionContext _sessionContext;
+
         #region Properties
+
         // Observables
-        [ObservableProperty] private ObservableCollection<CategoryItem> categories = new();
-        [ObservableProperty] private ObservableCollection<VaultEntry> passwords = new();
+        [ObservableProperty] private ObservableCollection<CategoryItem> categories = [];
+        [ObservableProperty] private ObservableCollection<VaultEntry> passwords = [];
         [ObservableProperty] private CategoryItem? selectedCategory;
         [ObservableProperty] private VaultEntry? selectedEntry;
         [ObservableProperty] private string? searchText;
@@ -32,123 +34,145 @@ namespace GoatVaultClient.ViewModels
         private List<CategoryItem> _allVaultCategories = [];
         private bool CanSync() => !IsBusy;
 
-        // Dependency Injection
-        private readonly VaultSessionService _vaultSessionService;
-        private readonly FakeDataSource _fakeDataSource;
+        #endregion
+
+        #region Dependency Injection
+
         private readonly ISyncingService _syncingService;
         private readonly TotpManagerService _totpManagerService;
         private readonly CategoryManagerService _categoryManagerService;
         private readonly VaultEntryManagerService _vaultEntryManagerService;
-        private readonly PwnedPasswordService _pwnedPasswordService;
+        // private readonly PwnedPasswordService _pwnedPasswordService;
         public GoatTipsService GoatTipsService { get; }
 
         #endregion
+
         public MainPageViewModel(
-            VaultSessionService vaultSessionService,
-            FakeDataSource fakeDataSource,
+            LoadVaultUseCase loadVault,
+            ISessionContext sessionContext,
             ISyncingService syncingService,
             GoatTipsService goatTipsService,
             TotpManagerService totpManagerService,
             CategoryManagerService categoryManagerService,
-            VaultEntryManagerService vaultEntryManagerService,
-            PwnedPasswordService pwnedPasswordService)
+            VaultEntryManagerService vaultEntryManagerService/*,
+            PwnedPasswordService pwnedPasswordService*/)
         {
-            // Dependency Injection
-            _vaultSessionService = vaultSessionService;
-            _fakeDataSource = fakeDataSource;
+            _loadVault = loadVault;
+            _sessionContext = sessionContext;
             _syncingService = syncingService;
             GoatTipsService = goatTipsService;
             _totpManagerService = totpManagerService;
             _categoryManagerService = categoryManagerService;
             _vaultEntryManagerService = vaultEntryManagerService;
-            _pwnedPasswordService = pwnedPasswordService;
+            // _pwnedPasswordService = pwnedPasswordService;
 
-            _syncingService.SyncCompleted += (s, e) =>
-            {
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    SelectedEntry = null; // Clear selection to prevent editing a dead reference
-                    ReloadVaultData();
-                });
-            };
+            // TODO: Check if logic is the same here
+            _sessionContext.VaultChanged += OnVaultChanged;
+            _syncingService.AuthenticationRequired += OnAuthenticationRequired;
 
-            LoadVaultData();
             StartRandomGoatComments();
+            Task.Run(async () => await InitializeAsync());
         }
 
-        partial void OnSelectedEntryChanged(VaultEntry? value) => _totpManagerService.TrackEntry(value);
+        private void OnVaultChanged(object? sender, EventArgs e)
+        {
+             MainThread.BeginInvokeOnMainThread(() =>
+             {
+                 if (_sessionContext.Vault == null)
+                     return;
+
+                 _allVaultEntries = [.. _sessionContext.Vault.Entries];
+                 _allVaultCategories = [.. _sessionContext.Vault.Categories];
+                 SelectedEntry = null; // Clear selection to prevent editing a dead reference
+                 ReloadVaultData();
+             });
+        }
+
+        private async void OnAuthenticationRequired(object? sender, EventArgs e)
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await Application.Current.MainPage.DisplayAlertAsync("Session Expired",
+                    "Your password has changed on another device. Please log in again.", "OK");
+
+                // Navigate to log in (using absolute route to clear stack)
+                await Shell.Current.GoToAsync("//login");
+            });
+        }
+
+        public void Dispose()
+        {
+            _sessionContext.VaultChanged -= OnVaultChanged;
+            _syncingService.AuthenticationRequired -= OnAuthenticationRequired;
+            GoatTipsService.PropertyChanged -= OnGoatTipsPropertyChanged;
+        }
+
+        private async Task InitializeAsync() => await LoadVaultAsync();
 
         [RelayCommand]
-        private async Task CopyTotpCode() => await _totpManagerService.CopyTotpCodeAsync(SelectedEntry);
-
-        public void StartRandomGoatComments()
+        private async Task LoadVaultAsync()
         {
-            GoatTipsService.StartTips();
+            if (IsBusy) return;
 
-            GoatTipsService.PropertyChanged += (s, e) =>
+            IsBusy = true;
+            try
             {
-                switch (e.PropertyName)
-                {
-                    case nameof(GoatTipsService.CurrentTip):
-                        GoatComment = GoatTipsService.CurrentTip;
-                        break;
+                var vault = await _loadVault.ExecuteAsync();
 
-                    case nameof(GoatTipsService.IsTipVisible):
-                    case nameof(GoatTipsService.IsGoatEnabled):
-                        var show = GoatTipsService is { IsGoatEnabled: true, IsTipVisible: true };
-                        IsGoatCommentVisible = show;
-                        if (!show)
-                            GoatComment = string.Empty;
-                        break;
-                }
-            };
+                _allVaultEntries = [.. vault.Entries];
+                _allVaultCategories = [.. vault.Categories];
+
+                ReloadVaultData();
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
-        #region Synchronous methods
-        public void LoadVaultData()
+
+        [RelayCommand]
+        private async Task RefreshVault()
         {
+            if (IsBusy) return;
+            await LoadVaultAsync();
             ReloadVaultData();
         }
+
+        #region Synchronous methods
+
         private void ReloadVaultData()
         {
-            // If vault is not decrypted, return
-            if (_vaultSessionService.DecryptedVault == null)
-                return;
+            if (_sessionContext.Vault != null)
+            {
+                _allVaultEntries = [.. _sessionContext.Vault.Entries];
+                _allVaultCategories = [.. _sessionContext.Vault.Categories];
+            }
 
-            // Clear Passwords and Categories
-            Categories.Clear();
-            Passwords.Clear();
-
-            // Reload from decrypted vault into local cache
-            _allVaultEntries = _vaultSessionService.DecryptedVault.Entries.ToList();
-            _allVaultCategories = _vaultSessionService.DecryptedVault.Categories.ToList();
-
-            // Set observable collections
-            UpdateCollection(Categories, _allVaultCategories);
             UpdateCollection(Passwords, _allVaultEntries);
+            UpdateCollection(Categories, _allVaultCategories);
 
-            // Presort to match UI
+            // TODO: Old pre-refactor code
+            // Passwords = _allVaultEntries.ToObservableCollection();
+            // Categories = _allVaultCategories.ToObservableCollection();
+
             PresortEntries(true);
             PresortCategories(true);
         }
 
-        private void UpdateCollection<T>(ObservableCollection<T> collection, IEnumerable<T> newItems)
+        private void UpdateCollection<T>(ObservableCollection<T> collection, IEnumerable<T>? newItems)
         {
             collection.Clear();
-            if (newItems != null)
-            {
-                foreach (var item in newItems)
-                {
-                    collection.Add(item);
-                }
-            }
+
+            if (newItems == null)
+                return;
+
+            foreach (var item in newItems)
+                collection.Add(item);
         }
 
         private void PresortCategories(bool matchUi = false)
         {
-            if (!matchUi)
-            {
-                _categoriesSortAsc = !_categoriesSortAsc;
-            }
+            if (!matchUi) _categoriesSortAsc = !_categoriesSortAsc;
 
             var sortedCategories = VaultFilterService.FilterAndSortCategories(
                 _allVaultCategories,
@@ -160,10 +184,7 @@ namespace GoatVaultClient.ViewModels
 
         private void PresortEntries(bool matchUi = false)
         {
-            if (!matchUi)
-            {
-                _passwordsSortAsc = !_passwordsSortAsc;
-            }
+            if (!matchUi) _passwordsSortAsc = !_passwordsSortAsc;
 
             var sortedEntries = VaultFilterService.FilterAndSortEntries(
                 _allVaultEntries,
@@ -198,19 +219,19 @@ namespace GoatVaultClient.ViewModels
         {
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                // Filter Categories
                 var filteredCategories = VaultFilterService.FilterAndSortCategories(
                     _allVaultCategories, // Filter from ALL
                     SearchText,
                     _categoriesSortAsc);
+
                 UpdateCollection(Categories, filteredCategories);
 
-                // Filter Passwords
-               var filteredEntries = VaultFilterService.FilterAndSortEntries(
+                var filteredEntries = VaultFilterService.FilterAndSortEntries(
                     _allVaultEntries, // Filter from ALL
                     SearchText,
                     SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name, // Keep category filter
                     _passwordsSortAsc);
+
                 UpdateCollection(Passwords, filteredEntries);
             }
             else
@@ -218,30 +239,65 @@ namespace GoatVaultClient.ViewModels
                 ReloadVaultData();
             }
         }
+
+        #endregion
+
+        #region TOTP
+
+        partial void OnSelectedEntryChanged(VaultEntry? value) => _totpManagerService.TrackEntry(value);
+
+        [RelayCommand]
+        private async Task CopyTotpCode() => await _totpManagerService.CopyTotpCodeAsync(SelectedEntry);
+
+        #endregion
+
+        #region Goat Comments
+
+        public void StartRandomGoatComments()
+        {
+            using var _ = GoatTipsService.StartTips();
+            GoatTipsService.PropertyChanged += OnGoatTipsPropertyChanged;
+        }
+
+        private void OnGoatTipsPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(GoatTipsService.CurrentTip):
+                    if (GoatTipsService.CurrentTip != null)
+                        GoatComment = GoatTipsService.CurrentTip;
+                    break;
+
+                case nameof(GoatTipsService.IsTipVisible):
+                case nameof(GoatTipsService.IsGoatEnabled):
+                    var show = GoatTipsService is { IsGoatEnabled: true, IsTipVisible: true };
+                    IsGoatCommentVisible = show;
+                    if (!show)
+                        GoatComment = string.Empty;
+                    break;
+            }
+        }
+
         #endregion
 
         #region Commands
-        /*
-         * Sync commands
-         */
-        // Manual Sync Command
+
         [RelayCommand]
         private async Task Save()
         {
-            // Indicate syncing
+            if (!CanSync()) return;
+
             IsSyncing = true;
-
-            // Save to local and server
-            //await _syncingService.Save();
-            await _syncingService.Sync();
-
-            // Reset syncing indicator
-            IsSyncing = false;
+            try
+            {
+                await _syncingService.Sync();
+            }
+            finally
+            {
+                IsSyncing = false;
+            }
         }
 
-        /*
-         * Categories Commands
-         */
 
         [RelayCommand]
         private Task SortCategories()
@@ -251,51 +307,36 @@ namespace GoatVaultClient.ViewModels
         }
 
         [RelayCommand]
-        private async Task CreateCategory()
-        {
-            var changed = await _categoryManagerService.CreateCategoryAsync(Categories);
-            if (changed)
-            {
-                ReloadVaultData();
-            }
-        }
-
-        [RelayCommand]
-        private async Task EditCategory(CategoryItem category)
-        {
-            var target = category ?? SelectedCategory;
-            var changed = await _categoryManagerService.EditCategoryAsync(target);
-            if (changed)
-            {
-                ReloadVaultData();
-            }
-        }
-
-        [RelayCommand]
-        private async Task DeleteCategory(CategoryItem category)
-        {
-            var target = category ?? SelectedCategory;
-            var changed = await _categoryManagerService.DeleteCategoryAsync(target);
-            if (changed)
-            {
-                // Set selected category
-                SelectedCategory = null;
-                ReloadVaultData();
-            }
-        }
-
-        [RelayCommand]
         private Task SortEntries()
         {
             PresortEntries();
             return Task.CompletedTask;
         }
 
-        // TODO: Unused method parameter
         [RelayCommand]
-        private async Task CopyEntry()
+        private async Task CreateCategory()
         {
-            await VaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry);
+            if (await _categoryManagerService.CreateCategoryAsync(Categories))
+                ReloadVaultData();
+        }
+
+        [RelayCommand]
+        private async Task EditCategory(CategoryItem category)
+        {
+            var target = category ?? SelectedCategory;
+            if (await _categoryManagerService.EditCategoryAsync(target))
+                ReloadVaultData();
+        }
+
+        [RelayCommand]
+        private async Task DeleteCategory(CategoryItem category)
+        {
+            var target = category ?? SelectedCategory;
+            if (await _categoryManagerService.DeleteCategoryAsync(target))
+            {
+                SelectedCategory = null;
+                ReloadVaultData();
+            }
         }
 
         [RelayCommand]
@@ -304,6 +345,8 @@ namespace GoatVaultClient.ViewModels
             var changed = await _vaultEntryManagerService.CreateEntryAsync(Categories);
             if (changed)
             {
+                // TODO: Old pre-refactor code
+                // PresortEntries(true);
                 ReloadVaultData();
             }
         }
@@ -312,30 +355,23 @@ namespace GoatVaultClient.ViewModels
         private async Task EditEntry(VaultEntry entry)
         {
             var target = entry ?? SelectedEntry;
-            var changed = await _vaultEntryManagerService.EditEntryAsync(target, Categories);
-            if (changed)
-            {
+            if (await _vaultEntryManagerService.EditEntryAsync(target, Categories))
                 ReloadVaultData();
-            }
         }
 
         [RelayCommand]
         private async Task DeleteEntry(VaultEntry entry)
         {
             var target = entry ?? SelectedEntry;
-            var changed = await _vaultEntryManagerService.DeleteEntryAsync(target);
-            if (changed)
-            {
-                // Update UI
+            if (await _vaultEntryManagerService.DeleteEntryAsync(target))
                 ReloadVaultData();
-            }
         }
 
         [RelayCommand]
-        private void TogglePasswordVisibility()
-        {
-            IsPasswordVisible = !IsPasswordVisible;
-        }
+        private async Task CopyEntry() => await VaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry);
+
+        [RelayCommand]
+        private void TogglePasswordVisibility() => IsPasswordVisible = !IsPasswordVisible;
 
         #endregion
     }

@@ -16,15 +16,15 @@
         ═══════════════════════════════════════════════════════════
         
         1. PRE-AUTH FLOW (FlyoutBehavior=Disabled):
-        IntroductionPage → LoginPage ↔ RegisterPage
+        OnboardingPage → LoginPage ↔ RegisterPage
         
         2. POST-AUTH FLOW (FlyoutBehavior=Flyout):
-        Hamburger menu with: Home | Education | Vault | User
-        FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
+           Hamburger menu with: Vault | Security
+           FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
         
         Navigation stack is cleared on:
         - Login/Register → Main  (//main/home)  + enable flyout
-        - Logout from UserPage   (//intro)       + disable flyout
+        - Logout from SecurityPage   (//intro)       + disable flyout
         ═══════════════════════════════════════════════════════════
     -->
 
@@ -32,18 +32,14 @@
     <!--  FLYOUT HEADER  -->
     <!--  ============================================================  -->
     <Shell.FlyoutHeader>
-        <Grid
-            Padding="20"
-            BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary},
-                                              Dark={StaticResource DarkPrimary}}"
-            HeightRequest="120">
-            <VerticalStackLayout Spacing="8" VerticalOptions="Center">
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="20"
-                    Text="GoatVault"
-                    TextColor="{AppThemeBinding Light={StaticResource LightOnPrimary},
-                                                Dark={StaticResource DarkOnPrimary}}" />
+        <Grid HeightRequest="60"
+              BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary}, Dark={StaticResource DarkPrimary}}"
+              Padding="20">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="8">
+                <Label Text="GoatVault"
+                       TextColor="{AppThemeBinding Light={StaticResource LightOnPrimary}, Dark={StaticResource DarkOnPrimary}}"
+                       FontSize="20"
+                       FontAttributes="Bold"/>
             </VerticalStackLayout>
         </Grid>
     </Shell.FlyoutHeader>
@@ -53,7 +49,7 @@
     <!--  ============================================================  -->
 
     <ShellContent
-        ContentTemplate="{DataTemplate pages:IntroductionPage}"
+        ContentTemplate="{DataTemplate pages:OnboardingPage}"
         FlyoutItemIsVisible="False"
         Route="intro"
         Shell.NavBarIsVisible="False" />
@@ -78,41 +74,21 @@
     <!--  ============================================================  -->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems" Route="main">
 
-        <ShellContent
-            Title="Home"
-            ContentTemplate="{DataTemplate local:MainPage}"
-            Icon="{FontImageSource FontFamily=MaterialSharp,
-                                   Glyph={x:Static m:MaterialRounded.Home},
-                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
-                                                          Dark={StaticResource DarkOnSurface}}}"
-            Route="home"
-            Shell.NavBarIsVisible="False" />
+        <ShellContent Route="home"
+                      Title="Vault"
+                      Shell.NavBarIsVisible="False"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Lock}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
+                      ContentTemplate="{DataTemplate local:MainPage}" />
 
-        <ShellContent
-            Title="Education"
-            ContentTemplate="{DataTemplate pages:EducationPage}"
-            Icon="{FontImageSource FontFamily=MaterialSharp,
-                                   Glyph={x:Static m:MaterialRounded.Book},
-                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
-                                                          Dark={StaticResource DarkOnSurface}}}"
-            Route="education"
-            Shell.NavBarIsVisible="False" />
+        <ShellContent Route="security"
+                      Title="Security"
+                      Shell.NavBarIsVisible="False"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Security}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
+                      ContentTemplate="{DataTemplate pages:SecurityPage}" />
 
-        <ShellContent
-            Title="Profile"
-            ContentTemplate="{DataTemplate pages:UserPage}"
-            Icon="{FontImageSource FontFamily=MaterialSharp,
-                                   Glyph={x:Static m:MaterialRounded.Person},
-                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
-                                                          Dark={StaticResource DarkOnSurface}}}"
-            Route="user"
-            Shell.NavBarIsVisible="False" />
-
-        <ShellContent
-            ContentTemplate="{DataTemplate pages:SplitSecretPage}"
-            FlyoutItemIsVisible="False"
-            Route="splitKey"
-            Shell.NavBarIsVisible="False" />
+        <ShellContent Title="Settings"
+                      Shell.NavBarIsVisible="False"
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Settings}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"/>
 
     </FlyoutItem>
 
@@ -160,15 +136,13 @@
     </Shell.FlyoutFooter>
 
     <!--<FlyoutItem Title="Introduction" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Handshake}}">
-        <ShellContent ContentTemplate="{DataTemplate pages:IntroductionPage}" Route="IntroductionPage" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Key}}" />
+        <ShellContent ContentTemplate="{DataTemplate pages:OnboardingPage}" Route="OnboardingPage" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Key}}" />
     </FlyoutItem>
     <FlyoutItem Title="Vault" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Home}}">
         <ShellContent Title="Vault" ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" Icon="user_icon.png" />
     </FlyoutItem>
-    <FlyoutItem Title="Education" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Book}}">
-        <ShellContent Title="EducationPage" ContentTemplate="{DataTemplate pages:EducationPage}" Route="EducationPage" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Book}}" />
     </FlyoutItem>
     <FlyoutItem Title="User" Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Account_circle}}">
-        <ShellContent Title="UserSettings" ContentTemplate="{DataTemplate pages:UserPage}" Route="UserPage" />
+        <ShellContent Title="UserSettings" ContentTemplate="{DataTemplate pages:SecurityPage}" Route="SecurityPage" />
     </FlyoutItem>-->
 </Shell>

@@ -1,7 +1,4 @@
-﻿using GoatVaultCore.Services.Shamir;
-using Microsoft.VisualBasic;
-
-namespace GoatVaultCore.Shamir.Services;
+﻿namespace GoatVaultCore.Services.Shamir;
 
 /// <summary>
 /// Loads the BIP-39 wordlist from Resources/Raw/. Thread-safe, cached singleton.
@@ -9,30 +6,30 @@ namespace GoatVaultCore.Shamir.Services;
 public static class WordListLoader
 {
     private static string[]? _cached;
-    private static readonly SemaphoreSlim _lock = new(1, 1);
+    private static readonly SemaphoreSlim Lock = new(1, 1);
 
     public static async Task<string[]> LoadAsync(string filename = "bip39words.txt")
     {
         if (_cached is not null) return _cached;
 
-        await _lock.WaitAsync();
+        await Lock.WaitAsync();
         try
         {
             if (_cached is not null) return _cached;
 
-            var asssembly = typeof(WordListLoader).Assembly;
+            var assembly = typeof(WordListLoader).Assembly;
 
-            string resourceName = "GoatVaultCore.Services.Shamir.Resources." + filename;
+            var resourceName = "GoatVaultCore.Services.Shamir.Resources." + filename;
 
-            using Stream? stream = asssembly.GetManifestResourceStream(resourceName);
+            await using var stream = assembly.GetManifestResourceStream(resourceName);
 
             if (stream == null)
             {
                 throw new FileNotFoundException($"Could not find embedded resource: {resourceName}");
             }
 
-            using StreamReader sr = new StreamReader(stream);
-            string text = await sr.ReadToEndAsync();
+            using var sr = new StreamReader(stream);
+            var text = await sr.ReadToEndAsync();
 
             var words = text
                 .Split('\n', StringSplitOptions.RemoveEmptyEntries)
@@ -41,13 +38,12 @@ public static class WordListLoader
                 .ToArray();
 
             if (words.Length != 2048)
-                throw new InvalidOperationException(
-                    $"Expected 2048 words in {filename}, got {words.Length}.");
+                throw new InvalidOperationException($"Expected 2048 words in {filename}, got {words.Length}.");
 
             _cached = words;
             return words;
         }
-        finally { _lock.Release(); }
+        finally { Lock.Release(); }
     }
 
     public static async Task<Bip39MnemonicEncoder> CreateEncoderAsync(

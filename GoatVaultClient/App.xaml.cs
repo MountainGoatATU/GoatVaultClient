@@ -1,20 +1,20 @@
-using GoatVaultInfrastructure.Services.Vault;
+using GoatVaultCore.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient;
 
 public partial class App : Application
 {
-    private readonly VaultSessionService _sessionService;
-    private readonly VaultService _vaultService;
+    private readonly ISessionContext _session;
+    private readonly IUserRepository _users;
     private readonly ILogger<App> _logger;
 
-    public App(VaultSessionService sessionService, VaultService vaultService, ILogger<App> logger)
+    public App(ISessionContext session, IUserRepository users, ILogger<App> logger)
     {
         InitializeComponent();
         MainPage = new AppShell();
-        _sessionService = sessionService;
-        _vaultService = vaultService;
+        _session = session;
+        _users = users;
         _logger = logger;
 
         // Wire up global exception handlers
@@ -39,19 +39,19 @@ public partial class App : Application
         {
             _logger.LogInformation("App stopped — attempting to save vault");
 
-            if (_sessionService.DecryptedVault == null ||
-                string.IsNullOrEmpty(_sessionService.MasterPassword) ||
-                _sessionService.CurrentUser == null)
+            if (_session.Vault == null || _session.UserId == null)
             {
                 _logger.LogDebug("No active vault session to save on stop");
                 return;
             }
 
+            // TODO: Fix
             // Use synchronous save - we're in a non-async event handler
-            var saveTask = _vaultService.SaveVaultAsync(
-                _sessionService.CurrentUser,
-                _sessionService.MasterPassword,
-                _sessionService.DecryptedVault);
+            /*
+            var saveTask = _users.SaveVaultAsync(
+                _session.CurrentUser,
+                _session.MasterPassword,
+                _session.DecryptedVault);
 
             // Wait with timeout
             if (saveTask.Wait(TimeSpan.FromSeconds(3)))
@@ -62,6 +62,7 @@ public partial class App : Application
             {
                 _logger.LogWarning("Vault save timed out on stop (3s)");
             }
+            */
         }
         catch (Exception ex)
         {
@@ -98,16 +99,17 @@ public partial class App : Application
         {
             _logger.LogInformation("App going to sleep — saving vault");
 
-            if (_sessionService.DecryptedVault != null &&
-                !string.IsNullOrEmpty(_sessionService.MasterPassword) &&
-                _sessionService.CurrentUser != null)
+            if (_session.Vault != null && _session.UserId != null)
             {
-                var saveTask = _vaultService.SaveVaultAsync(
-                    _sessionService.CurrentUser,
-                    _sessionService.MasterPassword,
-                    _sessionService.DecryptedVault);
+                // TODO: Fix
+                /*
+                var saveTask = _users.SaveVaultAsync(
+                    _session.CurrentUser,
+                    _session.MasterPassword,
+                    _session.DecryptedVault);
 
                 saveTask.Wait(TimeSpan.FromSeconds(3));
+                */
                 _logger.LogInformation("Vault saved on sleep");
             }
             else
@@ -120,7 +122,8 @@ public partial class App : Application
             _logger.LogError(ex, "Error saving vault on sleep");
         }
 
-        _sessionService.Lock();
+        // TODO: Fix
+        // _session.Lock();
     }
 
     #region Global Exception Handlers

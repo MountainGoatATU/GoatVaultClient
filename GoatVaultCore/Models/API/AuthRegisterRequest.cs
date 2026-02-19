@@ -1,12 +1,10 @@
-﻿using GoatVaultCore.Models.Vault;
-using System.Text.Json.Serialization;
-
-namespace GoatVaultCore.Models.API;
+namespace GoatVaultCore.Models.Api;
 
 public class AuthRegisterRequest
 {
-    [JsonPropertyName("email")] public required string Email { get; set; }
-    [JsonPropertyName("auth_salt")] public required string AuthSalt { get; set; }
-    [JsonPropertyName("auth_verifier")] public required string AuthVerifier { get; set; }
-    [JsonPropertyName("vault")] public required VaultModel? Vault { get; set; }
+    public required string Email { get; set; }
+    public required string AuthSalt { get; set; }
+    public required string AuthVerifier { get; set; }
+    public required string VaultSalt { get; set; }
+    public required VaultEncrypted Vault { get; set; }
 }

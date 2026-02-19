@@ -3,15 +3,20 @@ using Mopups.Pages;
 using Mopups.Services;
 using System.ComponentModel;
 using System.Windows.Input;
-using UraniumUI.Material.Attachments;
 using UraniumUI.Material.Controls;
 
 namespace GoatVaultClient.Controls.Popups;
 
 public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
 {
-    public string title = "Authorization";
-    public string Title { get; set; }
+    public static readonly BindableProperty TitleProperty = BindableProperty.Create(
+        nameof(Title), typeof(string), typeof(AuthorizePopup), "Authorization");
+
+    public string Title
+    {
+        get => (string)GetValue(TitleProperty);
+        set => SetValue(TitleProperty, value);
+    }
 
     private readonly TaskCompletionSource<string?> _tcs = new();
     private readonly ILogger<AuthorizePopup>? _logger;
@@ -63,18 +68,22 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
         try
         {
             _logger?.LogTrace("OnAccept called");
-            if (!_resultSet)
-            {
-                _resultSet = true;
-                var result = InputEntry?.Text ?? string.Empty;
-                _tcs.TrySetResult(result);
-            }
+            
+            // Mark as set so OnDisappearing doesn't auto-cancel
+            _resultSet = true; 
+            var result = InputEntry?.Text ?? string.Empty;
 
+            // Close popup
             await MopupService.Instance.PopAsync();
+            
+            // Set result AFTER pop completes
+            _tcs.TrySetResult(result);
         }
         catch (Exception e)
         {
             _logger?.LogError(e, "Error in AuthorizePopup.OnAccept");
+            // Ensure we don't hang the caller if pop fails
+            _tcs.TrySetResult(null); 
         }
     }
 
@@ -83,17 +92,20 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
         try
         {
             _logger?.LogTrace("OnCancel called");
-            if (!_resultSet)
-            {
-                _resultSet = true;
-                _tcs.TrySetResult(null);
-            }
+            
+            // Mark as set
+            _resultSet = true;
 
+            // Close popup
             await MopupService.Instance.PopAsync();
+
+            // Set result (null for cancel)
+            _tcs.TrySetResult(null);
         }
         catch (Exception e)
         {
             _logger?.LogError(e, "Error in AuthorizePopup.OnCancel");
+            _tcs.TrySetResult(null);
         }
     }
 

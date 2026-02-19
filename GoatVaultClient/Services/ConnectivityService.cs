@@ -33,7 +33,7 @@ public class ConnectivityService : IDisposable
         if (wasConnected == IsConnected)
             return;
 
-        _logger?.LogInformation("Connectivity changed: {IsConnected}", IsConnected);
+        _logger?.LogInformation("Connectivity changed: {IsOnline}", IsConnected);
         ConnectivityChanged?.Invoke(this, IsConnected);
     }
 

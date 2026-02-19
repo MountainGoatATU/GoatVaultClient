@@ -31,12 +31,24 @@ public partial class PromptPopup : PopupPage
         BindingContext = this;
     }
 
+    private bool _resultSet = false;
+
     private async void OnAccept()
     {
         try
         {
-            _tcs.TrySetResult(true);
-            await MopupService.Instance.PopAsync();
+            if (_resultSet) return;
+            _resultSet = true;
+
+            try
+            {
+                await MopupService.Instance.PopAsync();
+                _tcs.TrySetResult(true);
+            }
+            catch
+            {
+                _tcs.TrySetResult(false);
+            }
         }
         catch (Exception e)
         {
@@ -48,12 +60,32 @@ public partial class PromptPopup : PopupPage
     {
         try
         {
-            _tcs.TrySetResult(false);
-            await MopupService.Instance.PopAsync();
+            if (_resultSet) return;
+            _resultSet = true;
+
+            try
+            {
+                await MopupService.Instance.PopAsync();
+                _tcs.TrySetResult(false);
+            }
+            catch (Exception e)
+            {
+                _tcs.TrySetResult(false);
+            }
         }
         catch (Exception e)
         {
             throw; // TODO handle exception
         }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (_resultSet)
+            return;
+
+        _resultSet = true;
+        _tcs.TrySetResult(false);
     }
 }
