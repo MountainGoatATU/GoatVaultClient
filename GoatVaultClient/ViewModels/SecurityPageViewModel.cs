@@ -177,15 +177,19 @@ public partial class SecurityPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task EditEmailAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+            return;
 
         var password = await PromptPasswordAsync("Confirm Password");
-        if (password == null) return;
+        if (password == null)
+            return;
 
         var newEmailStr = await PromptInputAsync("Enter new email");
-        if (string.IsNullOrWhiteSpace(newEmailStr)) return;
+        if (string.IsNullOrWhiteSpace(newEmailStr))
+            return;
 
-        if (newEmailStr == Email) return;
+        if (newEmailStr == Email)
+            return;
 
         try
         {
@@ -207,13 +211,16 @@ public partial class SecurityPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task EditMasterPasswordAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+            return;
 
         var currentPassword = await PromptPasswordAsync("Confirm Current Password");
-        if (currentPassword == null) return;
+        if (currentPassword == null)
+            return;
 
         var newPassword = await PromptPasswordAsync("Enter New Master Password");
-        if (string.IsNullOrWhiteSpace(newPassword)) return;
+        if (string.IsNullOrWhiteSpace(newPassword))
+            return;
 
         try
         {
@@ -235,10 +242,12 @@ public partial class SecurityPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task EnableMfaAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+            return;
 
         var password = await PromptPasswordAsync("Confirm Password");
-        if (password == null) return;
+        if (password == null)
+            return;
 
         try
         {
@@ -252,7 +261,8 @@ public partial class SecurityPageViewModel : BaseViewModel
 
             // Ask for verification code
             var code = await PromptInputAsync("Enter 6-digit code from authenticator app");
-            if (string.IsNullOrWhiteSpace(code)) return;
+            if (string.IsNullOrWhiteSpace(code))
+                return;
 
             // Verify locally first (sanity check)
             if (!TotpService.VerifyCode(secret, code))
@@ -280,13 +290,16 @@ public partial class SecurityPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task DisableMfaAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+            return;
 
         var confirm = await ShowConfirmationAsync("Disable MFA", "Are you sure you want to disable two-factor authentication?");
-        if (!confirm) return;
+        if (!confirm)
+            return;
 
         var password = await PromptPasswordAsync("Confirm Password");
-        if (password == null) return;
+        if (password == null)
+            return;
 
         try
         {
@@ -309,7 +322,8 @@ public partial class SecurityPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task LogoutAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+            return;
         IsBusy = true;
         try
         {
@@ -343,15 +357,9 @@ public partial class SecurityPageViewModel : BaseViewModel
         return await popup.WaitForScan();
     }
 
-    private static async Task ShowErrorAsync(string message)
-    {
-        await MopupService.Instance.PushAsync(new PromptPopup("Error", message, "OK"));
-    }
+    private static async Task ShowErrorAsync(string message) => await MopupService.Instance.PushAsync(new PromptPopup("Error", message, "OK"));
 
-    private static async Task ShowSuccessAsync(string message)
-    {
-        await MopupService.Instance.PushAsync(new PromptPopup("Success", message, "OK"));
-    }
+    private static async Task ShowSuccessAsync(string message) => await MopupService.Instance.PushAsync(new PromptPopup("Success", message, "OK"));
 
     private static async Task<bool> ShowConfirmationAsync(string title, string message)
     {
@@ -362,7 +370,7 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     private static async Task ShowMfaSetupDialogAsync(string secret)
     {
-         var message = $"""
+        var message = $"""
                         Scan this QR code with your authenticator app:
                         
                         Or enter this secret manually:
@@ -374,8 +382,8 @@ public partial class SecurityPageViewModel : BaseViewModel
                         - Microsoft Authenticator
                         - Authy
                         """;
-         // Note: Actual QR code image generation isn't implemented here, just text.
-         // A real implementation would generate a QR image.
+        // Note: Actual QR code image generation isn't implemented here, just text.
+        // A real implementation would generate a QR image.
 
         var setupPopup = new PromptPopup(
             title: "Setup MFA",

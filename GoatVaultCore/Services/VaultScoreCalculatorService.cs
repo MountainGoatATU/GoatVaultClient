@@ -18,7 +18,7 @@ public class VaultScoreCalculatorService(
         var vaultEntries = entries as VaultEntry[] ?? entries.ToArray();
 
         // Master strength
-        var masterPercent = (int)Math.Round((masterPasswordScore / 4.0) * 100, MidpointRounding.AwayFromZero);
+        var masterPercent = (int)Math.Round(masterPasswordScore / 4.0 * 100, MidpointRounding.AwayFromZero);
 
         double foundationPoints = masterPasswordScore switch
         {
@@ -57,11 +57,11 @@ public class VaultScoreCalculatorService(
                 .Evaluate(p.Password).Score);
 
         var uniquenessPoints = passwordCount > 0
-            ? ((passwordCount - duplicateCount) / (double)passwordCount) * 200
+            ? (passwordCount - duplicateCount) / (double)passwordCount * 200
             : 200;
 
         var behaviorPoints = passwordCount > 0
-            ? (totalStrengthScore / (double)(passwordCount * 4)) * 200
+            ? totalStrengthScore / (double)(passwordCount * 4) * 200
             : 200;
 
         // MFA points
@@ -75,16 +75,17 @@ public class VaultScoreCalculatorService(
 
         // Final score calculation
         var rawScore = foundationPoints + uniquenessPoints + behaviorPoints + mfaPoints - breachPenalty;
-        if (!mfaEnabled && rawScore > 800) rawScore = 800;
+        if (!mfaEnabled && rawScore > 800)
+            rawScore = 800;
         var finalScore = Math.Max(rawScore, 0);
 
         // Percentages
         var averagePercent = passwordCount > 0
-            ? (int)Math.Round((totalStrengthScore / (double)passwordCount / 4.0) * 100, MidpointRounding.AwayFromZero)
+            ? (int)Math.Round(totalStrengthScore / (double)passwordCount / 4.0 * 100, MidpointRounding.AwayFromZero)
             : 100;
 
         var reuseRatePercent = passwordCount > 0
-            ? (int)Math.Round(((passwordCount - duplicateCount) / (double)passwordCount) * 100, MidpointRounding.AwayFromZero)
+            ? (int)Math.Round((passwordCount - duplicateCount) / (double)passwordCount * 100, MidpointRounding.AwayFromZero)
             : 100;
 
         return new VaultScoreDetails

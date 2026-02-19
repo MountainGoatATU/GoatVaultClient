@@ -124,11 +124,13 @@ internal sealed class FileLogWriter : IDisposable
 
     public void WriteLine(string line)
     {
-        if (_disposed) return;
+        if (_disposed)
+            return;
 
         lock (_lock)
         {
-            if (_disposed) return;
+            if (_disposed)
+                return;
 
             try
             {
@@ -184,7 +186,11 @@ internal sealed class FileLogWriter : IDisposable
             var filesToDelete = logFiles.Skip(_options.MaxRetainedFiles - 1);
             foreach (var file in filesToDelete)
             {
-                try { File.Delete(file); } catch { /* TODO */ }
+                try
+                {
+                    File.Delete(file);
+                }
+                catch { /* TODO */ }
             }
         }
         catch
@@ -195,10 +201,12 @@ internal sealed class FileLogWriter : IDisposable
 
     public void Dispose()
     {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         lock (_lock)
         {
-            if (_disposed) return;
+            if (_disposed)
+                return;
             _disposed = true;
             _currentWriter?.Flush();
             _currentWriter?.Dispose();

@@ -44,7 +44,8 @@ public class CategoryManagerService(
 
     public async Task<bool> EditCategoryAsync(CategoryItem? target)
     {
-        if (target == null) return false;
+        if (target == null)
+            return false;
 
         // Prevent renaming the built-in "All" category
         if (string.Equals(target.Name, "All", StringComparison.OrdinalIgnoreCase))
@@ -59,10 +60,12 @@ public class CategoryManagerService(
 
         // Find the index of the category in the vault
         var categories = session.Vault?.Categories;
-        if (categories == null) return false;
+        if (categories == null)
+            return false;
 
         var index = categories.IndexOf(target);
-        if (index < 0) return false;
+        if (index < 0)
+            return false;
 
         // Creating new prompt dialog
         var categoryPopup = new SingleInputPopup("Edit Category", "Category", target.Name);
@@ -73,7 +76,8 @@ public class CategoryManagerService(
         // Wait for the response
         var response = await categoryPopup.WaitForScan();
 
-        if (string.IsNullOrWhiteSpace(response)) return false;
+        if (string.IsNullOrWhiteSpace(response))
+            return false;
 
         var oldName = target.Name;
         var reassign = false;
@@ -81,7 +85,8 @@ public class CategoryManagerService(
         // Check if any passwords use this category
         // We check the source of truth
         var vaultEntries = session.Vault?.Entries;
-        if (vaultEntries == null) return false;
+        if (vaultEntries == null)
+            return false;
 
         var hasDependentPasswords = vaultEntries.Any(c => c.Category == oldName);
 
@@ -122,7 +127,8 @@ public class CategoryManagerService(
 
     public async Task<bool> DeleteCategoryAsync(CategoryItem? target)
     {
-        if (target == null) return false;
+        if (target == null)
+            return false;
 
         // Prevent deletion of the built-in "All" category
         if (string.Equals(target.Name, "All", StringComparison.OrdinalIgnoreCase))
@@ -144,7 +150,8 @@ public class CategoryManagerService(
         // Wait for the response
         var response = await categoryPopup.WaitForScan();
 
-        if (!response) return false;
+        if (!response)
+            return false;
 
         var vaultEntries = session.Vault?.Entries;
         var categories = session.Vault?.Categories;

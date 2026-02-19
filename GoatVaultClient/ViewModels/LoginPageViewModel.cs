@@ -3,11 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Auth;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Services;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
 using System.Collections.ObjectModel;
-using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models;
 using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
@@ -86,7 +86,8 @@ public partial class LoginPageViewModel(
     [RelayCommand]
     private async Task Login()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+            return;
         try
         {
             IsBusy = true;
@@ -167,7 +168,8 @@ public partial class LoginPageViewModel(
         var confirm = await Shell.Current.DisplayAlertAsync("Remove User",
             $"Are you sure you want to remove {user.Email} from this device?", "Yes", "No");
 
-        if (!confirm) return;
+        if (!confirm)
+            return;
 
         await userRepository.DeleteAsync(user);
         await LoadLocalUsersAsync();

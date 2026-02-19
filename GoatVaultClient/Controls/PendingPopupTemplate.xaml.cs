@@ -2,10 +2,10 @@ namespace GoatVaultClient.Controls;
 
 public partial class PendingPopupTemplate : ContentView
 {
-	public PendingPopupTemplate()
-	{
-		InitializeComponent();
-	}
+    public PendingPopupTemplate()
+    {
+        InitializeComponent();
+    }
 
     public static readonly BindableProperty FrameWidthProperty = BindableProperty.Create(
         nameof(FrameWidth),

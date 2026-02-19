@@ -1,16 +1,13 @@
-﻿using GoatVaultCore.Abstractions;
-using GoatVaultInfrastructure.Services;
+﻿using GoatVaultInfrastructure.Services;
 
 namespace GoatVaultTests;
 
 public class CryptoServiceTests
 {
     private readonly CryptoService _crypto = new();
-    private static byte[] CreateDeterministicSalt()
-    {
+    private static byte[] CreateDeterministicSalt() =>
         // 16 bytes, deterministic
-        return "0123456789ABCDEF"u8.ToArray();
-    }
+        "0123456789ABCDEF"u8.ToArray();
 
     [Fact]
     public void GenerateAuthVerifier_SamePasswordAndSalt_ReturnsSameVerifier()

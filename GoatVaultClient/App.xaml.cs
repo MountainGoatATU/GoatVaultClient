@@ -12,7 +12,6 @@ public partial class App : Application
     public App(ISessionContext session, IUserRepository users, ILogger<App> logger)
     {
         InitializeComponent();
-        MainPage = new AppShell();
         _session = session;
         _users = users;
         _logger = logger;
@@ -26,11 +25,13 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var window = base.CreateWindow(activationState);
+        var window = new Window(new AppShell());
         window.Stopped += Window_Stopped;
         window.Resumed += (_, _) => _logger.LogInformation("Application resumed");
         return window;
     }
+
+    public static Page? CurrentMainPage => Current?.Windows.FirstOrDefault()?.Page;
 
     private void Window_Stopped(object? sender, EventArgs e)
     {

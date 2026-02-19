@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Services;
 
 namespace GoatVaultClient.Services;
 
@@ -154,7 +153,6 @@ public partial class GoatTipsService : ObservableObject
         // Randomly pick one of the active problem categories
         var picker = problems[_random.Next(problems.Count)];
         return picker();
-
 
         string GetVeryWeakMasterTip() =>
             _random.Next(8) switch

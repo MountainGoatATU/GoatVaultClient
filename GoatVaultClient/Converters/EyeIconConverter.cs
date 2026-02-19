@@ -1,19 +1,19 @@
 ﻿using System.Globalization;
 using UraniumUI.Icons.MaterialSymbols;
 
-namespace GoatVaultClient.Converters
+namespace GoatVaultClient.Converters;
+
+public class EyeIconConverter : IValueConverter
 {
-    public class EyeIconConverter : IValueConverter
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        if (value is bool isVisible)
         {
-            if (value is bool isVisible)
-            {
-                return isVisible ? MaterialRounded.Visibility_off : MaterialRounded.Visibility;
-            }
-            return MaterialRounded.Visibility;
+            return isVisible ? MaterialRounded.Visibility_off : MaterialRounded.Visibility;
         }
 
-        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
+        return MaterialRounded.Visibility;
     }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
 }

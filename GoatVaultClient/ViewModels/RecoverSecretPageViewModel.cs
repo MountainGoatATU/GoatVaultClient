@@ -50,7 +50,8 @@ public partial class RecoverSecretViewModel(ShamirSSService st) : BaseViewModel
     private void AddShare()
     {
         var trimmed = CurrentShareInput.Trim();
-        if (string.IsNullOrWhiteSpace(trimmed)) return;
+        if (string.IsNullOrWhiteSpace(trimmed))
+            return;
 
         CollectedShares.Add(new RecoveryShare
         {
@@ -70,10 +71,11 @@ public partial class RecoverSecretViewModel(ShamirSSService st) : BaseViewModel
     [RelayCommand]
     private void RemoveShare(RecoveryShare? share)
     {
-        if (share is null) return;
+        if (share is null)
+            return;
         CollectedShares.Remove(share);
 
-        for (int i = 0; i < CollectedShares.Count; i++)
+        for (var i = 0; i < CollectedShares.Count; i++)
         {
             CollectedShares[i] = CollectedShares[i] with { Index = i + 1 };
         }
@@ -117,15 +119,13 @@ public partial class RecoverSecretViewModel(ShamirSSService st) : BaseViewModel
     }
 
     [RelayCommand]
-    private void ToggleSecretVisibility()
-    {
-        IsSecretVisible = !IsSecretVisible;
-    }
+    private void ToggleSecretVisibility() => IsSecretVisible = !IsSecretVisible;
 
     [RelayCommand]
     private async Task CopyRecoveredSecretAsync()
     {
-        if (string.IsNullOrEmpty(RecoveredSecret)) return;
+        if (string.IsNullOrEmpty(RecoveredSecret))
+            return;
         await Clipboard.Default.SetTextAsync(RecoveredSecret);
 
         _ = Task.Delay(TimeSpan.FromSeconds(60)).ContinueWith(_ =>

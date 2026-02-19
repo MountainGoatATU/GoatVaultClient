@@ -23,6 +23,7 @@ public sealed class UserRepository(AppDbContext db) : IUserRepository
         {
             db.Users.Add(user);
         }
+
         await db.SaveChangesAsync();
     }
 

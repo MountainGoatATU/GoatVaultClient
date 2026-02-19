@@ -27,8 +27,14 @@ public readonly struct Envelope
     {
         ArgumentException.ThrowIfNullOrEmpty(base64);
         byte[] packed;
-        try { packed = Convert.FromBase64String(base64); }
-        catch (FormatException ex) { throw new FormatException("Invalid Base64 envelope.", ex); }
+        try
+        {
+            packed = Convert.FromBase64String(base64);
+        }
+        catch (FormatException ex)
+        {
+            throw new FormatException("Invalid Base64 envelope.", ex);
+        }
 
         if (packed.Length < MinPacked)
             throw new FormatException($"Envelope too short: {packed.Length} bytes, need {MinPacked}+.");

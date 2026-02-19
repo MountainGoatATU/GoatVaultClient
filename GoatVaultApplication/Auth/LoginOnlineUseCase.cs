@@ -1,8 +1,8 @@
-using System.Security.Cryptography;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.Api;
 using GoatVaultCore.Models.Objects;
+using System.Security.Cryptography;
 
 namespace GoatVaultApplication.Auth;
 
@@ -49,7 +49,9 @@ public class LoginOnlineUseCase(
         // 4. Verify credentials
         var authVerifyRequest = new AuthVerifyRequest
         {
-            UserId = userId, Proof = proof, MfaCode = mfaCode
+            UserId = userId,
+            Proof = proof,
+            MfaCode = mfaCode
         };
         var authVerifyResponse = await serverAuth.VerifyAsync(authVerifyRequest, ct);
         authToken.SetToken(authVerifyResponse.AccessToken);

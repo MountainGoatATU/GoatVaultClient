@@ -20,15 +20,9 @@ public class ServerAuthService(
         // DefaultIgnoreCondition removed. Individual DTOs control serialization.
     };
 
-    public async Task<AuthInitResponse> InitAsync(AuthInitRequest payload, CancellationToken ct = default)
-    {
-        return await PostAsync<AuthInitResponse>("v1/auth/init", payload, ct);
-    }
+    public async Task<AuthInitResponse> InitAsync(AuthInitRequest payload, CancellationToken ct = default) => await PostAsync<AuthInitResponse>("v1/auth/init", payload, ct);
 
-    public async Task<AuthVerifyResponse> VerifyAsync(AuthVerifyRequest payload, CancellationToken ct = default)
-    {
-        return await PostAsync<AuthVerifyResponse>("v1/auth/verify", payload, ct);
-    }
+    public async Task<AuthVerifyResponse> VerifyAsync(AuthVerifyRequest payload, CancellationToken ct = default) => await PostAsync<AuthVerifyResponse>("v1/auth/verify", payload, ct);
 
     public async Task<UserResponse> GetUserAsync(Guid userId, CancellationToken ct = default)
     {
@@ -38,15 +32,9 @@ public class ServerAuthService(
         return JsonSerializer.Deserialize<UserResponse>(json, JsonOptions) ?? throw new InvalidOperationException("Invalid user response");
     }
 
-    public async Task<UserResponse> UpdateUserAsync(Guid userId, object payload, CancellationToken ct = default)
-    {
-        return await PatchAsync<UserResponse>($"v1/users/{userId}", payload, ct);
-    }
+    public async Task<UserResponse> UpdateUserAsync(Guid userId, object payload, CancellationToken ct = default) => await PatchAsync<UserResponse>($"v1/users/{userId}", payload, ct);
 
-    public async Task<AuthRegisterResponse> RegisterAsync(AuthRegisterRequest payload, CancellationToken ct = default)
-    {
-        return await PostAsync<AuthRegisterResponse>("v1/auth/register", payload, ct);
-    }
+    public async Task<AuthRegisterResponse> RegisterAsync(AuthRegisterRequest payload, CancellationToken ct = default) => await PostAsync<AuthRegisterResponse>("v1/auth/register", payload, ct);
 
     private async Task<T> PostAsync<T>(string endpoint, object payload, CancellationToken ct)
     {

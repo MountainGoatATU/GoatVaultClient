@@ -57,15 +57,11 @@ public partial class RegisterPageViewModel(
     }
 
     [RelayCommand]
-    private static async Task GoToLogin()
-    {
+    private static async Task GoToLogin() =>
         // Navigate back to Login
         await Shell.Current.GoToAsync("//login");
-    }
     [RelayCommand]
-    private static async Task GoToRecover()
-    {
+    private static async Task GoToRecover() =>
         // Navigate back to Login
         await Shell.Current.GoToAsync(nameof(RecoverSecretPage));
-    }
 }

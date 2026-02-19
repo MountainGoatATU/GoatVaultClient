@@ -2,10 +2,10 @@ namespace GoatVaultClient.Controls;
 
 public partial class ComponentHeader : ContentView
 {
-	public ComponentHeader()
-	{
-		InitializeComponent();
-	}
+    public ComponentHeader()
+    {
+        InitializeComponent();
+    }
 
     public static readonly BindableProperty TitleProperty = BindableProperty.Create(
         nameof(Title), typeof(string), typeof(ComponentHeader), string.Empty);

@@ -4,7 +4,7 @@ namespace GoatVaultTests;
 
 public class PasswordStrengthTests
 {
-    private readonly PasswordStrengthService _passwordStrength = new PasswordStrengthService();
+    private readonly PasswordStrengthService _passwordStrength = new();
 
     [Theory]
     [InlineData("IAtePizzaTodayAndItWasGood123!", 3, 4)]

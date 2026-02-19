@@ -48,7 +48,10 @@ public sealed class EnvelopeSharingService(IMnemonicEncoder encoder) : IEnvelope
                 TotalShares = totalShares
             }).ToList();
         }
-        finally { CryptographicOperations.ZeroMemory(key); }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
     }
 
     public string Recover(List<SharePackage> packages)
@@ -76,7 +79,10 @@ public sealed class EnvelopeSharingService(IMnemonicEncoder encoder) : IEnvelope
             throw new InvalidOperationException(
                 "Recovery failed. Shares may be insufficient, corrupted, or from a different session.", ex);
         }
-        finally { CryptographicOperations.ZeroMemory(key); }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+        }
     }
 
     // ── AES-GCM ──────────────────────────────────────────────────
@@ -114,10 +120,11 @@ public sealed class EnvelopeSharingService(IMnemonicEncoder encoder) : IEnvelope
 
             var packed = new byte[1 + shareValue.Length];
             packed[0] = (byte)index;
-            Buffer.BlockCopy(shareValue,0,packed,1, shareValue.Length);
+            Buffer.BlockCopy(shareValue, 0, packed, 1, shareValue.Length);
 
             result.Add(_encoder.Encode(packed));
         }
+
         return result;
     }
 
@@ -146,7 +153,8 @@ public sealed class EnvelopeSharingService(IMnemonicEncoder encoder) : IEnvelope
         // Force the output to be exactly KeySize (32 bytes)
         var rawBytes = reconstructed.ToByteArray();
 
-        if (rawBytes.Length == KeySize) return rawBytes;
+        if (rawBytes.Length == KeySize)
+            return rawBytes;
 
         var fixedKey = new byte[KeySize];
         if (rawBytes.Length > KeySize)
@@ -159,6 +167,7 @@ public sealed class EnvelopeSharingService(IMnemonicEncoder encoder) : IEnvelope
             // If shorter, copy into the end of the fixedKey (left-pad with zeros)
             Buffer.BlockCopy(rawBytes, 0, fixedKey, KeySize - rawBytes.Length, rawBytes.Length);
         }
+
         return fixedKey;
     }
 }

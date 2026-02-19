@@ -1,22 +1,30 @@
+using Microsoft.Extensions.Logging;
 using Mopups.Pages;
 using Mopups.Services;
 using System.Windows.Input;
 
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class SingleInputPopup: PopupPage
+public partial class SingleInputPopup : PopupPage
 {
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
     private readonly TaskCompletionSource<string?> _tcs = new();
+    private readonly ILogger<SingleInputPopup>? _logger;
     public Task<string?> WaitForScan() => _tcs.Task;
     public string? Title { get; set; }
     public string? InputFieldTitle { get; set; }
-    public string? InputFieldText {  get; set; }
+    public string? InputFieldText { get; set; }
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
-    public SingleInputPopup(string title = "", string inputFieldTitle = "", string inputFieldText = "")
-	{
-		InitializeComponent();
+    public SingleInputPopup(
+        string title = "",
+        string inputFieldTitle = "",
+        string inputFieldText = "",
+        ILogger<SingleInputPopup>? logger = null)
+    {
+        _logger = logger;
+
+        InitializeComponent();
 
         Title = title;
         InputFieldTitle = inputFieldTitle;
@@ -37,7 +45,7 @@ public partial class SingleInputPopup: PopupPage
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Error awaiting MopupService.Instance.PopAsync();");
         }
     }
 
@@ -50,7 +58,7 @@ public partial class SingleInputPopup: PopupPage
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Error awaiting MopupService.Instance.PopAsync();");
         }
     }
 

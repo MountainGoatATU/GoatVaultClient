@@ -1,12 +1,14 @@
-using System.Windows.Input;
-using Mopups.Services;
-using Mopups.Pages;
 using GoatVaultCore.Models;
+using Microsoft.Extensions.Logging;
+using Mopups.Pages;
+using Mopups.Services;
+using System.Windows.Input;
 
 namespace GoatVaultClient.Controls.Popups;
 
 public partial class VaultEntryDialog : PopupPage
 {
+    private readonly ILogger<VaultEntryDialog>? _logger;
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
     private readonly TaskCompletionSource<VaultEntryForm?> _tcs = new();
     public Task<VaultEntryForm?> WaitForScan() => _tcs.Task;
@@ -14,8 +16,10 @@ public partial class VaultEntryDialog : PopupPage
     public ICommand AcceptCommand { get; private set; }
     public ICommand CancelCommand { get; private set; }
 
-    public VaultEntryDialog(VaultEntryForm vm/*, string title = "Create New Password"*/)
+    public VaultEntryDialog(VaultEntryForm vm, ILogger<VaultEntryDialog>? logger = null)
     {
+        _logger = logger;
+
         InitializeComponent();
         ViewModel = vm;
 
@@ -36,7 +40,7 @@ public partial class VaultEntryDialog : PopupPage
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Error during OnAccept() of VaultEntryDialog");
         }
     }
 
@@ -49,7 +53,7 @@ public partial class VaultEntryDialog : PopupPage
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Error during OnCancel() of VaultEntryDialog");
         }
     }
 

@@ -85,13 +85,16 @@ public class VaultEntryManagerService(
 
     public async Task<bool> EditEntryAsync(VaultEntry? target, IEnumerable<CategoryItem> categories)
     {
-        if (target == null) return false;
+        if (target == null)
+            return false;
 
         var entries = session.Vault?.Entries;
-        if (entries == null) return false;
+        if (entries == null)
+            return false;
 
         var index = entries.IndexOf(target);
-        if (index < 0) return false;
+        if (index < 0)
+            return false;
 
         var categoriesList = categories.ToList();
 
@@ -161,7 +164,8 @@ public class VaultEntryManagerService(
 
     public async Task<bool> DeleteEntryAsync(VaultEntry? target)
     {
-        if (target == null) return false;
+        if (target == null)
+            return false;
 
         // Creating new prompt dialog
         var dialog = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the password for \"{target.Site}\"?", "Delete");
@@ -189,7 +193,8 @@ public class VaultEntryManagerService(
 
     public static async Task CopyEntryPasswordAsync(VaultEntry? target)
     {
-        if (target == null) return;
+        if (target == null)
+            return;
 
         await Clipboard.Default.SetTextAsync(target.Password);
 

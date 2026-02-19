@@ -101,7 +101,8 @@ public partial class SplitSecretViewModel(ShamirSSService st) : BaseViewModel
     [RelayCommand]
     private async Task CopyShareAsync(RecoveryShare? share)
     {
-        if (share is null) return;
+        if (share is null)
+            return;
 
         await Clipboard.Default.SetTextAsync(share.Mnemonic);
 
@@ -120,10 +121,7 @@ public partial class SplitSecretViewModel(ShamirSSService st) : BaseViewModel
     }
 
     [RelayCommand]
-    public async Task RecoverSecret()
-    {
-        await Shell.Current.GoToAsync("//recoverKey");
-    }
+    public async Task RecoverSecret() => await Shell.Current.GoToAsync("//recoverKey");
 
     [RelayCommand]
     private void Reset()

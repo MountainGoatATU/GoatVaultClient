@@ -1,8 +1,14 @@
 using CommunityToolkit.Maui;
+using GoatVaultApplication.Account;
+using GoatVaultApplication.Auth;
+using GoatVaultApplication.Session;
+using GoatVaultApplication.VaultUseCases;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.Controls;
+using GoatVaultCore.Abstractions;
+using GoatVaultCore.Services;
 using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
@@ -14,14 +20,8 @@ using Microsoft.Extensions.Logging;
 using Mopups.Hosting;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Reflection;
-using GoatVaultApplication.VaultUseCases;
-using GoatVaultApplication.Account;
-using GoatVaultApplication.Auth;
-using GoatVaultApplication.Session;
 using UraniumUI;
 using Xecrets.Slip39;
-using GoatVaultCore.Abstractions;
-using GoatVaultCore.Services;
 
 namespace GoatVaultClient;
 

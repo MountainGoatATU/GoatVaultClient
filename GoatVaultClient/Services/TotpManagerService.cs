@@ -26,10 +26,12 @@ public class TotpManagerService(ILogger<TotpManagerService>? logger = null)
 
     private void StartTimer()
     {
-        if (_timer != null) return;
+        if (_timer != null)
+            return;
 
         _timer = Application.Current?.Dispatcher.CreateTimer();
-        if (_timer == null) return;
+        if (_timer == null)
+            return;
 
         _timer.Interval = TimeSpan.FromSeconds(1);
         _timer.Tick += (s, e) => UpdateTotpCodes();
@@ -38,7 +40,8 @@ public class TotpManagerService(ILogger<TotpManagerService>? logger = null)
 
     private void StopTimer()
     {
-        if (_timer == null) return;
+        if (_timer == null)
+            return;
         _timer.Stop();
         _timer = null;
     }

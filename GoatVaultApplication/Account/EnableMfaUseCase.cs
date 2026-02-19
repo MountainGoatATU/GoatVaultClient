@@ -1,6 +1,6 @@
-using System.Text;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Api;
+using System.Text;
 
 namespace GoatVaultApplication.Account;
 

@@ -42,6 +42,7 @@ public class PwnedPasswordService
                 if (parts.Length == 2 && parts[0] == suffix)
                     return int.Parse(parts[1]);
             }
+
             return 0;
         }
         catch

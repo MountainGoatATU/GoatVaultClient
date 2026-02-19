@@ -4,9 +4,9 @@ namespace GoatVaultClient.Pages;
 
 public partial class SplitSecretPage : ContentPage
 {
-	public SplitSecretPage(SplitSecretViewModel vm)
-	{
-		InitializeComponent();
-		BindingContext = vm;
+    public SplitSecretPage(SplitSecretViewModel vm)
+    {
+        InitializeComponent();
+        BindingContext = vm;
     }
 }

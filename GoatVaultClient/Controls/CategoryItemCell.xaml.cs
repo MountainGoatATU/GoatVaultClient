@@ -4,10 +4,10 @@ namespace GoatVaultClient.Controls;
 
 public partial class CategoryItemCell : ContentView
 {
-	public CategoryItemCell()
-	{
-		InitializeComponent();
-	}
+    public CategoryItemCell()
+    {
+        InitializeComponent();
+    }
 
     // 1. MAIN TEXT (Heading)
     public static readonly BindableProperty TextProperty = BindableProperty.Create(

@@ -13,14 +13,8 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(RecoverSecretPage), typeof(RecoverSecretPage));
     }
 
-    public void EnableFlyout()
-    {
-        FlyoutBehavior = FlyoutBehavior.Flyout;
-    }
+    public void EnableFlyout() => FlyoutBehavior = FlyoutBehavior.Flyout;
 
-    public void DisableFlyout()
-    {
-        FlyoutBehavior = FlyoutBehavior.Disabled;
-    }
+    public void DisableFlyout() => FlyoutBehavior = FlyoutBehavior.Disabled;
 
 }

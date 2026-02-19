@@ -1,5 +1,5 @@
-using GoatVaultApplication.VaultUseCases;
 using CommunityToolkit.Mvvm.ComponentModel;
+using GoatVaultApplication.VaultUseCases;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.Api;
@@ -103,6 +103,7 @@ public class SyncingService(
     public event EventHandler? AuthenticationRequired;
 
     #endregion
+
     #region Public Methods
 
     // Saves if auto-save is enabled. Convenience method to reduce repeated checks.
@@ -132,7 +133,7 @@ public class SyncingService(
                 }
                 catch (Exception e)
                 {
-                    throw; // TODO handle exception
+                    logger?.LogError(e, "Error awaiting periodic sync callback");
                 }
             },
             null,
@@ -202,7 +203,7 @@ public class SyncingService(
 
                 if (Math.Abs(timeDiff) < 1.0)
                 {
-                     logger?.LogInformation("Data already in sync (within tolerance)");
+                    logger?.LogInformation("Data already in sync (within tolerance)");
                 }
                 else if (timeDiff > 0)
                 {
@@ -236,7 +237,6 @@ public class SyncingService(
         }
     }
 
-
     public async Task Save()
     {
         if (session.UserId == null || session.Vault == null)
@@ -265,7 +265,7 @@ public class SyncingService(
             // Trigger sync to push changes if auto-sync is on
             if (HasAutoSync)
             {
-                 _ = Task.Run(Sync);
+                _ = Task.Run(Sync);
             }
         }
         catch (Exception ex)
@@ -275,6 +275,7 @@ public class SyncingService(
     }
 
     #endregion
+
     #region Private Methods
 
     private async Task PeriodicSyncCallback()
@@ -315,9 +316,9 @@ public class SyncingService(
         }
         catch (CryptographicException)
         {
-             logger?.LogWarning("Failed to decrypt server vault. The password might have changed on another device.");
-             AuthenticationRequired?.Invoke(this, EventArgs.Empty);
-             throw;
+            logger?.LogWarning("Failed to decrypt server vault. The password might have changed on another device.");
+            AuthenticationRequired?.Invoke(this, EventArgs.Empty);
+            throw;
         }
 
         // 2. Update Session
@@ -327,7 +328,7 @@ public class SyncingService(
         var existingUser = await userRepository.GetByIdAsync(Guid.Parse(serverUser.Id));
 
         if (existingUser != null)
-             localUser = existingUser;
+            localUser = existingUser;
 
         var mfaSecret = serverUser.MfaSecret is not null
             ? Convert.FromBase64String(serverUser.MfaSecret)
@@ -351,8 +352,8 @@ public class SyncingService(
         }
         else
         {
-             // Preserve existing AuthVerifier/MfaSecret if updating existing user
-             localUser.AuthSalt = Convert.FromBase64String(serverUser.AuthSalt);
+            // Preserve existing AuthVerifier/MfaSecret if updating existing user
+            localUser.AuthSalt = Convert.FromBase64String(serverUser.AuthSalt);
         }
 
         localUser.Email = new Email(serverUser.Email);

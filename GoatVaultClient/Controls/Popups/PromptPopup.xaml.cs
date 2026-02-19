@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Mopups.Pages;
 using Mopups.Services;
 using System.Windows.Input;
@@ -6,6 +7,7 @@ namespace GoatVaultClient.Controls.Popups;
 
 public partial class PromptPopup : PopupPage
 {
+    private readonly ILogger<SingleInputPopup>? _logger;
     private readonly TaskCompletionSource<bool> _tcs = new();
     public Task<bool> WaitForScan() => _tcs.Task;
     public string Title { get; set; }
@@ -16,8 +18,10 @@ public partial class PromptPopup : PopupPage
     public ICommand? AcceptCommand { get; private set; }
     public ICommand? CancelCommand { get; private set; }
 
-    public PromptPopup(string title, string body, string aText, string? cText = null)
+    public PromptPopup(string title, string body, string aText, string? cText = null, ILogger<SingleInputPopup>? logger = null)
     {
+        _logger = logger;
+
         Title = title;
         Body = body;
         AcceptText = aText;
@@ -37,7 +41,8 @@ public partial class PromptPopup : PopupPage
     {
         try
         {
-            if (_resultSet) return;
+            if (_resultSet)
+                return;
             _resultSet = true;
 
             try
@@ -52,7 +57,7 @@ public partial class PromptPopup : PopupPage
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Error during OnAccept() of PromptPopup");
         }
     }
 
@@ -60,7 +65,8 @@ public partial class PromptPopup : PopupPage
     {
         try
         {
-            if (_resultSet) return;
+            if (_resultSet)
+                return;
             _resultSet = true;
 
             try
@@ -75,7 +81,7 @@ public partial class PromptPopup : PopupPage
         }
         catch (Exception e)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(e, "Error during OnCancel() of PromptPopup");
         }
     }
 

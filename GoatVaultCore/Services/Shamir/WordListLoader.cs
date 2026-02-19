@@ -10,12 +10,14 @@ public static class WordListLoader
 
     public static async Task<string[]> LoadAsync(string filename = "bip39words.txt")
     {
-        if (_cached is not null) return _cached;
+        if (_cached is not null)
+            return _cached;
 
         await Lock.WaitAsync();
         try
         {
-            if (_cached is not null) return _cached;
+            if (_cached is not null)
+                return _cached;
 
             var assembly = typeof(WordListLoader).Assembly;
 
@@ -43,7 +45,10 @@ public static class WordListLoader
             _cached = words;
             return words;
         }
-        finally { Lock.Release(); }
+        finally
+        {
+            Lock.Release();
+        }
     }
 
     public static async Task<Bip39MnemonicEncoder> CreateEncoderAsync(

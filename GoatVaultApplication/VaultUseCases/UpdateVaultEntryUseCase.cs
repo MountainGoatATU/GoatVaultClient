@@ -19,8 +19,9 @@ public class UpdateVaultEntryUseCase(ISessionContext session, SaveVaultUseCase s
         }
         else
         {
-             session.Vault.Entries.Add(newEntry);
+            session.Vault.Entries.Add(newEntry);
         }
+
         session.RaiseVaultChanged();
         await saveVault.ExecuteAsync();
     }

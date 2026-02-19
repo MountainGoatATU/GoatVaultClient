@@ -68,14 +68,14 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
         try
         {
             _logger?.LogTrace("OnAccept called");
-            
+
             // Mark as set so OnDisappearing doesn't auto-cancel
-            _resultSet = true; 
+            _resultSet = true;
             var result = InputEntry?.Text ?? string.Empty;
 
             // Close popup
             await MopupService.Instance.PopAsync();
-            
+
             // Set result AFTER pop completes
             _tcs.TrySetResult(result);
         }
@@ -83,7 +83,7 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
         {
             _logger?.LogError(e, "Error in AuthorizePopup.OnAccept");
             // Ensure we don't hang the caller if pop fails
-            _tcs.TrySetResult(null); 
+            _tcs.TrySetResult(null);
         }
     }
 
@@ -92,7 +92,7 @@ public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
         try
         {
             _logger?.LogTrace("OnCancel called");
-            
+
             // Mark as set
             _resultSet = true;
 

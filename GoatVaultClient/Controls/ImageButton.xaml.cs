@@ -4,16 +4,16 @@ namespace GoatVaultClient.Controls;
 
 public partial class ImageButton : ContentView
 {
-	public ImageButton()
-	{
-		InitializeComponent();
-	}
+    public ImageButton()
+    {
+        InitializeComponent();
+    }
 
-	public static readonly BindableProperty IconGlyphProperty = BindableProperty.Create(
-		nameof(IconGlyph),
-		typeof(string),
-		typeof(ImageButton),
-		string.Empty);
+    public static readonly BindableProperty IconGlyphProperty = BindableProperty.Create(
+        nameof(IconGlyph),
+        typeof(string),
+        typeof(ImageButton),
+        string.Empty);
     public string IconGlyph
     {
         get => (string)GetValue(IconGlyphProperty);

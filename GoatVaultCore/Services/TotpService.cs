@@ -1,5 +1,5 @@
-using System.Text.RegularExpressions;
 using OtpNet;
+using System.Text.RegularExpressions;
 
 namespace GoatVaultCore.Services;
 
@@ -64,8 +64,7 @@ public static class TotpService
             var totp = new Totp(secretBytes);
 
             // Verify with time window (allows for clock skew)
-            long timeStepMatched;
-            return totp.VerifyTotp(code, out timeStepMatched, new VerificationWindow(window, window));
+            return totp.VerifyTotp(code, out var timeStepMatched, new VerificationWindow(window, window));
         }
         catch
         {
