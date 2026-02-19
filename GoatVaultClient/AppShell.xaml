@@ -86,9 +86,11 @@
                       Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Security}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
                       ContentTemplate="{DataTemplate pages:SecurityPage}" />
 
-        <ShellContent Title="Settings"
+        <ShellContent Route="settings"
+                      Title="Settings"
                       Shell.NavBarIsVisible="False"
-                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Settings}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"/>
+                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Settings}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
+                      ContentTemplate="{DataTemplate pages:SettingsPage}" />
 
     </FlyoutItem>
 

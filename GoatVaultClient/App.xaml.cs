@@ -39,11 +39,11 @@ public partial class App : Application
         {
             _logger.LogInformation("App stopped — attempting to save vault");
 
-            if (_session.Vault == null || _session.UserId == null)
-            {
-                _logger.LogDebug("No active vault session to save on stop");
+            if (_session is { Vault: not null, UserId: not null })
                 return;
-            }
+
+            _logger.LogDebug("No active vault session to save on stop");
+            return;
 
             // TODO: Fix
             // Use synchronous save - we're in a non-async event handler
@@ -75,7 +75,7 @@ public partial class App : Application
         base.OnStart();
 
         // Retrieve the "IsFirstRun" flag. If it doesn't exist, it defaults to true.
-        bool isFirstRun = Preferences.Default.Get("IsFirstRun", true);
+        var isFirstRun = Preferences.Default.Get("IsFirstRun", true);
 
         if (isFirstRun)
         {
@@ -99,7 +99,7 @@ public partial class App : Application
         {
             _logger.LogInformation("App going to sleep — saving vault");
 
-            if (_session.Vault != null && _session.UserId != null)
+            if (_session is { Vault: not null, UserId: not null })
             {
                 // TODO: Fix
                 /*
