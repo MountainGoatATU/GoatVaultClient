@@ -166,7 +166,7 @@ public static class MauiProgram
 
         builder.Services.AddTransient<AuthenticatedHttpHandler>(sp =>
         {
-            const string refreshEndpoint = "v1/auth/refresh";
+            const string refreshEndpoint = "/v1/auth/refresh";
             var serverBaseUrl = sp.GetRequiredService<IConfiguration>()["API_BASE_URL"];
             var authService = sp.GetRequiredService<IAuthTokenService>();
             var jwtUtils = sp.GetRequiredService<JwtUtils>();
