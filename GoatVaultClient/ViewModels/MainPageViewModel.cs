@@ -45,6 +45,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private List<VaultEntry> _allVaultEntries = [];
     private List<CategoryItem> _allVaultCategories = [];
     private bool CanSync() => !IsBusy;
+    private bool _isUpdatingCollections;
 
     #endregion
 
@@ -143,21 +144,33 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
     private void ReloadVaultData()
     {
-        if (_session.Vault != null)
+        if (_isUpdatingCollections)
+            return;
+
+        try
         {
-            _allVaultEntries = [.. _session.Vault.Entries];
-            _allVaultCategories = [.. _session.Vault.Categories];
+            _isUpdatingCollections = true;
+
+            if (_session.Vault != null)
+            {
+                _allVaultEntries = [.. _session.Vault.Entries];
+                _allVaultCategories = [.. _session.Vault.Categories];
+            }
+
+            UpdateCollection(Passwords, _allVaultEntries);
+            UpdateCollection(Categories, _allVaultCategories);
+
+            // TODO: Old pre-refactor code
+            // Passwords = _allVaultEntries.ToObservableCollection();
+            // Categories = _allVaultCategories.ToObservableCollection();
+
+            PresortEntries(true);
+            PresortCategories(true);
         }
-
-        UpdateCollection(Passwords, _allVaultEntries);
-        UpdateCollection(Categories, _allVaultCategories);
-
-        // TODO: Old pre-refactor code
-        // Passwords = _allVaultEntries.ToObservableCollection();
-        // Categories = _allVaultCategories.ToObservableCollection();
-
-        PresortEntries(true);
-        PresortCategories(true);
+        finally
+        {
+            _isUpdatingCollections = false;
+        }
     }
 
     private void UpdateCollection<T>(ObservableCollection<T> collection, IEnumerable<T>? newItems)
@@ -200,39 +213,61 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
     partial void OnSelectedCategoryChanged(CategoryItem? value)
     {
-        SearchText = string.Empty;
-
-        var filteredEntries = VaultFilterService.FilterAndSortEntries(
-            _allVaultEntries, // Filter from ALL
-            SearchText, // Clear search filter
-            value?.Name,
-            _passwordsSortAsc);
-
-        UpdateCollection(Passwords, filteredEntries);
-    }
-
-    partial void OnSearchTextChanged(string? value)
-    {
-        if (!string.IsNullOrWhiteSpace(SearchText))
+        if (_isUpdatingCollections)
+            return;
+        try
         {
-            var filteredCategories = VaultFilterService.FilterAndSortCategories(
-                _allVaultCategories, // Filter from ALL
-                SearchText,
-                _categoriesSortAsc);
+            _isUpdatingCollections = true;
 
-            UpdateCollection(Categories, filteredCategories);
+            SearchText = string.Empty;
 
             var filteredEntries = VaultFilterService.FilterAndSortEntries(
                 _allVaultEntries, // Filter from ALL
-                SearchText,
-                SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name, // Keep category filter
+                SearchText, // Clear search filter
+                value?.Name,
                 _passwordsSortAsc);
 
             UpdateCollection(Passwords, filteredEntries);
         }
-        else
+        finally
         {
-            ReloadVaultData();
+            _isUpdatingCollections = false;
+        }
+    }
+
+    partial void OnSearchTextChanged(string? value)
+    {
+        if (_isUpdatingCollections)
+            return;
+        try
+        {
+            _isUpdatingCollections = true;
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var filteredCategories = VaultFilterService.FilterAndSortCategories(
+                    _allVaultCategories, // Filter from ALL
+                    SearchText,
+                    _categoriesSortAsc);
+
+                UpdateCollection(Categories, filteredCategories);
+
+                var filteredEntries = VaultFilterService.FilterAndSortEntries(
+                    _allVaultEntries, // Filter from ALL
+                    SearchText,
+                    SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name, // Keep category filter
+                    _passwordsSortAsc);
+
+                UpdateCollection(Passwords, filteredEntries);
+            }
+            else
+            {
+                ReloadVaultData();
+            }
+        }
+        finally
+        {
+            _isUpdatingCollections = false;
         }
     }
 
