@@ -35,6 +35,11 @@ public class VaultEntryManagerService(
         // Simple validation
         if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
         {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+                "Validation Error",
+                "Site and Password are required.",
+                "OK"
+            ));
             return false;
         }
 
@@ -116,6 +121,11 @@ public class VaultEntryManagerService(
 
         if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
         {
+            await MopupService.Instance.PushAsync(new PromptPopup(
+               "Validation Error",
+               "Site and Password are required.",
+               "OK"
+           ));
             return false;
         }
 
