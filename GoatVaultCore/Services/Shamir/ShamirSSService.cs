@@ -4,7 +4,7 @@ using Xecrets.Slip39;
 
 namespace GoatVaultCore.Services.Shamir;
 
-public class ShamirSSService(IShamirsSecretSharing sss)
+public class ShamirSSService(IShamirsSecretSharing sss) : IShamirSSService
 {
     public List<string> SplitSecret(string secret, string passPhrase, int totalShares, int threshold)
     {
