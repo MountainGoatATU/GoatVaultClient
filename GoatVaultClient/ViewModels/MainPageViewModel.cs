@@ -260,14 +260,11 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
                 UpdateCollection(Passwords, filteredEntries);
             }
-            else
-            {
-                ReloadVaultData();
-            }
         }
         finally
         {
             _isUpdatingCollections = false;
+            ReloadVaultData();
         }
     }
 
