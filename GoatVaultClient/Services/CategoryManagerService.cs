@@ -25,10 +25,10 @@ public class CategoryManagerService(
         if (!exists)
         {
             // Create temp Category
-            var temp = new CategoryItem { Name = result };
+            var newCategory = new CategoryItem { Name = result };
 
             // Add to global list
-            session.Vault?.Categories.Add(temp);
+            session.Vault?.Categories.Add(newCategory);
             session.RaiseVaultChanged();
 
             await syncing.AutoSaveIfEnabled();
@@ -46,17 +46,6 @@ public class CategoryManagerService(
     {
         if (target == null)
             return false;
-
-        // Prevent renaming the built-in "All" category
-        if (string.Equals(target.Name, "All", StringComparison.OrdinalIgnoreCase))
-        {
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                "Cannot Rename",
-                "The \"All\" category cannot be renamed.",
-                "OK"
-            ));
-            return false;
-        }
 
         // Find the index of the category in the vault
         var categories = session.Vault?.Categories;
@@ -129,17 +118,6 @@ public class CategoryManagerService(
     {
         if (target == null)
             return false;
-
-        // Prevent deletion of the built-in "All" category
-        if (string.Equals(target.Name, "All", StringComparison.OrdinalIgnoreCase))
-        {
-            await MopupService.Instance.PushAsync(new PromptPopup(
-                "Cannot Delete",
-                "The \"All\" category cannot be deleted.",
-                "OK"
-            ));
-            return false;
-        }
 
         // Creating new prompt dialog
         var categoryPopup = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the \"{target.Name}\" category?", "Delete");
