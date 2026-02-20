@@ -23,6 +23,9 @@
                     Style="{x:StaticResource MaterialDisplayMedium}"
                     Text="Register" />
                 <material:TextField Title="Email" Text="{Binding Email}" />
+                <Label Text="Invalid email" 
+                       TextColor="{Binding IsEmailValid, Converter={StaticResource BoolToColorConverter}}" 
+                       FontSize="12"/> 
                 <material:TextField
                     Title="Master Password"
                     IsPassword="True"
@@ -31,6 +34,13 @@
                         <material:TextFieldPasswordShowHideAttachment />
                     </material:TextField.Attachments>
                 </material:TextField>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="At least 12 characters" TextColor="{Binding IsLengthValid, Converter={StaticResource BoolToColorConverter}}" />
+                    <Label Text="Uppercase letter" TextColor="{Binding HasUpperCase, Converter={StaticResource BoolToColorConverter}}" />
+                    <Label Text="Lowercase letter" TextColor="{Binding HasLowerCase, Converter={StaticResource BoolToColorConverter}}" />
+                    <Label Text="Digit" TextColor="{Binding HasDigit, Converter={StaticResource BoolToColorConverter}}" />
+                    <Label Text="Special character" TextColor="{Binding HasSpecialChar, Converter={StaticResource BoolToColorConverter}}" />
+                </VerticalStackLayout>
                 <material:TextField
                     Title="Confirm Password"
                     IsPassword="True"
@@ -44,6 +54,7 @@
                                                       Dark={x:StaticResource DarkPrimaryContainer}}"
                     Command="{Binding RegisterCommand}"
                     Text="Register"
+                    IsEnabled="{Binding AllValid}" 
                     TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer},
                                                 Dark={x:StaticResource DarkOnPrimaryContainer}}" />
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
