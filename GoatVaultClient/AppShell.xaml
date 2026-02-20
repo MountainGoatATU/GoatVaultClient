@@ -120,14 +120,14 @@
 
                 <Label
                     FontFamily="MaterialSharp"
-                    Text=""
+                    Text="Logout"
                     FontSize="20"
-                    TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}" />
 
                 <Label
                     Text="Logout"
                     FontSize="14"
-                    TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"
                     VerticalOptions="Center" />
 
                 <HorizontalStackLayout.GestureRecognizers>
