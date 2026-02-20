@@ -22,7 +22,6 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly ChangePasswordUseCase _changePassword;
     private readonly EnableMfaUseCase _enableMfa;
     private readonly DisableMfaUseCase _disableMfa;
-    private readonly LogoutUseCase _logout;
     private readonly GoatTipsService _goatTips;
     private readonly ISessionContext _session;
 
@@ -48,7 +47,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         ChangePasswordUseCase changePassword,
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
-        LogoutUseCase logout,
         GoatTipsService goatTips,
         ISessionContext session)
     {
@@ -58,7 +56,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         _changePassword = changePassword;
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
-        _logout = logout;
         _goatTips = goatTips;
         _session = session;
 
@@ -261,17 +258,6 @@ public partial class SecurityPageViewModel : BaseViewModel
             MfaEnabled = false;
             await ShowSuccessAsync("MFA disabled successfully.");
             await RefreshVaultScoreAsync();
-        });
-    }
-
-    [RelayCommand]
-    private async Task LogoutAsync()
-    {
-        await SafeExecuteAsync(async () =>
-        {
-            _session.VaultChanged -= OnVaultChanged;
-            await _logout.ExecuteAsync();
-            await Shell.Current.GoToAsync("//intro");
         });
     }
 

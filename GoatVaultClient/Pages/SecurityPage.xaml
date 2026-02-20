@@ -337,19 +337,6 @@
 
                 </VerticalStackLayout>
             </controls:Component>
-
-            <!--  Logout Section  -->
-            <controls:Component>
-                <VerticalStackLayout Padding="20">
-                    <Button
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray500},
-                                                          Dark={StaticResource Gray400}}"
-                        Command="{Binding LogoutCommand}"
-                        Text="Logout"
-                        TextColor="White" />
-                </VerticalStackLayout>
-            </controls:Component>
-
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
