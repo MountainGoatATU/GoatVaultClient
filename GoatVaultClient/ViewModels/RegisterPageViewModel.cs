@@ -29,6 +29,9 @@ public partial class RegisterPageViewModel(
     public bool ShowInvalidEmail =>
         !string.IsNullOrWhiteSpace(Email) && !IsEmailValid;
 
+    public bool ShowPasswordRequirements =>
+        !string.IsNullOrEmpty(Password);
+
     public bool ShowPasswordMismatch =>
            !string.IsNullOrEmpty(ConfirmPassword) &&
            Password != ConfirmPassword;
@@ -84,6 +87,7 @@ public partial class RegisterPageViewModel(
     }
     private void NotifyValidationChanged()
     {
+        OnPropertyChanged(nameof(ShowPasswordRequirements));
         OnPropertyChanged(nameof(ShowPasswordMismatch));
         OnPropertyChanged(nameof(ShowInvalidEmail));
         OnPropertyChanged(nameof(AllValid));
