@@ -42,6 +42,20 @@
                                 </HorizontalStackLayout>
                             </controls:ComponentHeader.Actions>
                         </controls:ComponentHeader>
+
+                        <!--  Button to show all passwords, bypassing category filter  -->
+                        <Button
+                            Margin="0,0,0,16"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                              Dark={StaticResource DarkSecondaryContainer}}"
+                            Command="{Binding ShowAllPasswordsCommand}"
+                            CornerRadius="{StaticResource Large}"
+                            FontFamily="{StaticResource MaterialMediumFont}"
+                            FontSize="{StaticResource tMedium}"
+                            Text="All Passwords"
+                            TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                        Dark={StaticResource DarkOnSecondaryContainer}}" />
+
                         <CollectionView
                             x:Name="CategoriesCollection"
                             ItemsSource="{Binding Categories}"

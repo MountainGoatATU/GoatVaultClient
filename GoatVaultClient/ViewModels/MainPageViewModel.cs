@@ -200,22 +200,15 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
     partial void OnSelectedCategoryChanged(CategoryItem? value)
     {
-        SearchText = "";
+        SearchText = string.Empty;
 
-        if (value?.Name == "All")
-        {
-            ReloadVaultData();
-        }
-        else
-        {
-            var filteredEntries = VaultFilterService.FilterAndSortEntries(
-                _allVaultEntries,
-                SearchText,
-                value?.Name,
-                _passwordsSortAsc);
+        var filteredEntries = VaultFilterService.FilterAndSortEntries(
+            _allVaultEntries, // Filter from ALL
+            SearchText, // Clear search filter
+            value?.Name,
+            _passwordsSortAsc);
 
-            UpdateCollection(Passwords, filteredEntries);
-        }
+        UpdateCollection(Passwords, filteredEntries);
     }
 
     partial void OnSearchTextChanged(string? value)
@@ -290,6 +283,14 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     #endregion
 
     #region Commands
+
+    [RelayCommand]
+    private void ShowAllPasswords()
+    {
+        SelectedCategory = null;
+        SearchText = string.Empty;
+        ReloadVaultData();
+    }
 
     [RelayCommand]
     private async Task Save()
