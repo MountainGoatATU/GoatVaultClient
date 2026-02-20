@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Mopups.Pages;
 using Mopups.Services;
 
@@ -5,8 +6,10 @@ namespace GoatVaultClient.Controls.Popups;
 
 public partial class IncorrectPasswordPopup : PopupPage
 {
-    public IncorrectPasswordPopup()
+    private readonly ILogger<IncorrectPasswordPopup>? _logger;
+    public IncorrectPasswordPopup(ILogger<IncorrectPasswordPopup>? logger = null)
     {
+        _logger = logger;
         InitializeComponent();
     }
 
@@ -16,9 +19,9 @@ public partial class IncorrectPasswordPopup : PopupPage
         {
             await MopupService.Instance.PopAsync();
         }
-        catch
+        catch (Exception ex)
         {
-            throw; // TODO handle exception
+            _logger?.LogError(ex, "Error during OnOkClicked() of IncorrectPasswordPopup");
         }
     }
 }

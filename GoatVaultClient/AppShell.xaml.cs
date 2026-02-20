@@ -1,12 +1,14 @@
 using GoatVaultClient.Pages;
+using GoatVaultClient.ViewModels;
 
 namespace GoatVaultClient;
 
 public partial class AppShell : Shell
 {
-    public AppShell()
+    public AppShell(AppShellViewModel vm)
     {
         InitializeComponent();
+        BindingContext = vm;
 
         // Register routes for pages that use relative navigation (not declared in Shell XAML)
         Routing.RegisterRoute(nameof(SplitSecretPage), typeof(SplitSecretPage));

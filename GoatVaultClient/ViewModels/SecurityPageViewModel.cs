@@ -7,7 +7,9 @@ using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Mopups.Services;
+using SkiaSharp;
 using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
@@ -20,7 +22,6 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly ChangePasswordUseCase _changePassword;
     private readonly EnableMfaUseCase _enableMfa;
     private readonly DisableMfaUseCase _disableMfa;
-    private readonly LogoutUseCase _logout;
     private readonly GoatTipsService _goatTips;
     private readonly ISessionContext _session;
 
@@ -46,7 +47,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         ChangePasswordUseCase changePassword,
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
-        LogoutUseCase logout,
         GoatTipsService goatTips,
         ISessionContext session)
     {
@@ -56,7 +56,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         _changePassword = changePassword;
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
-        _logout = logout;
         _goatTips = goatTips;
         _session = session;
 
@@ -72,24 +71,14 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     private async Task InitializeAsync()
     {
-        IsBusy = true;
-        try
+        await SafeExecuteAsync(async () =>
         {
             var user = await _loadUserProfile.ExecuteAsync();
             Email = user.Email.Value;
             MfaEnabled = user.MfaEnabled;
 
             await RefreshVaultScoreAsync();
-        }
-        catch (Exception ex)
-        {
-            // Handle error (log or show alert)
-            Console.WriteLine($"Error loading user profile: {ex.Message}");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     [RelayCommand]
@@ -177,9 +166,6 @@ public partial class SecurityPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task EditEmailAsync()
     {
-        if (IsBusy)
-            return;
-
         var password = await PromptPasswordAsync("Confirm Password");
         if (password == null)
             return;
@@ -191,29 +177,17 @@ public partial class SecurityPageViewModel : BaseViewModel
         if (newEmailStr == Email)
             return;
 
-        try
+        await SafeExecuteAsync(async () =>
         {
-            IsBusy = true;
             await _changeEmail.ExecuteAsync(password, new Email(newEmailStr));
             Email = newEmailStr;
             await ShowSuccessAsync("Email updated successfully.");
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorAsync(ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     [RelayCommand]
     private async Task EditMasterPasswordAsync()
     {
-        if (IsBusy)
-            return;
-
         var currentPassword = await PromptPasswordAsync("Confirm Current Password");
         if (currentPassword == null)
             return;
@@ -222,37 +196,23 @@ public partial class SecurityPageViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(newPassword))
             return;
 
-        try
+        await SafeExecuteAsync(async () =>
         {
-            IsBusy = true;
             await _changePassword.ExecuteAsync(currentPassword, newPassword);
             await ShowSuccessAsync("Master password updated successfully.");
             await RefreshVaultScoreAsync();
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorAsync(ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     [RelayCommand]
     private async Task EnableMfaAsync()
     {
-        if (IsBusy)
-            return;
-
         var password = await PromptPasswordAsync("Confirm Password");
         if (password == null)
             return;
 
-        try
+        await SafeExecuteAsync(async () =>
         {
-            IsBusy = true;
-
             // Generate secret locally
             var secret = TotpService.GenerateSecret();
 
@@ -267,8 +227,10 @@ public partial class SecurityPageViewModel : BaseViewModel
             // Verify locally first (sanity check)
             if (!TotpService.VerifyCode(secret, code))
             {
-                await ShowErrorAsync("Invalid code. Please try again.");
-                return;
+                // We use throw instead of ShowErrorAsync so SafeExecuteAsync catches it?
+                // Or we can manually show error and return.
+                // But SafeExecuteAsync logic is simpler if we throw.
+                throw new InvalidOperationException("Invalid code. Please try again.");
             }
 
             // Enable on backend
@@ -276,23 +238,12 @@ public partial class SecurityPageViewModel : BaseViewModel
             MfaEnabled = true;
             await ShowSuccessAsync("MFA enabled successfully.");
             await RefreshVaultScoreAsync();
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorAsync(ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     [RelayCommand]
     private async Task DisableMfaAsync()
     {
-        if (IsBusy)
-            return;
-
         var confirm = await ShowConfirmationAsync("Disable MFA", "Are you sure you want to disable two-factor authentication?");
         if (!confirm)
             return;
@@ -301,44 +252,13 @@ public partial class SecurityPageViewModel : BaseViewModel
         if (password == null)
             return;
 
-        try
+        await SafeExecuteAsync(async () =>
         {
-            IsBusy = true;
             await _disableMfa.ExecuteAsync(password);
             MfaEnabled = false;
             await ShowSuccessAsync("MFA disabled successfully.");
             await RefreshVaultScoreAsync();
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorAsync(ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task LogoutAsync()
-    {
-        if (IsBusy)
-            return;
-        IsBusy = true;
-        try
-        {
-            _session.VaultChanged -= OnVaultChanged;
-            await _logout.ExecuteAsync();
-            await Shell.Current.GoToAsync("//intro");
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorAsync(ex.Message);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     #region UI Helpers
@@ -399,3 +319,12 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     #endregion
 }
+
+#region Helper Class
+
+public static class Paints
+{
+    public static readonly SolidColorPaint Color = new SolidColorPaint(new SKColor(255, 200, 0));
+}
+
+#endregion

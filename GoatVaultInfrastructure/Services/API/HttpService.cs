@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using GoatVaultInfrastructure.Services.Api.Models;
 
 namespace GoatVaultInfrastructure.Services.Api;
 
@@ -40,7 +42,25 @@ public class HttpService(
         logger?.LogWarning("HTTP {Method} {Url} failed {StatusCode} in {Elapsed}ms",
             method, url, response.StatusCode, stopwatch.ElapsedMilliseconds);
 
-        throw new HttpRequestException($"Request failed: {content}", null, response.StatusCode);
+        if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
+        {
+            HttpValidationError? validationErrors = null;
+            try
+            {
+                validationErrors = JsonSerializer.Deserialize<HttpValidationError>(content, JsonOptions);
+            }
+            catch
+            {
+                // Ignore deserialization errors
+            }
+
+            if (validationErrors != null)
+            {
+                throw new ApiException("Validation Error", (int)response.StatusCode, validationErrors);
+            }
+        }
+
+        throw new ApiException($"Request failed: {content}", (int)response.StatusCode);
     }
 
     public Task<T> GetAsync<T>(string url) => SendAsync<T>(HttpMethod.Get, url);

@@ -125,11 +125,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     [RelayCommand]
     private async Task LoadVaultAsync()
     {
-        if (IsBusy)
-            return;
-
-        IsBusy = true;
-        try
+        await SafeExecuteAsync(async () =>
         {
             var vault = await _loadVault.ExecuteAsync();
 
@@ -137,21 +133,11 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
             _allVaultCategories = [.. vault.Categories];
 
             ReloadVaultData();
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     [RelayCommand]
-    private async Task RefreshVault()
-    {
-        if (IsBusy)
-            return;
-        await LoadVaultAsync();
-        ReloadVaultData();
-    }
+    private async Task RefreshVault() => await LoadVaultAsync();
 
     #region Synchronous methods
 
@@ -264,7 +250,13 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     partial void OnSelectedEntryChanged(VaultEntry? value) => _totpManager.TrackEntry(value);
 
     [RelayCommand]
-    private async Task CopyTotpCode() => await _totpManager.CopyTotpCodeAsync(SelectedEntry);
+    private async Task CopyTotpCode()
+    {
+        await SafeExecuteAsync(async () =>
+        {
+            await _totpManager.CopyTotpCodeAsync(SelectedEntry);
+        });
+    }
 
     #endregion
 
@@ -305,15 +297,20 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         if (!CanSync())
             return;
 
-        IsSyncing = true;
-        try
+        // We use SafeExecuteAsync to handle errors, but we also want to show IsSyncing state.
+        // SafeExecuteAsync sets IsBusy, which disables CanSync (good).
+        await SafeExecuteAsync(async () =>
         {
-            await _syncing.Sync();
-        }
-        finally
-        {
-            IsSyncing = false;
-        }
+            IsSyncing = true;
+            try
+            {
+                await _syncing.Sync();
+            }
+            finally
+            {
+                IsSyncing = false;
+            }
+        });
     }
 
     [RelayCommand]
@@ -333,59 +330,81 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     [RelayCommand]
     private async Task CreateCategory()
     {
-        if (await _categoryManager.CreateCategoryAsync(Categories))
-            ReloadVaultData();
+        await SafeExecuteAsync(async () =>
+        {
+            if (await _categoryManager.CreateCategoryAsync(Categories))
+                ReloadVaultData();
+        });
     }
 
     [RelayCommand]
     private async Task EditCategory(CategoryItem category)
     {
-        var target = category ?? SelectedCategory;
-        if (await _categoryManager.EditCategoryAsync(target))
-            ReloadVaultData();
+        await SafeExecuteAsync(async () =>
+        {
+            var target = category ?? SelectedCategory;
+            if (await _categoryManager.EditCategoryAsync(target))
+                ReloadVaultData();
+        });
     }
 
     [RelayCommand]
     private async Task DeleteCategory(CategoryItem category)
     {
-        var target = category ?? SelectedCategory;
-        if (await _categoryManager.DeleteCategoryAsync(target))
+        await SafeExecuteAsync(async () =>
         {
-            SelectedCategory = null;
-            ReloadVaultData();
-        }
+            var target = category ?? SelectedCategory;
+            if (await _categoryManager.DeleteCategoryAsync(target))
+            {
+                SelectedCategory = null;
+                ReloadVaultData();
+            }
+        });
     }
 
     [RelayCommand]
     private async Task CreateEntry()
     {
-        var changed = await _vaultEntryManager.CreateEntryAsync(Categories);
-        if (changed)
+        await SafeExecuteAsync(async () =>
         {
-            // TODO: Old pre-refactor code
-            // PresortEntries(true);
-            ReloadVaultData();
-        }
+            var changed = await _vaultEntryManager.CreateEntryAsync(Categories);
+            if (changed)
+            {
+                ReloadVaultData();
+            }
+        });
     }
 
     [RelayCommand]
     private async Task EditEntry(VaultEntry entry)
     {
-        var target = entry ?? SelectedEntry;
-        if (await _vaultEntryManager.EditEntryAsync(target, Categories))
-            ReloadVaultData();
+        await SafeExecuteAsync(async () =>
+        {
+            var target = entry ?? SelectedEntry;
+            if (await _vaultEntryManager.EditEntryAsync(target, Categories))
+                ReloadVaultData();
+        });
     }
 
     [RelayCommand]
     private async Task DeleteEntry(VaultEntry entry)
     {
-        var target = entry ?? SelectedEntry;
-        if (await _vaultEntryManager.DeleteEntryAsync(target))
-            ReloadVaultData();
+        await SafeExecuteAsync(async () =>
+        {
+            var target = entry ?? SelectedEntry;
+            if (await _vaultEntryManager.DeleteEntryAsync(target))
+                ReloadVaultData();
+        });
     }
 
     [RelayCommand]
-    private async Task CopyEntry() => await VaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry);
+    private async Task CopyEntry()
+    {
+        await SafeExecuteAsync(async () =>
+        {
+            await VaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry);
+        });
+    }
 
     [RelayCommand]
     private void TogglePasswordVisibility() => IsPasswordVisible = !IsPasswordVisible;

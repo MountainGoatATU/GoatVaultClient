@@ -11,7 +11,7 @@ public partial class SingleInputPopup : PopupPage
     private readonly TaskCompletionSource<string?> _tcs = new();
     private readonly ILogger<SingleInputPopup>? _logger;
     public Task<string?> WaitForScan() => _tcs.Task;
-    public string? Title { get; set; }
+    public new string? Title { get; set; }
     public string? InputFieldTitle { get; set; }
     public string? InputFieldText { get; set; }
     public ICommand AcceptCommand { get; private set; }

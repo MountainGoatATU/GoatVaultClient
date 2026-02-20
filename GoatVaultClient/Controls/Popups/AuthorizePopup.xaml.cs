@@ -9,10 +9,10 @@ namespace GoatVaultClient.Controls.Popups;
 
 public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
 {
-    public static readonly BindableProperty TitleProperty = BindableProperty.Create(
+    public static new readonly BindableProperty TitleProperty = BindableProperty.Create(
         nameof(Title), typeof(string), typeof(AuthorizePopup), "Authorization");
 
-    public string Title
+    public new string Title
     {
         get => (string)GetValue(TitleProperty);
         set => SetValue(TitleProperty, value);

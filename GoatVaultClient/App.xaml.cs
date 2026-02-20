@@ -1,3 +1,4 @@
+using GoatVaultClient.ViewModels;
 using GoatVaultCore.Abstractions;
 using Microsoft.Extensions.Logging;
 
@@ -25,7 +26,9 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var window = new Window(new AppShell());
+        var vm = this.Handler.MauiContext.Services.GetRequiredService<AppShellViewModel>();
+
+        var window = new Window(new AppShell(vm));
         window.Stopped += Window_Stopped;
         window.Resumed += (_, _) => _logger.LogInformation("Application resumed");
         return window;

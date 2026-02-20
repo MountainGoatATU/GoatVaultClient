@@ -23,37 +23,15 @@ public partial class RegisterPageViewModel(
     private async Task Register()
     {
         // Prevent multiple registrations
-        if (IsBusy)
-            return;
-
-        try
+        await SafeExecuteAsync(async () =>
         {
-            // Set Busy
-            IsBusy = true;
-
             // Call Register use case
             if (Email is not null && Password is not null)
                 await register.ExecuteAsync(new Email(Email), Password);
 
             // On success, navigate to Gratitude page
             await Shell.Current.GoToAsync("//gratitude");
-        }
-        catch (InvalidOperationException ex)
-        {
-            await Shell.Current.DisplayAlertAsync("Registration Failed", ex.Message, "OK");
-        }
-        catch (HttpRequestException)
-        {
-            await Shell.Current.DisplayAlertAsync("Network Error", "Unable to reach server. Please try again later.", "OK");
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlertAsync("Error", $"An unexpected error occurred: {ex.Message}", "OK");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        });
     }
 
     [RelayCommand]
