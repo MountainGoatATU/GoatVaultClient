@@ -7,6 +7,8 @@ using GoatVaultInfrastructure.Services;
 
 namespace GoatVaultApplication.Auth;
 
+public record PasswordValidationResult(bool IsWarning, bool IsGood, string Message);
+
 public class RegisterUseCase(
     ICryptoService crypto,
     IVaultCrypto vaultCrypto,
@@ -52,5 +54,34 @@ public class RegisterUseCase(
 
         // 6. Automatically log in to establish session and get auth token
         await loginOnline.ExecuteAsync(email, password);
+    }
+
+    // NEW: Business logic for password validation moved here
+    public async Task<PasswordValidationResult> ValidatePasswordAsync(string? password)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+            return new PasswordValidationResult(false, false, string.Empty);
+
+        // NIST Guidelines: Minimum 8 characters, maximum 64 characters.
+        if (password.Length < 8)
+            return new PasswordValidationResult(true, false, "NIST Guideline: Password must be at least 8 characters.");
+
+        if (password.Length > 64)
+            return new PasswordValidationResult(true, false, "NIST Guideline: Password should not exceed 64 characters.");
+
+        // Dynamic Breach Validation
+        try
+        {
+            var pwnCount = await pwned.CheckPasswordAsync(password);
+            if (pwnCount > 0)
+                return new PasswordValidationResult(true, false, $"Warning: Password found in {pwnCount} data breaches. It is unsafe.");
+
+            return new PasswordValidationResult(false, true, "Password is secure and hasn't been breached.");
+        }
+        catch
+        {
+            // If network fails, don't block the user, just inform them
+            return new PasswordValidationResult(true, false, "Unable to reach breach database for verification.");
+        }
     }
 }

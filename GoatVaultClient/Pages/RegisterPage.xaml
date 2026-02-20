@@ -10,7 +10,6 @@
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
 
-
     <controls:Component Padding="{StaticResource pContent}">
         <Grid RowDefinitions="*,Auto,*">
             <VerticalStackLayout
@@ -18,34 +17,150 @@
                 HorizontalOptions="Center"
                 Spacing="{StaticResource formSpacing}"
                 WidthRequest="{StaticResource textFieldWidth}">
+
                 <Label
                     HorizontalOptions="Center"
                     Style="{x:StaticResource MaterialDisplayMedium}"
                     Text="Register" />
-                <material:TextField Title="Email" Text="{Binding Email}" />
+
                 <material:TextField
-                    Title="Master Password"
-                    IsPassword="True"
-                    Text="{Binding Password}">
-                    <material:TextField.Attachments>
-                        <material:TextFieldPasswordShowHideAttachment />
-                    </material:TextField.Attachments>
-                </material:TextField>
-                <material:TextField
-                    Title="Confirm Password"
-                    IsPassword="True"
-                    Text="{Binding ConfirmPassword}">
-                    <material:TextField.Attachments>
-                        <material:TextFieldPasswordShowHideAttachment />
-                    </material:TextField.Attachments>
-                </material:TextField>
+                    Title="Email"
+                    CornerRadius="{StaticResource xSmall}"
+                    Text="{Binding Email}" />
+
+                <VerticalStackLayout Spacing="{StaticResource sContent}">
+
+                    <material:TextField
+                        Title="Master Password"
+                        CornerRadius="{StaticResource xSmall}"
+                        IsPassword="True"
+                        Text="{Binding Password}">
+                        <material:TextField.Attachments>
+                            <material:TextFieldPasswordShowHideAttachment />
+                        </material:TextField.Attachments>
+                        <material:TextField.Triggers>
+                            <DataTrigger
+                                Binding="{Binding IsPasswordWarning}"
+                                TargetType="material:TextField"
+                                Value="True">
+                                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                                <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                            </DataTrigger>
+                            <DataTrigger
+                                Binding="{Binding IsPasswordGood}"
+                                TargetType="material:TextField"
+                                Value="True">
+                                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                                <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                            </DataTrigger>
+                        </material:TextField.Triggers>
+                    </material:TextField>
+
+                    <Label
+                        Margin="16,0,0,0"
+                        Style="{StaticResource MaterialLabelSmall}"
+                        Text="{Binding PasswordMessage}">
+                        <Label.Triggers>
+                            <DataTrigger
+                                Binding="{Binding PasswordMessage.Length}"
+                                TargetType="Label"
+                                Value="0">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+
+                            <DataTrigger
+                                Binding="{Binding IsPasswordWarning}"
+                                TargetType="Label"
+                                Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                            </DataTrigger>
+
+                            <DataTrigger
+                                Binding="{Binding IsPasswordGood}"
+                                TargetType="Label"
+                                Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="{StaticResource sContent}">
+
+                    <material:TextField
+                        Title="Confirm Password"
+                        CornerRadius="{StaticResource xSmall}"
+                        IsPassword="True"
+                        Text="{Binding ConfirmPassword}">
+                        <material:TextField.Attachments>
+                            <material:TextFieldPasswordShowHideAttachment />
+                        </material:TextField.Attachments>
+                        <material:TextField.Triggers>
+                            <DataTrigger
+                                Binding="{Binding IsConfirmPasswordWarning}"
+                                TargetType="material:TextField"
+                                Value="True">
+                                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                                <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                            </DataTrigger>
+                            <DataTrigger
+                                Binding="{Binding IsConfirmPasswordGood}"
+                                TargetType="material:TextField"
+                                Value="True">
+                                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                                <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                            </DataTrigger>
+                        </material:TextField.Triggers>
+                    </material:TextField>
+
+                    <Label
+                        Margin="16,0,0,0"
+                        Style="{StaticResource MaterialLabelSmall}"
+                        Text="{Binding ConfirmPasswordMessage}">
+                        <Label.Triggers>
+                            <DataTrigger
+                                Binding="{Binding ConfirmPasswordMessage.Length}"
+                                TargetType="Label"
+                                Value="0">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+
+                            <DataTrigger
+                                Binding="{Binding IsConfirmPasswordWarning}"
+                                TargetType="Label"
+                                Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                            </DataTrigger>
+
+                            <DataTrigger
+                                Binding="{Binding IsConfirmPasswordGood}"
+                                TargetType="Label"
+                                Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                </VerticalStackLayout>
+
+                <material:CheckBox
+                    IsChecked="{Binding CreateRecovery}"
+                    LabelPosition="After"
+                    MaximumWidthRequest="400"
+                    Text="Create Recovery?" />
+
                 <Button
                     BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer},
                                                       Dark={x:StaticResource DarkPrimaryContainer}}"
                     Command="{Binding RegisterCommand}"
+                    CornerRadius="{StaticResource Large}"
+                    FontFamily="{StaticResource MaterialMediumFont}"
+                    FontSize="{StaticResource tMedium}"
+                    HeightRequest="{StaticResource buttonHeight}"
                     Text="Register"
                     TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer},
                                                 Dark={x:StaticResource DarkOnPrimaryContainer}}" />
+
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
                     <Label
                         Text="Already have an account?"
@@ -55,25 +170,13 @@
                     <Button
                         BackgroundColor="Transparent"
                         Command="{Binding GoToLoginCommand}"
+                        FontFamily="{StaticResource MaterialMediumFont}"
                         FontSize="{StaticResource tMedium}"
                         Text="Login"
                         TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface},
                                                     Dark={x:StaticResource DarkOnSurface}}" />
                 </HorizontalStackLayout>
-                <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
-                    <Label
-                        Text="Forgot master password?"
-                        TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurfaceVariant},
-                                                    Dark={x:StaticResource DarkOnSurfaceVariant}}"
-                        VerticalOptions="Center" />
-                    <Button
-                        BackgroundColor="Transparent"
-                        Command="{Binding GoToRecoverCommand}"
-                        FontSize="{StaticResource tMedium}"
-                        Text="Recover"
-                        TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface},
-                                                    Dark={x:StaticResource DarkOnSurface}}" />
-                </HorizontalStackLayout>
+
                 <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
             </VerticalStackLayout>
         </Grid>
