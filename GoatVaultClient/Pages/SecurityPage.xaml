@@ -39,7 +39,8 @@
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding MasterPasswordStrength}"
-                                        MaxRadialColumnWidth="50" />
+                                        MaxRadialColumnWidth="50" 
+                                        Fill="{x:Static vm:Paints.Color}"/>
                                     <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
@@ -70,7 +71,8 @@
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding AveragePasswordsStrength}"
-                                        MaxRadialColumnWidth="50" />
+                                        MaxRadialColumnWidth="50" 
+                                        Fill="{x:Static vm:Paints.Color}"/>
                                     <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
@@ -101,7 +103,8 @@
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding ReuseRate}"
-                                        MaxRadialColumnWidth="50" />
+                                        MaxRadialColumnWidth="50"
+                                        Fill="{x:Static vm:Paints.Color}"/>
                                     <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
@@ -132,7 +135,8 @@
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding BreachesCount}"
-                                        MaxRadialColumnWidth="50" />
+                                        MaxRadialColumnWidth="50" 
+                                        Fill="{x:Static vm:Paints.Color}"/>
                                     <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
@@ -163,7 +167,8 @@
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding MfaPercent}"
-                                        MaxRadialColumnWidth="50" />
+                                        MaxRadialColumnWidth="50" 
+                                        Fill="{x:Static vm:Paints.Color}"/>
                                     <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>

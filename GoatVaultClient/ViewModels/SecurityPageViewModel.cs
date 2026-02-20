@@ -7,7 +7,9 @@ using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Mopups.Services;
+using SkiaSharp;
 using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
@@ -331,3 +333,12 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     #endregion
 }
+
+#region Helper Class
+
+public static class Paints
+{
+    public static readonly SolidColorPaint Color = new SolidColorPaint(new SKColor(255, 200, 0));
+}
+
+#endregion
