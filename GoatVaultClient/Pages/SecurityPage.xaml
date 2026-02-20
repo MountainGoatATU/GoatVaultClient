@@ -33,15 +33,17 @@
                             InitialRotation="-90"
                             MaxValue="400"
                             MinValue="0"
-                            WidthRequest="150">
+                            WidthRequest="150"
+                            BackgroundColor="Transparent">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding MasterPasswordStrength}"
                                         MaxRadialColumnWidth="50" 
-                                        Fill="{x:Static vm:Paints.Color}"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                        Fill="{x:Static vm:Paints.Color}"
+                                        IsHoverable="False"/>
+                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
@@ -65,15 +67,17 @@
                             InitialRotation="-90"
                             MaxValue="200"
                             MinValue="0"
-                            WidthRequest="150">
+                            WidthRequest="150"
+                            BackgroundColor="Transparent">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding AveragePasswordsStrength}"
                                         MaxRadialColumnWidth="50" 
-                                        Fill="{x:Static vm:Paints.Color}"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                        Fill="{x:Static vm:Paints.Color}"
+                                        IsHoverable="False"/>
+                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
@@ -97,15 +101,17 @@
                             InitialRotation="-90"
                             MaxValue="200"
                             MinValue="0"
-                            WidthRequest="150">
+                            WidthRequest="150"
+                            BackgroundColor="Transparent">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding ReuseRate}"
                                         MaxRadialColumnWidth="50"
-                                        Fill="{x:Static vm:Paints.Color}"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                        Fill="{x:Static vm:Paints.Color}"
+                                        IsHoverable="False"/>
+                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
@@ -129,15 +135,17 @@
                             InitialRotation="-90"
                             MaxValue="100"
                             MinValue="0"
-                            WidthRequest="150">
+                            WidthRequest="150"
+                            BackgroundColor="Transparent">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding BreachesCount}"
                                         MaxRadialColumnWidth="50" 
-                                        Fill="{x:Static vm:Paints.Color}"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                        Fill="{x:Static vm:Paints.Color}"
+                                        IsHoverable="False"/>
+                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
@@ -161,15 +169,17 @@
                             InitialRotation="-90"
                             MaxValue="200"
                             MinValue="0"
-                            WidthRequest="150">
+                            WidthRequest="150"
+                            BackgroundColor="Transparent">
                             <lvc:PieChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlGaugeSeries
                                         DataLabelsSize="20"
                                         GaugeValue="{Binding MfaPercent}"
                                         MaxRadialColumnWidth="50" 
-                                        Fill="{x:Static vm:Paints.Color}"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="LightGray" MaxRadialColumnWidth="50" />
+                                        Fill="{x:Static vm:Paints.Color}"
+                                        IsHoverable="False"/>
+                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
                                 </lvc:SeriesCollection>
                             </lvc:PieChart.Series>
                         </lvc:PieChart>
