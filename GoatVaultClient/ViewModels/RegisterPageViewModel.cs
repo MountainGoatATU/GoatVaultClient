@@ -12,18 +12,18 @@ public partial class RegisterPageViewModel : BaseViewModel
     private readonly RegisterUseCase _register;
     private CancellationTokenSource? _debounceCts;
     // Observable Properties (Bound to Entry fields)
-    [ObservableProperty] private string? _email;
-    [ObservableProperty] private string? _password;
-    [ObservableProperty] private string? _confirmPassword;
-    [ObservableProperty] private bool _createRecovery = false;
+    [ObservableProperty] private string? email;
+    [ObservableProperty] private string? password;
+    [ObservableProperty] private string? confirmPassword;
+    [ObservableProperty] private bool createRecovery = false;
 
-    [ObservableProperty] private string _passwordMessage = string.Empty;
-    [ObservableProperty] private bool _isPasswordWarning;
-    [ObservableProperty] private bool _isPasswordGood;
+    [ObservableProperty] private string passwordMessage = string.Empty;
+    [ObservableProperty] private bool isPasswordWarning;
+    [ObservableProperty] private bool isPasswordGood;
 
-    [ObservableProperty] private string _confirmPasswordMessage = string.Empty;
-    [ObservableProperty] private bool _isConfirmPasswordWarning;
-    [ObservableProperty] private bool _isConfirmPasswordGood;
+    [ObservableProperty] private string confirmPasswordMessage = string.Empty;
+    [ObservableProperty] private bool isConfirmPasswordWarning;
+    [ObservableProperty] private bool isConfirmPasswordGood;
 
     // Constructor (Clean Dependency Injection)
     public RegisterPageViewModel(RegisterUseCase register)
@@ -105,17 +105,18 @@ public partial class RegisterPageViewModel : BaseViewModel
 
             if (CreateRecovery)
             {
-                await Shell.Current.GoToAsync(nameof(SplitSecretPage));
+                await Shell.Current.GoToAsync($"{ nameof(SplitSecretPage)}?Mp={Password}");
             }
-            // On success, navigate to Gratitude page
-            await Shell.Current.GoToAsync("//gratitude");
+            else
+            {
+                await Shell.Current.GoToAsync("//gratitude");
+            }
+            
 
         });
     }
 
     [RelayCommand]
     private static async Task GoToLogin() => await Shell.Current.GoToAsync("//login");
-    [RelayCommand]
-    private static async Task GoToRecover() => await Shell.Current.GoToAsync(nameof(RecoverSecretPage));
 }
 

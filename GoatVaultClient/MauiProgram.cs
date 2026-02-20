@@ -2,6 +2,7 @@ using CommunityToolkit.Maui;
 using GoatVaultApplication.Account;
 using GoatVaultApplication.Auth;
 using GoatVaultApplication.Session;
+using GoatVaultApplication.Shamir;
 using GoatVaultApplication.VaultUseCases;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
@@ -124,6 +125,11 @@ public static class MauiProgram
         builder.Services.AddTransient<LogoutUseCase>();
         builder.Services.AddTransient<RegisterUseCase>();
 
+        builder.Services.AddTransient<DisableShamirUseCase>();
+        builder.Services.AddTransient<EnableShamirUseCase>();
+        builder.Services.AddTransient<RecoverKeyUseCase>();
+        builder.Services.AddTransient<SplitKeyUseCase>();
+
         builder.Services.AddTransient<AddVaultEntryUseCase>();
         builder.Services.AddTransient<CalculateVaultScoreUseCase>();
         builder.Services.AddTransient<DeleteVaultEntryUseCase>();
@@ -151,7 +157,7 @@ public static class MauiProgram
         // Shamir Test
         builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
         builder.Services.AddSingleton<IRandom, StrongRandom>();
-        builder.Services.AddTransient<ShamirSSService>();
+        builder.Services.AddTransient<IShamirSSService,ShamirSSService>();
 
         // TODO: Fix Shamir services
         builder.Services.AddTransient<SplitSecretViewModel>();

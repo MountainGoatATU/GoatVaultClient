@@ -1,4 +1,6 @@
-﻿using GoatVaultCore.Services.Shamir;
+﻿using GoatVaultCore.Models.Shamir;
+using GoatVaultCore.Services.Shamir;
+using System.Collections.ObjectModel;
 
 namespace GoatVaultApplication.Shamir;
 
@@ -9,8 +11,21 @@ public class SplitKeyUseCase
     {
         _shamirSSService = shamirSSService;
     }
-    public List<string> Execute(string secret, string passPhrase, int totalShares, int threshold)
+    public ObservableCollection<RecoveryShare> Execute(string secret, string passPhrase, int totalShares, int threshold)
     {
-        return _shamirSSService.SplitSecret(secret, passPhrase, totalShares, threshold);
+        ObservableCollection<RecoveryShare> generatedShares = new ObservableCollection<RecoveryShare>();
+
+        var splittedKey =  _shamirSSService.SplitSecret(secret, passPhrase, totalShares, threshold);
+
+        for (var i = 0; i < splittedKey.Count; i++)
+        {
+            generatedShares.Add(new RecoveryShare
+            {
+                Index = i + 1,
+                Mnemonic = splittedKey[i]
+            });
+        }
+
+        return generatedShares;
     }
 }

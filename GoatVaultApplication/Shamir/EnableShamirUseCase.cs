@@ -32,8 +32,8 @@ public class EnableShamirUseCase
         var user = await _users.GetByIdAsync(_session.UserId.Value)
                    ?? throw new InvalidOperationException("User not found.");
 
-        if (user.ShamirEnabled == false)
-            throw new InvalidOperationException("Shamir's Secret Sharing is not enabled for this user.");
+        if (user.ShamirEnabled == true)
+            throw new InvalidOperationException("Shamir's Secret Sharing is already enabled for this user.");
 
         // 1. Verify current password
         var currentAuthVerifier = _crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt);

@@ -17,27 +17,27 @@ namespace GoatVaultClient.Services;
 /// </summary>
 public static class ShamirServiceRegistration
 {
-    public static IServiceCollection AddShamirSecretSharing(this IServiceCollection services)
-    {
-        // Shamir Services
-        services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
-        services.AddSingleton<IMakeSharesUseCase<BigInteger>, SecretSplitter<BigInteger>>();
-        services.AddSingleton<IReconstructionUseCase<BigInteger>, SecretReconstructor<BigInteger>>();
+    //public static IServiceCollection AddShamirSecretSharing(this IServiceCollection services)
+    //{
+    //    // Shamir Services
+    //    services.AddSingleton<IExtendedGcdAlgorithm<BigInteger>, ExtendedEuclideanAlgorithm<BigInteger>>();
+    //    services.AddSingleton<IMakeSharesUseCase<BigInteger>, SecretSplitter<BigInteger>>();
+    //    services.AddSingleton<IReconstructionUseCase<BigInteger>, SecretReconstructor<BigInteger>>();
 
-        // ── Core services (singletons — stateless, thread-safe) ──
-        services.AddSingleton<IMnemonicEncoder>(sp =>
-            WordListLoader.CreateEncoderAsync().GetAwaiter().GetResult());
+    //    // ── Core services (singletons — stateless, thread-safe) ──
+    //    services.AddSingleton<IMnemonicEncoder>(sp =>
+    //        WordListLoader.CreateEncoderAsync().GetAwaiter().GetResult());
 
-        services.AddSingleton<IEnvelopeSharingService, EnvelopeSharingService>();
+    //    services.AddSingleton<IEnvelopeSharingService, EnvelopeSharingService>();
 
-        // ── ViewModels (transient — fresh per page navigation) ───
-        services.AddTransient<SplitSecretViewModel>();
-        services.AddTransient<RecoverSecretViewModel>();
+    //    // ── ViewModels (transient — fresh per page navigation) ───
+    //    services.AddTransient<SplitSecretViewModel>();
+    //    services.AddTransient<RecoverSecretViewModel>();
 
-        // ── Pages ────────────────────────────────────────────────
-        services.AddTransient<SplitSecretPage>();
-        services.AddTransient<RecoverSecretPage>();
+    //    // ── Pages ────────────────────────────────────────────────
+    //    services.AddTransient<SplitSecretPage>();
+    //    services.AddTransient<RecoverSecretPage>();
 
-        return services;
-    }
+    //    return services;
+    //}
 }
