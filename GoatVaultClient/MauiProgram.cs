@@ -202,6 +202,7 @@ public static class MauiProgram
         builder.Services.AddTransient<SecurityPage>();
         builder.Services.AddTransient<SettingsPageViewModel>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<AppShellViewModel>();
 
         #endregion
 

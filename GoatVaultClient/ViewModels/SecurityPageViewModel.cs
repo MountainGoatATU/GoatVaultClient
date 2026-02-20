@@ -7,7 +7,9 @@ using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Mopups.Services;
+using SkiaSharp;
 using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
@@ -20,7 +22,6 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly ChangePasswordUseCase _changePassword;
     private readonly EnableMfaUseCase _enableMfa;
     private readonly DisableMfaUseCase _disableMfa;
-    private readonly LogoutUseCase _logout;
     private readonly GoatTipsService _goatTips;
     private readonly ISessionContext _session;
 
@@ -46,7 +47,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         ChangePasswordUseCase changePassword,
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
-        LogoutUseCase logout,
         GoatTipsService goatTips,
         ISessionContext session)
     {
@@ -56,7 +56,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         _changePassword = changePassword;
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
-        _logout = logout;
         _goatTips = goatTips;
         _session = session;
 
@@ -262,17 +261,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         });
     }
 
-    [RelayCommand]
-    private async Task LogoutAsync()
-    {
-        await SafeExecuteAsync(async () =>
-        {
-            _session.VaultChanged -= OnVaultChanged;
-            await _logout.ExecuteAsync();
-            await Shell.Current.GoToAsync("//intro");
-        });
-    }
-
     #region UI Helpers
 
     private static async Task<string?> PromptPasswordAsync(string title)
@@ -331,3 +319,12 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     #endregion
 }
+
+#region Helper Class
+
+public static class Paints
+{
+    public static readonly SolidColorPaint Color = new SolidColorPaint(new SKColor(255, 200, 0));
+}
+
+#endregion
