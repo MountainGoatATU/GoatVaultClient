@@ -19,18 +19,46 @@ public partial class RegisterPageViewModel : BaseViewModel
 
     [ObservableProperty] private string passwordMessage = string.Empty;
     [ObservableProperty] private bool isPasswordWarning;
-    [ObservableProperty] private bool isPasswordGood;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFormValid))]
+    private bool isPasswordGood;
 
     [ObservableProperty] private string confirmPasswordMessage = string.Empty;
     [ObservableProperty] private bool isConfirmPasswordWarning;
-    [ObservableProperty] private bool isConfirmPasswordGood;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFormValid))]
+    private bool isConfirmPasswordGood;
+
+    [ObservableProperty] private string emailMessage = string.Empty;
+    [ObservableProperty] private bool isEmailWarning;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFormValid))]
+    private bool isEmailGood;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFormValid))]
+    private bool isFormViewValid;
+
+    public bool IsFormValid => 
+        IsEmailGood &&
+        IsPasswordGood &&
+        IsConfirmPasswordGood;
 
     // Constructor (Clean Dependency Injection)
     public RegisterPageViewModel(RegisterUseCase register)
     {
         _register = register;
     }
-
+    partial void OnEmailChanged(string? value)
+    {
+        var result = _register.ValidateEmail(Email);
+        if (result != null)
+        {
+            IsEmailWarning = result.IsWarning;
+            IsEmailGood = result.IsGood;
+            EmailMessage = result.Message;
+        }
+    }
     partial void OnPasswordChanged(string? value)
     {
         // Cancel previous pending API call if user is typing fast
@@ -77,19 +105,19 @@ public partial class RegisterPageViewModel : BaseViewModel
     private async Task ValidateInputAsync(string? value, CancellationToken token)
     {
         // Wait 500ms before hitting the Use Case to avoid spamming the API
-        try { await Task.Delay(500, token); }
+        try { await Task.Delay(300, token); }
         catch (TaskCanceledException) { return; }
 
         if (token.IsCancellationRequested) return;
 
         // Delegate business logic to the Use Case
-        var validationResult = await _register.ValidatePasswordAsync(value);
+        var passwordValidationResult = await _register.ValidatePasswordAsync(value);
 
         if (!token.IsCancellationRequested)
         {
-            IsPasswordWarning = validationResult.IsWarning;
-            IsPasswordGood = validationResult.IsGood;
-            PasswordMessage = validationResult.Message;
+            IsPasswordWarning = passwordValidationResult.IsWarning;
+            IsPasswordGood = passwordValidationResult.IsGood;
+            PasswordMessage = passwordValidationResult.Message;
         }
     }
 

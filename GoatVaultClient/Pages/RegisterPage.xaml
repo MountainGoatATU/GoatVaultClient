@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     x:DataType="vm:RegisterPageViewModel"
@@ -23,11 +24,57 @@
                     Style="{x:StaticResource MaterialDisplayMedium}"
                     Text="Register" />
 
-                <material:TextField
-                    Title="Email"
-                    CornerRadius="{StaticResource xSmall}"
-                    Text="{Binding Email}" />
+                <!--  Email input  -->
+                <VerticalStackLayout>
+                    <material:TextField
+                        Title="Email"
+                        CornerRadius="{StaticResource xSmall}"
+                        Text="{Binding Email}">
+                        <material:TextField.Triggers>
+                            <DataTrigger
+                                Binding="{Binding IsEmailWarning}"
+                                TargetType="material:TextField"
+                                Value="True">
+                                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                                <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                            </DataTrigger>
+                            <DataTrigger
+                                Binding="{Binding IsEmailGood}"
+                                TargetType="material:TextField"
+                                Value="True">
+                                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                                <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                            </DataTrigger>
+                        </material:TextField.Triggers>
+                    </material:TextField>
 
+                    <Label Style="{StaticResource MaterialLabelLarge}" Text="{Binding EmailMessage}">
+                        <Label.Triggers>
+                            <DataTrigger
+                                Binding="{Binding EmailMessage.Length}"
+                                TargetType="Label"
+                                Value="0">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+
+                            <DataTrigger
+                                Binding="{Binding IsEmailWarning}"
+                                TargetType="Label"
+                                Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}" />
+                            </DataTrigger>
+
+                            <DataTrigger
+                                Binding="{Binding IsEmailGood}"
+                                TargetType="Label"
+                                Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+
+                <!--  Master Password input  -->
                 <VerticalStackLayout Spacing="{StaticResource sContent}">
 
                     <material:TextField
@@ -56,10 +103,7 @@
                         </material:TextField.Triggers>
                     </material:TextField>
 
-                    <Label
-                        Margin="16,0,0,0"
-                        Style="{StaticResource MaterialLabelSmall}"
-                        Text="{Binding PasswordMessage}">
+                    <Label Style="{StaticResource MaterialLabelLarge}" Text="{Binding PasswordMessage}">
                         <Label.Triggers>
                             <DataTrigger
                                 Binding="{Binding PasswordMessage.Length}"
@@ -84,7 +128,44 @@
                         </Label.Triggers>
                     </Label>
                 </VerticalStackLayout>
+                <!--  Guidelines  -->
+                <Border
+                    Padding="{StaticResource pMedium}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceVariant},
+                                                      Dark={StaticResource DarkSurfaceVariant}}"
+                    StrokeShape="RoundRectangle {StaticResource Medium}"
+                    StrokeThickness="0">
 
+                    <Border.Triggers>
+                        <DataTrigger
+                            Binding="{Binding IsPasswordGood}"
+                            TargetType="Border"
+                            Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                    </Border.Triggers>
+
+                    <VerticalStackLayout Spacing="{StaticResource sContent}">
+                        <Label
+                            Style="{StaticResource MaterialTitleSmall}"
+                            Text="Password Guidelines"
+                            TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                        Dark={StaticResource DarkOnSurfaceVariant}}" />
+
+                        <Label
+                            Style="{StaticResource MaterialBodySmall}"
+                            Text="• Minimum of 8 characters is required (15+ is highly recommended)."
+                            TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                        Dark={StaticResource DarkOnSurfaceVariant}}" />
+
+                        <Label
+                            Style="{StaticResource MaterialBodySmall}"
+                            Text="• Maximum length supported is 64 characters."
+                            TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                        Dark={StaticResource DarkOnSurfaceVariant}}" />
+                    </VerticalStackLayout>
+                </Border>
+                <!--  Confirm Password input  -->
                 <VerticalStackLayout Spacing="{StaticResource sContent}">
 
                     <material:TextField
@@ -113,10 +194,7 @@
                         </material:TextField.Triggers>
                     </material:TextField>
 
-                    <Label
-                        Margin="16,0,0,0"
-                        Style="{StaticResource MaterialLabelSmall}"
-                        Text="{Binding ConfirmPasswordMessage}">
+                    <Label Style="{StaticResource MaterialLabelLarge}" Text="{Binding ConfirmPasswordMessage}">
                         <Label.Triggers>
                             <DataTrigger
                                 Binding="{Binding ConfirmPasswordMessage.Length}"
@@ -142,13 +220,13 @@
                     </Label>
 
                 </VerticalStackLayout>
-
+                <!--  Create recovery checkbox  -->
                 <material:CheckBox
                     IsChecked="{Binding CreateRecovery}"
                     LabelPosition="After"
                     MaximumWidthRequest="400"
                     Text="Create Recovery?" />
-
+                <!--  Register button  -->
                 <Button
                     BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer},
                                                       Dark={x:StaticResource DarkPrimaryContainer}}"
@@ -157,10 +235,12 @@
                     FontFamily="{StaticResource MaterialMediumFont}"
                     FontSize="{StaticResource tMedium}"
                     HeightRequest="{StaticResource buttonHeight}"
+                    IsEnabled="{Binding IsFormValid}"
                     Text="Register"
                     TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer},
                                                 Dark={x:StaticResource DarkOnPrimaryContainer}}" />
 
+                <!--  Login button  -->
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
                     <Label
                         Text="Already have an account?"
@@ -169,6 +249,7 @@
                         VerticalOptions="Center" />
                     <Button
                         BackgroundColor="Transparent"
+                        BorderColor="Transparent"
                         Command="{Binding GoToLoginCommand}"
                         FontFamily="{StaticResource MaterialMediumFont}"
                         FontSize="{StaticResource tMedium}"
@@ -176,7 +257,7 @@
                         TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface},
                                                     Dark={x:StaticResource DarkOnSurface}}" />
                 </HorizontalStackLayout>
-
+                <!--  Spinner  -->
                 <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
             </VerticalStackLayout>
         </Grid>

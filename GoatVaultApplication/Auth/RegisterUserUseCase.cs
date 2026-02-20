@@ -4,10 +4,11 @@ using GoatVaultCore.Models.Api;
 using GoatVaultCore.Models.Objects;
 using GoatVaultCore.Services;
 using GoatVaultInfrastructure.Services;
+using System.Text.RegularExpressions;
 
 namespace GoatVaultApplication.Auth;
 
-public record PasswordValidationResult(bool IsWarning, bool IsGood, string Message);
+public record ValidationResult(bool IsWarning, bool IsGood, string Message);
 
 public class RegisterUseCase(
     ICryptoService crypto,
@@ -57,31 +58,42 @@ public class RegisterUseCase(
     }
 
     // NEW: Business logic for password validation moved here
-    public async Task<PasswordValidationResult> ValidatePasswordAsync(string? password)
+    public async Task<ValidationResult> ValidatePasswordAsync(string? password)
     {
         if (string.IsNullOrWhiteSpace(password))
-            return new PasswordValidationResult(false, false, string.Empty);
+            return new ValidationResult(false, false, string.Empty);
 
         // NIST Guidelines: Minimum 8 characters, maximum 64 characters.
         if (password.Length < 8)
-            return new PasswordValidationResult(true, false, "NIST Guideline: Password must be at least 8 characters.");
+            return new ValidationResult(true, false, "NIST Guideline: Password must be at least 8 characters.");
 
         if (password.Length > 64)
-            return new PasswordValidationResult(true, false, "NIST Guideline: Password should not exceed 64 characters.");
+            return new ValidationResult(true, false, "NIST Guideline: Password should not exceed 64 characters.");
 
         // Dynamic Breach Validation
         try
         {
             var pwnCount = await pwned.CheckPasswordAsync(password);
             if (pwnCount > 0)
-                return new PasswordValidationResult(true, false, $"Warning: Password found in {pwnCount} data breaches. It is unsafe.");
+                return new ValidationResult(true, false, $"Warning: Password found in {pwnCount} data breaches. It is unsafe.");
 
-            return new PasswordValidationResult(false, true, "Password is secure and hasn't been breached.");
+            return new ValidationResult(false, true, "Password is secure and hasn't been breached.");
         }
         catch
         {
             // If network fails, don't block the user, just inform them
-            return new PasswordValidationResult(true, false, "Unable to reach breach database for verification.");
+            return new ValidationResult(true, false, "Unable to reach breach database for verification.");
         }
+    }
+
+    public ValidationResult ValidateEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return new ValidationResult(false, false, string.Empty);
+        // Basic format check
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            return new ValidationResult(true, false, "Please enter a valid email address.");
+
+        return new ValidationResult(false, true, "Email format looks good.");
     }
 }
