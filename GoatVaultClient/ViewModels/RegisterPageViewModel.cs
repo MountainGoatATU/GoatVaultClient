@@ -11,7 +11,7 @@ public partial class RegisterPageViewModel(
     RegisterUseCase register)
     : BaseViewModel
 {
-    // Services
+    private static readonly Regex EmailRegex = new(@"^[^\s@]+@[^\s@]+\.[^\s@]+$", RegexOptions.Compiled);
 
     // Observable Properties (Bound to Entry fields)
     [ObservableProperty] private string? _email;
@@ -26,7 +26,69 @@ public partial class RegisterPageViewModel(
     [ObservableProperty] private bool _hasSpecialChar;
     [ObservableProperty] private bool _isEmailValid;
 
-    // Constructor (Clean Dependency Injection)
+    public bool ShowInvalidEmail =>
+        !string.IsNullOrWhiteSpace(Email) && !IsEmailValid;
+
+    public bool ShowPasswordMismatch =>
+           !string.IsNullOrEmpty(ConfirmPassword) &&
+           Password != ConfirmPassword;
+
+    public bool AllValid =>
+           IsLengthValid &&
+           HasUpperCase &&
+           HasLowerCase &&
+           HasDigit &&
+           HasSpecialChar &&
+           IsEmailValid &&
+           !ShowPasswordMismatch;
+
+    partial void OnPasswordChanged(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            IsLengthValid = HasUpperCase = HasLowerCase = HasDigit = HasSpecialChar = false;
+            return;
+        }
+
+        else
+        {
+            IsLengthValid = value.Length >= 12;
+            HasUpperCase = value.Any(char.IsUpper);
+            HasLowerCase = value.Any(char.IsLower);
+            HasDigit = value.Any(char.IsDigit);
+            HasSpecialChar = value.Any(c => "!@#$%^&*(),.?\":{}|<>".Contains(c));
+        }
+
+        NotifyValidationChanged();
+    }
+
+    partial void OnConfirmPasswordChanged(string? value)
+    {
+        NotifyValidationChanged();
+    }
+
+    partial void OnEmailChanged(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            IsEmailValid = false;
+            return;
+        }
+
+        else
+        {
+            IsEmailValid = EmailRegex.IsMatch(value);
+        }
+
+        NotifyValidationChanged();
+    }
+    private void NotifyValidationChanged()
+    {
+        OnPropertyChanged(nameof(ShowPasswordMismatch));
+        OnPropertyChanged(nameof(ShowInvalidEmail));
+        OnPropertyChanged(nameof(AllValid));
+        RegisterCommand.NotifyCanExecuteChanged();
+    }
 
     [RelayCommand]
     private async Task Register()
@@ -52,39 +114,4 @@ public partial class RegisterPageViewModel(
         // Navigate back to Login
         await Shell.Current.GoToAsync(nameof(RecoverSecretPage));
 
-    partial void OnPasswordChanged(string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            IsLengthValid = HasUpperCase = HasLowerCase = HasDigit = HasSpecialChar = false;
-            return;
-        }
-
-        IsLengthValid = value.Length >= 12;
-        HasUpperCase = value.Any(char.IsUpper);
-        HasLowerCase = value.Any(char.IsLower);
-        HasDigit = value.Any(char.IsDigit);
-        HasSpecialChar = value.Any(c => "!@#$%^&*(),.?\":{}|<>".Contains(c));
-    }
-
-    partial void OnEmailChanged(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            IsEmailValid = false;
-            return;
-        }
-
-        var regex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
-        IsEmailValid = regex.IsMatch(value);
-    }
-
-    public bool AllValid =>
-        IsLengthValid &&
-        HasUpperCase &&
-        HasLowerCase &&
-        HasDigit &&
-        HasSpecialChar &&
-        IsEmailValid &&
-        Password == ConfirmPassword;
 }

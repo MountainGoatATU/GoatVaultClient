@@ -23,9 +23,10 @@
                     Style="{x:StaticResource MaterialDisplayMedium}"
                     Text="Register" />
                 <material:TextField Title="Email" Text="{Binding Email}" />
-                <Label Text="Invalid email" 
-                       TextColor="{Binding IsEmailValid, Converter={StaticResource BoolToColorConverter}}" 
-                       FontSize="12"/> 
+                <Label Text="Invalid email"
+                       TextColor="Red"
+                       FontSize="12"
+                       IsVisible="{Binding ShowInvalidEmail}"/>   
                 <material:TextField
                     Title="Master Password"
                     IsPassword="True"
@@ -49,12 +50,17 @@
                         <material:TextFieldPasswordShowHideAttachment />
                     </material:TextField.Attachments>
                 </material:TextField>
+                <Label
+                    Text="Passwords do not match"
+                    TextColor="Red"
+                    FontSize="12"
+                    IsVisible="{Binding ShowPasswordMismatch}" />
                 <Button
                     BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimaryContainer},
                                                       Dark={x:StaticResource DarkPrimaryContainer}}"
                     Command="{Binding RegisterCommand}"
                     Text="Register"
-                    IsEnabled="{Binding AllValid}" 
+                    IsEnabled="{Binding AllValid}"
                     TextColor="{AppThemeBinding Light={x:StaticResource LightOnPrimaryContainer},
                                                 Dark={x:StaticResource DarkOnPrimaryContainer}}" />
                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="0">
