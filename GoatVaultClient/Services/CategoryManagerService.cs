@@ -12,7 +12,7 @@ public class CategoryManagerService(
 {
     public async Task<bool> CreateCategoryAsync(IEnumerable<CategoryItem> existingCategories)
     {
-        var popup = new SingleInputPopup("Create Category", "Category Name", "");
+        var popup = new CreateCategoryPopup("Create Category", "Category Name", "");
 
         await MopupService.Instance.PushAsync(popup);
         var result = await popup.WaitForScan();
@@ -57,7 +57,7 @@ public class CategoryManagerService(
             return false;
 
         // Creating new prompt dialog
-        var categoryPopup = new SingleInputPopup("Edit Category", "Category", target.Name);
+        var categoryPopup = new CreateCategoryPopup("Edit Category", "Category", target.Name);
 
         // Push the dialog to MopupService
         await MopupService.Instance.PushAsync(categoryPopup);

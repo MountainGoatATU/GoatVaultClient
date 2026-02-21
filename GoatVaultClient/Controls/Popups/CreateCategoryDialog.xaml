@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mopups:PopupPage
+    x:Class="GoatVaultClient.Controls.Popups.CreateCategoryPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+    xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
+    BackgroundColor="#80000000"
+    CloseWhenBackgroundIsClicked="True">
+
+
+    <controls:PopupTemplate
+        Title="{Binding Title}"
+        AcceptCommand="{Binding AcceptCommand}"
+        AcceptText="Save"
+        CancelCommand="{Binding CancelCommand}"
+        FrameWidth="500">
+        <VerticalStackLayout>
+            <material:TextField
+                x:Name="CategoryField"
+                Title="{Binding CategoryFieldTitle}"
+                Text="{Binding CategoryFieldText}">
+                <validation:RequiredValidation />
+                <validation:MinLengthValidation MinLength="2" />
+            </material:TextField>
+        </VerticalStackLayout>
+    </controls:PopupTemplate>
+</mopups:PopupPage>

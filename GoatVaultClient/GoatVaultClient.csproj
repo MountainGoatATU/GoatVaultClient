@@ -159,6 +159,9 @@
 	  <MauiXaml Update="Controls\ImageButton.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Controls\Popups\CreateCategoryDialog.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Controls\Popups\SingleInputPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
