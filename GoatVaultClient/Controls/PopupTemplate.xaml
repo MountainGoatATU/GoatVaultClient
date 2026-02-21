@@ -1,54 +1,75 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:GoatVaultClient.Controls"
-             x:Class="GoatVaultClient.Controls.PopupTemplate"
-             x:Name="RootLayout">
+<ContentView
+    x:Class="GoatVaultClient.Controls.PopupTemplate"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+    x:Name="RootLayout">
     <ContentView.ControlTemplate>
         <ControlTemplate>
-            <Border BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"
-                    StrokeThickness="0"
-                    WidthRequest="{TemplateBinding FrameWidth}"
-                    VerticalOptions="Center"
-                    MaximumHeightRequest="650">
+            <Border
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
+                                                  Dark={StaticResource DarkSurface}}"
+                MaximumHeightRequest="650"
+                StrokeThickness="0"
+                VerticalOptions="Center"
+                WidthRequest="{TemplateBinding FrameWidth}">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="{x:StaticResource xLargeIncreased}"/>
+                    <RoundRectangle CornerRadius="{x:StaticResource xLargeIncreased}" />
                 </Border.StrokeShape>
                 <Grid RowDefinitions="Auto, *, Auto">
-                    <Label Grid.Row="0"
-                               Text="{TemplateBinding Title}" 
-                               Style="{x:StaticResource MaterialHeadlineMedium}"
-                               Padding="20"
-                               HorizontalOptions="Center"/>
+                    <Label
+                        Grid.Row="0"
+                        Padding="20"
+                        HorizontalOptions="Center"
+                        Style="{x:StaticResource MaterialHeadlineMedium}"
+                        Text="{TemplateBinding Title}" />
                     <ContentView Grid.Row="1" Padding="20,10">
                         <ContentPresenter />
                     </ContentView>
 
-                    <HorizontalStackLayout Grid.Row="2" 
-                                           Margin="20" 
-                                           Spacing="{x:StaticResource formSpacing}"
-                                           HorizontalOptions="End">
-                        <Button Text="{TemplateBinding CancelText}" 
-                                Command="{TemplateBinding CancelCommand}"
-                                StyleClass="OutlinedButton">
+                    <HorizontalStackLayout
+                        Grid.Row="2"
+                        Margin="20"
+                        HorizontalOptions="End"
+                        Spacing="{x:StaticResource formSpacing}">
+                        <Button
+                            Command="{TemplateBinding CancelCommand}"
+                            StyleClass="OutlinedButton"
+                            Text="{TemplateBinding CancelText}">
                             <Button.Triggers>
-                                <DataTrigger TargetType="Button" Binding="{Binding Text, Source={RelativeSource Self}}" Value="">
+                                <DataTrigger
+                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    TargetType="Button"
+                                    Value="">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
-                                <DataTrigger TargetType="Button" Binding="{Binding Text, Source={RelativeSource Self}}" Value="{x:Null}">
+                                <DataTrigger
+                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    TargetType="Button"
+                                    Value="{x:Null}">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
                             </Button.Triggers>
                         </Button>
-                        <Button Grid.Column="1"
-                                Text="{TemplateBinding AcceptText}" 
-                                Command="{TemplateBinding AcceptCommand}"
-                                StyleClass="FilledButton">
+                        <Button
+                            Grid.Column="1"
+                            Command="{TemplateBinding AcceptCommand}"
+                            StyleClass="FilledButton"
+                            Text="{TemplateBinding AcceptText}">
+
                             <Button.Triggers>
-                                <DataTrigger TargetType="Button" Binding="{Binding Text, Source={RelativeSource Self}}" Value="">
+                                <DataTrigger
+                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    TargetType="Button"
+                                    Value="">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
-                                <DataTrigger TargetType="Button" Binding="{Binding Text, Source={RelativeSource Self}}" Value="{x:Null}">
+                                <DataTrigger
+                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    TargetType="Button"
+                                    Value="{x:Null}">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
                             </Button.Triggers>

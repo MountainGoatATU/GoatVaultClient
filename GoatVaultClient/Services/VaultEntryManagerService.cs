@@ -30,7 +30,12 @@ public class VaultEntryManagerService(
         var dialog = new VaultEntryDialog(formModel);
 
         await MopupService.Instance.PushAsync(dialog);
-        await dialog.WaitForScan();
+        var result = await dialog.WaitForScan();
+
+        if (result == null)
+        {
+            return false;
+        }
 
         // Simple validation
         if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
@@ -112,7 +117,13 @@ public class VaultEntryManagerService(
         var dialog = new VaultEntryDialog(formModel);
 
         await MopupService.Instance.PushAsync(dialog);
-        await dialog.WaitForScan();
+        var result = await dialog.WaitForScan();
+
+        if (result == null)
+        {
+            return false;
+        }
+        
 
         if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
         {

@@ -33,6 +33,15 @@ public partial class VaultEntryDialog : PopupPage
 
     private async void OnAccept()
     {
+        SiteField.DisplayValidation();
+        UsernameField.DisplayValidation();
+        PasswordField.DisplayValidation();
+
+        if (!SiteField.IsValid || !UsernameField.IsValid || !PasswordField.IsValid)
+        {
+            return;
+        }
+
         try
         {
             _tcs.TrySetResult(ViewModel);
