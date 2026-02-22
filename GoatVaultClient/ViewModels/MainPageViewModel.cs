@@ -31,7 +31,9 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     [ObservableProperty] private ObservableCollection<CategoryItem> categories = [];
     [ObservableProperty] private ObservableCollection<VaultEntry> passwords = [];
     [ObservableProperty] private CategoryItem? selectedCategory;
-    [ObservableProperty] private VaultEntry? selectedEntry;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDetailsPanelVisible))]
+    private VaultEntry? selectedEntry;
     [ObservableProperty] private string? searchText;
     [ObservableProperty] private bool _isPasswordVisible;
     [ObservableProperty] private double vaultScore;
@@ -46,6 +48,8 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private List<CategoryItem> _allVaultCategories = [];
     private bool CanSync() => !IsBusy;
     private bool _isUpdatingCollections;
+    
+    public bool IsDetailsPanelVisible => SelectedEntry != null;
 
     #endregion
 

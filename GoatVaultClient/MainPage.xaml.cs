@@ -1,6 +1,8 @@
+using GoatVaultClient.Pages;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models;
 using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient;
@@ -112,6 +114,30 @@ public partial class MainPage : ContentPage
         // This prevents unnecessary background operations
         // Note: For global sync, move this to App.xaml.cs lifecycle
         _syncingService.StopPeriodicSync();
+    }
+
+    private async void OnEntrySelected(object sender, SelectionChangedEventArgs e)
+    {
+        // Ensure we have a valid selected item (adjust VaultEntryModel to your actual model name)
+        if (e.CurrentSelection.FirstOrDefault() is not VaultEntry selectedEntry)
+            return;
+
+        // Check the current window width to determine if the Mobile layout is active
+        if (this.Width < 768)
+        {
+            // MOBILE BEHAVIOR: Route to a separate details page
+            var navigationParameters = new Dictionary<string, object>
+        {
+            { "Entry", selectedEntry }
+        };
+
+            // Ensure EntryDetailsPage is registered in AppShell.xaml routes
+            await Shell.Current.GoToAsync(nameof(EntryDetailPage), navigationParameters);
+
+            // Clear the CollectionView selection so it can be tapped again upon returning
+            ((CollectionView)sender).SelectedItem = null;
+        }
+        // DESKTOP BEHAVIOR: Do nothing programmatically; the XAML binding handles it.
     }
 
     private void OnCategoriesCollectionMenuOpening(object sender, EventArgs e)
