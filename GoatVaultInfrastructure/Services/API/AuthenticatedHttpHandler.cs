@@ -33,7 +33,14 @@ public class AuthenticatedHttpHandler(
         if (!string.IsNullOrWhiteSpace(token))
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        return await base.SendAsync(request, cancellationToken);
+        try
+        {
+            return await base.SendAsync(request, cancellationToken);
+        }
+        catch (HttpRequestException ex) when (ex.InnerException is System.Net.Sockets.SocketException)
+        {
+            throw new HttpRequestException("Server unreachable – use offline mode", ex);
+        }
     }
 
     private async Task RefreshTokenAsync()

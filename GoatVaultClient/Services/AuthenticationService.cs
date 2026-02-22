@@ -2,9 +2,11 @@ using GoatVaultApplication.Auth;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
+using GoatVaultInfrastructure.Services.Api;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
 using Email = GoatVaultCore.Models.Objects.Email;
+using Microsoft.Extensions.Configuration;
 
 // TODO: REFACTOR only hold use cases
 namespace GoatVaultClient.Services;
@@ -25,6 +27,8 @@ public class AuthenticationService(
     LogoutUseCase logout,
     IUserRepository users,
     ConnectivityService connectivity,
+    IHttpService httpService,
+    IConfiguration configuration,
     ILogger<AuthenticationService>? logger = null
     ) : IAuthenticationService
 {
@@ -48,6 +52,15 @@ public class AuthenticationService(
                 await Shell.Current.DisplayAlertAsync(
                     "Connection Error",
                     "Unable to verify internet connection.",
+                    "OK");
+                return false;
+            }
+
+            if (!await IsServerRunningAsync())
+            {
+                await Shell.Current.DisplayAlertAsync(
+                    "Server Unavailable",
+                    "Unable to connect to the authentication server. Please ensure the server is running and try again.",
                     "OK");
                 return false;
             }
@@ -269,5 +282,22 @@ public class AuthenticationService(
             return;
 
         await users.DeleteAsync(account);
+    }
+    private string BaseUrl => configuration.GetSection("API_BASE_URL").Value
+                           ?? throw new InvalidOperationException("Server base URL missing");
+    private async Task<bool> IsServerRunningAsync()
+    {
+        if (httpService == null)
+            return false;
+
+        try
+        {
+            var result = await httpService.GetAsync<object>("{baseUrl}");
+            return result != null;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
