@@ -1,85 +1,101 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             xmlns:controls="clr-namespace:GoatVaultClient.Controls"
-             xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-             x:Class="GoatVaultClient.Controls.SyncStatusBar"
-             >
-    <HorizontalStackLayout HorizontalOptions="End" 
-                          Spacing="8" 
-                          Padding="12,8">
+<ContentView
+    x:Class="GoatVaultClient.Controls.SyncStatusBar"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material">
+    <HorizontalStackLayout
+        Padding="12,8"
+        HorizontalOptions="End"
+        Spacing="8">
 
-        <!-- Sync Status Indicator -->
-        <Border x:Name="SyncStatusIndicator"
-                StrokeShape="RoundRectangle 12"
-                BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer}, Dark={StaticResource DarkSecondaryContainer}}"
-                Padding="8,4"
-                IsVisible="{Binding ShowSyncStatus}">
+        <!--  Sync Status Indicator  -->
+        <Border
+            x:Name="SyncStatusIndicator"
+            Padding="8,4"
+            BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                              Dark={StaticResource DarkSecondaryContainer}}"
+            IsVisible="{Binding ShowSyncStatus}"
+            StrokeShape="RoundRectangle 12">
             <HorizontalStackLayout Spacing="4">
-                <!-- Animated sync icon when syncing -->
-                <Label x:Name="SyncingIcon"
-                       FontFamily="MaterialRounded"
-                       Text="{x:Static m:MaterialRounded.Sync}"
-                       FontSize="16"
-                       VerticalOptions="Center"
-                       IsVisible="{Binding IsSyncing}"
-                       TextColor="{AppThemeBinding Light={StaticResource LightPrimary}, Dark={StaticResource DarkPrimary}}"/>
+                <!--  Animated sync icon when syncing  -->
+                <Label
+                    x:Name="SyncingIcon"
+                    FontFamily="MaterialRounded"
+                    FontSize="16"
+                    IsVisible="{Binding IsSyncing}"
+                    Text="{x:Static m:MaterialRounded.Sync}"
+                    TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                                Dark={StaticResource DarkPrimary}}"
+                    VerticalOptions="Center" />
 
-                <!-- Success icon when synced -->
-                <Label FontFamily="MaterialRounded"
-                       Text="{x:Static m:MaterialRounded.Check_circle}"
-                       FontSize="16"
-                       VerticalOptions="Center"
-                       IsVisible="{Binding IsSynced}"
-                       TextColor="{AppThemeBinding Light={StaticResource LightTertiary}, Dark={StaticResource DarkTertiary}}"/>
+                <!--  Success icon when synced  -->
+                <Label
+                    FontFamily="MaterialRounded"
+                    FontSize="16"
+                    IsVisible="{Binding IsSynced}"
+                    Text="{x:Static m:MaterialRounded.Check_circle}"
+                    TextColor="{AppThemeBinding Light={StaticResource LightTertiary},
+                                                Dark={StaticResource DarkTertiary}}"
+                    VerticalOptions="Center" />
 
-                <!-- Error icon when sync failed -->
-                <Label FontFamily="MaterialRounded"
-                       Text="{x:Static m:MaterialRounded.Error}"
-                       FontSize="16"
-                       VerticalOptions="Center"
-                       IsVisible="{Binding SyncFailed}"
-                       TextColor="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}"/>
+                <!--  Error icon when sync failed  -->
+                <Label
+                    FontFamily="MaterialRounded"
+                    FontSize="16"
+                    IsVisible="{Binding SyncFailed}"
+                    Text="{x:Static m:MaterialRounded.Error}"
+                    TextColor="{AppThemeBinding Light={StaticResource LightError},
+                                                Dark={StaticResource DarkError}}"
+                    VerticalOptions="Center" />
 
-                <!-- Status text -->
-                <Label Text="{Binding SyncStatusText}"
-                       Style="{StaticResource MaterialLabelSmall}"
-                       VerticalOptions="Center"
-                       FontAttributes="Bold"/>
+                <!--  Status text  -->
+                <Label
+                    FontAttributes="Bold"
+                    Style="{StaticResource MaterialLabelSmall}"
+                    Text="{Binding SyncStatusText}"
+                    VerticalOptions="Center" />
             </HorizontalStackLayout>
         </Border>
 
-        <!-- Last Updated Label -->
-        <Label x:Name="LastUpdatedLabel"
-               VerticalOptions="Center"
-               Style="{StaticResource MaterialLabelSmall}"
-               IsVisible="{Binding ShowLastUpdated}">
+        <!--  Last Updated Label  -->
+        <Label
+            x:Name="LastUpdatedLabel"
+            IsVisible="{Binding ShowLastUpdated}"
+            Style="{StaticResource MaterialLabelSmall}"
+            VerticalOptions="Center">
             <Label.FormattedText>
                 <FormattedString>
                     <Span Text="Last synced: " />
-                    <Span Text="{Binding LastSyncedFormatted}" 
-                          FontAttributes="Bold"/>
+                    <Span FontAttributes="Bold" Text="{Binding LastSyncedFormatted}" />
                 </FormattedString>
             </Label.FormattedText>
         </Label>
 
-        <!-- Sync Button - appears based on SyncingService state -->
-        <controls:ImageButton x:Name="SyncButton"
-                             IconGlyph="{x:Static m:MaterialRounded.Refresh}"
-                             Command="{Binding SyncCommand}"
-                             Color="{AppThemeBinding Light={StaticResource LightSecondary}, Dark={StaticResource DarkSecondary}}"
-                             VerticalOptions="Center"
-                             IsVisible="{Binding ShowSyncButton}"
-                             IsEnabled="{Binding IsSyncButtonEnabled}"/>
+        <!--  Sync Button - appears based on SyncingService state  -->
+        <controls:ImageButton
+            x:Name="SyncButton"
+            Command="{Binding SyncCommand}"
+            IconBgColorHover="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                               Dark={StaticResource DarkOnSecondaryContainer}}"
+            IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                        Dark={StaticResource DarkOnSecondaryContainer}}"
+            IconGlyph="{x:Static m:MaterialRounded.Refresh}"
+            IsEnabled="{Binding IsSyncButtonEnabled}"
+            IsVisible="{Binding ShowSyncButton}"
+            VerticalOptions="Center" />
 
-        <!-- Auto-sync indicator -->
-        <Label FontFamily="MaterialRounded"
-               Text="{x:Static m:MaterialRounded.Sync_disabled}"
-               FontSize="20"
-               VerticalOptions="Center"
-               IsVisible="{Binding IsAutoSyncDisabled}"
-               TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant}, Dark={StaticResource DarkOnSurfaceVariant}}"
-               ToolTipProperties.Text="Auto-sync is disabled"/>
+        <!--  Auto-sync indicator  -->
+        <Label
+            FontFamily="MaterialRounded"
+            FontSize="20"
+            IsVisible="{Binding IsAutoSyncDisabled}"
+            Text="{x:Static m:MaterialRounded.Sync_disabled}"
+            TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                        Dark={StaticResource DarkOnSurfaceVariant}}"
+            ToolTipProperties.Text="Auto-sync is disabled"
+            VerticalOptions="Center" />
     </HorizontalStackLayout>
 </ContentView>

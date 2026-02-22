@@ -1,35 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="GoatVaultClient.Controls.ImageButton"
-             x:Name="this">
-    <material:ButtonView WidthRequest="{StaticResource iconDesktopZone}" HeightRequest="{StaticResource iconDesktopZone}" PressedCommand="{Binding Command, Source={x:Reference this}}" BackgroundColor="Transparent">
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroupList>
-                <VisualStateGroup x:Name="CommonStates">
-                    <VisualState x:Name="Normal">
-                        <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="Transparent" />
-                        </VisualState.Setters>
-                    </VisualState>
-                    <VisualState x:Name="PointerOver">
-                        <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={x:StaticResource LightSecondary}, Dark={x:StaticResource DarkSecondary}}"/>
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateGroupList>
-        </VisualStateManager.VisualStateGroups>
+<ContentView
+    x:Class="GoatVaultClient.Controls.ImageButton"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    x:Name="this">
+    <material:ButtonView
+        HeightRequest="{OnIdiom Phone={StaticResource iconMobileZone},
+                                Desktop={StaticResource iconDesktopZone}}"
+        PressedCommand="{Binding Command, Source={x:Reference this}}"
+        WidthRequest="{OnIdiom Phone={StaticResource iconMobileZone},
+                               Desktop={StaticResource iconDesktopZone}}">
         <material:ButtonView.StrokeShape>
             <Ellipse />
         </material:ButtonView.StrokeShape>
-        <Image VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="{x:StaticResource iconDesktop}" WidthRequest="{x:StaticResource iconDesktop}">
+        <Image
+            HeightRequest="{OnIdiom Phone={StaticResource iconMobile},
+                                    Desktop={StaticResource iconDesktop}}"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            WidthRequest="{OnIdiom Phone={StaticResource iconMobile},
+                                   Desktop={StaticResource iconDesktop}}">
             <Image.Source>
-                <FontImageSource FontFamily="MaterialRounded"
-                                 Glyph="{Binding IconGlyph, Source={x:Reference this}}"
-                                 Color="{AppThemeBinding Light={x:StaticResource Gray900}, Dark={x:StaticResource Gray100}}"
-                                 Size="{x:StaticResource iconDesktopResolution}"/>
+                <FontImageSource
+                    FontFamily="MaterialRounded"
+                    Glyph="{Binding IconGlyph, Source={x:Reference this}}"
+                    Size="{OnIdiom Phone={StaticResource iconMobileResolution},
+                                   Desktop={StaticResource iconDesktopResolution}}"
+                    Color="{Binding IconColor, Source={x:Reference this}}" />
             </Image.Source>
         </Image>
     </material:ButtonView>
