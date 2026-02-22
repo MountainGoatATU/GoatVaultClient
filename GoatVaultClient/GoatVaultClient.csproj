@@ -183,6 +183,9 @@
 	  <MauiXaml Update="Controls\SyncStatusBar.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Pages\EntryDetailPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\GratitudePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
