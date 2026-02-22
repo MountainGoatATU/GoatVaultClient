@@ -1,47 +1,54 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="GoatVaultClient_v3.Resources.Styles.Dimens">
-    
-    <!--Corner Radius-->
-    <x:Double x:Key="xSmall">4</x:Double> <!-- TextFields, Item List-->
-    <x:Double x:Key="Small">8</x:Double> <!-- Assist Chip, Menu Item-->
-    <x:Double x:Key="Medium">12</x:Double> <!-- Card -->
-    <x:Double x:Key="Large">16</x:Double> <!-- FAB , Filled Button-->
-    <x:Double x:Key="LargeIncreased">20</x:Double> <!-- Large FAB, Selected Item in List -->
-    <x:Double x:Key="xLarge">28</x:Double> <!-- Extended FAB -->
-    <x:Double x:Key="xLargeIncreased">32</x:Double> <!-- Dialog -->
-    <x:Double x:Key="xxLarge">48</x:Double> <!-- Card Header -->
-    <!--Padding-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!--  Corner Radius  -->
+    <x:Double x:Key="xSmall">4</x:Double>
+    <!--  TextFields, Item List  -->
+    <x:Double x:Key="Small">8</x:Double>
+    <!--  Assist Chip, Menu Item  -->
+    <x:Double x:Key="Medium">12</x:Double>
+    <!--  Card  -->
+    <x:Double x:Key="Large">16</x:Double>
+    <!--  FAB , Filled Button  -->
+    <x:Double x:Key="LargeIncreased">20</x:Double>
+    <!--  Large FAB, Selected Item in List  -->
+    <x:Double x:Key="xLarge">28</x:Double>
+    <!--  Extended FAB  -->
+    <x:Double x:Key="xLargeIncreased">32</x:Double>
+    <!--  Dialog  -->
+    <x:Double x:Key="xxLarge">48</x:Double>
+    <!--  Card Header  -->
+    <!--  Padding  -->
     <Thickness x:Key="pContent">4</Thickness>
     <Thickness x:Key="pSmall">8</Thickness>
     <Thickness x:Key="pMedium">16</Thickness>
     <Thickness x:Key="pLarge">24</Thickness>
     <Thickness x:Key="formPadding">30</Thickness>
-    <!--Margins-->
+    <!--  Margins  -->
     <Thickness x:Key="mCompact">16</Thickness>
     <Thickness x:Key="mLarge">24</Thickness>
     <Thickness x:Key="layoutMargin">24,0,24,16</Thickness>
     <Thickness x:Key="componentMarginLarge">0,0,24,0</Thickness>
     <Thickness x:Key="componentMarginCompact">0,0,16,0</Thickness>
-    <!--Content Spacing-->
+    <Thickness x:Key="headerMargin">0,16,0,16</Thickness>
+    <!--  Content Spacing  -->
     <x:Double x:Key="sContent">4</x:Double>
     <x:Double x:Key="sLarge">24</x:Double>
     <x:Double x:Key="formSpacing">20</x:Double>
-    <!--Icons-->
-    <x:Double x:Key="iconDesktop">20</x:Double>
+    <!--  Icons  -->
+    <x:Double x:Key="iconDesktop">15</x:Double>
     <x:Double x:Key="iconDesktopResolution">48</x:Double>
-    <x:Double x:Key="iconDesktopZone">48</x:Double>
+    <x:Double x:Key="iconDesktopZone">40</x:Double>
     <x:Double x:Key="iconMobile">24</x:Double>
     <x:Double x:Key="iconMobileResolution">48</x:Double>
     <x:Double x:Key="iconMobileZone">48</x:Double>
-    <!--Text Field-->
+    <!--  Text Field  -->
     <x:Double x:Key="textFieldHeight">50</x:Double>
     <x:Double x:Key="textFieldWidth">400</x:Double>
-    <!--Buttons-->
+    <!--  Buttons  -->
     <x:Double x:Key="buttonHeight">50</x:Double>
     <x:Double x:Key="buttonWidth">250</x:Double>
-    <!--Text Size-->
+    <!--  Text Size  -->
     <x:Double x:Key="tMedium">16</x:Double>
     <x:Double x:Key="tLarge">36</x:Double>
 </ResourceDictionary>
