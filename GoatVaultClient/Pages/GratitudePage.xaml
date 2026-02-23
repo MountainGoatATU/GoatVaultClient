@@ -9,9 +9,10 @@
     <Grid Padding="30">
         <VerticalStackLayout Spacing="30" VerticalOptions="Center" HorizontalOptions="Center">
 
-            <Label Text="Thank you!" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
-            <Label Text="Your account has been successfully created." FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-
+            <Label Text="Check your email!" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
+            <Label Text="We have sent a verification email to your inbox. Please verify your email and then log in."
+                   FontSize="16" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+            
             <material:ButtonView WidthRequest="200" HeightRequest="50" BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight}, Dark={StaticResource ButtonBackgroundDark}}">
                 <material:ButtonView.StrokeShape>
                     <RoundRectangle CornerRadius="25"/>

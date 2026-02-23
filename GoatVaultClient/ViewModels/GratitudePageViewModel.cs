@@ -10,8 +10,8 @@ public partial class GratitudePageViewModel : BaseViewModel
     {
         await SafeExecuteAsync(async () =>
         {
-            // Go to Main Page (AppShell Root)
-            await Shell.Current.GoToAsync("//main/home");
+            // Go to Login Page
+            await Shell.Current.GoToAsync("//login");
         });
     }
 }
