@@ -4,7 +4,7 @@
              xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
              xmlns:controls="clr-namespace:GoatVaultClient.Controls"
              x:Class="GoatVaultClient.Controls.Popups.ErrorPopup"
-             BackgroundColor="#80000000"
+             BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
              CloseWhenBackgroundIsClicked="True">
 
     <controls:PopupTemplate Title="Error"

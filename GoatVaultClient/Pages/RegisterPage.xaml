@@ -133,7 +133,7 @@
                     Padding="{StaticResource pMedium}"
                     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceVariant},
                                                       Dark={StaticResource DarkSurfaceVariant}}"
-                    StrokeShape="RoundRectangle {StaticResource Medium}"
+                    StrokeShape="{RoundRectangle CornerRadius={StaticResource Medium}}"
                     StrokeThickness="0">
 
                     <Border.Triggers>
