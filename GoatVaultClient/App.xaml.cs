@@ -26,7 +26,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var vm = this.Handler.MauiContext.Services.GetRequiredService<AppShellViewModel>();
+        var vm = Handler!.MauiContext!.Services.GetRequiredService<AppShellViewModel>();
 
         var window = new Window(new AppShell(vm));
         window.Stopped += Window_Stopped;
@@ -34,7 +34,7 @@ public partial class App : Application
         return window;
     }
 
-    public static Page? CurrentMainPage => Current?.Windows.FirstOrDefault()?.Page;
+    public static Page? CurrentMainPage => Current is { Windows.Count: > 0 } ? Current.Windows[0]?.Page : null;
 
     private void Window_Stopped(object? sender, EventArgs e)
     {

@@ -22,7 +22,6 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly ChangePasswordUseCase _changePassword;
     private readonly EnableMfaUseCase _enableMfa;
     private readonly DisableMfaUseCase _disableMfa;
-    private readonly GoatTipsService _goatTips;
     private readonly ISessionContext _session;
 
     [ObservableProperty] private string email = string.Empty;
@@ -38,8 +37,6 @@ public partial class SecurityPageViewModel : BaseViewModel
     [ObservableProperty] private double mfaPercent;
     [ObservableProperty] private string? vaultTierText;
 
-    [ObservableProperty] private bool goatEnabled;
-
     public SecurityPageViewModel(
         LoadUserProfileUseCase loadUserProfile,
         CalculateVaultScoreUseCase calculateVaultScore,
@@ -47,7 +44,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         ChangePasswordUseCase changePassword,
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
-        GoatTipsService goatTips,
         ISessionContext session)
     {
         _loadUserProfile = loadUserProfile;
@@ -56,10 +52,8 @@ public partial class SecurityPageViewModel : BaseViewModel
         _changePassword = changePassword;
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
-        _goatTips = goatTips;
         _session = session;
 
-        GoatEnabled = _goatTips.IsGoatEnabled;
 
         _session.VaultChanged += OnVaultChanged;
 
@@ -155,13 +149,6 @@ public partial class SecurityPageViewModel : BaseViewModel
     };
 
     public string MfaCategory => MfaEnabled ? "Very Strong" : "Poor";
-
-    [RelayCommand]
-    private void ToggleGoat()
-    {
-        GoatEnabled = !GoatEnabled;
-        _goatTips.SetEnabled(GoatEnabled);
-    }
 
     [RelayCommand]
     private async Task EditEmailAsync()
@@ -324,7 +311,27 @@ public partial class SecurityPageViewModel : BaseViewModel
 
 public static class Paints
 {
-    public static readonly SolidColorPaint Color = new SolidColorPaint(new SKColor(255, 200, 0));
+    private static SolidColorPaint? _colorPaint;
+
+    public static SolidColorPaint Color
+    {
+        get
+        {
+            // Get theme-aware color based on current app theme
+            var isDarkMode = Application.Current?.UserAppTheme == AppTheme.Dark;
+            var skColor = isDarkMode
+                ? new SKColor(215, 199, 112) // DarkPrimary #D7C770
+                : new SKColor(107, 95, 16);   // LightPrimary #6B5F10
+
+            // Create new paint if null or if theme changed
+            if (_colorPaint == null || _colorPaint.Color != skColor)
+            {
+                _colorPaint = new SolidColorPaint(skColor);
+            }
+
+            return _colorPaint;
+        }
+    }
 }
 
 #endregion

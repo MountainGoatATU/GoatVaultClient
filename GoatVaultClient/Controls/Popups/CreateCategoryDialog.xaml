@@ -8,7 +8,7 @@
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
-    BackgroundColor="#80000000"
+    BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
     CloseWhenBackgroundIsClicked="True">
 
 
