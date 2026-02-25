@@ -9,7 +9,7 @@
     xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
     xmlns:uranium="clr-namespace:UraniumUI.Controls;assembly=UraniumUI"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
-    BackgroundColor="#80000000"
+    BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
     CloseWhenBackgroundIsClicked="False">
 
     <controls:PopupTemplate
@@ -92,10 +92,10 @@
                         TextColor="{AppThemeBinding Light={StaticResource LightError},
                                                     Dark={StaticResource DarkError}}" />
                     <ProgressBar
-                        BackgroundColor="LightGray"
                         HeightRequest="10"
                         Progress="{Binding ViewModel.CrackProgress}"
-                        ProgressColor="Green" />
+                        ProgressColor="{AppThemeBinding Light=#4CAF50, Dark=#66BB6A}" 
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Padding="0,10,0,0" Spacing="12">
@@ -107,14 +107,14 @@
                             <Label
                                 FontSize="12"
                                 Text="{Binding ViewModel.PasswordLength}"
-                                TextColor="Gray" />
+                                TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                         </VerticalStackLayout>
                         <Slider
                             Grid.Column="1"
                             Maximum="128"
                             Minimum="5"
                             WidthRequest="140"
-                            Value="{Binding ViewModel.PasswordLength}" />
+                             Value="{Binding ViewModel.PasswordLength}" />
                     </Grid>
 
                     <!--  Include Lowercase Characters  -->

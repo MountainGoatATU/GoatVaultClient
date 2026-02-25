@@ -6,7 +6,7 @@
                   xmlns:controls="clr-namespace:GoatVaultClient.Controls"
                   xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
                   x:Class="GoatVaultClient.Controls.Popups.PromptPopup"
-                  BackgroundColor="#80000000"
+                  BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
                   CloseWhenBackgroundIsClicked="False">
 
     <controls:PopupTemplate Title="{Binding Title}"

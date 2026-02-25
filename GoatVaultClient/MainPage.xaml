@@ -276,7 +276,8 @@
                 Spacing="0">
                 <Border
                     Padding="12"
-                    BackgroundColor="White"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHighest},
+                                  Dark={StaticResource DarkSurfaceContainerHighest}}"
                     HorizontalOptions="End"
                     StrokeShape="RoundRectangle 12">
                     <Label
@@ -284,11 +285,13 @@
                         LineBreakMode="WordWrap"
                         MaxLines="3"
                         Text="{Binding GoatComment}"
-                        TextColor="Black" />
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnSurface},
+                            Dark={StaticResource DarkOnSurface}}" />
                 </Border>
                 <BoxView
                     Margin="0,-8,16,0"
-                    BackgroundColor="White"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHighest},
+                                  Dark={StaticResource DarkSurfaceContainerHighest}}"
                     HeightRequest="12"
                     HorizontalOptions="End"
                     Rotation="45"

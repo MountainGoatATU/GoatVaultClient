@@ -54,7 +54,7 @@ public class RegisterUseCase(
         await serverAuth.RegisterAsync(registerPayload);
 
         // 6. Automatically log in to establish session and get auth token
-        await loginOnline.ExecuteAsync(email, password);
+        //await loginOnline.ExecuteAsync(email, password);
     }
 
     // NEW: Business logic for password validation moved here

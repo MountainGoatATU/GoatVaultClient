@@ -4,11 +4,109 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="GoatVaultClient.Pages.SettingsPage"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-    x:DataType="vm:SettingsPageViewModel">
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    x:DataType="vm:SettingsPageViewModel"
+    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},Dark={StaticResource DarkSurface}}">
 
-    <ContentPage.Content>
-        
-    </ContentPage.Content>
+	<ScrollView>
+		<VerticalStackLayout Padding="{StaticResource pLarge}" Spacing="{StaticResource sLarge}">
+			<!--  Interface Section  -->
+			<controls:ComponentHeader Title="Interface" />
+			<controls:Component>
+				<VerticalStackLayout Padding="20" Spacing="20">
+
+                    <!--  Enable/Disable Goat  -->
+					<Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
+						<Label
+                            FontAttributes="Bold"
+                            Text="Goat"
+                            VerticalOptions="Center" />
+
+						<!--  Status text  -->
+						<Label
+                            Grid.Column="1"
+                            FontSize="14"
+                            Text="Disabled"
+                            VerticalOptions="Center">
+							<Label.Triggers>
+								<DataTrigger
+                                    Binding="{Binding GoatEnabled}"
+                                    TargetType="Label"
+                                    Value="True">
+									<Setter Property="Text" Value="Enabled" />
+								</DataTrigger>
+							</Label.Triggers>
+						</Label>
+
+						<!--  Button text  -->
+						<Button
+                            Grid.Column="2"
+                            BackgroundColor="{Binding GoatEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
+                            Command="{Binding ToggleGoatCommand}"
+                            HeightRequest="40"
+                            Text="Enable"
+                            TextColor="White"
+                            WidthRequest="100">
+							<Button.Triggers>
+								<DataTrigger
+                                    Binding="{Binding GoatEnabled}"
+                                    TargetType="Button"
+                                    Value="True">
+									<Setter Property="Text" Value="Disable" />
+								</DataTrigger>
+							</Button.Triggers>
+						</Button>
+					</Grid>
+
+                    <!--  Toggle Theme  -->
+                    <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            Text="Dark Mode"
+                            VerticalOptions="Center" />
+
+                        <!--  Status text  -->
+                        <Label
+                            Grid.Column="1"
+                            FontSize="14"
+                            Text="Disabled"
+                            VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger
+                                    Binding="{Binding DarkModeEnabled}"
+                                    TargetType="Label"
+                                    Value="True">
+                                    <Setter Property="Text" Value="Enabled" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
+                        <!--  Button text  -->
+                        <Button
+                            Grid.Column="2"
+                            BackgroundColor="{Binding DarkModeEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
+                            Command="{Binding ToggleDarkModeCommand}"
+                            HeightRequest="40"
+                            Text="Enable"
+                            TextColor="White"
+                            WidthRequest="100">
+                            <Button.Triggers>
+                                <DataTrigger
+                                    Binding="{Binding DarkModeEnabled}"
+                                    TargetType="Button"
+                                    Value="True">
+                                    <Setter Property="Text" Value="Disable" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+
+				</VerticalStackLayout>
+			</controls:Component>
+		</VerticalStackLayout>
+	</ScrollView>
 </ContentPage>

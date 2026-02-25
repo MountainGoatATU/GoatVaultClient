@@ -10,8 +10,7 @@
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     x:DataType="vm:SecurityPageViewModel"
-    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
-                                      Dark={StaticResource DarkSurface}}">
+    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},Dark={StaticResource DarkSurface}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource pLarge}" Spacing="{StaticResource sLarge}">
@@ -55,7 +54,7 @@
                             FontSize="13"
                             HorizontalOptions="Center"
                             Text="{Binding MasterPasswordCategory}"
-                            TextColor="Gray" />
+                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
@@ -89,7 +88,7 @@
                             FontSize="13"
                             HorizontalOptions="Center"
                             Text="{Binding AveragePasswordsCategory}"
-                            TextColor="Gray" />
+                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
@@ -123,7 +122,7 @@
                             FontSize="13"
                             HorizontalOptions="Center"
                             Text="{Binding OriginalityCategory}"
-                            TextColor="Gray" />
+                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
@@ -157,7 +156,7 @@
                             FontSize="13"
                             HorizontalOptions="Center"
                             Text="{Binding BreachesCategory}"
-                            TextColor="Gray" />
+                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
@@ -191,7 +190,7 @@
                             FontSize="13"
                             HorizontalOptions="Center"
                             Text="{Binding MfaCategory}"
-                            TextColor="Gray" />
+                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                     </VerticalStackLayout>
                 </Grid>
             </VerticalStackLayout>
@@ -234,50 +233,6 @@
                             Command="{Binding EditMasterPasswordCommand}"
                             IconGlyph="{x:Static m:MaterialRounded.Edit}" />
                     </Grid>
-
-                    <!--  Enable Goat  -->
-                    <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
-                        <Label
-                            FontAttributes="Bold"
-                            Text="Enable Goat"
-                            VerticalOptions="Center" />
-
-                        <!--  Status text  -->
-                        <Label
-                            Grid.Column="1"
-                            FontSize="14"
-                            Text="Disabled"
-                            VerticalOptions="Center">
-                            <Label.Triggers>
-                                <DataTrigger
-                                    Binding="{Binding GoatEnabled}"
-                                    TargetType="Label"
-                                    Value="True">
-                                    <Setter Property="Text" Value="Enabled" />
-                                </DataTrigger>
-                            </Label.Triggers>
-                        </Label>
-
-                        <!--  Button text  -->
-                        <Button
-                            Grid.Column="2"
-                            BackgroundColor="{Binding GoatEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
-                            Command="{Binding ToggleGoatCommand}"
-                            HeightRequest="40"
-                            Text="Enable"
-                            TextColor="White"
-                            WidthRequest="100">
-                            <Button.Triggers>
-                                <DataTrigger
-                                    Binding="{Binding GoatEnabled}"
-                                    TargetType="Button"
-                                    Value="True">
-                                    <Setter Property="Text" Value="Disable" />
-                                </DataTrigger>
-                            </Button.Triggers>
-                        </Button>
-                    </Grid>
-
                 </VerticalStackLayout>
             </controls:Component>
 
