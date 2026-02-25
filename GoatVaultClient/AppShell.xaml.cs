@@ -13,6 +13,7 @@ public partial class AppShell : Shell
         // Register routes for pages that use relative navigation (not declared in Shell XAML)
         Routing.RegisterRoute(nameof(SplitSecretPage), typeof(SplitSecretPage));
         Routing.RegisterRoute(nameof(RecoverSecretPage), typeof(RecoverSecretPage));
+        Routing.RegisterRoute(nameof(EntryDetailPage), typeof(Pages.EntryDetailPage));
     }
 
     public void EnableFlyout() => FlyoutBehavior = FlyoutBehavior.Flyout;

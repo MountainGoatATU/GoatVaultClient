@@ -19,8 +19,8 @@
         OnboardingPage → LoginPage ↔ RegisterPage
         
         2. POST-AUTH FLOW (FlyoutBehavior=Flyout):
-           Hamburger menu with: Vault | Security
-           FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
+        Hamburger menu with: Vault | Security
+        FlyoutBehavior toggled in AppShell.xaml.cs after login/logout
         
         Navigation stack is cleared on:
         - Login/Register → Main  (//main/home)  + enable flyout
@@ -32,14 +32,18 @@
     <!--  FLYOUT HEADER  -->
     <!--  ============================================================  -->
     <Shell.FlyoutHeader>
-        <Grid HeightRequest="60"
-              BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary}, Dark={StaticResource DarkPrimary}}"
-              Padding="20">
-            <VerticalStackLayout VerticalOptions="Center" Spacing="8">
-                <Label Text="GoatVault"
-                       TextColor="{AppThemeBinding Light={StaticResource LightOnPrimary}, Dark={StaticResource DarkOnPrimary}}"
-                       FontSize="20"
-                       FontAttributes="Bold"/>
+        <Grid
+            Padding="20"
+            BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                              Dark={StaticResource DarkPrimary}}"
+            HeightRequest="60">
+            <VerticalStackLayout Spacing="8" VerticalOptions="Center">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="20"
+                    Text="GoatVault"
+                    TextColor="{AppThemeBinding Light={StaticResource LightOnPrimary},
+                                                Dark={StaticResource DarkOnPrimary}}" />
             </VerticalStackLayout>
         </Grid>
     </Shell.FlyoutHeader>
@@ -74,23 +78,32 @@
     <!--  ============================================================  -->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems" Route="main">
 
-        <ShellContent Route="home"
-                      Title="Vault"
-                      Shell.NavBarIsVisible="False"
-                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Lock}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
-                      ContentTemplate="{DataTemplate local:MainPage}" />
+        <ShellContent
+            Title="Vault"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Icon="{FontImageSource FontFamily=MaterialSharp,
+                                   Glyph={x:Static m:MaterialRounded.Lock},
+                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
+                                                          Dark={StaticResource DarkOnSurface}}}"
+            Route="home" />
 
-        <ShellContent Route="security"
-                      Title="Security"
-                      Shell.NavBarIsVisible="False"
-                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Security}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
-                      ContentTemplate="{DataTemplate pages:SecurityPage}" />
+        <ShellContent
+            Title="Security"
+            ContentTemplate="{DataTemplate pages:SecurityPage}"
+            Icon="{FontImageSource FontFamily=MaterialSharp,
+                                   Glyph={x:Static m:MaterialRounded.Security},
+                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
+                                                          Dark={StaticResource DarkOnSurface}}}"
+            Route="security" />
 
-        <ShellContent Route="settings"
-                      Title="Settings"
-                      Shell.NavBarIsVisible="False"
-                      Icon="{FontImageSource FontFamily=MaterialSharp, Glyph={x:Static m:MaterialRounded.Settings}, Color={AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}}"
-                      ContentTemplate="{DataTemplate pages:SettingsPage}" />
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate pages:SettingsPage}"
+            Icon="{FontImageSource FontFamily=MaterialSharp,
+                                   Glyph={x:Static m:MaterialRounded.Settings},
+                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
+                                                          Dark={StaticResource DarkOnSurface}}}"
+            Route="settings" />
 
     </FlyoutItem>
 
@@ -99,20 +112,20 @@
     <!--  ============================================================  -->
     <Shell.FlyoutFooter>
         <Grid Padding="20" HeightRequest="60">
-            
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            
+
             <Label
                 FontSize="12"
                 Text="© 2026 GoatVault"
                 TextColor="{AppThemeBinding Light={StaticResource Gray500},
                                             Dark={StaticResource Gray400}}"
                 VerticalOptions="Center" />
-            
-            <!-- Logout button with icon and text -->
+
+            <!--  Logout button with icon and text  -->
             <HorizontalStackLayout
                 Grid.Column="1"
                 Spacing="5"
@@ -120,14 +133,16 @@
 
                 <Label
                     FontFamily="MaterialSharp"
-                    Text="Logout"
                     FontSize="20"
-                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}" />
+                    Text="Logout"
+                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurface},
+                                                Dark={StaticResource DarkOnSurface}}" />
 
                 <Label
-                    Text="Logout"
                     FontSize="14"
-                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"
+                    Text="Logout"
+                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurface},
+                                                Dark={StaticResource DarkOnSurface}}"
                     VerticalOptions="Center" />
 
                 <HorizontalStackLayout.GestureRecognizers>

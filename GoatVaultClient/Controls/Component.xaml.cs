@@ -5,11 +5,6 @@ public partial class Component : ContentView
     public Component()
     {
         InitializeComponent();
-
-        if (Application.Current != null && Application.Current.Resources.TryGetValue("componentMarginLarge", out var defaultMargin))
-        {
-            BorderMargin = (Thickness)defaultMargin;
-        }
     }
 
     public static readonly BindableProperty BorderMarginProperty = BindableProperty.Create(

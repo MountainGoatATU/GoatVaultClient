@@ -1,11 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
-<ResourceDictionary 
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui" 
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="GoatVaultClient_v3.Resources.Styles.MaterialColors"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
-    <!-- Primary -->
+    <!--  Primary  -->
     <Color x:Key="Primary0">#000000</Color>
     <Color x:Key="Primary5">#131106</Color>
     <Color x:Key="Primary10">#1E1C0F</Color>
@@ -24,7 +23,7 @@
     <Color x:Key="Primary98">#FFF9EB</Color>
     <Color x:Key="Primary99">#FFFBFF</Color>
     <Color x:Key="Primary100">#FFFFFF</Color>
-    <!-- Secondary -->
+    <!--  Secondary  -->
     <Color x:Key="Secondary0">#000000</Color>
     <Color x:Key="Secondary5">#12110D</Color>
     <Color x:Key="Secondary10">#1D1B18</Color>
@@ -43,7 +42,7 @@
     <Color x:Key="Secondary98">#FEF9F2</Color>
     <Color x:Key="Secondary99">#FFFBFF</Color>
     <Color x:Key="Secondary100">#FFFFFF</Color>
-    <!-- Tertiary -->
+    <!--  Tertiary  -->
     <Color x:Key="Tertiary0">#000000</Color>
     <Color x:Key="Tertiary5">#0E120F</Color>
     <Color x:Key="Tertiary10">#191C1A</Color>
@@ -62,7 +61,7 @@
     <Color x:Key="Tertiary98">#F8FAF5</Color>
     <Color x:Key="Tertiary99">#FAFDF8</Color>
     <Color x:Key="Tertiary100">#FFFFFF</Color>
-    <!-- Neutral -->
+    <!--  Neutral  -->
     <Color x:Key="Neutral0">#000000</Color>
     <Color x:Key="Neutral5">#111110</Color>
     <Color x:Key="Neutral10">#1C1B1A</Color>
@@ -81,7 +80,7 @@
     <Color x:Key="Neutral98">#FDF8F6</Color>
     <Color x:Key="Neutral99">#FFFBFF</Color>
     <Color x:Key="Neutral100">#FFFFFF</Color>
-    <!-- Neutral-variant -->
+    <!--  Neutral-variant  -->
     <Color x:Key="NeutralVariant0">#000000</Color>
     <Color x:Key="NeutralVariant5">#12110F</Color>
     <Color x:Key="NeutralVariant10">#1C1B1A</Color>
@@ -100,7 +99,7 @@
     <Color x:Key="NeutralVariant98">#FDF8F5</Color>
     <Color x:Key="NeutralVariant99">#FFFBFF</Color>
     <Color x:Key="NeutralVariant100">#FFFFFF</Color>
-    <!-- Light -->
+    <!--  Light  -->
     <Color x:Key="LightPrimary">#6B5F10</Color>
     <Color x:Key="LightSurfaceTint">#6B5F10</Color>
     <Color x:Key="LightOnPrimary">#FFFFFF</Color>
@@ -150,7 +149,7 @@
     <Color x:Key="LightSurfaceContainer">#F3EDE0</Color>
     <Color x:Key="LightSurfaceContainerHigh">#EEE8DA</Color>
     <Color x:Key="LightSurfaceContainerHighest">#E8E2D4</Color>
-    <!-- Light-Medium-Contrast -->
+    <!--  Light-Medium-Contrast  -->
     <Color x:Key="LightMediumContrastPrimary">#3E3600</Color>
     <Color x:Key="LightMediumContrastSurfaceTint">#6B5F10</Color>
     <Color x:Key="LightMediumContrastOnPrimary">#FFFFFF</Color>
@@ -200,7 +199,7 @@
     <Color x:Key="LightMediumContrastSurfaceContainer">#EEE8DA</Color>
     <Color x:Key="LightMediumContrastSurfaceContainerHigh">#E2DCCF</Color>
     <Color x:Key="LightMediumContrastSurfaceContainerHighest">#D7D1C4</Color>
-    <!-- Light-High-Contrast -->
+    <!--  Light-High-Contrast  -->
     <Color x:Key="LightHighContrastPrimary">#332C00</Color>
     <Color x:Key="LightHighContrastSurfaceTint">#6B5F10</Color>
     <Color x:Key="LightHighContrastOnPrimary">#FFFFFF</Color>
@@ -250,7 +249,7 @@
     <Color x:Key="LightHighContrastSurfaceContainer">#E8E2D4</Color>
     <Color x:Key="LightHighContrastSurfaceContainerHigh">#DAD4C7</Color>
     <Color x:Key="LightHighContrastSurfaceContainerHighest">#CBC6B9</Color>
-    <!-- Dark -->
+    <!--  Dark  -->
     <Color x:Key="DarkPrimary">#D7C770</Color>
     <Color x:Key="DarkSurfaceTint">#D7C770</Color>
     <Color x:Key="DarkOnPrimary">#383000</Color>
@@ -300,7 +299,7 @@
     <Color x:Key="DarkSurfaceContainer">#222017</Color>
     <Color x:Key="DarkSurfaceContainerHigh">#2C2A21</Color>
     <Color x:Key="DarkSurfaceContainerHighest">#37352B</Color>
-    <!-- Dark-Medium-Contrast -->
+    <!--  Dark-Medium-Contrast  -->
     <Color x:Key="DarkMediumContrastPrimary">#EEDD83</Color>
     <Color x:Key="DarkMediumContrastSurfaceTint">#D7C770</Color>
     <Color x:Key="DarkMediumContrastOnPrimary">#2C2600</Color>
@@ -350,7 +349,7 @@
     <Color x:Key="DarkMediumContrastSurfaceContainer">#2A281F</Color>
     <Color x:Key="DarkMediumContrastSurfaceContainerHigh">#353329</Color>
     <Color x:Key="DarkMediumContrastSurfaceContainerHighest">#403E34</Color>
-    <!-- Dark-High-Contrast -->
+    <!--  Dark-High-Contrast  -->
     <Color x:Key="DarkHighContrastPrimary">#FFF1AC</Color>
     <Color x:Key="DarkHighContrastSurfaceTint">#D7C770</Color>
     <Color x:Key="DarkHighContrastOnPrimary">#000000</Color>
@@ -400,4 +399,87 @@
     <Color x:Key="DarkHighContrastSurfaceContainer">#333027</Color>
     <Color x:Key="DarkHighContrastSurfaceContainerHigh">#3E3B32</Color>
     <Color x:Key="DarkHighContrastSurfaceContainerHighest">#49473D</Color>
+
+
+    <!--  UraniumUI overrides  -->
+    <Color x:Key="Primary">#6B5F10</Color>
+    <Color x:Key="PrimaryDark">#D7C770</Color>
+    <Color x:Key="PrimaryContainer">#F5E389</Color>
+    <Color x:Key="PrimaryContainerDark">#514700</Color>
+
+    <Color x:Key="Secondary">#655F41</Color>
+    <Color x:Key="SecondaryDark">#D0C7A2</Color>
+    <Color x:Key="SecondaryContainer">#ECE3BC</Color>
+    <Color x:Key="SecondaryContainerDark">#4C472B</Color>
+
+    <Color x:Key="Tertiary">#426650</Color>
+    <Color x:Key="TertiaryDark">#A8D0B5</Color>
+    <Color x:Key="TertiaryContainer">#C3ECD1</Color>
+    <Color x:Key="TertiaryContainerDark">#2A4E3A</Color>
+
+    <Color x:Key="Surface">#FFF9EB</Color>
+    <Color x:Key="SurfaceDark">#15130C</Color>
+
+    <Color x:Key="SurfaceVariant">#E9E2D0</Color>
+    <Color x:Key="SurfaceVariantDark">#4A4739</Color>
+
+    <Color x:Key="Background">#FFF9EB</Color>
+    <Color x:Key="BackgroundDark">#15130C</Color>
+
+    <Color x:Key="Error">#BA1A1A</Color>
+    <Color x:Key="ErrorDark">#FFB4AB</Color>
+    <Color x:Key="ErrorContainer">#FFDAD6</Color>
+    <Color x:Key="ErrorContainerDark">#93000A</Color>
+
+    <Color x:Key="OnPrimary">#FFFFFF</Color>
+    <Color x:Key="OnPrimaryDark">#383000</Color>
+    <Color x:Key="OnPrimaryContainer">#514700</Color>
+    <Color x:Key="OnPrimaryContainerDark">#F5E389</Color>
+
+    <Color x:Key="OnSecondary">#FFFFFF</Color>
+    <Color x:Key="OnSecondaryDark">#353116</Color>
+    <Color x:Key="OnSecondaryContainer">#4C472B</Color>
+    <Color x:Key="OnSecondaryContainerDark">#ECE3BC</Color>
+
+    <Color x:Key="OnTertiary">#FFFFFF</Color>
+    <Color x:Key="OnTertiaryDark">#123724</Color>
+    <Color x:Key="OnTertiaryContainer">#2A4E3A</Color>
+    <Color x:Key="OnTertiaryContainerDark">#C3ECD1</Color>
+
+    <Color x:Key="OnSurface">#1D1C13</Color>
+    <Color x:Key="OnSurfaceDark">#E8E2D4</Color>
+
+    <Color x:Key="OnSurfaceVariant">#4A4739</Color>
+    <Color x:Key="OnSurfaceVariantDark">#CCC6B5</Color>
+
+    <Color x:Key="OnError">#FFFFFF</Color>
+    <Color x:Key="OnErrorDark">#690005</Color>
+    <Color x:Key="OnErrorContainer">#93000A</Color>
+    <Color x:Key="OnErrorContainerDark">#FFDAD6</Color>
+
+    <Color x:Key="OnBackground">#1D1C13</Color>
+    <Color x:Key="OnBackgroundDark">#E8E2D4</Color>
+
+    <Color x:Key="Outline">#7B7768</Color>
+    <Color x:Key="OutlineDark">#959180</Color>
+
+    <Color x:Key="OutlineVariant">#CCC6B5</Color>
+    <Color x:Key="OutlineVariantDark">#4A4739</Color>
+
+    <Color x:Key="Shadow">#000000</Color>
+    <Color x:Key="ShadowDark">#000000</Color>
+
+    <Color x:Key="SurfaceTint">#6B5F10</Color>
+    <Color x:Key="SurfaceTintDark">#D7C770</Color>
+
+    <Color x:Key="InverseSurface">#333027</Color>
+    <Color x:Key="InverseSurfaceDark">#E8E2D4</Color>
+    <Color x:Key="InverseOnSurface">#F6F0E2</Color>
+    <Color x:Key="InverseOnSurfaceDark">#333027</Color>
+
+    <Color x:Key="InversePrimary">#D7C770</Color>
+    <Color x:Key="InversePrimaryDark">#6B5F10</Color>
+
+    <Color x:Key="Scrim">#000000</Color>
+    <Color x:Key="ScrimDark">#000000</Color>
 </ResourceDictionary>

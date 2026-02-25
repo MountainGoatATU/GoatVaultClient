@@ -1,12 +1,43 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="GoatVaultClient.Controls.CategoryItemCell"
-             x:Name="This">
-    <Border StrokeShape="RoundRectangle 12"
-            StrokeThickness="0"
-            
-            BackgroundColor="Transparent">
+<ContentView
+    x:Class="GoatVaultClient.Controls.CategoryItemCell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Name="This">
+    <Border
+        BackgroundColor="Transparent"
+        StrokeShape="RoundRectangle 12"
+        StrokeThickness="0">
+        <Grid
+            Padding="{x:StaticResource pContent}"
+            ColumnDefinitions="40, *, Auto"
+            VerticalOptions="Center">
+
+            <Image
+                Grid.Column="0"
+                HeightRequest="{x:StaticResource iconDesktop}"
+                HorizontalOptions="Start"
+                VerticalOptions="Center"
+                WidthRequest="{x:StaticResource iconDesktop}">
+                <Image.Source>
+                    <FontImageSource
+                        FontFamily="MaterialRounded"
+                        Glyph="{Binding IconGlyph, Source={x:Reference This}}"
+                        Size="{x:StaticResource iconDesktopResolution}"
+                        Color="{AppThemeBinding Light=Black,
+                                                Dark=White}" />
+                </Image.Source>
+            </Image>
+
+            <Label
+                Grid.Column="1"
+                LineBreakMode="TailTruncation"
+                Style="{x:StaticResource MaterialTitleMedium}"
+                Text="{Binding Text, Source={x:Reference This}}"
+                VerticalOptions="Center" />
+
+
+        </Grid>
 
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="CommonStates">
@@ -22,29 +53,5 @@
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
-
-        <Grid ColumnDefinitions="40, *, Auto" VerticalOptions="Center" Padding="{x:StaticResource pContent}">
-
-            <Image Grid.Column="0" 
-                   VerticalOptions="Center" 
-                   HorizontalOptions="Start"
-                   HeightRequest="{x:StaticResource iconDesktop}"
-                   WidthRequest="{x:StaticResource iconDesktop}">
-                <Image.Source>
-                    <FontImageSource FontFamily="MaterialRounded"
-                                     Glyph="{Binding IconGlyph, Source={x:Reference This}}"
-                                     Color="{AppThemeBinding Light=Black, Dark=White}"
-                                     Size="{x:StaticResource iconDesktopResolution}"/>
-                </Image.Source>
-            </Image>
-
-            <Label Grid.Column="1"
-                   Text="{Binding Text, Source={x:Reference This}}"
-                   VerticalOptions="Center"
-                   Style="{x:StaticResource MaterialTitleMedium}"
-                   LineBreakMode="TailTruncation"/>
-
-
-        </Grid>
     </Border>
 </ContentView>

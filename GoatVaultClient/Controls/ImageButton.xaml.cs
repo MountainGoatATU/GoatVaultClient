@@ -20,19 +20,30 @@ public partial class ImageButton : ContentView
         set => SetValue(IconGlyphProperty, value);
     }
 
-    public static readonly BindableProperty ColorProperty = BindableProperty.Create(
-        nameof(Color),
-        typeof(string),
+    public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
+        nameof(IconColor),
+        typeof(Color),
         typeof(ImageButton),
-        string.Empty);
-    public string Color
+        Colors.Transparent);
+    public Color IconColor
     {
-        get => (string)GetValue(ColorProperty);
-        set => SetValue(ColorProperty, value);
+        get => (Color)GetValue(IconColorProperty);
+        set => SetValue(IconColorProperty, value);
+    }
+
+    public static readonly BindableProperty IconBgColorHoverProperty = BindableProperty.Create(
+        nameof(IconBgColorHover),
+        typeof(Color),
+        typeof(ImageButton),
+        Colors.Transparent);
+    public Color IconBgColorHover
+    {
+        get => (Color)GetValue(IconBgColorHoverProperty);
+        set => SetValue(IconBgColorHoverProperty, value);
     }
 
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
-        nameof(Command), typeof(ICommand), typeof(ImageButton));
+        nameof(Command), typeof(ICommand), typeof(ImageButton), null);
 
     public ICommand Command
     {

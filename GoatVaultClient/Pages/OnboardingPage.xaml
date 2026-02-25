@@ -15,11 +15,7 @@
             Spacing="30"
             VerticalOptions="Center">
 
-            <material:ButtonView
-                BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight},
-                                                  Dark={StaticResource ButtonBackgroundDark}}"
-                HeightRequest="140"
-                WidthRequest="140">
+            <material:ButtonView HeightRequest="140" WidthRequest="140">
                 <material:ButtonView.StrokeShape>
                     <RoundRectangle CornerRadius="70" />
                 </material:ButtonView.StrokeShape>
@@ -37,11 +33,7 @@
                 Style="{x:StaticResource MaterialBodyMedium}"
                 Text="Securely store and manage all your passwords in one place." />
 
-            <material:ButtonView
-                BackgroundColor="{AppThemeBinding Light={StaticResource ButtonBackgroundLight},
-                                                  Dark={StaticResource ButtonBackgroundDark}}"
-                HeightRequest="55"
-                WidthRequest="220">
+            <material:ButtonView HeightRequest="55" WidthRequest="220">
                 <material:ButtonView.StrokeShape>
                     <RoundRectangle CornerRadius="27" />
                 </material:ButtonView.StrokeShape>
