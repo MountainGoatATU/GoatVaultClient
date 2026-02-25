@@ -3,6 +3,7 @@ using GoatVaultCore.Models;
 using GoatVaultCore.Models.Objects;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace GoatVaultInfrastructure.Services;
 
@@ -16,21 +17,24 @@ public class VaultCrypto : IVaultCrypto
         aesGcm.Decrypt(encryptedVault.Nonce, encryptedVault.EncryptedBlob, encryptedVault.AuthTag, plaintext);
 
         var json = Encoding.UTF8.GetString(plaintext);
-        return System.Text.Json.JsonSerializer.Deserialize<VaultDecrypted>(json)
+        CryptographicOperations.ZeroMemory(plaintext);
+        return JsonSerializer.Deserialize<VaultDecrypted>(json)
                ?? throw new InvalidOperationException("Vault decryption returned null");
     }
 
     public VaultEncrypted Encrypt(VaultDecrypted decryptedVault, MasterKey key, byte[] vaultSalt)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(decryptedVault);
+        var json = JsonSerializer.Serialize(decryptedVault);
         var plaintext = Encoding.UTF8.GetBytes(json);
 
-        var nonce = CryptoService.GenerateRandomBytes(12);
+        var nonce = CryptoService.GenerateNonce();
         var authTag = new byte[16];
         var encryptedBlob = new byte[plaintext.Length];
 
         using var aesGcm = new AesGcm(key.Key, 16);
         aesGcm.Encrypt(nonce, plaintext, encryptedBlob, authTag);
+
+        CryptographicOperations.ZeroMemory(plaintext);
 
         return new VaultEncrypted(encryptedBlob, nonce, authTag)
         {
