@@ -34,9 +34,9 @@ public class ChangePasswordUseCase(
         var decryptedVault = vaultCrypto.Decrypt(user.Vault, currentMasterKey);
 
         // 4. Generate new credentials
-        var newAuthSalt = CryptoService.GenerateRandomBytes(32);
+        var newAuthSalt = CryptoService.GenerateSalt();
         var newAuthVerifier = crypto.GenerateAuthVerifier(newPassword, newAuthSalt);
-        var newVaultSalt = CryptoService.GenerateRandomBytes(32);
+        var newVaultSalt = CryptoService.GenerateSalt();
 
         // 5. Re-encrypt vault with new credentials
         var newMasterKey = crypto.DeriveMasterKey(newPassword, newVaultSalt);

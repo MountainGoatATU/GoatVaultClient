@@ -27,9 +27,9 @@ public class RegisterUseCase(
         }
 
         // 2. Generate auth salt, auth verifier, & vault salt
-        var authSalt = CryptoService.GenerateRandomBytes(32);
+        var authSalt = CryptoService.GenerateSalt();
         var authVerifier = crypto.GenerateAuthVerifier(password, authSalt);
-        var vaultSalt = CryptoService.GenerateRandomBytes(32);
+        var vaultSalt = CryptoService.GenerateSalt();
 
         // 3. Create empty vault and encrypt
         var emptyVault = new VaultDecrypted
@@ -74,10 +74,9 @@ public class RegisterUseCase(
         try
         {
             var pwnCount = await pwned.CheckPasswordAsync(password);
-            if (pwnCount > 0)
-                return new ValidationResult(true, false, $"Warning: Password found in {pwnCount} data breaches. It is unsafe.");
-
-            return new ValidationResult(false, true, "Password is secure and hasn't been breached.");
+            return pwnCount > 0
+                ? new ValidationResult(true, false, $"Warning: Password found in {pwnCount} data breaches. It is unsafe.") 
+                : new ValidationResult(false, true, "Password is secure and hasn't been breached.");
         }
         catch
         {
@@ -90,10 +89,10 @@ public class RegisterUseCase(
     {
         if (string.IsNullOrWhiteSpace(email))
             return new ValidationResult(false, false, string.Empty);
-        // Basic format check
-        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-            return new ValidationResult(true, false, "Please enter a valid email address.");
 
-        return new ValidationResult(false, true, "Email format looks good.");
+        // Basic format check
+        return !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+            ? new ValidationResult(true, false, "Please enter a valid email address.")
+            : new ValidationResult(false, true, "Email format looks good.");
     }
 }
