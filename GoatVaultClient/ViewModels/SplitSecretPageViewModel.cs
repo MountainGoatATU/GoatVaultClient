@@ -125,7 +125,7 @@ public partial class SplitSecretViewModel : BaseViewModel
         {
             var popup = new PromptPopup(
                "Warning",
-               "Did you copy the shares and pasphrase properly? Without them, you are not going to be able to recover your master password",
+               "Did you copy the shares and passphrase properly? Without them, you are not going to be able to recover your master password",
                "Yes",
                "No"
            );
@@ -135,7 +135,7 @@ public partial class SplitSecretViewModel : BaseViewModel
             {
                 safetyCheckPass++;
             }
-            MopupService.Instance.PopAllAsync();
+            await MopupService.Instance.PopAllAsync();
         }
         else if (safetyCheckPass == 1)
         {
@@ -154,7 +154,7 @@ public partial class SplitSecretViewModel : BaseViewModel
                 await MopupService.Instance.PopAllAsync();
                 await Shell.Current.GoToAsync("//gratitude");
             }
-            MopupService.Instance.PopAllAsync();
+            await MopupService.Instance.PopAllAsync();
         }
     }
 
