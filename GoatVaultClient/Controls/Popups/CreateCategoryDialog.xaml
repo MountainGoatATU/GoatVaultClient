@@ -10,14 +10,13 @@
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
     BackgroundColor="#80000000"
     CloseWhenBackgroundIsClicked="True">
-
-
     <controls:PopupTemplate
+        x:Name="PopupRoot"
         Title="{Binding Title}"
         AcceptCommand="{Binding AcceptCommand}"
         AcceptText="Save"
-        CancelCommand="{Binding CancelCommand}"
-        FrameWidth="500">
+        CancelCommand="{Binding CancelCommand}">
+
         <VerticalStackLayout>
             <material:TextField
                 x:Name="CategoryField"
@@ -27,5 +26,28 @@
                 <validation:MinLengthValidation MinLength="2" />
             </material:TextField>
         </VerticalStackLayout>
+
     </controls:PopupTemplate>
+
+    <VisualStateManager.VisualStateGroups>
+        <VisualStateGroup x:Name="WindowStates">
+            <VisualState x:Name="Mobile">
+                <VisualState.StateTriggers>
+                    <AdaptiveTrigger MinWindowWidth="0" />
+                </VisualState.StateTriggers>
+                <VisualState.Setters>
+                    <Setter TargetName="PopupRoot" Property="FrameWidth" Value="350" />
+                </VisualState.Setters>
+            </VisualState>
+
+            <VisualState x:Name="Desktop">
+                <VisualState.StateTriggers>
+                    <AdaptiveTrigger MinWindowWidth="900" />
+                </VisualState.StateTriggers>
+                <VisualState.Setters>
+                    <Setter TargetName="PopupRoot" Property="FrameWidth" Value="500" />
+                </VisualState.Setters>
+            </VisualState>
+        </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
 </mopups:PopupPage>
