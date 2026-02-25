@@ -9,10 +9,16 @@ namespace GoatVaultInfrastructure.Services;
 public sealed class CryptoService : ICryptoService
 {
     private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
+    private const int SaltLength = 32;
+    private const int NonceLength = 12;
 
     public byte[] GenerateAuthVerifier(string password, byte[] authSalt) => Argon2Hash(password, authSalt);
 
     public MasterKey DeriveMasterKey(string password, byte[] vaultSalt) => new(Argon2Hash(password, vaultSalt));
+
+    public static byte[] GenerateSalt() => GenerateRandomBytes(SaltLength);
+
+    public static byte[] GenerateNonce() => GenerateRandomBytes(NonceLength);
 
     private static byte[] Argon2Hash(string password, byte[] salt)
     {
@@ -20,11 +26,11 @@ public sealed class CryptoService : ICryptoService
 
         var config = new Argon2Config
         {
-            Type = Argon2Type.DataIndependentAddressing,
+            Type = Argon2Type.HybridAddressing,
             Version = Argon2Version.Nineteen,
-            TimeCost = 10,
-            MemoryCost = 32768,
-            Lanes = 5,
+            TimeCost = 3,
+            MemoryCost = 65536,
+            Lanes = 4,
             Threads = Environment.ProcessorCount,
             Password = passwordBytes,
             Salt = salt,
@@ -33,11 +39,12 @@ public sealed class CryptoService : ICryptoService
 
         using var argon2 = new Argon2(config);
         using var hash = argon2.Hash();
-
-        return hash.Buffer.ToArray();
+        var result = hash.Buffer.ToArray();
+        CryptographicOperations.ZeroMemory(passwordBytes);
+        return result;
     }
 
-    public static byte[] GenerateRandomBytes(int length)
+    private static byte[] GenerateRandomBytes(int length)
     {
         var bytes = new byte[length];
         Rng.GetBytes(bytes);
