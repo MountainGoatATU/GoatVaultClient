@@ -10,7 +10,7 @@ public partial class PendingPopupTemplate : ContentView
     public static readonly BindableProperty FrameWidthProperty = BindableProperty.Create(
         nameof(FrameWidth),
         typeof(double),
-        typeof(PopupTemplate),
+        typeof(PendingPopupTemplate),
         350d); // Set your default width here (350)
 
     public double FrameWidth
@@ -22,7 +22,7 @@ public partial class PendingPopupTemplate : ContentView
     public static readonly BindableProperty FrameHeightProperty = BindableProperty.Create(
         nameof(FrameHeight),
         typeof(double),
-        typeof(PopupTemplate),
+        typeof(PendingPopupTemplate),
         350d); // Set your default width here (350)
 
     public double FrameHeight
@@ -33,7 +33,7 @@ public partial class PendingPopupTemplate : ContentView
 
     // TITLE
     public static readonly BindableProperty TitleProperty = BindableProperty.Create(
-        nameof(Title), typeof(string), typeof(PopupTemplate), string.Empty);
+        nameof(Title), typeof(string), typeof(PendingPopupTemplate), string.Empty);
 
     public string Title
     {
