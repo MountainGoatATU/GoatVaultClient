@@ -3,7 +3,7 @@ using GoatVaultCore.Models;
 using GoatVaultCore.Services;
 using Moq;
 
-namespace GoatVaultTests;
+namespace GoatVaultTests.Core;
 
 public class VaultScoreCalculatorServiceTests
 {

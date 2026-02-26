@@ -1,6 +1,6 @@
 ﻿using GoatVaultInfrastructure.Services.Api;
 
-namespace GoatVaultTests;
+namespace GoatVaultTests.Infrastructure;
 
 public class AuthTokenServiceTests
 {
