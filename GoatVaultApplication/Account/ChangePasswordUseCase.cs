@@ -21,43 +21,48 @@ public class ChangePasswordUseCase(
         var user = await users.GetByIdAsync(session.UserId.Value)
                    ?? throw new InvalidOperationException("User not found.");
 
-        // 2. Verify current password
-        var currentAuthVerifier = crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt);
-        if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
+        var result = await Task.Run(() =>
         {
-            throw new UnauthorizedAccessException("Incorrect current password.");
-        }
+            // 2. Verify current password
+            var currentAuthVerifier = crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt);
+            if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
+            {
+                throw new UnauthorizedAccessException("Incorrect current password.");
+            }
 
-        // 3. Decrypt vault with current credentials
-        // Although we likely have it decrypted in session, decrypting from source ensures integrity before re-encryption
-        var currentMasterKey = crypto.DeriveMasterKey(currentPassword, user.VaultSalt);
-        var decryptedVault = vaultCrypto.Decrypt(user.Vault, currentMasterKey);
+            // 3. Decrypt vault with current credentials
+            var currentMasterKey = crypto.DeriveMasterKey(currentPassword, user.VaultSalt);
+            var decryptedVault = vaultCrypto.Decrypt(user.Vault, currentMasterKey);
 
-        // 4. Generate new credentials
-        var newAuthSalt = CryptoService.GenerateRandomBytes(32);
-        var newAuthVerifier = crypto.GenerateAuthVerifier(newPassword, newAuthSalt);
-        var newVaultSalt = CryptoService.GenerateRandomBytes(32);
+            // 4. Generate new credentials
+            var newAuthSalt = CryptoService.GenerateSalt();
+            var newAuthVerifier = crypto.GenerateAuthVerifier(newPassword, newAuthSalt);
+            var newVaultSalt = CryptoService.GenerateSalt();
 
-        // 5. Re-encrypt vault with new credentials
-        var newMasterKey = crypto.DeriveMasterKey(newPassword, newVaultSalt);
-        var newEncryptedVault = vaultCrypto.Encrypt(decryptedVault, newMasterKey, newVaultSalt);
+            // 5. Re-encrypt vault with new credentials
+            var newMasterKey = crypto.DeriveMasterKey(newPassword, newVaultSalt);
+            var newEncryptedVault = vaultCrypto.Encrypt(decryptedVault, newMasterKey, newVaultSalt);
+
+            return (decryptedVault, newAuthSalt, newAuthVerifier, newVaultSalt, newEncryptedVault, newMasterKey);
+        });
+
 
         // 6. Update server
         var updateRequest = new ChangeMasterPasswordRequest
         {
-            AuthSalt = Convert.ToBase64String(newAuthSalt),
-            AuthVerifier = Convert.ToBase64String(newAuthVerifier),
-            VaultSalt = Convert.ToBase64String(newVaultSalt),
-            Vault = newEncryptedVault
+            AuthSalt = Convert.ToBase64String(result.newAuthVerifier),
+            AuthVerifier = Convert.ToBase64String(result.newAuthVerifier),
+            VaultSalt = Convert.ToBase64String(result.newVaultSalt),
+            Vault = result.newEncryptedVault
         };
 
         var serverUser = await serverAuth.UpdateUserAsync(user.Id, updateRequest);
 
         // 7. Update local DB
-        user.AuthSalt = newAuthSalt;
-        user.AuthVerifier = newAuthVerifier;
-        user.VaultSalt = newVaultSalt;
-        user.Vault = newEncryptedVault;
+        user.AuthSalt = result.newAuthSalt;
+        user.AuthVerifier = result.newAuthVerifier;
+        user.VaultSalt = result.newVaultSalt;
+        user.Vault = result.newEncryptedVault;
         user.UpdatedAtUtc = serverUser.UpdatedAtUtc;
 
         await users.SaveAsync(user);
@@ -66,6 +71,6 @@ public class ChangePasswordUseCase(
         var strength = passwordStrength.Evaluate(newPassword).Score;
 
         // 9. Update session - needs new master key to continue working without re-login
-        session.Start(user.Id, newMasterKey, decryptedVault, strength);
+        session.Start(user.Id, result.newMasterKey, result.decryptedVault, strength);
     }
 }
