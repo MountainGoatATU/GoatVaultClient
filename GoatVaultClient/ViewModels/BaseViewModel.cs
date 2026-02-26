@@ -28,7 +28,8 @@ public partial class BaseViewModel : ObservableObject
 #if ANDROID
         catch (Java.Lang.Exception javaEx)
         {
-            await MopupService.Instance.PushAsync(new ErrorPopup("A platform error occurred", [javaEx.Message]));
+            if (javaEx.Message != null)
+                await MopupService.Instance.PushAsync(new ErrorPopup("A platform error occurred", [javaEx.Message]));
         }
 #endif
         catch (Exception ex)

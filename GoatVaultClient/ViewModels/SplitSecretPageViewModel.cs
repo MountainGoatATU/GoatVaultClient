@@ -49,9 +49,9 @@ public partial class SplitSecretViewModel(
 
     // ── Slider ranges ────────────────────────────────────────────
 
-    public static int MinShares => 2;
-    public static int MaxShares => 10;
-    public static int MinThreshold => 2;
+    public int MinShares => 2;
+    public int MaxShares => 10;
+    public int MinThreshold => 2;
     private int _safetyCheckPass = 0;
 
     public int MaxThreshold => TotalShares;
