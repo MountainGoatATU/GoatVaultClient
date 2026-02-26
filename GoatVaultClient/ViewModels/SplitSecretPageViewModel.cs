@@ -78,7 +78,7 @@ public partial class SplitSecretViewModel(
         ErrorMessage = string.Empty;
         GeneratedShares.Clear();
 
-        var response = splitKeyUseCase.Execute(Mp, Passphrase, TotalShares, Threshold);
+        var response = await splitKeyUseCase.Execute(Mp, Passphrase, TotalShares, Threshold);
         foreach (var share in response)
         {
             GeneratedShares.Add(share);
