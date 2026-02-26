@@ -28,7 +28,7 @@ public class LoginOnlineUseCase(
 
         // 2. Compute proof client-side
         var authSalt = Convert.FromBase64String(authInitResponse.AuthSalt);
-        var authVerifier = crypto.GenerateAuthVerifier(password, authSalt);
+        var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt));
 
         var nonce = Convert.FromBase64String(authInitResponse.Nonce);
         using var hmac = new HMACSHA256(authVerifier);
@@ -66,8 +66,8 @@ public class LoginOnlineUseCase(
         var vaultEncrypted = userResponse.Vault;
         var vaultSalt = Convert.FromBase64String(userResponse.VaultSalt);
 
-        var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
-        var decryptedVault = vaultCrypto.Decrypt(vaultEncrypted, masterKey);
+        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, vaultSalt));
+        var decryptedVault = await Task.Run(() => vaultCrypto.Decrypt(vaultEncrypted, masterKey));
 
         // 7. Save to local DB (for offline login & sync baseline)
         var existing = await users.GetByIdAsync(userId);

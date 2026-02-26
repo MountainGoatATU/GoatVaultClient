@@ -280,8 +280,10 @@ public class AuthenticationService(
 
         if (!confirm)
             return;
-
-        await users.DeleteAsync(account);
+        await Task.Run(() =>
+        {
+            _ = users.DeleteAsync(account);
+        });
     }
     private string BaseUrl => configuration.GetSection("API_BASE_URL").Value
                            ?? throw new InvalidOperationException("Server base URL missing");

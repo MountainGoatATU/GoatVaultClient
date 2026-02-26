@@ -22,7 +22,7 @@ public class ChangePasswordUseCase(
                    ?? throw new InvalidOperationException("User not found.");
 
         // 2. Verify current password
-        var currentAuthVerifier = crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt);
+        var currentAuthVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt));
         if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
         {
             throw new UnauthorizedAccessException("Incorrect current password.");
@@ -30,17 +30,17 @@ public class ChangePasswordUseCase(
 
         // 3. Decrypt vault with current credentials
         // Although we likely have it decrypted in session, decrypting from source ensures integrity before re-encryption
-        var currentMasterKey = crypto.DeriveMasterKey(currentPassword, user.VaultSalt);
-        var decryptedVault = vaultCrypto.Decrypt(user.Vault, currentMasterKey);
+        var currentMasterKey = await Task.Run(() => crypto.DeriveMasterKey(currentPassword, user.VaultSalt));
+        var decryptedVault = await Task.Run(() => vaultCrypto.Decrypt(user.Vault, currentMasterKey));
 
         // 4. Generate new credentials
         var newAuthSalt = CryptoService.GenerateRandomBytes(32);
-        var newAuthVerifier = crypto.GenerateAuthVerifier(newPassword, newAuthSalt);
+        var newAuthVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(newPassword, newAuthSalt));
         var newVaultSalt = CryptoService.GenerateRandomBytes(32);
 
         // 5. Re-encrypt vault with new credentials
-        var newMasterKey = crypto.DeriveMasterKey(newPassword, newVaultSalt);
-        var newEncryptedVault = vaultCrypto.Encrypt(decryptedVault, newMasterKey, newVaultSalt);
+        var newMasterKey = await Task.Run(() => crypto.DeriveMasterKey(newPassword, newVaultSalt));
+        var newEncryptedVault = await Task.Run(() => vaultCrypto.Encrypt(decryptedVault, newMasterKey, newVaultSalt));
 
         // 6. Update server
         var updateRequest = new ChangeMasterPasswordRequest

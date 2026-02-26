@@ -35,8 +35,11 @@ public class HttpService(
 
         if (response.IsSuccessStatusCode)
         {
-            return JsonSerializer.Deserialize<T>(content, JsonOptions)
+            await Task.Run(() =>
+            {
+                return JsonSerializer.Deserialize<T>(content, JsonOptions)
                    ?? throw new InvalidOperationException($"Failed to deserialize {typeof(T).Name}");
+            });
         }
 
         logger?.LogWarning("HTTP {Method} {Url} failed {StatusCode} in {Elapsed}ms",

@@ -28,7 +28,7 @@ public class RegisterUseCase(
 
         // 2. Generate auth salt, auth verifier, & vault salt
         var authSalt = CryptoService.GenerateRandomBytes(32);
-        var authVerifier = crypto.GenerateAuthVerifier(password, authSalt);
+        var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt));
         var vaultSalt = CryptoService.GenerateRandomBytes(32);
 
         // 3. Create empty vault and encrypt
@@ -37,8 +37,8 @@ public class RegisterUseCase(
             Categories = [],
             Entries = []
         };
-        var masterKey = crypto.DeriveMasterKey(password, vaultSalt);
-        var encryptedVault = vaultCrypto.Encrypt(emptyVault, masterKey, vaultSalt);
+        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, vaultSalt));
+        var encryptedVault = await Task.Run(() => vaultCrypto.Encrypt(emptyVault, masterKey, vaultSalt));
 
         // 4. Create registration payload
         var registerPayload = new AuthRegisterRequest()
