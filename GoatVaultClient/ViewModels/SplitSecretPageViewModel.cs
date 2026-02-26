@@ -105,13 +105,13 @@ public partial class SplitSecretViewModel(
                 catch (Exception e)
                 {
                     logger?.LogError(e, "Error during CopyShareAsync() of SplitSecretViewModel");
-                    throw; // TODO handle exception
+                    throw;
                 }
             }));
     }
 
     [RelayCommand]
-    public async Task RecoverSecret() => await Shell.Current.GoToAsync("//recoverKey");
+    public static async Task RecoverSecret() => await Shell.Current.GoToAsync("//recoverKey");
 
     [RelayCommand]
     public async Task Continue()
