@@ -1,53 +1,47 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Shamir;
-using GoatVaultClient.Controls;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Models.Shamir;
-using GoatVaultCore.Services.Shamir;
+using Microsoft.Extensions.Logging;
 using Mopups.Services;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
 [QueryProperty("Mp", "Mp")]
-public partial class SplitSecretViewModel : BaseViewModel
+public partial class SplitSecretViewModel(
+    // ── Constructor ──────────────────────────────────────────────
+    SplitKeyUseCase splitKeyUseCase,
+    EnableShamirUseCase enableShamirUseCase,
+    ILogger<SplitSecretViewModel>? logger
+    ) : BaseViewModel
 {
-    private readonly SplitKeyUseCase _splitKeyUseCase;
-    private readonly EnableShamirUseCase _enableShamirUseCase;
-
     // ── Input fields ─────────────────────────────────────────────
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SplitCommand))]
-    private string mp;
+    private string _mp = string.Empty;
 
     [ObservableProperty]
-    private string passphrase = string.Empty; // Added for SLIP-39
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SplitCommand))]
-    private int totalShares = 5;
+    private string _passphrase = string.Empty; // Added for SLIP-39
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SplitCommand))]
-    private int threshold = 3;
+    private int _totalShares = 5;
 
     [ObservableProperty]
-    private string errorMessage = string.Empty;
+    [NotifyCanExecuteChangedFor(nameof(SplitCommand))]
+    private int _threshold = 3;
 
     [ObservableProperty]
-    private bool hasError;
+    private string _errorMessage = string.Empty;
 
     [ObservableProperty]
-    private bool hasResults;
+    private bool _hasError;
 
-    // ── Constructor ──────────────────────────────────────────────
-    public SplitSecretViewModel(SplitKeyUseCase splitKeyUseCase, EnableShamirUseCase enableShamirUseCase)
-    {
-        _splitKeyUseCase = splitKeyUseCase;
-        _enableShamirUseCase = enableShamirUseCase;
-    }
+    [ObservableProperty]
+    private bool _hasResults;
 
     // ── Output ───────────────────────────────────────────────────
 
@@ -58,7 +52,7 @@ public partial class SplitSecretViewModel : BaseViewModel
     public int MinShares => 2;
     public int MaxShares => 10;
     public int MinThreshold => 2;
-    private int safetyCheckPass = 0;
+    private int _safetyCheckPass = 0;
 
     public int MaxThreshold => TotalShares;
 
@@ -84,7 +78,7 @@ public partial class SplitSecretViewModel : BaseViewModel
         ErrorMessage = string.Empty;
         GeneratedShares.Clear();
 
-        var response = _splitKeyUseCase.Execute(Mp, Passphrase, TotalShares, Threshold);
+        var response = splitKeyUseCase.Execute(Mp, Passphrase, TotalShares, Threshold);
         foreach (var share in response)
         {
             GeneratedShares.Add(share);
@@ -110,22 +104,23 @@ public partial class SplitSecretViewModel : BaseViewModel
                 }
                 catch (Exception e)
                 {
-                    throw; // TODO handle exception
+                    logger?.LogError(e, "Error during CopyShareAsync() of SplitSecretViewModel");
+                    throw;
                 }
             }));
     }
 
     [RelayCommand]
-    public async Task RecoverSecret() => await Shell.Current.GoToAsync("//recoverKey");
+    public static async Task RecoverSecret() => await Shell.Current.GoToAsync("//recoverKey");
 
     [RelayCommand]
     public async Task Continue()
     {
-        if (safetyCheckPass == 0)
+        if (_safetyCheckPass == 0)
         {
             var popup = new PromptPopup(
                "Warning",
-               "Did you copy the shares and pasphrase properly? Without them, you are not going to be able to recover your master password",
+               "Did you copy the shares and passphrase properly? Without them, you are not going to be able to recover your master password",
                "Yes",
                "No"
            );
@@ -133,11 +128,11 @@ public partial class SplitSecretViewModel : BaseViewModel
             var result = await popup.WaitForScan();
             if (result)
             {
-                safetyCheckPass++;
+                _safetyCheckPass++;
             }
-            MopupService.Instance.PopAllAsync();
+            await MopupService.Instance.PopAllAsync();
         }
-        else if (safetyCheckPass == 1)
+        else if (_safetyCheckPass == 1)
         {
             var popup = new PromptPopup(
                "LAST WARNING",
@@ -150,11 +145,11 @@ public partial class SplitSecretViewModel : BaseViewModel
             if (result)
             {
                 await MopupService.Instance.PushAsync(new PendingPopup("Enabling Recovery on your account..."));
-                await _enableShamirUseCase.ExecuteAsync(Mp);
+                await enableShamirUseCase.ExecuteAsync(Mp);
                 await MopupService.Instance.PopAllAsync();
                 await Shell.Current.GoToAsync("//gratitude");
             }
-            MopupService.Instance.PopAllAsync();
+            await MopupService.Instance.PopAllAsync();
         }
     }
 

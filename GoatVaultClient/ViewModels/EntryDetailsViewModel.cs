@@ -1,8 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using GoatVaultCore.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GoatVaultClient.ViewModels;
 
@@ -10,5 +7,5 @@ namespace GoatVaultClient.ViewModels;
 public partial class EntryDetailsViewModel : BaseViewModel
 {
     [ObservableProperty]
-    private VaultEntry entry;
+    private VaultEntry _entry = new();
 }

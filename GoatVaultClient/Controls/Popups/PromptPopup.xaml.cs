@@ -50,8 +50,9 @@ public partial class PromptPopup : PopupPage
                 await MopupService.Instance.PopAsync();
                 _tcs.TrySetResult(true);
             }
-            catch
+            catch (Exception e)
             {
+                _logger?.LogError(e, "Error during OnAccept() of PromptPopup");
                 _tcs.TrySetResult(false);
             }
         }
@@ -76,6 +77,7 @@ public partial class PromptPopup : PopupPage
             }
             catch (Exception e)
             {
+                _logger?.LogError(e, "Error during OnCancel() of PromptPopup");
                 _tcs.TrySetResult(false);
             }
         }

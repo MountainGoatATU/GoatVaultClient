@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GoatVaultCore.Models.Shamir;
+﻿namespace GoatVaultCore.Models.Shamir;
 
 public sealed record RecoveryShare
 {

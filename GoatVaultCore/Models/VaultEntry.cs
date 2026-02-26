@@ -5,18 +5,18 @@ namespace GoatVaultCore.Models;
 
 public partial class VaultEntry : ObservableObject
 {
-    [ObservableProperty] [property: Required] private string site;
-    [ObservableProperty] [property: Required] private string userName;
-    [ObservableProperty] [property: Required] private string password;
-    [ObservableProperty] [property: Required] private string description;
-    [ObservableProperty] [property: Required] private string category;
+    [ObservableProperty] [property: Required] private string _site = string.Empty;
+    [ObservableProperty] [property: Required] private string _userName = string.Empty;
+    [ObservableProperty] [property: Required] private string _password = string.Empty;
+    [ObservableProperty] [property: Required] private string _description = string.Empty;
+    [ObservableProperty] [property: Required] private string _category = string.Empty;
 
     // MFA
-    [ObservableProperty] [property: Required] private string mfaSecret;
-    [ObservableProperty] [property: Required] private bool hasMfa;
-    [ObservableProperty] [property: Required] private string? currentTotpCode;
-    [ObservableProperty] [property: Required] private int totpTimeRemaining;
+    [ObservableProperty] [property: Required] private string _mfaSecret = string.Empty;
+    [ObservableProperty] [property: Required] private bool _hasMfa;
+    [ObservableProperty] [property: Required] private string? _currentTotpCode;
+    [ObservableProperty] [property: Required] private int _totpTimeRemaining;
 
     // Vault score
-    [ObservableProperty] [property: Required] private int breachCount;
+    [ObservableProperty] [property: Required] private int _breachCount;
 }

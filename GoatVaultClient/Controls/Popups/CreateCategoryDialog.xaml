@@ -3,7 +3,7 @@
     x:Class="GoatVaultClient.Controls.Popups.CreateCategoryPopup"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls;assembly=GoatVaultClient"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
@@ -29,6 +29,7 @@
 
     </controls:PopupTemplate>
 
+    <!--
     <VisualStateManager.VisualStateGroups>
         <VisualStateGroup x:Name="WindowStates">
             <VisualState x:Name="Mobile">
@@ -50,4 +51,5 @@
             </VisualState>
         </VisualStateGroup>
     </VisualStateManager.VisualStateGroups>
+    -->
 </mopups:PopupPage>

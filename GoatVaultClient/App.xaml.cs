@@ -47,7 +47,6 @@ public partial class App : Application
                 return;
 
             _logger.LogDebug("No active vault session to save on stop");
-            return;
 
             // TODO: Fix
             // Use synchronous save - we're in a non-async event handler
