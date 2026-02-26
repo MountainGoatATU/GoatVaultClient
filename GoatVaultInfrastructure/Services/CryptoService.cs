@@ -1,6 +1,7 @@
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Objects;
 using Isopoh.Cryptography.Argon2;
+using Isopoh.Cryptography.SecureArray;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -24,18 +25,22 @@ public sealed class CryptoService : ICryptoService
     {
         var passwordBytes = Encoding.UTF8.GetBytes(password);
 
+        var lanes = Math.Min(4, Environment.ProcessorCount);
+
         var config = new Argon2Config
         {
             Type = Argon2Type.HybridAddressing,
             Version = Argon2Version.Nineteen,
             TimeCost = 3,
             MemoryCost = 65536,
-            Lanes = 4,
-            Threads = Environment.ProcessorCount,
+            Lanes = lanes,
+            Threads = lanes,
             Password = passwordBytes,
             Salt = salt,
-            HashLength = 32
+            HashLength = 32,
         };
+
+        SecureArray.ReportMaxLockableOnLockFail = true;
 
         using var argon2 = new Argon2(config);
         using var hash = argon2.Hash();
