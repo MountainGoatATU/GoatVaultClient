@@ -28,18 +28,18 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     #region Properties
 
     // Observables
-    [ObservableProperty] private ObservableCollection<CategoryItem> categories = [];
-    [ObservableProperty] private ObservableCollection<VaultEntry> passwords = [];
-    [ObservableProperty] private CategoryItem? selectedCategory;
+    [ObservableProperty] private ObservableCollection<CategoryItem> _categories = [];
+    [ObservableProperty] private ObservableCollection<VaultEntry> _passwords = [];
+    [ObservableProperty] private CategoryItem? _selectedCategory;
+    [ObservableProperty] private string? _searchText;
+    [ObservableProperty] private bool _isPasswordVisible;
+    [ObservableProperty] private double _vaultScore;
+    [ObservableProperty] private string _goatComment = string.Empty;
+    [ObservableProperty] private bool _isGoatCommentVisible;
+    [ObservableProperty] private bool _isSyncing;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDetailsPanelVisible))]
-    private VaultEntry? selectedEntry;
-    [ObservableProperty] private string? searchText;
-    [ObservableProperty] private bool _isPasswordVisible;
-    [ObservableProperty] private double vaultScore;
-    [ObservableProperty] private string goatComment = string.Empty;
-    [ObservableProperty] private bool isGoatCommentVisible;
-    [ObservableProperty] private bool _isSyncing;
+    private VaultEntry? _selectedEntry;
 
     // UI Properties for the Sync Status Component
     private bool _categoriesSortAsc = true;
@@ -48,7 +48,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private List<CategoryItem> _allVaultCategories = [];
     private bool CanSync() => !IsBusy;
     private bool _isUpdatingCollections;
-    
+
     public bool IsDetailsPanelVisible => SelectedEntry != null;
 
     #endregion

@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultCore.Models.Shamir;
+using GoatVaultCore.Models.Objects;
 using GoatVaultCore.Services.Shamir;
 using System.Collections.ObjectModel;
 
