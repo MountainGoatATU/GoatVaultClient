@@ -29,6 +29,7 @@
 
     </controls:PopupTemplate>
 
+    <!--
     <VisualStateManager.VisualStateGroups>
         <VisualStateGroup x:Name="WindowStates">
             <VisualState x:Name="Mobile">
@@ -50,4 +51,5 @@
             </VisualState>
         </VisualStateGroup>
     </VisualStateManager.VisualStateGroups>
+    -->
 </mopups:PopupPage>
