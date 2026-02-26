@@ -6,15 +6,21 @@ namespace GoatVaultCore.Services;
 public class PwnedPasswordService
 {
     private readonly HttpClient _httpClient;
+    private const string ApiUri = "https://api.pwnedpasswords.com/";
 
-    public PwnedPasswordService()
+    public PwnedPasswordService() : this(CreateDefaultClient())
     {
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri("https://api.pwnedpasswords.com/")
-        };
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", "GoatVault");
     }
+
+    public PwnedPasswordService(HttpClient httpClient)
+    {
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+
+        if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "GoatVault");
+    }
+
+    private static HttpClient CreateDefaultClient() => new() { BaseAddress = new Uri(ApiUri) };
 
     // Checks if the password was breached. Returns number of breaches, or null if error.
     public async Task<int?> CheckPasswordAsync(string password)
@@ -25,25 +31,21 @@ public class PwnedPasswordService
         try
         {
             // SHA1 hash of password, one way hashing to avoid sending actual password to API
-            using var sha1 = SHA1.Create();
-            var hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(password));
-            var hash = BitConverter.ToString(hashBytes).Replace("-", "").ToUpperInvariant();
+            var hashBytes = SHA1.HashData(Encoding.UTF8.GetBytes(password));
+            var hash = Convert.ToHexString(hashBytes).ToUpperInvariant();
 
             // Send only first 5 chars of hash
-            var prefix = hash.Substring(0, 5);
-            var suffix = hash.Substring(5);
+            var prefix = hash[..5];
+            var suffix = hash[5..];
 
             var response = await _httpClient.GetStringAsync($"range/{prefix}");
             var lines = response.Split('\n');
 
-            foreach (var line in lines)
-            {
-                var parts = line.Split(':');
-                if (parts.Length == 2 && parts[0] == suffix)
-                    return int.Parse(parts[1]);
-            }
-
-            return 0;
+            return (from line in lines
+                select line.Split(':')
+                into parts
+                where parts.Length == 2 && parts[0] == suffix
+                select int.Parse(parts[1])).FirstOrDefault();
         }
         catch
         {

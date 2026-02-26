@@ -1,10 +1,11 @@
-﻿using System.Security.Cryptography;
+﻿using GoatVaultCore.Abstractions;
+using System.Security.Cryptography;
 using System.Text;
 using Xecrets.Slip39;
 
-namespace GoatVaultCore.Services.Shamir;
+namespace GoatVaultCore.Services;
 
-public class ShamirSSService(IShamirsSecretSharing sss) : IShamirSSService
+public class ShamirSsService(IShamirsSecretSharing sss) : IShamirSsService
 {
     public List<string> SplitSecret(string secret, string passPhrase, int totalShares, int threshold)
     {

@@ -3,32 +3,10 @@ using System.Text.RegularExpressions;
 
 namespace GoatVaultCore.Services;
 
-public static class TotpService
+public static partial class TotpService
 {
-    public static string GenerateCode(string secret)
-    {
-        if (string.IsNullOrWhiteSpace(secret))
-            throw new ArgumentException("Secret cannot be null or empty", nameof(secret));
-
-        try
-        {
-            // Clean the secret (remove spaces, dashes, etc.)
-            var cleanSecret = CleanSecret(secret);
-
-            // Decode Base32 secret
-            var secretBytes = Base32Encoding.ToBytes(cleanSecret);
-
-            // Create TOTP instance
-            var totp = new Totp(secretBytes);
-
-            // Generate current code
-            return totp.ComputeTotp();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to generate TOTP code: {ex.Message}", ex);
-        }
-    }
+    [GeneratedRegex("[^A-Za-z2-7]")] private static partial Regex SecretRegex();
+    [GeneratedRegex("^[A-Z2-7]+$")] private static partial Regex CleanSecretRegex();
 
     public static (string Code, int SecondsRemaining) GenerateCodeWithTime(string secret)
     {
@@ -75,7 +53,7 @@ public static class TotpService
     private static string CleanSecret(string secret)
     {
         // Remove spaces, dashes, and other non-alphanumeric characters
-        var cleaned = Regex.Replace(secret, @"[^A-Za-z2-7]", "");
+        var cleaned = SecretRegex().Replace(secret, "");
 
         // Convert to uppercase (Base32 is case-insensitive but typically uppercase)
         return cleaned.ToUpperInvariant();
@@ -91,7 +69,7 @@ public static class TotpService
             var cleanSecret = CleanSecret(secret);
 
             // Base32 alphabet is A-Z and 2-7
-            if (!Regex.IsMatch(cleanSecret, "^[A-Z2-7]+$"))
+            if (!CleanSecretRegex().IsMatch(cleanSecret))
                 return false;
 
             // Try to decode

@@ -10,7 +10,6 @@ using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
-using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.Api;
@@ -157,7 +156,7 @@ public static class MauiProgram
         // Shamir Test
         builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
         builder.Services.AddSingleton<IRandom, StrongRandom>();
-        builder.Services.AddTransient<IShamirSSService,ShamirSSService>();
+        builder.Services.AddTransient<IShamirSsService,ShamirSsService>();
 
         // TODO: Fix Shamir services
         builder.Services.AddTransient<SplitSecretViewModel>();
