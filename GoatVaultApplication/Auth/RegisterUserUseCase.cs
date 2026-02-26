@@ -14,8 +14,7 @@ public class RegisterUseCase(
     ICryptoService crypto,
     IVaultCrypto vaultCrypto,
     IServerAuthService serverAuth,
-    PwnedPasswordService pwned,
-    LoginOnlineUseCase loginOnline)
+    PwnedPasswordService pwned)
 {
     public async Task ExecuteAsync(Email email, string password)
     {
@@ -52,9 +51,6 @@ public class RegisterUseCase(
 
         // 5. Call server
         await serverAuth.RegisterAsync(registerPayload);
-
-        // 6. Automatically log in to establish session and get auth token
-        //await loginOnline.ExecuteAsync(email, password);
     }
 
     // NEW: Business logic for password validation moved here
