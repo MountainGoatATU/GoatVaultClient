@@ -1,4 +1,4 @@
-﻿namespace GoatVaultCore.Models.Shamir;
+﻿namespace GoatVaultCore.Models.Objects;
 
 public sealed record RecoveryShare
 {
