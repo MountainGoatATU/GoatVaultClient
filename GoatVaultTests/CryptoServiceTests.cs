@@ -55,18 +55,38 @@ public class CryptoServiceTests
         Assert.NotEqual(verifier1, verifier2);
     }
 
-    /*
     [Fact]
-    public void GenerateAuthSalt_Returns16RandomBytes()
+    public void GenerateSalt_Returns32RandomBytes()
     {
         // Act
-        var salt = crypto.GenerateAuthSalt();
+        var salt = CryptoService.GenerateSalt();
 
         // Assert
         Assert.NotNull(salt);
-        Assert.Equal(16, salt.Length);
+        Assert.Equal(32, salt.Length);
     }
 
+    [Fact]
+    public void GenerateNonce_Returns12RandomBytes()
+    {
+        // Act
+        var nonce = CryptoService.GenerateNonce();
+
+        // Assert
+        Assert.NotNull(nonce);
+        Assert.Equal(12, nonce.Length);
+    }
+
+    [Fact]
+    public void GenerateSalt_ShouldNotReturnAllZeros()
+    {
+        // Act
+        var bytes = CryptoService.GenerateSalt();
+
+        // Assert
+        Assert.Contains(bytes, b => b != 0);
+    }
+    /*
 
     [Fact]
     public void GenerateAuthSalt_MultipleCalls_ReturnsDifferentSalts()
@@ -93,29 +113,4 @@ public class CryptoServiceTests
         Assert.ThrowsAny<Exception>(() => _crypto.GenerateAuthVerifier(password, invalidSalt));
     }
     */
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(16)]
-    [InlineData(32)]
-    [InlineData(64)]
-    public void GenerateRandomBytes_ReturnsCorrectLength(int length)
-    {
-        // Act
-        var bytes = CryptoService.GenerateRandomBytes(length);
-
-        // Assert
-        Assert.NotNull(bytes);
-        Assert.Equal(length, bytes.Length);
-    }
-
-    [Fact]
-    public void GenerateRandomBytes_ShouldNotReturnAllZeros()
-    {
-        // Act
-        var bytes = CryptoService.GenerateRandomBytes(32);
-
-        // Assert
-        Assert.Contains(bytes, b => b != 0);
-    }
 }
