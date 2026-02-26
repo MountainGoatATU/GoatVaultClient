@@ -19,7 +19,7 @@ public class EnableMfaUseCase(
                    ?? throw new InvalidOperationException("User not found.");
 
         // 1. Verify current password
-        var currentAuthVerifier = crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt);
+        var currentAuthVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt));
         if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
         {
             throw new UnauthorizedAccessException("Incorrect current password.");

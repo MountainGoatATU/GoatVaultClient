@@ -9,8 +9,8 @@ public class RecoverKeyUseCase
     {
         _shamirSSService = shamirSSService;
     }
-    public string Execute(List<string> mnemonicShares, string passphrase)
+    public async Task<string> Execute(List<string> mnemonicShares, string passphrase)
     {
-        return _shamirSSService.RecoverSecret(mnemonicShares, passphrase);
+        return await Task.Run(() => _shamirSSService.RecoverSecret(mnemonicShares, passphrase));
     }
 }

@@ -37,7 +37,7 @@ public class DisableShamirUseCase
             throw new InvalidOperationException("Shamir's Secret Sharing is not enabled for this user.");
 
         // 1. Verify current password
-        var currentAuthVerifier = _crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt);
+        var currentAuthVerifier = await Task.Run(() => _crypto.GenerateAuthVerifier(currentPassword, user.AuthSalt));
         if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
         {
             throw new UnauthorizedAccessException("Incorrect current password.");

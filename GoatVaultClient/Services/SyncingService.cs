@@ -188,7 +188,7 @@ public class SyncingService(
             {
                 // Should not happen if session is active
                 logger?.LogWarning("Local user not found, pulling from server.");
-                await HandleServerNewer(null, serverUser, userRepository);
+                await Task.Run(() => HandleServerNewer(null, serverUser, userRepository));
             }
             else
             {
@@ -208,12 +208,12 @@ public class SyncingService(
                 else if (timeDiff > 0)
                 {
                     logger?.LogInformation("Local data is newer ({Local} > {Server}), pushing to server", localUser.UpdatedAtUtc, serverUser.UpdatedAtUtc);
-                    await HandleLocalNewer(localUser, userRepository);
+                    await Task.Run(() => HandleLocalNewer(localUser, userRepository));
                 }
                 else
                 {
                     logger?.LogInformation("Server data is newer ({Server} > {Local}), pulling from server", serverUser.UpdatedAtUtc, localUser.UpdatedAtUtc);
-                    await HandleServerNewer(localUser, serverUser, userRepository);
+                    await Task.Run(() => HandleServerNewer(localUser, serverUser, userRepository));
                 }
             }
 
@@ -285,7 +285,7 @@ public class SyncingService(
 
         try
         {
-            await Sync();
+            await Task.Run(() => Sync());
         }
         catch (Exception ex)
         {

@@ -19,8 +19,8 @@ public sealed class LoginOfflineUseCase(
             throw new InvalidOperationException("Vault is missing.");
 
         // 2. Decrypt vault
-        var masterKey = crypto.DeriveMasterKey(password, user.VaultSalt);
-        var decryptedVault = vaultCrypto.Decrypt(user.Vault, masterKey);
+        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, user.VaultSalt));
+        var decryptedVault = await Task.Run(() => vaultCrypto.Decrypt(user.Vault, masterKey));
 
         // 3. Start session
         var strength = passwordStrength.Evaluate(password).Score;
