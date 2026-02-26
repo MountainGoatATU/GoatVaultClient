@@ -3,20 +3,22 @@
     x:Class="GoatVaultClient.Controls.ComponentHeader"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Name="this">
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
+    x:Name="This">
     <Grid ColumnDefinitions="Auto, *" VerticalOptions="Center">
         <Label
             FontSize="16"
-            Text="{Binding Title, Source={x:Reference this}}"
+            Text="{Binding Title}"
             TextColor="{AppThemeBinding Light={x:StaticResource LightOnSurface},
                                         Dark={x:StaticResource DarkOnSurface}}"
-            VerticalTextAlignment="Center" />
+            VerticalTextAlignment="Center" x:DataType="popups:PromptPopup" />
         <ContentView
             Grid.Column="1"
             Margin="{StaticResource headerMargin}"
-            Content="{Binding Actions, Source={x:Reference this}}"
+            Content="{Binding Actions}"
             HorizontalOptions="End"
-            VerticalOptions="Center" />
+            VerticalOptions="Center" x:DataType="controls:ComponentHeader" />
 
     </Grid>
 </ContentView>

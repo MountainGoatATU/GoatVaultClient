@@ -5,6 +5,7 @@
                   xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
                   xmlns:controls="clr-namespace:GoatVaultClient.Controls"
                   xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+                  xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
                   x:Class="GoatVaultClient.Controls.Popups.SingleInputPopup"
                   BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
                   CloseWhenBackgroundIsClicked="True">
@@ -14,7 +15,7 @@
                             FrameWidth="500"
                             AcceptCommand="{Binding AcceptCommand}"
                             CancelCommand="{Binding CancelCommand}"
-                            AcceptText="Save">
+                            AcceptText="Save" x:DataType="popups:SingleInputPopup">
         <VerticalStackLayout>
             <material:TextField x:Name="InputField" Title="{Binding InputFieldTitle}" Text="{Binding InputFieldText}">
             </material:TextField>

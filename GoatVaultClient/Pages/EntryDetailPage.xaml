@@ -7,7 +7,8 @@
     xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     Title="{Binding Site}"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
-                                      Dark={StaticResource DarkSurface}}">
+                                      Dark={StaticResource DarkSurface}}"
+    x:DataType="models:VaultEntry">
     <ScrollView>
         <Grid Padding="{StaticResource mCompact}">
             <controls:EntryDetailView BindingContext="{Binding .}" />

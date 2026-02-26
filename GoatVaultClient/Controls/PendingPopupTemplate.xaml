@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:GoatVaultClient.Controls"
              x:Class="GoatVaultClient.Controls.PendingPopupTemplate">
     <ContentView.ControlTemplate>
         <ControlTemplate>
             <Border BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"
                     StrokeThickness="0"
-                    WidthRequest="{TemplateBinding FrameWidth}"
+                    WidthRequest="{Binding FrameWidth }"
                     VerticalOptions="Center"
-                    MaximumHeightRequest="650">
+                    MaximumHeightRequest="650" x:DataType="controls:PopupTemplate">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="{x:StaticResource xLargeIncreased}"/>
                 </Border.StrokeShape>
                 <Grid RowDefinitions="Auto, *, Auto" RowSpacing="{x:StaticResource sContent}" Padding="{x:StaticResource sContent}">
                     <Label Grid.Row="0"
-                           Text="{TemplateBinding Title}" 
+                           Text="{Binding Title}" 
                            Style="{x:StaticResource MaterialHeadlineMedium}"
                            Padding="20"
                            HorizontalOptions="Center"/>

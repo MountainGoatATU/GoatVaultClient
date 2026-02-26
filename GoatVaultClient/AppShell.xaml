@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:GoatVaultClient"
     xmlns:m="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:pages="clr-namespace:GoatVaultClient.Pages"
+    xmlns:viewModels="clr-namespace:GoatVaultClient.ViewModels"
     Title="GoatVault"
     BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
                                       Dark={x:StaticResource DarkSurface}}"
@@ -146,7 +147,7 @@
                     VerticalOptions="Center" />
 
                 <HorizontalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                    <TapGestureRecognizer Command="{Binding LogoutCommand}" x:DataType="viewModels:AppShellViewModel" />
                 </HorizontalStackLayout.GestureRecognizers>
             </HorizontalStackLayout>
         </Grid>

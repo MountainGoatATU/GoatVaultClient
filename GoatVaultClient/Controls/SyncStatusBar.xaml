@@ -9,7 +9,7 @@
     <HorizontalStackLayout
         Padding="12,8"
         HorizontalOptions="End"
-        Spacing="8">
+        Spacing="8" x:DataType="controls:SyncStatusBar">
 
         <!--  Sync Status Indicator  -->
         <Border

@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels">
+    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+    xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore">
 
     <controls:Component BorderMargin="0">
         <VerticalStackLayout Spacing="10">
@@ -22,7 +23,7 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="16"
-                        Text="{Binding Site}" />
+                        Text="{Binding Site}" x:DataType="models:VaultEntry" />
                 </VerticalStackLayout>
 
                 <!--  Username  -->
@@ -35,7 +36,7 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="16"
-                        Text="{Binding UserName}" />
+                        Text="{Binding UserName}" x:DataType="models:VaultEntry" />
                 </VerticalStackLayout>
 
                 <!--  Password  -->
@@ -51,12 +52,12 @@
                             FontAttributes="Bold"
                             FontSize="16"
                             Text="{Binding Password}"
-                            VerticalOptions="Center">
+                            VerticalOptions="Center" x:DataType="models:VaultEntry">
                             <Label.Triggers>
                                 <DataTrigger
-                                    Binding="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=IsPasswordVisible}"
+                                    Binding="{Binding Path=IsPasswordVisible}"
                                     TargetType="Label"
-                                    Value="False">
+                                    Value="False" x:DataType="vm:MainPageViewModel">
                                     <Setter Property="Text" Value="••••••••" />
                                 </DataTrigger>
                             </Label.Triggers>
@@ -64,25 +65,26 @@
 
                         <controls:ImageButton
                             Grid.Column="1"
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=TogglePasswordVisibilityCommand}"
+                            Command="{Binding Path=TogglePasswordVisibilityCommand}"
                             IconBgColorHover="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
                                                                Dark={StaticResource DarkSecondaryContainer}}"
                             IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
                                                         Dark={StaticResource DarkOnSecondaryContainer}}"
-                            IconGlyph="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=IsPasswordVisible, Converter={StaticResource EyeIconConverter}}" />
+                            IconGlyph="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=IsPasswordVisible, Converter={StaticResource EyeIconConverter}}"
+                            x:DataType="vm:MainPageViewModel" />
                         <controls:ImageButton
                             Grid.Column="2"
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyEntryCommand}"
+                            Command="{Binding Path=CopyEntryCommand}"
                             IconBgColorHover="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
                                                                Dark={StaticResource DarkSecondaryContainer}}"
                             IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
                                                         Dark={StaticResource DarkOnSecondaryContainer}}"
-                            IconGlyph="{x:Static m:MaterialRounded.Content_copy}" />
+                            IconGlyph="{x:Static m:MaterialRounded.Content_copy}" x:DataType="vm:MainPageViewModel" />
                     </Grid>
                 </VerticalStackLayout>
 
                 <!--  MFA  -->
-                <VerticalStackLayout IsVisible="{Binding HasMfa}">
+                <VerticalStackLayout IsVisible="{Binding HasMfa}" x:DataType="models:VaultEntry">
                     <Label
                         FontSize="12"
                         Text="MFA CODE (TOTP)"
@@ -97,7 +99,7 @@
                             Text="{Binding CurrentTotpCode, TargetNullValue='------'}"
                             TextColor="{AppThemeBinding Light={StaticResource Primary},
                                                         Dark={StaticResource PrimaryDark}}"
-                            VerticalOptions="Center" />
+                            VerticalOptions="Center" x:DataType="models:VaultEntry" />
 
                         <ProgressBar
                             Grid.Column="1"
@@ -105,7 +107,7 @@
                             Progress="{Binding TotpTimeRemaining, Converter={StaticResource TimeToProgressConverter}}"
                             ProgressColor="{AppThemeBinding Light={StaticResource Primary},
                                                             Dark={StaticResource PrimaryDark}}"
-                            VerticalOptions="Center" />
+                            VerticalOptions="Center" x:DataType="models:VaultEntry" />
 
                         <Label
                             Grid.Column="2"
@@ -113,17 +115,17 @@
                             Text="{Binding TotpTimeRemaining, StringFormat='{0}s'}"
                             TextColor="{AppThemeBinding Light={StaticResource Gray500},
                                                         Dark={StaticResource Gray400}}"
-                            VerticalOptions="Center" />
+                            VerticalOptions="Center" x:DataType="models:VaultEntry" />
 
                         <controls:ImageButton
                             Grid.Column="3"
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyTotpCodeCommand}"
+                            Command="{Binding CopyTotpCodeCommand}"
                             IconBgColorHover="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
                                                                Dark={StaticResource DarkSecondaryContainer}}"
                             IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
                                                         Dark={StaticResource DarkOnSecondaryContainer}}"
                             IconGlyph="{x:Static m:MaterialRounded.Content_copy}"
-                            ToolTipProperties.Text="Copy TOTP Code" />
+                            ToolTipProperties.Text="Copy TOTP Code" x:DataType="vm:MainPageViewModel" />
                     </Grid>
                 </VerticalStackLayout>
 
@@ -134,7 +136,7 @@
                         Text="CATEGORY"
                         TextColor="{AppThemeBinding Light={StaticResource Gray500},
                                                     Dark={StaticResource Gray400}}" />
-                    <Label FontSize="16" Text="{Binding Category}" />
+                    <Label FontSize="16" Text="{Binding Category}" x:DataType="models:VaultEntry" />
                 </VerticalStackLayout>
 
                 <!--  Description  -->
@@ -144,7 +146,7 @@
                         Text="DESCRIPTION"
                         TextColor="{AppThemeBinding Light={StaticResource Gray500},
                                                     Dark={StaticResource Gray400}}" />
-                    <Label FontSize="14" Text="{Binding Description}" />
+                    <Label FontSize="14" Text="{Binding Description}" x:DataType="models:VaultEntry" />
                 </VerticalStackLayout>
 
             </VerticalStackLayout>

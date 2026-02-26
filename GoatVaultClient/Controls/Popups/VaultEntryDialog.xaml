@@ -9,6 +9,7 @@
     xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
     xmlns:uranium="clr-namespace:UraniumUI.Controls;assembly=UraniumUI"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
+    xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
     BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
     CloseWhenBackgroundIsClicked="False">
 
@@ -18,7 +19,7 @@
         AcceptText="Save"
         CancelCommand="{Binding CancelCommand}"
         FrameWidth="700"
-        IsForm="True">
+        IsForm="True" x:DataType="popups:VaultEntryDialog">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{x:StaticResource formSpacing}">
             <VerticalStackLayout Grid.Column="0" Spacing="{x:StaticResource formSpacing}">
 

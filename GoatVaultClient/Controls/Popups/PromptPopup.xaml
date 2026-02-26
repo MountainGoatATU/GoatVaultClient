@@ -5,6 +5,7 @@
                   xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
                   xmlns:controls="clr-namespace:GoatVaultClient.Controls"
                   xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+                  xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
                   x:Class="GoatVaultClient.Controls.Popups.PromptPopup"
                   BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
                   CloseWhenBackgroundIsClicked="False">
@@ -14,7 +15,7 @@
                             AcceptCommand="{Binding AcceptCommand}"
                             CancelCommand="{Binding CancelCommand}"
                             AcceptText="{Binding AcceptText}"
-                            CancelText="{Binding CancelText}">
+                            CancelText="{Binding CancelText}" x:DataType="popups:PromptPopup">
         <VerticalStackLayout>
             <Label Text="{Binding Body}" 
                    LineBreakMode="WordWrap"/>

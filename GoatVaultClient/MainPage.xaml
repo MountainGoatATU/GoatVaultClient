@@ -22,7 +22,7 @@
                 <SearchBar
                     HeightRequest="48"
                     Placeholder="Search passwords..."
-                    Text="{Binding SearchText}" />
+                    Text="{Binding SearchText}" x:DataType="vm:MainPageViewModel" />
             </controls:Component>
 
             <Grid
@@ -53,7 +53,7 @@
                                                                Dark={StaticResource DarkOnPrimaryContainer}}"
                             IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
                                                         Dark={StaticResource DarkOnPrimaryContainer}}"
-                            IconGlyph="{x:Static m:MaterialOutlined.Add}" />
+                            IconGlyph="{x:Static m:MaterialOutlined.Add}" x:DataType="vm:MainPageViewModel" />
                     </Grid>
                 </controls:Component>
 
@@ -72,14 +72,14 @@
                                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
                                         IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
                                                                     Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Sort}" />
+                                        IconGlyph="{x:Static m:MaterialRounded.Sort}" x:DataType="vm:MainPageViewModel" />
                                     <controls:ImageButton
                                         Command="{Binding CreateCategoryCommand}"
                                         IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
                                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
                                         IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
                                                                     Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Add}" />
+                                        IconGlyph="{x:Static m:MaterialRounded.Add}" x:DataType="vm:MainPageViewModel" />
                                 </HorizontalStackLayout>
                             </controls:ComponentHeader.Actions>
                         </controls:ComponentHeader>
@@ -95,14 +95,15 @@
                             FontSize="{StaticResource tMedium}"
                             Text="All Passwords"
                             TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                        Dark={StaticResource DarkOnSecondaryContainer}}" />
+                                                        Dark={StaticResource DarkOnSecondaryContainer}}"
+                            x:DataType="vm:MainPageViewModel" />
 
                         <CollectionView
                             x:Name="CategoriesCollection"
                             Grid.Row="2"
                             ItemsSource="{Binding Categories}"
                             SelectedItem="{Binding SelectedCategory}"
-                            SelectionMode="Single">
+                            SelectionMode="Single" x:DataType="vm:MainPageViewModel">
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout ItemSpacing="{x:StaticResource sContent}" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
@@ -111,13 +112,13 @@
                                     <controls:CategoryItemCell
                                         ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
                                         IconGlyph="{x:Static m:MaterialRounded.Folder}"
-                                        Text="{Binding Name}">
+                                        Text="{Binding Name}" x:DataType="models:CategoryItem">
                                         <FlyoutBase.ContextFlyout>
                                             <MenuFlyout>
                                                 <MenuFlyoutItem
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
+                                                    Command="{Binding Path=EditCategoryCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    Text="Edit">
+                                                    Text="Edit" x:DataType="vm:MainPageViewModel">
                                                     <MenuFlyoutItem.IconImageSource>
                                                         <FontImageSource
                                                             FontFamily="MaterialRounded"
@@ -127,9 +128,9 @@
                                                 </MenuFlyoutItem>
 
                                                 <MenuFlyoutItem
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}"
+                                                    Command="{Binding Path=DeleteCategoryCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    Text="Delete">
+                                                    Text="Delete" x:DataType="vm:MainPageViewModel">
                                                     <MenuFlyoutItem.IconImageSource>
                                                         <FontImageSource
                                                             FontFamily="MaterialRounded"
@@ -161,14 +162,14 @@
                                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
                                         IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
                                                                     Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Sort}" />
+                                        IconGlyph="{x:Static m:MaterialRounded.Sort}" x:DataType="vm:MainPageViewModel" />
                                     <controls:ImageButton
                                         Command="{Binding CreateEntryCommand}"
                                         IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
                                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
                                         IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
                                                                     Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Add}" />
+                                        IconGlyph="{x:Static m:MaterialRounded.Add}" x:DataType="vm:MainPageViewModel" />
                                 </HorizontalStackLayout>
                             </controls:ComponentHeader.Actions>
                         </controls:ComponentHeader>
@@ -178,7 +179,7 @@
                             Grid.Row="1"
                             ItemsSource="{Binding Passwords}"
                             SelectedItem="{Binding SelectedEntry}"
-                            SelectionMode="Single">
+                            SelectionMode="Single" x:DataType="vm:MainPageViewModel">
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout ItemSpacing="{x:StaticResource sContent}" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
@@ -187,13 +188,13 @@
                                     <controls:CategoryItemCell
                                         ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
                                         IconGlyph="{x:Static m:MaterialRounded.Key}"
-                                        Text="{Binding Site}">
+                                        Text="{Binding Site}" x:DataType="models:VaultEntry">
                                         <FlyoutBase.ContextFlyout>
                                             <MenuFlyout>
                                                 <MenuFlyoutItem
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
+                                                    Command="{Binding Path=EditEntryCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    Text="Edit">
+                                                    Text="Edit" x:DataType="vm:MainPageViewModel">
                                                     <MenuFlyoutItem.IconImageSource>
                                                         <FontImageSource
                                                             FontFamily="MaterialRounded"
@@ -202,9 +203,9 @@
                                                     </MenuFlyoutItem.IconImageSource>
                                                 </MenuFlyoutItem>
                                                 <MenuFlyoutItem
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
+                                                    Command="{Binding Path=DeleteEntryCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    Text="Delete">
+                                                    Text="Delete" x:DataType="vm:MainPageViewModel">
                                                     <MenuFlyoutItem.IconImageSource>
                                                         <FontImageSource
                                                             FontFamily="MaterialRounded"
@@ -225,7 +226,7 @@
                     x:Name="DetailsPane"
                     Grid.Row="1"
                     Grid.Column="2"
-                    IsVisible="{Binding IsDetailsPanelVisible}">
+                    IsVisible="{Binding IsDetailsPanelVisible}" x:DataType="vm:MainPageViewModel">
                     <Grid RowDefinitions="Auto, *">
                         <controls:ComponentHeader Title="Details" Grid.Row="0">
                             <controls:ComponentHeader.Actions>
@@ -286,7 +287,8 @@
                         MaxLines="3"
                         Text="{Binding GoatComment}"
                         TextColor="{AppThemeBinding Light={StaticResource LightOnSurface},
-                            Dark={StaticResource DarkOnSurface}}" />
+                            Dark={StaticResource DarkOnSurface}}"
+                        x:DataType="vm:MainPageViewModel" />
                 </Border>
                 <BoxView
                     Margin="0,-8,16,0"

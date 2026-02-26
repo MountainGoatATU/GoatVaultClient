@@ -14,7 +14,7 @@
                 MaximumHeightRequest="650"
                 StrokeThickness="0"
                 VerticalOptions="Center"
-                WidthRequest="{TemplateBinding FrameWidth}">
+                WidthRequest="{Binding FrameWidth}" x:DataType="controls:PopupTemplate">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="{x:StaticResource xLargeIncreased}" />
                 </Border.StrokeShape>
@@ -24,7 +24,7 @@
                         Padding="20"
                         HorizontalOptions="Center"
                         Style="{x:StaticResource MaterialHeadlineMedium}"
-                        Text="{TemplateBinding Title}" />
+                        Text="{Binding Title}" x:DataType="controls:PopupTemplate" />
                     <ContentView Grid.Row="1" Padding="20,10">
                         <ContentPresenter />
                     </ContentView>
@@ -35,41 +35,44 @@
                         HorizontalOptions="End"
                         Spacing="{x:StaticResource formSpacing}">
                         <Button
-                            Command="{TemplateBinding CancelCommand}"
+                            Command="{Binding CancelCommand}"
                             StyleClass="OutlinedButton"
-                            Text="{TemplateBinding CancelText}">
+                            Text="{Binding CancelText}" x:DataType="controls:PopupTemplate">
                             <Button.Triggers>
                                 <DataTrigger
-                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    Binding="{Binding Text}"
                                     TargetType="Button"
-                                    Value="">
+                                    Value=""
+                                    x:DataType="controls:CategoryItemCell">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
                                 <DataTrigger
-                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    Binding="{Binding Text}"
                                     TargetType="Button"
-                                    Value="{x:Null}">
+                                    Value="{x:Null}" 
+                                    x:DataType="controls:CategoryItemCell">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
                             </Button.Triggers>
                         </Button>
                         <Button
-                            Grid.Column="1"
-                            Command="{TemplateBinding AcceptCommand}"
+                            Command="{Binding AcceptCommand}"
                             StyleClass="FilledButton"
-                            Text="{TemplateBinding AcceptText}">
+                            Text="{Binding AcceptText}" x:DataType="controls:PopupTemplate">
 
                             <Button.Triggers>
                                 <DataTrigger
-                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    Binding="{Binding Text}"
                                     TargetType="Button"
-                                    Value="">
+                                    Value="" 
+                                    x:DataType="controls:CategoryItemCell">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
                                 <DataTrigger
-                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    Binding="{Binding Text}"
                                     TargetType="Button"
-                                    Value="{x:Null}">
+                                    Value="{x:Null}" 
+                                    x:DataType="controls:CategoryItemCell">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
                             </Button.Triggers>

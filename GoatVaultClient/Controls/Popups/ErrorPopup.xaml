@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
              xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+             xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
+             xmlns:models="clr-namespace:GoatVaultInfrastructure.Services.Api.Models;assembly=GoatVaultInfrastructure"
              x:Class="GoatVaultClient.Controls.Popups.ErrorPopup"
              BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
              CloseWhenBackgroundIsClicked="True">
@@ -11,22 +13,25 @@
                             AcceptText="Close"
                             AcceptCommand="{Binding CloseCommand}"
                             CancelText=""
-                            FrameWidth="350">
+                            FrameWidth="350" x:DataType="popups:ErrorPopup">
         
         <VerticalStackLayout Spacing="10" Padding="10">
             <Label Text="{Binding Message}" 
                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"
-                   LineBreakMode="WordWrap" />
+                   LineBreakMode="WordWrap" 
+                   x:DataType="popups:ErrorPopup" />
             
             <CollectionView ItemsSource="{Binding Errors}"
                             SelectionMode="None"
-                            MaximumHeightRequest="200">
+                            MaximumHeightRequest="200" 
+                            x:DataType="popups:ErrorPopup">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Label Text="{Binding .}" 
                                TextColor="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}"
                                FontSize="12"
-                               Padding="0,2"/>
+                               Padding="0,2"
+                               x:DataType="popups:ErrorPopup"/>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

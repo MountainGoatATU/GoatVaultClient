@@ -87,7 +87,8 @@
                                         </Border.StrokeShape>
 
                                         <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LoginPageViewModel}}, Path=SelectLocalUserCommand}" CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding Path=SelectLocalUserCommand}" CommandParameter="{Binding .}"
+                                                                  x:DataType="vm:LoginPageViewModel" />
                                         </Border.GestureRecognizers>
 
                                         <Grid
@@ -107,7 +108,7 @@
                                                 Padding="8"
                                                 BackgroundColor="Transparent"
                                                 BorderColor="Transparent"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LoginPageViewModel}}, Path=RemoveOfflineUserCommand}"
+                                                Command="{Binding  Path=RemoveOfflineUserCommand}"
                                                 CommandParameter="{Binding .}"
                                                 CornerRadius="20"
                                                 HeightRequest="40"
@@ -115,7 +116,7 @@
                                                 TextColor="{AppThemeBinding Light={StaticResource LightError},
                                                                             Dark={StaticResource DarkError}}"
                                                 VerticalOptions="Center"
-                                                WidthRequest="40" />
+                                                WidthRequest="40" x:DataType="vm:LoginPageViewModel" />
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

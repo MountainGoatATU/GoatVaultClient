@@ -8,6 +8,7 @@
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
+    xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
     BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
     CloseWhenBackgroundIsClicked="True">
     <controls:PopupTemplate
@@ -15,13 +16,13 @@
         Title="{Binding Title}"
         AcceptCommand="{Binding AcceptCommand}"
         AcceptText="Save"
-        CancelCommand="{Binding CancelCommand}">
+        CancelCommand="{Binding CancelCommand}" x:DataType="popups:AuthorizePopup">
 
         <VerticalStackLayout>
             <material:TextField
                 x:Name="CategoryField"
                 Title="{Binding CategoryFieldTitle}"
-                Text="{Binding CategoryFieldText}">
+                Text="{Binding CategoryFieldText}" x:DataType="popups:CreateCategoryPopup">
                 <validation:RequiredValidation />
                 <validation:MinLengthValidation MinLength="2" />
             </material:TextField>
@@ -37,7 +38,7 @@
                     <AdaptiveTrigger MinWindowWidth="0" />
                 </VisualState.StateTriggers>
                 <VisualState.Setters>
-                    <Setter TargetName="PopupRoot" Property="FrameWidth" Value="350" />
+                    <Setter Property="FrameWidth" Value="350" />
                 </VisualState.Setters>
             </VisualState>
 
@@ -46,7 +47,7 @@
                     <AdaptiveTrigger MinWindowWidth="900" />
                 </VisualState.StateTriggers>
                 <VisualState.Setters>
-                    <Setter TargetName="PopupRoot" Property="FrameWidth" Value="500" />
+                    <Setter Property="FrameWidth" Value="500" />
                 </VisualState.Setters>
             </VisualState>
         </VisualStateGroup>
