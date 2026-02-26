@@ -1,9 +1,8 @@
 name: .NET 10 MAUI Deployment
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
     paths-ignore:
       - "*.md"
   pull_request:
@@ -98,6 +97,7 @@ jobs:
       # --------------------------
 
       - name: Run tests with coverage
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: >
           dotnet test GoatVaultTests/GoatVaultTests.csproj
           -c ${{ env.CONFIGURATION }}
@@ -108,7 +108,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Upload test results
-        if: always()
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -116,7 +116,7 @@ jobs:
           retention-days: 30
 
       - name: Upload coverage artifacts
-        if: always()
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-results
@@ -124,14 +124,14 @@ jobs:
           retention-days: 30
 
       - name: Upload coverage to Codecov
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.CODECOV_TOKEN != ''
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v5
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           files: ${{ env.WORKING_DIRECTORY }}/TestResults/**/coverage.cobertura.xml
-          flags: unittests
-          fail_ci_if_error: true
-          verbose: true
+          slug: MountainGoatATU/GoatVaultClient
 
       # --------------------------
       # Decode & install signing certificate
