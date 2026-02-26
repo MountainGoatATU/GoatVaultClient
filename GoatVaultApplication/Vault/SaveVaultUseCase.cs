@@ -1,6 +1,6 @@
 using GoatVaultCore.Abstractions;
 
-namespace GoatVaultApplication.VaultUseCases;
+namespace GoatVaultApplication.Vault;
 
 public sealed class SaveVaultUseCase(
     IUserRepository users,

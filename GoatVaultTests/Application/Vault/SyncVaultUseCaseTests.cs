@@ -1,4 +1,4 @@
-using GoatVaultApplication.VaultUseCases;
+using GoatVaultApplication.Vault;
 using GoatVaultCore.Abstractions;
 using Moq;
 

@@ -1,7 +1,7 @@
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 
-namespace GoatVaultApplication.VaultUseCases;
+namespace GoatVaultApplication.Vault;
 
 public class UpdateVaultEntryUseCase(ISessionContext session, SaveVaultUseCase saveVault)
 {

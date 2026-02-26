@@ -3,7 +3,7 @@ using GoatVaultApplication.Account;
 using GoatVaultApplication.Auth;
 using GoatVaultApplication.Session;
 using GoatVaultApplication.Shamir;
-using GoatVaultApplication.VaultUseCases;
+using GoatVaultApplication.Vault;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;

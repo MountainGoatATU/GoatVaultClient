@@ -1,4 +1,4 @@
-using GoatVaultApplication.VaultUseCases;
+using GoatVaultApplication.Vault;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;

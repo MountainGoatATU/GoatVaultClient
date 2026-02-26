@@ -1,9 +1,9 @@
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 
-namespace GoatVaultApplication.VaultUseCases;
+namespace GoatVaultApplication.Vault;
 
-public class DeleteVaultEntryUseCase(ISessionContext session, SaveVaultUseCase saveVault)
+public class AddVaultEntryUseCase(ISessionContext session, SaveVaultUseCase saveVault)
 {
     public async Task ExecuteAsync(VaultEntry entry)
     {
@@ -12,7 +12,7 @@ public class DeleteVaultEntryUseCase(ISessionContext session, SaveVaultUseCase s
             throw new InvalidOperationException("Vault not loaded.");
         }
 
-        session.Vault.Entries.Remove(entry);
+        session.Vault.Entries.Add(entry);
         session.RaiseVaultChanged();
         await saveVault.ExecuteAsync();
     }
