@@ -1,6 +1,6 @@
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Api;
-using GoatVaultInfrastructure.Services.Api.Models;
+using GoatVaultCore.Models.API;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;

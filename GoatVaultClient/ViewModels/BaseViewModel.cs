@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using GoatVaultClient.Controls.Popups;
-using GoatVaultInfrastructure.Services.Api.Models;
+using GoatVaultCore.Models.API;
 using Mopups.Services;
 
 namespace GoatVaultClient.ViewModels;

@@ -2,8 +2,6 @@ using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.Api;
 using GoatVaultCore.Models.Objects;
-using GoatVaultCore.Services;
-using GoatVaultInfrastructure.Services;
 using System.Text.RegularExpressions;
 
 namespace GoatVaultApplication.Auth;
@@ -14,7 +12,7 @@ public class RegisterUseCase(
     ICryptoService crypto,
     IVaultCrypto vaultCrypto,
     IServerAuthService serverAuth,
-    PwnedPasswordService pwned)
+    IPwnedPasswordService pwned)
 {
     public async Task ExecuteAsync(Email email, string password)
     {
@@ -26,9 +24,9 @@ public class RegisterUseCase(
         }
 
         // 2. Generate auth salt, auth verifier, & vault salt
-        var authSalt = CryptoService.GenerateSalt();
+        var authSalt = crypto.GenerateSalt();
         var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt));
-        var vaultSalt = CryptoService.GenerateSalt();
+        var vaultSalt = crypto.GenerateSalt();
 
         // 3. Create empty vault and encrypt
         var emptyVault = new VaultDecrypted
@@ -70,6 +68,9 @@ public class RegisterUseCase(
         try
         {
             var pwnCount = await pwned.CheckPasswordAsync(password);
+            if (pwnCount is null)
+                return new ValidationResult(true, false, "Unable to reach breach database for verification.");
+
             return pwnCount > 0
                 ? new ValidationResult(true, false, $"Warning: Password found in {pwnCount} data breaches. It is unsafe.") 
                 : new ValidationResult(false, true, "Password is secure and hasn't been breached.");

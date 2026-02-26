@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace GoatVaultInfrastructure.Services.Api.Models;
+namespace GoatVaultCore.Models.API;
 
 public class ValidationError
 {

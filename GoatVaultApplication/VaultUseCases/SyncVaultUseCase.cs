@@ -1,5 +1,8 @@
-﻿namespace GoatVaultApplication.VaultUseCases;
+﻿using GoatVaultCore.Abstractions;
 
-public class SyncVaultUseCase
+namespace GoatVaultApplication.VaultUseCases;
+
+public class SyncVaultUseCase(ISyncingService syncing)
 {
+    public Task ExecuteAsync() => syncing.Sync();
 }

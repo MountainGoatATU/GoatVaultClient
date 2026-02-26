@@ -148,7 +148,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<TotpManagerService>();
         builder.Services.AddTransient<CategoryManagerService>();
         builder.Services.AddTransient<VaultEntryManagerService>();
-        builder.Services.AddTransient<PwnedPasswordService>();
+        builder.Services.AddTransient<IPwnedPasswordService, PwnedPasswordService>();
         builder.Services.AddTransient<IVaultScoreCalculatorService, VaultScoreCalculatorService>();
         builder.Services.AddTransient<IPasswordStrengthService, PasswordStrengthService>();
         builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();

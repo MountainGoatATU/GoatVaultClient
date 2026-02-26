@@ -1,9 +1,10 @@
+using GoatVaultCore.Abstractions;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace GoatVaultCore.Services;
 
-public class PwnedPasswordService
+public class PwnedPasswordService : IPwnedPasswordService
 {
     private readonly HttpClient _httpClient;
     private const string ApiUri = "https://api.pwnedpasswords.com/";
