@@ -26,9 +26,9 @@ public class RegisterUseCase(
         }
 
         // 2. Generate auth salt, auth verifier, & vault salt
-        var authSalt = CryptoService.GenerateRandomBytes(32);
+        var authSalt = CryptoService.GenerateSalt();
         var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt));
-        var vaultSalt = CryptoService.GenerateRandomBytes(32);
+        var vaultSalt = CryptoService.GenerateSalt();
 
         // 3. Create empty vault and encrypt
         var emptyVault = new VaultDecrypted
