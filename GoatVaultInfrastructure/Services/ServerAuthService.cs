@@ -1,8 +1,7 @@
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Api;
-using GoatVaultInfrastructure.Services.Api.Models;
+using GoatVaultCore.Models.API;
 using Microsoft.Extensions.Configuration;
-using System.Net;
 using System.Text;
 using System.Text.Json;
 
@@ -66,7 +65,7 @@ public class ServerAuthService(
         return JsonSerializer.Deserialize<T>(json, JsonOptions) ?? throw new InvalidOperationException($"Invalid response for {endpoint}");
     }
 
-    private async Task EnsureSuccessAsync(HttpResponseMessage response, CancellationToken ct)
+    private static async Task EnsureSuccessAsync(HttpResponseMessage response, CancellationToken ct)
     {
         if (response.IsSuccessStatusCode)
             return;
@@ -90,7 +89,7 @@ public class ServerAuthService(
         }
 
         // Try to parse a generic 'detail' string from JSON if available
-        string message = string.Empty;
+        var message = string.Empty;
         try
         {
             if (!string.IsNullOrWhiteSpace(content))

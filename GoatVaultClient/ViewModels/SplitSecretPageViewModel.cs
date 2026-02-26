@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Shamir;
 using GoatVaultClient.Controls.Popups;
-using GoatVaultCore.Models.Shamir;
+using GoatVaultCore.Models.Objects;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
 using System.Collections.ObjectModel;

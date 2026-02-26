@@ -1,28 +1,23 @@
-﻿using GoatVaultCore.Models.Shamir;
-using GoatVaultCore.Services.Shamir;
+﻿using GoatVaultCore.Abstractions;
+using GoatVaultCore.Models.Objects;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultApplication.Shamir;
 
-public class SplitKeyUseCase
+public class SplitKeyUseCase(IShamirSsService shamirSsService)
 {
-    private readonly IShamirSSService _shamirSSService;
-    public SplitKeyUseCase(IShamirSSService shamirSSService)
-    {
-        _shamirSSService = shamirSSService;
-    }
     public async Task<ObservableCollection<RecoveryShare>> Execute(string secret, string passPhrase, int totalShares, int threshold)
     {
-        ObservableCollection<RecoveryShare> generatedShares = new ObservableCollection<RecoveryShare>();
+        var generatedShares = new ObservableCollection<RecoveryShare>();
 
-        var splittedKey =  await Task.Run(() => _shamirSSService.SplitSecret(secret, passPhrase, totalShares, threshold));
+        var splitKey =  await Task.Run(() => shamirSsService.SplitSecret(secret, passPhrase, totalShares, threshold));
 
-        for (var i = 0; i < splittedKey.Count; i++)
+        for (var i = 0; i < splitKey.Count; i++)
         {
             generatedShares.Add(new RecoveryShare
             {
                 Index = i + 1,
-                Mnemonic = splittedKey[i]
+                Mnemonic = splitKey[i]
             });
         }
 

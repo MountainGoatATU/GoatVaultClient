@@ -3,14 +3,13 @@ using GoatVaultApplication.Account;
 using GoatVaultApplication.Auth;
 using GoatVaultApplication.Session;
 using GoatVaultApplication.Shamir;
-using GoatVaultApplication.VaultUseCases;
+using GoatVaultApplication.Vault;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
-using GoatVaultCore.Services.Shamir;
 using GoatVaultInfrastructure.Database;
 using GoatVaultInfrastructure.Services;
 using GoatVaultInfrastructure.Services.Api;
@@ -149,7 +148,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<TotpManagerService>();
         builder.Services.AddTransient<CategoryManagerService>();
         builder.Services.AddTransient<VaultEntryManagerService>();
-        builder.Services.AddTransient<PwnedPasswordService>();
+        builder.Services.AddTransient<IPwnedPasswordService, PwnedPasswordService>();
         builder.Services.AddTransient<IVaultScoreCalculatorService, VaultScoreCalculatorService>();
         builder.Services.AddTransient<IPasswordStrengthService, PasswordStrengthService>();
         builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
@@ -157,7 +156,7 @@ public static class MauiProgram
         // Shamir Test
         builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
         builder.Services.AddSingleton<IRandom, StrongRandom>();
-        builder.Services.AddTransient<IShamirSSService,ShamirSSService>();
+        builder.Services.AddTransient<IShamirSsService,ShamirSsService>();
 
         // TODO: Fix Shamir services
         builder.Services.AddTransient<SplitSecretViewModel>();

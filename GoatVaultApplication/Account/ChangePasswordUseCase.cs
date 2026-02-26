@@ -50,7 +50,7 @@ public class ChangePasswordUseCase(
         // 6. Update server
         var updateRequest = new ChangeMasterPasswordRequest
         {
-            AuthSalt = Convert.ToBase64String(result.newAuthVerifier),
+            AuthSalt = Convert.ToBase64String(result.newAuthSalt),
             AuthVerifier = Convert.ToBase64String(result.newAuthVerifier),
             VaultSalt = Convert.ToBase64String(result.newVaultSalt),
             Vault = result.newEncryptedVault

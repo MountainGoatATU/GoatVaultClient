@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Account;
 using GoatVaultApplication.Auth;
-using GoatVaultApplication.VaultUseCases;
+using GoatVaultApplication.Vault;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;

@@ -1,12 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultCore.Models.Shamir;
-using GoatVaultCore.Services.Shamir;
+using GoatVaultCore.Models.Objects;
+using GoatVaultCore.Services;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class RecoverSecretViewModel(ShamirSSService st) : BaseViewModel
+public partial class RecoverSecretViewModel(ShamirSsService shamir) : BaseViewModel
 {
     // ── Input fields ─────────────────────────────────────────────
 
@@ -101,7 +101,7 @@ public partial class RecoverSecretViewModel(ShamirSSService st) : BaseViewModel
             var mnemonics = CollectedShares.Select(s => s.Mnemonic).ToList();
 
             var result = await Task.Run(() =>
-                st.RecoverSecret(mnemonics, Passphrase ?? string.Empty));
+                shamir.RecoverSecret(mnemonics, Passphrase ?? string.Empty));
 
             RecoveredSecret = result;
             HasRecoveredSecret = true;

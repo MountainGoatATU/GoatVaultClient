@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using GoatVaultApplication.VaultUseCases;
+using GoatVaultApplication.Vault;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using GoatVaultCore.Models.Api;

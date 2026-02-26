@@ -6,7 +6,7 @@ public class JwtUtils
 {
     private readonly JwtSecurityTokenHandler _handler = new();
 
-    public JwtSecurityToken ConvertJwtStringToJwtSecurityToken(string? jwt)
+    public JwtSecurityToken ConvertStringToSecurityToken(string? jwt)
     {
         return string.IsNullOrWhiteSpace(jwt)
             ? throw new ArgumentException("JWT string cannot be null or empty")
@@ -15,7 +15,7 @@ public class JwtUtils
 
     public bool IsExpired(string jwt)
     {
-        var token = ConvertJwtStringToJwtSecurityToken(jwt);
+        var token = ConvertStringToSecurityToken(jwt);
         return token.ValidTo <= DateTime.UtcNow;
     }
 }

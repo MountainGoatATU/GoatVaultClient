@@ -94,21 +94,44 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       # --------------------------
-      # Run tests (only on main branch)
+      # Run tests with coverage
       # --------------------------
 
-      - name: Run tests
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: dotnet test GoatVaultTests/GoatVaultTests.csproj -c ${{ env.CONFIGURATION }} --logger trx --results-directory ./TestResults
+      - name: Run tests with coverage
+        run: >
+          dotnet test GoatVaultTests/GoatVaultTests.csproj
+          -c ${{ env.CONFIGURATION }}
+          --logger trx
+          --results-directory ./TestResults
+          --collect:"XPlat Code Coverage"
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Upload test results
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: ${{ env.WORKING_DIRECTORY }}/TestResults/*.trx
           retention-days: 30
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-results
+          path: ${{ env.WORKING_DIRECTORY }}/TestResults/**/coverage.cobertura.xml
+          retention-days: 30
+
+      - name: Upload coverage to Codecov
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ env.WORKING_DIRECTORY }}/TestResults/**/coverage.cobertura.xml
+          flags: unittests
+          fail_ci_if_error: true
+          verbose: true
 
       # --------------------------
       # Decode & install signing certificate

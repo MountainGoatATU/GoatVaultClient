@@ -1,16 +1,9 @@
-﻿using GoatVaultCore.Services.Shamir;
+﻿using GoatVaultCore.Abstractions;
 
 namespace GoatVaultApplication.Shamir;
 
-public class RecoverKeyUseCase
+public class RecoverKeyUseCase(IShamirSsService shamir)
 {
-    private readonly IShamirSSService _shamirSSService;
-    public RecoverKeyUseCase(IShamirSSService shamirSSService)
-    {
-        _shamirSSService = shamirSSService;
-    }
-    public async Task<string> Execute(List<string> mnemonicShares, string passphrase)
-    {
-        return await Task.Run(() => _shamirSSService.RecoverSecret(mnemonicShares, passphrase));
-    }
+    public async Task<string> Execute(List<string> mnemonicShares, string passphrase) 
+        => await Task.Run(() => shamir.RecoverSecret(mnemonicShares, passphrase));
 }

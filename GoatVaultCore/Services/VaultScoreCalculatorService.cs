@@ -28,16 +28,6 @@ public class VaultScoreCalculatorService(
             _ => 0
         };
 
-        // TODO: Fix
-        /*
-        var masterBreached = vaultEntries.Any(e => !string.IsNullOrEmpty(e.Password) && e.Password == masterPassword && e.BreachCount > 0);
-        if (masterBreached)
-        {
-            foundationPoints = 0;
-            masterPercent = 0;
-        }
-        */
-
         var passwordList = vaultEntries
                                .Where(e => !string.IsNullOrEmpty(e.Password))
                                .ToList();
@@ -46,15 +36,15 @@ public class VaultScoreCalculatorService(
 
         // Duplicates and strength
         var duplicateCount = passwordList
-            .GroupBy(p => p)
+            .GroupBy(e => e)
             .Where(g => g
                 .Count() > 1)
             .Sum(g => g
                 .Count() - 1);
 
         var totalStrengthScore = passwordList
-            .Sum(p => passwordStrength
-                .Evaluate(p.Password).Score);
+            .Sum(e => passwordStrength
+                .Evaluate(e.Password).Score);
 
         var uniquenessPoints = passwordCount > 0
             ? (passwordCount - duplicateCount) / (double)passwordCount * 200

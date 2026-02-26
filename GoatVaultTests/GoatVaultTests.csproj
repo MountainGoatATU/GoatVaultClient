@@ -22,12 +22,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GoatVaultApplication\GoatVaultApplication.csproj" />
     <ProjectReference Include="..\GoatVaultCore\GoatVaultCore.csproj" />
     <ProjectReference Include="..\GoatVaultInfrastructure\GoatVaultInfrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Application\Account\" />
+    <Folder Include="Application\Shamir\" />
+    <Folder Include="Infrastructure\API\" />
   </ItemGroup>
 
 </Project>

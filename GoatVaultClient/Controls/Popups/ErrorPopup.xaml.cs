@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
-using GoatVaultInfrastructure.Services.Api.Models;
+using GoatVaultCore.Models.API;
 using Mopups.Pages;
 using Mopups.Services;
 using System.Collections.ObjectModel;

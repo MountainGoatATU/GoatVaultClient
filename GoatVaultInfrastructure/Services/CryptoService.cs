@@ -17,6 +17,8 @@ public sealed class CryptoService : ICryptoService
 
     public MasterKey DeriveMasterKey(string password, byte[] vaultSalt) => new(Argon2Hash(password, vaultSalt));
 
+    byte[] ICryptoService.GenerateSalt() => GenerateSalt();
+
     public static byte[] GenerateSalt() => GenerateRandomBytes(SaltLength);
 
     public static byte[] GenerateNonce() => GenerateRandomBytes(NonceLength);
