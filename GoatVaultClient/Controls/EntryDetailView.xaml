@@ -7,11 +7,11 @@
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-    x:DataType="models:VaultEntry">
+    x:DataType="vm:MainPageViewModel">
     <controls:Component BorderMargin="0">
         <VerticalStackLayout Spacing="10">
 
-            <VerticalStackLayout Margin="15" Spacing="15">
+            <VerticalStackLayout Spacing="{StaticResource formSpacing}">
 
                 <!--  Site  -->
                 <VerticalStackLayout>
@@ -23,7 +23,7 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="16"
-                        Text="{Binding Site}" />
+                        Text="{Binding SelectedEntry.Site}" />
                 </VerticalStackLayout>
 
                 <!--  Username  -->
@@ -36,7 +36,7 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="16"
-                        Text="{Binding UserName}" />
+                        Text="{Binding SelectedEntry.UserName}" />
                 </VerticalStackLayout>
 
                 <!--  Password  -->
@@ -51,11 +51,11 @@
                             Grid.Column="0"
                             FontAttributes="Bold"
                             FontSize="16"
-                            Text="{Binding Password}"
+                            Text="{Binding SelectedEntry.Password}"
                             VerticalOptions="Center">
                             <Label.Triggers>
                                 <DataTrigger
-                                    Binding="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=IsPasswordVisible}"
+                                    Binding="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsPasswordVisible}"
                                     TargetType="Label"
                                     Value="False">
                                     <Setter Property="Text" Value="••••••••" />
@@ -65,17 +65,17 @@
 
                         <controls:ImageButton
                             Grid.Column="1"
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=TogglePasswordVisibilityCommand}"
-                            IconBgColorHover="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
-                                                               Dark={StaticResource DarkSecondaryContainer}}"
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                            Dark={StaticResource DarkSecondaryContainer}}"
+                            Command="{Binding TogglePasswordVisibilityCommand}"
                             IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
                                                         Dark={StaticResource DarkOnSecondaryContainer}}"
                             IconGlyph="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=IsPasswordVisible, Converter={StaticResource EyeIconConverter}}" />
                         <controls:ImageButton
                             Grid.Column="2"
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyEntryCommand}"
-                            IconBgColorHover="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
-                                                               Dark={StaticResource DarkSecondaryContainer}}"
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                            Dark={StaticResource DarkSecondaryContainer}}"
+                            Command="{Binding CopyEntryCommand}"
                             IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
                                                         Dark={StaticResource DarkOnSecondaryContainer}}"
                             IconGlyph="{x:Static m:MaterialRounded.Content_copy}" />
@@ -83,7 +83,7 @@
                 </VerticalStackLayout>
 
                 <!--  MFA  -->
-                <VerticalStackLayout IsVisible="{Binding HasMfa}">
+                <VerticalStackLayout IsVisible="{Binding SelectedEntry.HasMfa}">
                     <Label
                         FontSize="12"
                         Text="MFA CODE (TOTP)"
@@ -95,7 +95,7 @@
                             FontAttributes="Bold"
                             FontFamily="JetBrainsMonoRegular"
                             FontSize="24"
-                            Text="{Binding CurrentTotpCode, TargetNullValue='------'}"
+                            Text="{Binding SelectedEntry.CurrentTotpCode, TargetNullValue='------'}"
                             TextColor="{AppThemeBinding Light={StaticResource Primary},
                                                         Dark={StaticResource PrimaryDark}}"
                             VerticalOptions="Center" />
@@ -103,7 +103,7 @@
                         <ProgressBar
                             Grid.Column="1"
                             HeightRequest="6"
-                            Progress="{Binding TotpTimeRemaining, Converter={StaticResource TimeToProgressConverter}}"
+                            Progress="{Binding SelectedEntry.TotpTimeRemaining, Converter={StaticResource TimeToProgressConverter}}"
                             ProgressColor="{AppThemeBinding Light={StaticResource Primary},
                                                             Dark={StaticResource PrimaryDark}}"
                             VerticalOptions="Center" />
@@ -111,16 +111,16 @@
                         <Label
                             Grid.Column="2"
                             FontSize="14"
-                            Text="{Binding TotpTimeRemaining, StringFormat='{0}s'}"
+                            Text="{Binding SelectedEntry.TotpTimeRemaining, StringFormat='{0}s'}"
                             TextColor="{AppThemeBinding Light={StaticResource Gray500},
                                                         Dark={StaticResource Gray400}}"
                             VerticalOptions="Center" />
 
                         <controls:ImageButton
                             Grid.Column="3"
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=CopyTotpCodeCommand}"
-                            IconBgColorHover="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
-                                                               Dark={StaticResource DarkSecondaryContainer}}"
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                            Dark={StaticResource DarkSecondaryContainer}}"
+                            Command="{Binding CopyTotpCodeCommand}"
                             IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
                                                         Dark={StaticResource DarkOnSecondaryContainer}}"
                             IconGlyph="{x:Static m:MaterialRounded.Content_copy}"
@@ -135,7 +135,7 @@
                         Text="CATEGORY"
                         TextColor="{AppThemeBinding Light={StaticResource Gray500},
                                                     Dark={StaticResource Gray400}}" />
-                    <Label FontSize="16" Text="{Binding Category}" />
+                    <Label FontSize="16" Text="{Binding SelectedEntry.Category}" />
                 </VerticalStackLayout>
 
                 <!--  Description  -->
@@ -145,7 +145,7 @@
                         Text="DESCRIPTION"
                         TextColor="{AppThemeBinding Light={StaticResource Gray500},
                                                     Dark={StaticResource Gray400}}" />
-                    <Label FontSize="14" Text="{Binding Description}" />
+                    <Label FontSize="14" Text="{Binding SelectedEntry.Description}" />
                 </VerticalStackLayout>
 
             </VerticalStackLayout>
