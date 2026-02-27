@@ -45,6 +45,7 @@ public class RegisterUseCase(
             AuthSalt = Convert.ToBase64String(authSalt),
             AuthVerifier = Convert.ToBase64String(authVerifier),
             VaultSalt = Convert.ToBase64String(vaultSalt),
+            Argon2Parameters = argon2Parameters,
             Vault = encryptedVault
         };
 

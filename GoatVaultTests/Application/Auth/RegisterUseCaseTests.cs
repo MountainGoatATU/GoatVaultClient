@@ -75,6 +75,7 @@ public class RegisterUseCaseTests
                 r.AuthSalt == Convert.ToBase64String(authSalt) &&
                 r.AuthVerifier == Convert.ToBase64String(authVerifier) &&
                 r.VaultSalt == Convert.ToBase64String(vaultSalt) &&
+                r.Argon2Parameters != null &&
                 ReferenceEquals(r.Vault, encryptedVault)),
             It.IsAny<CancellationToken>()),
             Times.Once);

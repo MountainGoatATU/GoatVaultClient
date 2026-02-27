@@ -17,6 +17,9 @@ public class PwnedPasswordService : IPwnedPasswordService
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
+        if (_httpClient.BaseAddress is null)
+            _httpClient.BaseAddress = new Uri(ApiUri);
+
         if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "GoatVault");
     }

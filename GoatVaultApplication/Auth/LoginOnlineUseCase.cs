@@ -26,11 +26,12 @@ public class LoginOnlineUseCase(
         var authInitResponse = await serverAuth.InitAsync(authInitRequest, ct);
         var userId = Guid.Parse(authInitResponse.UserId);
         var existing = await users.GetByIdAsync(userId);
-        var argon2Parameters = existing?.Argon2Parameters ?? Argon2Parameters.Default;
+        var existingArgon2Parameters = existing?.Argon2Parameters;
+        var authArgon2Parameters = existingArgon2Parameters ?? Argon2Parameters.Default;
 
         // 2. Compute proof client-side
         var authSalt = Convert.FromBase64String(authInitResponse.AuthSalt);
-        var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt, argon2Parameters), ct);
+        var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt, authArgon2Parameters), ct);
 
         var nonce = Convert.FromBase64String(authInitResponse.Nonce);
         using var hmac = new HMACSHA256(authVerifier);
@@ -63,6 +64,8 @@ public class LoginOnlineUseCase(
         var userResponse = await serverAuth.GetUserAsync(userId, ct);
         if (userResponse.Vault == null)
             throw new InvalidOperationException("Vault is missing.");
+
+        var argon2Parameters = userResponse.Argon2Parameters ?? existingArgon2Parameters ?? Argon2Parameters.Default;
 
         // 6. Decrypt vault
         var vaultEncrypted = userResponse.Vault;

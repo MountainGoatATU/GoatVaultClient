@@ -1,3 +1,4 @@
+using GoatVaultCore.Models.Objects;
 using System.Text.Json.Serialization;
 
 namespace GoatVaultCore.Models.Api;
@@ -12,6 +13,7 @@ public class UserResponse
     public required string? MfaSecret { get; set; }
     public required bool ShamirEnabled { get; set; }
     public required string VaultSalt { get; set; }
+    public Argon2Parameters? Argon2Parameters { get; set; }
     public required VaultEncrypted Vault { get; set; }
     public required DateTime CreatedAtUtc { get; set; }
     public required DateTime UpdatedAtUtc { get; set; }

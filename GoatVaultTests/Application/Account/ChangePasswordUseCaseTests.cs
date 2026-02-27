@@ -98,6 +98,7 @@ public class ChangePasswordUseCaseTests
                 ((ChangeMasterPasswordRequest)o).AuthSalt != ((ChangeMasterPasswordRequest)o).AuthVerifier &&
                 Convert.FromBase64String(((ChangeMasterPasswordRequest)o).AuthSalt).Length == 32 &&
                 Convert.FromBase64String(((ChangeMasterPasswordRequest)o).VaultSalt).Length == 32 &&
+                ((ChangeMasterPasswordRequest)o).Argon2Parameters != null &&
                 ReferenceEquals(((ChangeMasterPasswordRequest)o).Vault, newEncryptedVault)),
             It.IsAny<CancellationToken>()),
             Times.Once);

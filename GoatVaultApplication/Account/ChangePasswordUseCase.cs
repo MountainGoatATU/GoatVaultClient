@@ -55,6 +55,7 @@ public class ChangePasswordUseCase(
             AuthSalt = Convert.ToBase64String(result.newAuthSalt),
             AuthVerifier = Convert.ToBase64String(result.newAuthVerifier),
             VaultSalt = Convert.ToBase64String(result.newVaultSalt),
+            Argon2Parameters = result.newArgon2Parameters,
             Vault = result.newEncryptedVault
         };
 

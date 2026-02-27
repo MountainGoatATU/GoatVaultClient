@@ -190,6 +190,7 @@ public class ServerAuthServiceTests
             AuthSalt = "AQID",
             AuthVerifier = "BAUG",
             VaultSalt = "BwgJ",
+            Argon2Parameters = GoatVaultCore.Models.Objects.Argon2Parameters.Default,
             Vault = new GoatVaultCore.Models.VaultEncrypted([1, 2, 3], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
             {
                 EncryptedBlob = [1, 2, 3],
@@ -250,6 +251,7 @@ public class ServerAuthServiceTests
             AuthSalt = "AQID",
             AuthVerifier = "BAUG",
             VaultSalt = "BwgJ",
+            Argon2Parameters = GoatVaultCore.Models.Objects.Argon2Parameters.Default,
             Vault = new GoatVaultCore.Models.VaultEncrypted([1, 2, 3], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
             {
                 EncryptedBlob = [1, 2, 3],
