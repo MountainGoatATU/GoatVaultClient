@@ -1,9 +1,23 @@
 <Solution>
-  <Project Path="GoatVaultApplication/GoatVaultApplication.csproj" />
-  <Project Path="GoatVaultClient/GoatVaultClient.csproj">
-    <Deploy Solution="Debug|*" />
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="GoatVaultApplication/GoatVaultApplication.csproj">
+    <Platform Solution="*|x64" Project="x64" />
   </Project>
-  <Project Path="GoatVaultCore/GoatVaultCore.csproj" Id="fe27a4c1-ec49-48bf-9d8a-eacd0dccb2eb" />
-  <Project Path="GoatVaultInfrastructure/GoatVaultInfrastructure.csproj" Id="7de2c99f-9f30-4e65-83f4-b55446c2d27c" />
-  <Project Path="GoatVaultTests/GoatVaultTests.csproj" Id="acd3abf3-9ace-41d8-9db2-a4da65234231" />
+  <Project Path="GoatVaultClient/GoatVaultClient.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+    <Deploy Solution="*|Any CPU" />
+    <Deploy Solution="Release|x64" />
+  </Project>
+  <Project Path="GoatVaultCore/GoatVaultCore.csproj" Id="fe27a4c1-ec49-48bf-9d8a-eacd0dccb2eb">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="GoatVaultInfrastructure/GoatVaultInfrastructure.csproj" Id="7de2c99f-9f30-4e65-83f4-b55446c2d27c">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="GoatVaultTests/GoatVaultTests.csproj" Id="acd3abf3-9ace-41d8-9db2-a4da65234231">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
 </Solution>

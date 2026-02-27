@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="GoatVaultClient.Controls.PendingPopupTemplate">
+<ContentView
+    x:Class="GoatVaultClient.Controls.PendingPopupTemplate"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    x:DataType="controls:PendingPopupTemplate">
     <ContentView.ControlTemplate>
         <ControlTemplate>
-            <Border BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"
-                    StrokeThickness="0"
-                    WidthRequest="{TemplateBinding FrameWidth}"
-                    VerticalOptions="Center"
-                    MaximumHeightRequest="650">
+            <Border
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
+                                                  Dark={StaticResource DarkSurface}}"
+                MaximumHeightRequest="650"
+                StrokeThickness="0"
+                VerticalOptions="Center"
+                WidthRequest="{TemplateBinding FrameWidth}">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="{x:StaticResource xLargeIncreased}"/>
+                    <RoundRectangle CornerRadius="{x:StaticResource xLargeIncreased}" />
                 </Border.StrokeShape>
-                <Grid RowDefinitions="Auto, *, Auto" RowSpacing="{x:StaticResource sContent}" Padding="{x:StaticResource sContent}">
-                    <Label Grid.Row="0"
-                           Text="{TemplateBinding Title}" 
-                           Style="{x:StaticResource MaterialHeadlineMedium}"
-                           Padding="20"
-                           HorizontalOptions="Center"/>
-                    <ActivityIndicator Grid.Row="1"
-                                       IsRunning="true"
-                                       IsVisible="true"/>
+                <Grid
+                    Padding="{x:StaticResource sContent}"
+                    RowDefinitions="Auto, *, Auto"
+                    RowSpacing="{x:StaticResource sContent}">
+                    <Label
+                        Grid.Row="0"
+                        Padding="20"
+                        HorizontalOptions="Center"
+                        Style="{x:StaticResource MaterialHeadlineMedium}"
+                        Text="{TemplateBinding Title}" />
+                    <ActivityIndicator
+                        Grid.Row="1"
+                        IsRunning="true"
+                        IsVisible="true" />
                 </Grid>
             </Border>
         </ControlTemplate>

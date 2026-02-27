@@ -5,8 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels">
-
+    xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
+    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+    x:DataType="models:VaultEntry">
     <controls:Component BorderMargin="0">
         <VerticalStackLayout Spacing="10">
 
