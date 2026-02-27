@@ -219,7 +219,7 @@ public static class MauiProgram
         {
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.EnsureCreated();
+            db.Database.Migrate();
 
             var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MauiProgram");
             logger.LogInformation("Database initialized at {DbPath}", dbPath);

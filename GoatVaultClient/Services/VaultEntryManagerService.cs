@@ -2,7 +2,6 @@ using GoatVaultApplication.Vault;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
-using GoatVaultCore.Services;
 using Mopups.Services;
 
 namespace GoatVaultClient.Services;
@@ -13,7 +12,7 @@ public class VaultEntryManagerService(
     UpdateVaultEntryUseCase updateEntry,
     DeleteVaultEntryUseCase deleteEntry,
     ISyncingService syncing,
-    PwnedPasswordService pwned,
+    IPwnedPasswordService pwned,
     IPasswordStrengthService passwordStrength)
 {
     public async Task<bool> CreateEntryAsync(IEnumerable<CategoryItem> categories)
@@ -56,7 +55,7 @@ public class VaultEntryManagerService(
 
         if (!string.IsNullOrEmpty(newEntry.Password))
         {
-            newEntry.BreachCount = (int)await pwned.CheckPasswordAsync(newEntry.Password);
+            newEntry.BreachCount = (int)(await pwned.CheckPasswordAsync(newEntry.Password) ?? 0);
 
             // If breached, confirm with user before saving
             if (newEntry.BreachCount > 0)

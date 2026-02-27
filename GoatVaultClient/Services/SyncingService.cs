@@ -346,6 +346,7 @@ public class SyncingService(
                 MfaEnabled = serverUser.MfaEnabled,
                 MfaSecret = mfaSecret,
                 ShamirEnabled = serverUser.ShamirEnabled,
+                Argon2Parameters = serverUser.Argon2Parameters ?? GoatVaultCore.Models.Objects.Argon2Parameters.Default,
                 VaultSalt = Convert.FromBase64String(serverUser.VaultSalt),
                 UpdatedAtUtc = serverUser.UpdatedAtUtc
             };
@@ -354,6 +355,7 @@ public class SyncingService(
         {
             // Preserve existing AuthVerifier/MfaSecret if updating existing user
             localUser.AuthSalt = Convert.FromBase64String(serverUser.AuthSalt);
+            localUser.Argon2Parameters = serverUser.Argon2Parameters ?? localUser.Argon2Parameters;
         }
 
         localUser.Email = new Email(serverUser.Email);

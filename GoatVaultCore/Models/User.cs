@@ -26,6 +26,8 @@ public class User
     public required byte[] VaultSalt { get; set; } = [];
     public VaultEncrypted Vault { get; set; } = null!;
 
+    public Argon2Parameters Argon2Parameters { get; set; } = new();
+
     // Timestamps
     public required DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public required DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;

@@ -21,7 +21,7 @@ public class EnableShamirUseCase(
             throw new InvalidOperationException("Shamir's Secret Sharing is already enabled for this user.");
 
         // 1. Verify current password
-        var currentAuthVerifier = await Task.Run(() => cryptoService.GenerateAuthVerifier(currentPassword, user.AuthSalt));
+        var currentAuthVerifier = await Task.Run(() => cryptoService.GenerateAuthVerifier(currentPassword, user.AuthSalt, user.Argon2Parameters));
         if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
         {
             throw new UnauthorizedAccessException("Incorrect current password.");

@@ -19,7 +19,7 @@ public sealed class LoginOfflineUseCase(
             throw new InvalidOperationException("Vault is missing.");
 
         // 2. Decrypt vault
-        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, user.VaultSalt));
+        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, user.VaultSalt, user.Argon2Parameters));
         var decryptedVault = await Task.Run(() => vaultCrypto.Decrypt(user.Vault, masterKey));
 
         // 3. Start session

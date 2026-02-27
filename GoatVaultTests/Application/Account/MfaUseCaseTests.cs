@@ -25,7 +25,7 @@ public class MfaUseCaseTests
         users.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", user.AuthSalt)).Returns(user.AuthVerifier);
+        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", user.AuthSalt, user.Argon2Parameters)).Returns(user.AuthVerifier);
 
         var serverAuth = new Mock<IServerAuthService>();
         serverAuth.Setup(x => x.UpdateUserAsync(
@@ -63,7 +63,7 @@ public class MfaUseCaseTests
         users.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", user.AuthSalt)).Returns(user.AuthVerifier);
+        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", user.AuthSalt, user.Argon2Parameters)).Returns(user.AuthVerifier);
 
         var serverAuth = new Mock<IServerAuthService>();
         serverAuth.Setup(x => x.UpdateUserAsync(

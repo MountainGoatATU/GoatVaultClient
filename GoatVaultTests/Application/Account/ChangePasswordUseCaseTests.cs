@@ -23,7 +23,7 @@ public class ChangePasswordUseCaseTests
         users.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("wrong", user.AuthSalt)).Returns([9, 9, 9]);
+        crypto.Setup(x => x.GenerateAuthVerifier("wrong", user.AuthSalt, user.Argon2Parameters)).Returns([9, 9, 9]);
 
         var useCase = new ChangePasswordUseCase(
             session.Object,
@@ -59,10 +59,10 @@ public class ChangePasswordUseCaseTests
         users.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("CurrentPassword123!", user.AuthSalt)).Returns(currentVerifier);
-        crypto.Setup(x => x.GenerateAuthVerifier("NewPassword123!", It.IsAny<byte[]>())).Returns(newVerifier);
-        crypto.Setup(x => x.DeriveMasterKey("CurrentPassword123!", user.VaultSalt)).Returns(currentMasterKey);
-        crypto.Setup(x => x.DeriveMasterKey("NewPassword123!", It.IsAny<byte[]>())).Returns(newMasterKey);
+        crypto.Setup(x => x.GenerateAuthVerifier("CurrentPassword123!", user.AuthSalt, user.Argon2Parameters)).Returns(currentVerifier);
+        crypto.Setup(x => x.GenerateAuthVerifier("NewPassword123!", It.IsAny<byte[]>(), It.IsAny<Argon2Parameters?>())).Returns(newVerifier);
+        crypto.Setup(x => x.DeriveMasterKey("CurrentPassword123!", user.VaultSalt, user.Argon2Parameters)).Returns(currentMasterKey);
+        crypto.Setup(x => x.DeriveMasterKey("NewPassword123!", It.IsAny<byte[]>(), It.IsAny<Argon2Parameters?>())).Returns(newMasterKey);
 
         var vaultCrypto = new Mock<IVaultCrypto>();
         vaultCrypto.Setup(x => x.Decrypt(user.Vault, currentMasterKey)).Returns(decryptedVault);
@@ -98,6 +98,7 @@ public class ChangePasswordUseCaseTests
                 ((ChangeMasterPasswordRequest)o).AuthSalt != ((ChangeMasterPasswordRequest)o).AuthVerifier &&
                 Convert.FromBase64String(((ChangeMasterPasswordRequest)o).AuthSalt).Length == 32 &&
                 Convert.FromBase64String(((ChangeMasterPasswordRequest)o).VaultSalt).Length == 32 &&
+                ((ChangeMasterPasswordRequest)o).Argon2Parameters != null &&
                 ReferenceEquals(((ChangeMasterPasswordRequest)o).Vault, newEncryptedVault)),
             It.IsAny<CancellationToken>()),
             Times.Once);

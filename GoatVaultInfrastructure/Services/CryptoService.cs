@@ -13,9 +13,11 @@ public sealed class CryptoService : ICryptoService
     private const int SaltLength = 32;
     private const int NonceLength = 12;
 
-    public byte[] GenerateAuthVerifier(string password, byte[] authSalt) => Argon2Hash(password, authSalt);
+    public byte[] GenerateAuthVerifier(string password, byte[] authSalt, Argon2Parameters? parameters = null)
+        => Argon2Hash(password, authSalt, parameters ?? Argon2Parameters.Default);
 
-    public MasterKey DeriveMasterKey(string password, byte[] vaultSalt) => new(Argon2Hash(password, vaultSalt));
+    public MasterKey DeriveMasterKey(string password, byte[] vaultSalt, Argon2Parameters? parameters = null)
+        => new(Argon2Hash(password, vaultSalt, parameters ?? Argon2Parameters.Default));
 
     byte[] ICryptoService.GenerateSalt() => GenerateSalt();
 
@@ -23,23 +25,24 @@ public sealed class CryptoService : ICryptoService
 
     public static byte[] GenerateNonce() => GenerateRandomBytes(NonceLength);
 
-    private static byte[] Argon2Hash(string password, byte[] salt)
+    private static byte[] Argon2Hash(string password, byte[] salt, Argon2Parameters parameters)
     {
         var passwordBytes = Encoding.UTF8.GetBytes(password);
 
-        var lanes = Math.Min(4, Environment.ProcessorCount);
+        var lanes = Math.Min(parameters.Lanes, Environment.ProcessorCount);
+        var threads = Math.Min(parameters.Threads, Environment.ProcessorCount);
 
         var config = new Argon2Config
         {
             Type = Argon2Type.HybridAddressing,
             Version = Argon2Version.Nineteen,
-            TimeCost = 3,
-            MemoryCost = 65536,
+            TimeCost = parameters.TimeCost,
+            MemoryCost = parameters.MemoryCost,
             Lanes = lanes,
-            Threads = lanes,
+            Threads = threads,
             Password = passwordBytes,
             Salt = salt,
-            HashLength = 32,
+            HashLength = parameters.HashLength,
         };
 
         SecureArray.ReportMaxLockableOnLockFail = true;

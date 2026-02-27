@@ -23,7 +23,7 @@ public class ChangeEmailUseCaseTests
         users.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("wrong", user.AuthSalt)).Returns([9, 9, 9]);
+        crypto.Setup(x => x.GenerateAuthVerifier("wrong", user.AuthSalt, user.Argon2Parameters)).Returns([9, 9, 9]);
 
         var useCase = new ChangeEmailUseCase(session.Object, users.Object, crypto.Object, Mock.Of<IServerAuthService>());
 
@@ -48,7 +48,7 @@ public class ChangeEmailUseCaseTests
         users.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", user.AuthSalt)).Returns(user.AuthVerifier);
+        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", user.AuthSalt, user.Argon2Parameters)).Returns(user.AuthVerifier);
 
         var serverAuth = new Mock<IServerAuthService>();
         serverAuth.Setup(x => x.UpdateUserAsync(

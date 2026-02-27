@@ -25,10 +25,13 @@ public class LoginOnlineUseCase(
         var authInitRequest = new AuthInitRequest { Email = email.Value };
         var authInitResponse = await serverAuth.InitAsync(authInitRequest, ct);
         var userId = Guid.Parse(authInitResponse.UserId);
+        var existing = await users.GetByIdAsync(userId);
+        var existingArgon2Parameters = existing?.Argon2Parameters;
+        var authArgon2Parameters = existingArgon2Parameters ?? Argon2Parameters.Default;
 
         // 2. Compute proof client-side
         var authSalt = Convert.FromBase64String(authInitResponse.AuthSalt);
-        var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt), ct);
+        var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt, authArgon2Parameters), ct);
 
         var nonce = Convert.FromBase64String(authInitResponse.Nonce);
         using var hmac = new HMACSHA256(authVerifier);
@@ -62,15 +65,16 @@ public class LoginOnlineUseCase(
         if (userResponse.Vault == null)
             throw new InvalidOperationException("Vault is missing.");
 
+        var argon2Parameters = userResponse.Argon2Parameters ?? existingArgon2Parameters ?? Argon2Parameters.Default;
+
         // 6. Decrypt vault
         var vaultEncrypted = userResponse.Vault;
         var vaultSalt = Convert.FromBase64String(userResponse.VaultSalt);
 
-        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, vaultSalt), ct);
+        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, vaultSalt, argon2Parameters), ct);
         var decryptedVault = await Task.Run(() => vaultCrypto.Decrypt(vaultEncrypted, masterKey), ct);
 
         // 7. Save to local DB (for offline login & sync baseline)
-        var existing = await users.GetByIdAsync(userId);
         User userToSave;
 
         var mfaSecret = userResponse.MfaSecret is not null
@@ -86,6 +90,7 @@ public class LoginOnlineUseCase(
             existing.MfaSecret = mfaSecret;
             existing.ShamirEnabled = userResponse.ShamirEnabled;
             existing.VaultSalt = vaultSalt;
+            existing.Argon2Parameters = argon2Parameters;
             existing.Vault = vaultEncrypted;
             existing.CreatedAtUtc = userResponse.CreatedAtUtc;
             existing.UpdatedAtUtc = userResponse.UpdatedAtUtc;
@@ -104,6 +109,7 @@ public class LoginOnlineUseCase(
                 MfaSecret = mfaSecret,
                 ShamirEnabled = userResponse.ShamirEnabled,
                 VaultSalt = vaultSalt,
+                Argon2Parameters = argon2Parameters,
                 Vault = vaultEncrypted,
                 CreatedAtUtc = userResponse.CreatedAtUtc,
                 UpdatedAtUtc = userResponse.UpdatedAtUtc

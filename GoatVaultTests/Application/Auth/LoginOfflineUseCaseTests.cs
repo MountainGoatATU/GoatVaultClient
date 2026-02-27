@@ -40,7 +40,7 @@ public class LoginOfflineUseCaseTests
         users.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.DeriveMasterKey("Password123!", user.VaultSalt)).Returns(masterKey);
+        crypto.Setup(x => x.DeriveMasterKey("Password123!", user.VaultSalt, user.Argon2Parameters)).Returns(masterKey);
 
         var vaultCrypto = new Mock<IVaultCrypto>();
         vaultCrypto.Setup(x => x.Decrypt(user.Vault, masterKey)).Returns(decryptedVault);
