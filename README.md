@@ -7,7 +7,7 @@
 
 ## Features
 
-*   Zero-knowledge storage of vault and master password
+*   Zero-knowledge storage of vault
 *   Encrypted vault with Argon2Id and AES
 *   Cross-platform syncing on Windows and Android
 
