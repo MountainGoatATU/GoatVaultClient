@@ -1,10 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Account;
-using GoatVaultApplication.Auth;
 using GoatVaultApplication.Vault;
 using GoatVaultClient.Controls.Popups;
-using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -22,6 +20,7 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly ChangePasswordUseCase _changePassword;
     private readonly EnableMfaUseCase _enableMfa;
     private readonly DisableMfaUseCase _disableMfa;
+    private readonly DeleteAccountUseCase _deleteAccount;
     private readonly ISessionContext _session;
 
     [ObservableProperty] private string email = string.Empty;
@@ -44,6 +43,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         ChangePasswordUseCase changePassword,
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
+        DeleteAccountUseCase deleteAccount,
         ISessionContext session)
     {
         _loadUserProfile = loadUserProfile;
@@ -52,6 +52,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         _changePassword = changePassword;
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
+        _deleteAccount = deleteAccount;
         _session = session;
 
 
@@ -245,6 +246,36 @@ public partial class SecurityPageViewModel : BaseViewModel
             MfaEnabled = false;
             await ShowSuccessAsync("MFA disabled successfully.");
             await RefreshVaultScoreAsync();
+        });
+    }
+
+    [RelayCommand]
+    private async Task DeleteAccount()
+    {
+        var confirm1 = await ShowConfirmationAsync("Delete Account", 
+            "Are you sure you want to delete your account? This action is permanent and cannot be reversed.");
+        if (!confirm1)
+            return;
+
+        var password = await PromptPasswordAsync("Confirm Password");
+        if (password == null)
+            return;
+
+        var confirm2 = await ShowConfirmationAsync("Delete Account",
+            "Are you really sure? There is no turning back after confirming this.");
+        if (!confirm2)
+            return;
+
+        await SafeExecuteAsync(async () =>
+        {
+            await _deleteAccount.ExecuteAsync(password);
+            await ShowSuccessAsync("Your account has been permanently deleted.");
+
+            if (Shell.Current is AppShell appShell)
+                appShell.DisableFlyout();
+
+            // Clear the navigation stack and return to the intro route
+            await Shell.Current.GoToAsync("//login");
         });
     }
 
