@@ -105,7 +105,6 @@ jobs:
           --logger trx
           --results-directory ./TestResults
           --collect:"XPlat Code Coverage"
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Upload test results
@@ -113,7 +112,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ${{ env.WORKING_DIRECTORY }}/TestResults/*.trx
+          path: ${{ env.WORKING_DIRECTORY }}/TestResults/**/*.trx
           retention-days: 30
 
       - name: Upload coverage artifacts
@@ -125,12 +124,10 @@ jobs:
           retention-days: 30
 
       - name: Upload coverage to Codecov
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.CODECOV_TOKEN != ''
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v5
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          token: ${{ env.CODECOV_TOKEN }}
+        with:   
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.WORKING_DIRECTORY }}/TestResults/**/coverage.cobertura.xml
           slug: MountainGoatATU/GoatVaultClient
 
