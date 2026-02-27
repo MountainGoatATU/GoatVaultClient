@@ -1,3 +1,7 @@
+[![codecov](https://codecov.io/github/mountaingoatatu/goatvaultclient/graph/badge.svg?token=5ESATTO6OQ)](https://codecov.io/github/mountaingoatatu/goatvaultclient)
+[![CodeScene Average Code Health](https://codescene.io/projects/76220/status-badges/average-code-health?component-name=Goatvaultclient)](https://codescene.io/projects/76220/architecture/biomarkers?component=Goatvaultclient)
+[![CodeScene System Mastery](https://codescene.io/projects/76220/status-badges/system-mastery?component-name=Goatvaultclient)](https://codescene.io/projects/76220/)
+
 # GoatVault
 
 **GoatVault** is a secure, cross-platform password manager built with **.NET MAUI**.
