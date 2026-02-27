@@ -1,5 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="MaterialColors.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <OnPlatform x:Key="MaterialRegularFont" x:TypeArguments="x:String">
         <On Platform="Android" Value="JetBrainsMonoRegular" />
         <On Platform="iOS" Value="JetBrainsMonoRegular" />
