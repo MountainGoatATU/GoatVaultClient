@@ -132,7 +132,7 @@ public class EntryVaultUseCasesTests
             MfaSecret = [],
             ShamirEnabled = false,
             VaultSalt = [3, 4, 5],
-            Vault = CreateEncryptedVault(),
+            Vault = TestFixtures.CreateEncryptedVault(),
             CreatedAtUtc = DateTime.UtcNow,
             UpdatedAtUtc = DateTime.UtcNow
         };
@@ -141,21 +141,11 @@ public class EntryVaultUseCasesTests
         users.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
 
         var crypto = new Mock<IVaultCrypto>();
-        crypto.Setup(x => x.Encrypt(vault, It.IsAny<MasterKey>(), user.VaultSalt)).Returns(CreateEncryptedVault());
+        crypto.Setup(x => x.Encrypt(vault, It.IsAny<MasterKey>(), user.VaultSalt)).Returns(TestFixtures.CreateEncryptedVault());
 
         var saveUseCase = new SaveVaultUseCase(users.Object, session.Object, crypto.Object);
         return new EntryContext(vault, session, users, saveUseCase);
     }
-
-    private static VaultEncrypted CreateEncryptedVault() => new(
-        encryptedBlob: [1, 2, 3],
-        nonce: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        authTag: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    {
-        EncryptedBlob = [1, 2, 3],
-        Nonce = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        AuthTag = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    };
 
     private sealed record EntryContext(
         VaultDecrypted Vault,

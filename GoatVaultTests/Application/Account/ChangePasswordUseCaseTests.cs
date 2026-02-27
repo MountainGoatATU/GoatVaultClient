@@ -47,7 +47,7 @@ public class ChangePasswordUseCaseTests
         var currentVerifier = user.AuthVerifier;
         var newVerifier = new byte[] { 40, 41, 42, 43 };
         var decryptedVault = new VaultDecrypted { Categories = [], Entries = [] };
-        var newEncryptedVault = CreateEncryptedVault();
+        var newEncryptedVault = TestFixtures.CreateEncryptedVault();
         using var currentMasterKey = new MasterKey(new byte[32]);
         using var newMasterKey = new MasterKey(new byte[32]);
         var updatedAt = DateTime.UtcNow;
@@ -121,7 +121,7 @@ public class ChangePasswordUseCaseTests
         MfaSecret = [],
         ShamirEnabled = false,
         VaultSalt = [7, 8, 9],
-        Vault = CreateEncryptedVault(),
+        Vault = TestFixtures.CreateEncryptedVault(),
         CreatedAtUtc = DateTime.UtcNow,
         UpdatedAtUtc = DateTime.UtcNow
     };
@@ -136,18 +136,8 @@ public class ChangePasswordUseCaseTests
         MfaSecret = null,
         ShamirEnabled = false,
         VaultSalt = Convert.ToBase64String([3]),
-        Vault = CreateEncryptedVault(),
+        Vault = TestFixtures.CreateEncryptedVault(),
         CreatedAtUtc = DateTime.UtcNow,
         UpdatedAtUtc = updatedAtUtc
-    };
-
-    private static VaultEncrypted CreateEncryptedVault() => new(
-        encryptedBlob: [1, 2, 3],
-        nonce: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        authTag: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    {
-        EncryptedBlob = [1, 2, 3],
-        Nonce = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        AuthTag = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     };
 }
