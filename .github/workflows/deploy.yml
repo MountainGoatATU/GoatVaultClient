@@ -129,6 +129,7 @@ jobs:
         with:   
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./TestResults/**/coverage.cobertura.xml
+          disable_search: true
           slug: MountainGoatATU/GoatVaultClient
 
       # --------------------------
