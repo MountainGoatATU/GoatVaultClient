@@ -8,7 +8,11 @@
     xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     x:DataType="vm:MainPageViewModel">
-    <controls:Component BorderMargin="0">
+    <controls:Component
+        BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHigh},
+                                  Dark={StaticResource DarkSurfaceContainerHigh}}"
+        BorderMargin="0"
+        ContentPadding="{StaticResource sContent}">
         <VerticalStackLayout Spacing="10">
 
             <VerticalStackLayout Spacing="{StaticResource formSpacing}">
