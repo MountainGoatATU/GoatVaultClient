@@ -37,6 +37,14 @@ public class ServerAuthService(
 
     public async Task<AuthRegisterResponse> RegisterAsync(AuthRegisterRequest payload, CancellationToken ct = default) => await PostAsync<AuthRegisterResponse>("v1/auth/register", payload, ct);
 
+    public async Task<string> DeleteUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var response = await http.DeleteAsync($"{BaseUrl}/v1/users/{userId}", ct);
+        await EnsureSuccessAsync(response, ct);
+        var json = await response.Content.ReadAsStringAsync(ct);
+        return JsonSerializer.Deserialize<string>(json, JsonOptions) ?? throw new InvalidOperationException("Invalid response");
+    }
+
     private async Task<T> PostAsync<T>(string endpoint, object payload, CancellationToken ct)
     {
         var content = new StringContent(
