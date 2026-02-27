@@ -6,10 +6,9 @@ using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class RegisterPageViewModel : BaseViewModel
+public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewModel
 {
     // Services
-    private readonly RegisterUseCase _register;
     private CancellationTokenSource? _debounceCts;
     // Observable Properties (Bound to Entry fields)
     [ObservableProperty] private string? email;
@@ -44,20 +43,16 @@ public partial class RegisterPageViewModel : BaseViewModel
         IsPasswordGood &&
         IsConfirmPasswordGood;
 
-    // Constructor (Clean Dependency Injection)
-    public RegisterPageViewModel(RegisterUseCase register)
-    {
-        _register = register;
-    }
     partial void OnEmailChanged(string? value)
     {
-        var result = _register.ValidateEmail(Email);
-        if (result != null)
-        {
-            IsEmailWarning = result.IsWarning;
-            IsEmailGood = result.IsGood;
-            EmailMessage = result.Message;
-        }
+        var result = register.ValidateEmail(Email);
+
+        if (result == null) 
+            return;
+
+        IsEmailWarning = result.IsWarning;
+        IsEmailGood = result.IsGood;
+        EmailMessage = result.Message;
     }
     partial void OnPasswordChanged(string? value)
     {
@@ -111,7 +106,7 @@ public partial class RegisterPageViewModel : BaseViewModel
         if (token.IsCancellationRequested) return;
 
         // Delegate business logic to the Use Case
-        var passwordValidationResult = await _register.ValidatePasswordAsync(value);
+        var passwordValidationResult = await register.ValidatePasswordAsync(value);
 
         if (!token.IsCancellationRequested)
         {
@@ -129,7 +124,7 @@ public partial class RegisterPageViewModel : BaseViewModel
         {
             // Call Register use case
             if (Email is not null && Password is not null)
-                await _register.ExecuteAsync(new Email(Email), Password);
+                await register.ExecuteAsync(new Email(Email), Password);
 
             if (CreateRecovery)
             {
