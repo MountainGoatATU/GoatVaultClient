@@ -1,10 +1,12 @@
-﻿namespace GoatVaultCore.Models.Objects;
+namespace GoatVaultCore.Models.Objects;
 
 public sealed record Argon2Parameters
 {
-    public required string Type { get; set; } // "id"
-    public required int MemoryCost { get; set; }
-    public required int TimeCost { get; set; }
-    public required int Lanes { get; set; }
-    public required int Version { get; set; }
+    public int TimeCost { get; init; } = 3;
+    public int MemoryCost { get; init; } = 65536;
+    public int Lanes { get; init; } = 4;
+    public int Threads { get; init; } = 4;
+    public int HashLength { get; init; } = 32;
+
+    public static Argon2Parameters Default { get; } = new();
 }

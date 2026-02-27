@@ -35,6 +35,9 @@ public class AppDbContextTests
         Assert.Equal(user.Vault.EncryptedBlob, loaded.Vault.EncryptedBlob);
         Assert.Equal(user.Vault.Nonce, loaded.Vault.Nonce);
         Assert.Equal(user.Vault.AuthTag, loaded.Vault.AuthTag);
+        Assert.Equal(user.Argon2Parameters.TimeCost, loaded.Argon2Parameters.TimeCost);
+        Assert.Equal(user.Argon2Parameters.MemoryCost, loaded.Argon2Parameters.MemoryCost);
+        Assert.Equal(user.Argon2Parameters.HashLength, loaded.Argon2Parameters.HashLength);
     }
 
     [Fact]
@@ -62,6 +65,11 @@ public class AppDbContextTests
         Assert.Contains("VaultEncryptedBlob", columns);
         Assert.Contains("VaultNonce", columns);
         Assert.Contains("VaultAuthTag", columns);
+        Assert.Contains("Argon2TimeCost", columns);
+        Assert.Contains("Argon2MemoryCost", columns);
+        Assert.Contains("Argon2Lanes", columns);
+        Assert.Contains("Argon2Threads", columns);
+        Assert.Contains("Argon2HashLength", columns);
     }
 
     private static SqliteConnection CreateInMemoryConnection()
@@ -85,6 +93,14 @@ public class AppDbContextTests
         MfaEnabled = false,
         MfaSecret = [7, 8],
         ShamirEnabled = false,
+        Argon2Parameters = new Argon2Parameters
+        {
+            TimeCost = 4,
+            MemoryCost = 131072,
+            Lanes = 2,
+            Threads = 2,
+            HashLength = 32
+        },
         VaultSalt = [9, 10],
         Vault = new VaultEncrypted(
             encryptedBlob: [11, 12, 13],

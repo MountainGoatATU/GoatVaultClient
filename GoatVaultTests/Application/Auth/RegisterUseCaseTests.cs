@@ -50,8 +50,8 @@ public class RegisterUseCaseTests
         crypto.SetupSequence(x => x.GenerateSalt())
             .Returns(authSalt)
             .Returns(vaultSalt);
-        crypto.Setup(x => x.GenerateAuthVerifier("StrongPassword123!", authSalt)).Returns(authVerifier);
-        crypto.Setup(x => x.DeriveMasterKey("StrongPassword123!", vaultSalt)).Returns(masterKey);
+        crypto.Setup(x => x.GenerateAuthVerifier("StrongPassword123!", authSalt, It.IsAny<Argon2Parameters?>())).Returns(authVerifier);
+        crypto.Setup(x => x.DeriveMasterKey("StrongPassword123!", vaultSalt, It.IsAny<Argon2Parameters?>())).Returns(masterKey);
 
         var vaultCrypto = new Mock<IVaultCrypto>();
         vaultCrypto.Setup(x => x.Encrypt(It.IsAny<VaultDecrypted>(), masterKey, vaultSalt)).Returns(encryptedVault);

@@ -82,8 +82,8 @@ public class LoginOnlineUseCaseTests
         var expectedProof = Convert.ToBase64String(hmac.ComputeHash(nonceBytes));
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", authSaltBytes)).Returns(authVerifierBytes);
-        crypto.Setup(x => x.DeriveMasterKey("Password123!", vaultSaltBytes)).Returns(masterKey);
+        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", authSaltBytes, It.IsAny<Argon2Parameters?>())).Returns(authVerifierBytes);
+        crypto.Setup(x => x.DeriveMasterKey("Password123!", vaultSaltBytes, It.IsAny<Argon2Parameters?>())).Returns(masterKey);
 
         var vaultCrypto = new Mock<IVaultCrypto>();
         vaultCrypto.Setup(x => x.Decrypt(encryptedVault, masterKey)).Returns(decryptedVault);
@@ -158,8 +158,8 @@ public class LoginOnlineUseCaseTests
         using var masterKey = new MasterKey(new byte[32]);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", It.IsAny<byte[]>())).Returns(authVerifierBytes);
-        crypto.Setup(x => x.DeriveMasterKey("Password123!", vaultSaltBytes)).Returns(masterKey);
+        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", It.IsAny<byte[]>(), It.IsAny<Argon2Parameters?>())).Returns(authVerifierBytes);
+        crypto.Setup(x => x.DeriveMasterKey("Password123!", vaultSaltBytes, It.IsAny<Argon2Parameters?>())).Returns(masterKey);
 
         var vaultCrypto = new Mock<IVaultCrypto>();
         vaultCrypto.Setup(x => x.Decrypt(encryptedVault, masterKey)).Returns(decryptedVault);
@@ -232,8 +232,8 @@ public class LoginOnlineUseCaseTests
         using var masterKey = new MasterKey(new byte[32]);
 
         var crypto = new Mock<ICryptoService>();
-        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", It.IsAny<byte[]>())).Returns(authVerifierBytes);
-        crypto.Setup(x => x.DeriveMasterKey("Password123!", vaultSaltBytes)).Returns(masterKey);
+        crypto.Setup(x => x.GenerateAuthVerifier("Password123!", It.IsAny<byte[]>(), It.IsAny<Argon2Parameters?>())).Returns(authVerifierBytes);
+        crypto.Setup(x => x.DeriveMasterKey("Password123!", vaultSaltBytes, It.IsAny<Argon2Parameters?>())).Returns(masterKey);
 
         var vaultCrypto = new Mock<IVaultCrypto>();
         vaultCrypto.Setup(x => x.Decrypt(encryptedVault, masterKey)).Returns(decryptedVault);
@@ -327,7 +327,7 @@ public class LoginOnlineUseCaseTests
 
         var useCase = CreateUseCase(
             serverAuth.Object,
-            Mock.Of<ICryptoService>(x => x.GenerateAuthVerifier(It.IsAny<string>(), It.IsAny<byte[]>()) == new byte[] { 1 }),
+            Mock.Of<ICryptoService>(x => x.GenerateAuthVerifier(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<Argon2Parameters?>()) == new byte[] { 1 }),
             Mock.Of<IVaultCrypto>(),
             Mock.Of<ISessionContext>(),
             Mock.Of<IAuthTokenService>(),

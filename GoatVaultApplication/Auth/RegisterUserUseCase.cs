@@ -24,8 +24,9 @@ public class RegisterUseCase(
         }
 
         // 2. Generate auth salt, auth verifier, & vault salt
+        var argon2Parameters = Argon2Parameters.Default;
         var authSalt = crypto.GenerateSalt();
-        var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt));
+        var authVerifier = await Task.Run(() => crypto.GenerateAuthVerifier(password, authSalt, argon2Parameters));
         var vaultSalt = crypto.GenerateSalt();
 
         // 3. Create empty vault and encrypt
@@ -34,7 +35,7 @@ public class RegisterUseCase(
             Categories = [],
             Entries = []
         };
-        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, vaultSalt));
+        var masterKey = await Task.Run(() => crypto.DeriveMasterKey(password, vaultSalt, argon2Parameters));
         var encryptedVault = await Task.Run(() => vaultCrypto.Encrypt(emptyVault, masterKey, vaultSalt));
 
         // 4. Create registration payload
