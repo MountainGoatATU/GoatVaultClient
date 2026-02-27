@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
-    x:Name="RootLayout">
+    x:Name="RootLayout"
+    x:DataType="controls:PopupTemplate">
     <ContentView.ControlTemplate>
         <ControlTemplate>
             <Border

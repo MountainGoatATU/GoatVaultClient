@@ -1,36 +1,46 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<mopups:PopupPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
-             xmlns:controls="clr-namespace:GoatVaultClient.Controls"
-             x:Class="GoatVaultClient.Controls.Popups.ErrorPopup"
-             BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
-             CloseWhenBackgroundIsClicked="True">
+<mopups:PopupPage
+    x:Class="GoatVaultClient.Controls.Popups.ErrorPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+    xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
+    x:DataType="popups:ErrorPopup"
+    BackgroundColor="{AppThemeBinding Light=#80000000,
+                                      Dark=#B0000000}"
+    CloseWhenBackgroundIsClicked="True">
 
-    <controls:PopupTemplate Title="Error"
-                            AcceptText="Close"
-                            AcceptCommand="{Binding CloseCommand}"
-                            CancelText=""
-                            FrameWidth="350">
-        
-        <VerticalStackLayout Spacing="10" Padding="10">
-            <Label Text="{Binding Message}" 
-                   TextColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}"
-                   LineBreakMode="WordWrap" />
-            
-            <CollectionView ItemsSource="{Binding Errors}"
-                            SelectionMode="None"
-                            MaximumHeightRequest="200">
+    <controls:PopupTemplate
+        Title="Error"
+        AcceptCommand="{Binding CloseCommand}"
+        AcceptText="Close"
+        CancelText=""
+        FrameWidth="350">
+
+        <VerticalStackLayout Padding="10" Spacing="10">
+            <Label
+                LineBreakMode="WordWrap"
+                Text="{Binding Message}"
+                TextColor="{AppThemeBinding Light={StaticResource LightOnSurface},
+                                            Dark={StaticResource DarkOnSurface}}" />
+
+            <CollectionView
+                ItemsSource="{Binding Errors}"
+                MaximumHeightRequest="200"
+                SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Label Text="{Binding .}" 
-                               TextColor="{AppThemeBinding Light={StaticResource LightError}, Dark={StaticResource DarkError}}"
-                               FontSize="12"
-                               Padding="0,2"/>
+                        <Label
+                            Padding="0,2"
+                            FontSize="12"
+                            Text="{Binding .}"
+                            TextColor="{AppThemeBinding Light={StaticResource LightError},
+                                                        Dark={StaticResource DarkError}}" />
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </VerticalStackLayout>
-        
+
     </controls:PopupTemplate>
 </mopups:PopupPage>

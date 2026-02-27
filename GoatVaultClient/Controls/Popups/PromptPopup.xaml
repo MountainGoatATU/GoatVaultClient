@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<mopups:PopupPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                  xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
-                  xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-                  xmlns:controls="clr-namespace:GoatVaultClient.Controls"
-                  xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-                  x:Class="GoatVaultClient.Controls.Popups.PromptPopup"
-                  BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
-                  CloseWhenBackgroundIsClicked="False">
+<mopups:PopupPage
+    x:Class="GoatVaultClient.Controls.Popups.PromptPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+    xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
+    x:DataType="popups:PromptPopup"
+    BackgroundColor="{AppThemeBinding Light=#80000000,
+                                      Dark=#B0000000}"
+    CloseWhenBackgroundIsClicked="False">
 
-    <controls:PopupTemplate Title="{Binding Title}"
-                            FrameWidth="500"
-                            AcceptCommand="{Binding AcceptCommand}"
-                            CancelCommand="{Binding CancelCommand}"
-                            AcceptText="{Binding AcceptText}"
-                            CancelText="{Binding CancelText}">
+    <controls:PopupTemplate
+        Title="{Binding Title}"
+        AcceptCommand="{Binding AcceptCommand}"
+        AcceptText="{Binding AcceptText}"
+        CancelCommand="{Binding CancelCommand}"
+        CancelText="{Binding CancelText}"
+        FrameWidth="500">
         <VerticalStackLayout>
-            <Label Text="{Binding Body}" 
-                   LineBreakMode="WordWrap"/>
+            <Label LineBreakMode="WordWrap" Text="{Binding Body}" />
         </VerticalStackLayout>
     </controls:PopupTemplate>
 </mopups:PopupPage>

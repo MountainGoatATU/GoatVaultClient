@@ -3,7 +3,9 @@
     x:Class="GoatVaultClient.Controls.CategoryItemCell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Name="This">
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    x:Name="This"
+    x:DataType="controls:CategoryItemCell">
     <Border
         BackgroundColor="Transparent"
         StrokeShape="RoundRectangle 12"

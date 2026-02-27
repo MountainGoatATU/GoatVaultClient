@@ -7,8 +7,11 @@
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+    xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
-    BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
+    x:DataType="popups:CreateCategoryPopup"
+    BackgroundColor="{AppThemeBinding Light=#80000000,
+                                      Dark=#B0000000}"
     CloseWhenBackgroundIsClicked="True">
     <controls:PopupTemplate
         x:Name="PopupRoot"
