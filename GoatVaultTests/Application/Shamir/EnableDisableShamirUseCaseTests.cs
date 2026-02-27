@@ -147,7 +147,7 @@ public class EnableDisableShamirUseCaseTests
         MfaSecret = [],
         ShamirEnabled = shamirEnabled,
         VaultSalt = [7, 8],
-        Vault = CreateEncryptedVault(),
+        Vault = TestFixtures.CreateEncryptedVault(),
         CreatedAtUtc = DateTime.UtcNow,
         UpdatedAtUtc = DateTime.UtcNow
     };
@@ -162,18 +162,8 @@ public class EnableDisableShamirUseCaseTests
         MfaSecret = null,
         ShamirEnabled = shamirEnabled,
         VaultSalt = Convert.ToBase64String([7, 8]),
-        Vault = CreateEncryptedVault(),
+        Vault = TestFixtures.CreateEncryptedVault(),
         CreatedAtUtc = DateTime.UtcNow,
         UpdatedAtUtc = updatedAtUtc
-    };
-
-    private static VaultEncrypted CreateEncryptedVault() => new(
-        encryptedBlob: [1, 2, 3],
-        nonce: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        authTag: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    {
-        EncryptedBlob = [1, 2, 3],
-        Nonce = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        AuthTag = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     };
 }

@@ -74,7 +74,7 @@ public class LoginOnlineUseCaseTests
         var nonceBytes = new byte[] { 5, 6, 7, 8 };
         var authVerifierBytes = new byte[] { 10, 11, 12, 13, 14, 15 };
         var vaultSaltBytes = new byte[] { 9, 9, 9, 9 };
-        var encryptedVault = CreateEncryptedVault();
+        var encryptedVault = TestFixtures.CreateEncryptedVault();
         var decryptedVault = new VaultDecrypted { Categories = [], Entries = [] };
         using var masterKey = new MasterKey(new byte[32]);
 
@@ -153,7 +153,7 @@ public class LoginOnlineUseCaseTests
         var nonceBytes = new byte[] { 9, 9, 9, 9 };
         var vaultSaltBytes = new byte[] { 6, 7, 8, 9 };
         var authVerifierBytes = new byte[] { 10, 11, 12 };
-        var encryptedVault = CreateEncryptedVault();
+        var encryptedVault = TestFixtures.CreateEncryptedVault();
         var decryptedVault = new VaultDecrypted { Categories = [], Entries = [] };
         using var masterKey = new MasterKey(new byte[32]);
 
@@ -227,7 +227,7 @@ public class LoginOnlineUseCaseTests
         var nonceBytes = new byte[] { 1, 1, 1, 1 };
         var vaultSaltBytes = new byte[] { 31, 32, 33, 34 };
         var authVerifierBytes = new byte[] { 41, 42, 43 };
-        var encryptedVault = CreateEncryptedVault();
+        var encryptedVault = TestFixtures.CreateEncryptedVault();
         var decryptedVault = new VaultDecrypted { Categories = [], Entries = [] };
         using var masterKey = new MasterKey(new byte[32]);
 
@@ -349,16 +349,6 @@ public class LoginOnlineUseCaseTests
         IPasswordStrengthService passwordStrength)
         => new(crypto, vaultCrypto, session, serverAuth, authToken, users, passwordStrength);
 
-    private static VaultEncrypted CreateEncryptedVault() => new(
-        encryptedBlob: [1, 2, 3],
-        nonce: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        authTag: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    {
-        EncryptedBlob = [1, 2, 3],
-        Nonce = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        AuthTag = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    };
-
     private static User CreateUser(Guid id, string email) => new()
     {
         Id = id,
@@ -369,7 +359,7 @@ public class LoginOnlineUseCaseTests
         MfaSecret = [],
         ShamirEnabled = false,
         VaultSalt = [7, 8],
-        Vault = CreateEncryptedVault(),
+        Vault = TestFixtures.CreateEncryptedVault(),
         CreatedAtUtc = DateTime.UtcNow,
         UpdatedAtUtc = DateTime.UtcNow
     };

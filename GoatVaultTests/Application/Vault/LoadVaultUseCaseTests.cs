@@ -46,7 +46,7 @@ public class LoadVaultUseCaseTests
         // Arrange
         var userId = Guid.NewGuid();
         using var masterKey = new MasterKey(new byte[32]);
-        var encrypted = CreateEncryptedVault();
+        var encrypted = TestFixtures.CreateEncryptedVault();
         var decrypted = new VaultDecrypted { Categories = [], Entries = [] };
         var user = new User
         {
@@ -83,13 +83,4 @@ public class LoadVaultUseCaseTests
         session.Verify(x => x.UpdateVault(decrypted), Times.Once);
     }
 
-    private static VaultEncrypted CreateEncryptedVault() => new(
-        encryptedBlob: [1, 2, 3],
-        nonce: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        authTag: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    {
-        EncryptedBlob = [1, 2, 3],
-        Nonce = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        AuthTag = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    };
 }
