@@ -28,6 +28,8 @@
                         <Label
                             Style="{StaticResource HeaderLabel}"
                             Text="{TemplateBinding Title}"
+                            TextColor="{AppThemeBinding Light={StaticResource LightOnSurface},
+                                                        Dark={StaticResource DarkOnSurface}}"
                             VerticalTextAlignment="Center" />
 
                         <ContentView
