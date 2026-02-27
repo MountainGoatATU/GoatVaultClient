@@ -292,6 +292,23 @@
 
                 </VerticalStackLayout>
             </controls:Component>
+
+            <!--  Danger Zone Section  -->
+            <controls:ComponentHeader Title="Danger Zone" />
+            <controls:Component>
+                <VerticalStackLayout>
+
+                    <!-- Delete Account Button  -->
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                            Dark={StaticResource ErrorDark}}"
+                        Command="{Binding DeleteAccountCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        Text="Delete Account"
+                        TextColor="White" />
+                </VerticalStackLayout>
+            </controls:Component>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
