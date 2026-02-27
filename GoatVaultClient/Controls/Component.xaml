@@ -39,7 +39,7 @@
                             VerticalOptions="Center" />
                     </Grid>
                     <!--  Content  -->
-                    <ContentView Grid.Row="1" Padding="16">
+                    <ContentView Grid.Row="1" Padding="{TemplateBinding ContentPadding}">
                         <ContentPresenter />
                     </ContentView>
 

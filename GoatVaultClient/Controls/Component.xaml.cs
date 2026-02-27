@@ -18,6 +18,15 @@ public partial class Component : ContentView
         set => SetValue(BorderMarginProperty, value);
     }
 
+    public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(
+        nameof(ContentPadding), typeof(Thickness), typeof(Component), new Thickness(0));
+
+    public Thickness ContentPadding
+    {
+        get => (Thickness)GetValue(ContentPaddingProperty);
+        set => SetValue(ContentPaddingProperty, value);
+    }
+
     public static readonly BindableProperty StrokeThicknessProperty = BindableProperty.Create(
         nameof(StrokeThickness), typeof(Thickness), typeof(Component), new Thickness(1));
 
