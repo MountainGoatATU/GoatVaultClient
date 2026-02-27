@@ -1,0 +1,65 @@
+using System.Windows.Input;
+
+namespace GoatVaultClient.Controls;
+
+public partial class IconTextButton : ContentView
+{
+	public IconTextButton()
+	{
+		InitializeComponent();
+	}
+
+    public static readonly BindableProperty ButtonTextProperty = BindableProperty.Create(
+       nameof(ButtonText),
+       typeof(string),
+       typeof(ImageButton),
+       string.Empty);
+    public string ButtonText
+    {
+        get => (string)GetValue(ButtonTextProperty);
+        set => SetValue(ButtonTextProperty, value);
+    }
+
+    public static readonly BindableProperty IconGlyphProperty = BindableProperty.Create(
+       nameof(IconGlyph),
+       typeof(string),
+       typeof(ImageButton),
+       string.Empty);
+    public string IconGlyph
+    {
+        get => (string)GetValue(IconGlyphProperty);
+        set => SetValue(IconGlyphProperty, value);
+    }
+
+    public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
+        nameof(IconColor),
+        typeof(Color),
+        typeof(ImageButton),
+        Colors.Transparent);
+    public Color IconColor
+    {
+        get => (Color)GetValue(IconColorProperty);
+        set => SetValue(IconColorProperty, value);
+    }
+
+    public static readonly BindableProperty ButtonBgColorProperty = BindableProperty.Create(
+        nameof(ButtonBgColor),
+        typeof(Color),
+        typeof(ImageButton),
+        Colors.Transparent);
+    public Color ButtonBgColor
+    {
+        get => (Color)GetValue(ButtonBgColorProperty);
+        set => SetValue(ButtonBgColorProperty, value);
+    }
+
+    public static readonly BindableProperty CommandProperty = BindableProperty.Create(
+        nameof(Command), typeof(ICommand), typeof(ImageButton), null);
+
+    public ICommand Command
+    {
+        get => (ICommand)GetValue(CommandProperty);
+        set => SetValue(CommandProperty, value);
+    }
+
+}
