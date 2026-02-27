@@ -31,15 +31,15 @@ public partial class ImageButton : ContentView
         set => SetValue(IconColorProperty, value);
     }
 
-    public static readonly BindableProperty IconBgColorHoverProperty = BindableProperty.Create(
-        nameof(IconBgColorHover),
+    public static readonly BindableProperty ButtonBgColorProperty = BindableProperty.Create(
+        nameof(ButtonBgColor),
         typeof(Color),
         typeof(ImageButton),
         Colors.Transparent);
-    public Color IconBgColorHover
+    public Color ButtonBgColor
     {
-        get => (Color)GetValue(IconBgColorHoverProperty);
-        set => SetValue(IconBgColorHoverProperty, value);
+        get => (Color)GetValue(ButtonBgColorProperty);
+        set => SetValue(ButtonBgColorProperty, value);
     }
 
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
