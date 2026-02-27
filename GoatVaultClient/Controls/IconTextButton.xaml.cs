@@ -2,18 +2,29 @@ using System.Windows.Input;
 
 namespace GoatVaultClient.Controls;
 
-public partial class ImageButton : ContentView
+public partial class IconTextButton : ContentView
 {
-    public ImageButton()
+	public IconTextButton()
+	{
+		InitializeComponent();
+	}
+
+    public static readonly BindableProperty ButtonTextProperty = BindableProperty.Create(
+       nameof(ButtonText),
+       typeof(string),
+       typeof(ImageButton),
+       string.Empty);
+    public string ButtonText
     {
-        InitializeComponent();
+        get => (string)GetValue(ButtonTextProperty);
+        set => SetValue(ButtonTextProperty, value);
     }
 
     public static readonly BindableProperty IconGlyphProperty = BindableProperty.Create(
-        nameof(IconGlyph),
-        typeof(string),
-        typeof(ImageButton),
-        string.Empty);
+       nameof(IconGlyph),
+       typeof(string),
+       typeof(ImageButton),
+       string.Empty);
     public string IconGlyph
     {
         get => (string)GetValue(IconGlyphProperty);
@@ -50,4 +61,5 @@ public partial class ImageButton : ContentView
         get => (ICommand)GetValue(CommandProperty);
         set => SetValue(CommandProperty, value);
     }
+
 }

@@ -9,6 +9,7 @@
     x:Name="this"
     x:DataType="controls:ImageButton">
     <material:ButtonView
+        BackgroundColor="{Binding ButtonBgColor, Source={x:Reference this}}"
         HeightRequest="{OnIdiom Phone={StaticResource iconMobileZone},
                                 Desktop={StaticResource iconDesktopZone}}"
         PressedCommand="{Binding Command, Source={x:Reference this}}"

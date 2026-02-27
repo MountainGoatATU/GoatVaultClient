@@ -87,7 +87,8 @@
                                    Glyph={x:Static m:MaterialRounded.Lock},
                                    Color={AppThemeBinding Light={StaticResource LightOnSurface},
                                                           Dark={StaticResource DarkOnSurface}}}"
-            Route="home" />
+            Route="home"
+            Shell.NavBarIsVisible="False" />
 
         <ShellContent
             Title="Security"
