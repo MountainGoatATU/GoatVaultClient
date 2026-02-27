@@ -120,7 +120,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-results
-          path: ${{ env.WORKING_DIRECTORY }}/TestResults/**/coverage.cobertura.xml
+          path: ./TestResults/**/coverage.cobertura.xml
           retention-days: 30
 
       - name: Upload coverage to Codecov
@@ -128,7 +128,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:   
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{ env.WORKING_DIRECTORY }}/TestResults/**/coverage.cobertura.xml
+          files: ./TestResults/**/coverage.cobertura.xml
           slug: MountainGoatATU/GoatVaultClient
 
       # --------------------------
