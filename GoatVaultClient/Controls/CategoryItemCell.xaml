@@ -6,13 +6,14 @@
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     x:Name="This"
     x:DataType="controls:CategoryItemCell">
-    <Border
-        BackgroundColor="Transparent"
-        StrokeShape="RoundRectangle 12"
-        StrokeThickness="0">
+    <Border BackgroundColor="{AppThemeBinding Light={StaticResource LightOnSurface}, Dark={StaticResource DarkOnSurface}}" StrokeThickness="0">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="{StaticResource xSmall}" />
+        </Border.StrokeShape>
         <Grid
             Padding="{x:StaticResource pContent}"
             ColumnDefinitions="40, *, Auto"
+            ColumnSpacing="{StaticResource sContent}"
             VerticalOptions="Center">
 
             <Image
@@ -37,6 +38,23 @@
                 Style="{x:StaticResource MaterialTitleMedium}"
                 Text="{Binding Text, Source={x:Reference This}}"
                 VerticalOptions="Center" />
+
+            <Border
+                Grid.Column="2"
+                Padding="{StaticResource sContent}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                  Dark={StaticResource DarkSurfaceContainerLow}}"
+                Stroke="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                         Dark={StaticResource DarkSurfaceContainerLow}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="{StaticResource xSmall}" />
+                </Border.StrokeShape>
+                <Label
+                    LineBreakMode="TailTruncation"
+                    Style="{x:StaticResource MaterialLabelMedium}"
+                    Text="{Binding EntryCount, Source={x:Reference This}}"
+                    VerticalOptions="Center" />
+            </Border>
 
 
         </Grid>

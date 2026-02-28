@@ -19,6 +19,15 @@ public partial class CategoryItemCell : ContentView
         set => SetValue(TextProperty, value);
     }
 
+    public static readonly BindableProperty EntryCountProperty = BindableProperty.Create(
+        nameof(EntryCount), typeof(string), typeof(CategoryItemCell), string.Empty);
+
+    public string EntryCount
+    {
+        get => (string)GetValue(EntryCountProperty);
+        set => SetValue(EntryCountProperty, value);
+    }
+
     // 2. LEADING ICON (Left side)
     public static readonly BindableProperty IconGlyphProperty = BindableProperty.Create(
         nameof(IconGlyph), typeof(string), typeof(CategoryItemCell), string.Empty);

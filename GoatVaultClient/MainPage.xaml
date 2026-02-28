@@ -137,6 +137,7 @@
                                 <DataTemplate>
                                     <controls:CategoryItemCell
                                         ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
+                                        EntryCount="{Binding EntryCount}"
                                         IconGlyph="{x:Static m:MaterialRounded.Folder}"
                                         Text="{Binding Name}">
                                         <FlyoutBase.ContextFlyout>
@@ -227,37 +228,58 @@
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <controls:CategoryItemCell
-                                    ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
-                                    IconGlyph="{x:Static m:MaterialRounded.Key}"
-                                    Text="{Binding Site}">
-                                    <FlyoutBase.ContextFlyout>
-                                        <MenuFlyout>
-                                            <MenuFlyoutItem
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems Mode="Reveal">
+                                            <SwipeItem
+                                                BackgroundColor="{StaticResource Primary}"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
                                                 CommandParameter="{Binding .}"
-                                                Text="Edit">
-                                                <MenuFlyoutItem.IconImageSource>
-                                                    <FontImageSource
-                                                        FontFamily="MaterialRounded"
-                                                        Glyph="{x:Static m:MaterialRounded.Edit}"
-                                                        Color="{StaticResource Primary}" />
-                                                </MenuFlyoutItem.IconImageSource>
-                                            </MenuFlyoutItem>
-                                            <MenuFlyoutItem
+                                                IconImageSource="{FontImageSource FontFamily=MaterialRounded,
+                                                                                  Glyph={x:Static m:MaterialRounded.Edit}}"
+                                                Text="Edit" />
+
+                                            <SwipeItem
+                                                BackgroundColor="{StaticResource Error}"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
                                                 CommandParameter="{Binding .}"
-                                                Text="Delete">
-                                                <MenuFlyoutItem.IconImageSource>
-                                                    <FontImageSource
-                                                        FontFamily="MaterialRounded"
-                                                        Glyph="{x:Static m:MaterialRounded.Delete}"
-                                                        Color="{StaticResource Error}" />
-                                                </MenuFlyoutItem.IconImageSource>
-                                            </MenuFlyoutItem>
-                                        </MenuFlyout>
-                                    </FlyoutBase.ContextFlyout>
-                                </controls:CategoryItemCell>
+                                                IconImageSource="{FontImageSource FontFamily=MaterialRounded,
+                                                                                  Glyph={x:Static m:MaterialRounded.Delete}}"
+                                                Text="Delete" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+                                    <controls:CategoryItemCell
+                                        ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
+                                        IconGlyph="{x:Static m:MaterialRounded.Key}"
+                                        Text="{Binding Site}">
+                                        <FlyoutBase.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Text="Edit">
+                                                    <MenuFlyoutItem.IconImageSource>
+                                                        <FontImageSource
+                                                            FontFamily="MaterialRounded"
+                                                            Glyph="{x:Static m:MaterialRounded.Edit}"
+                                                            Color="{StaticResource Primary}" />
+                                                    </MenuFlyoutItem.IconImageSource>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Text="Delete">
+                                                    <MenuFlyoutItem.IconImageSource>
+                                                        <FontImageSource
+                                                            FontFamily="MaterialRounded"
+                                                            Glyph="{x:Static m:MaterialRounded.Delete}"
+                                                            Color="{StaticResource Error}" />
+                                                    </MenuFlyoutItem.IconImageSource>
+                                                </MenuFlyoutItem>
+                                            </MenuFlyout>
+                                        </FlyoutBase.ContextFlyout>
+                                    </controls:CategoryItemCell>
+                                </SwipeView>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
