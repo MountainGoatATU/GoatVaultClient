@@ -10,198 +10,232 @@
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     x:DataType="vm:SecurityPageViewModel"
-    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},Dark={StaticResource DarkSurface}}">
+    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
+                                      Dark={StaticResource DarkSurface}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource pLarge}" Spacing="{StaticResource sLarge}">
-
-            <!--  Vault Score Section  -->
-            <VerticalStackLayout Spacing="10">
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="18"
-                    HorizontalOptions="Center"
-                    Text="{Binding VaultTierText}" />
-                <Grid ColumnDefinitions="*,*,*,*,*" RowDefinitions="Auto">
-                    <VerticalStackLayout
-                        Grid.Column="0"
+            <controls:Component
+                Title="Vault Score"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
+                <!--  Vault Score Section  -->
+                <VerticalStackLayout HorizontalOptions="Fill" Spacing="10">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="18"
                         HorizontalOptions="Center"
-                        Spacing="6">
-                        <lvc:PieChart
-                            HeightRequest="150"
-                            InitialRotation="-90"
-                            MaxValue="400"
-                            MinValue="0"
-                            WidthRequest="150"
-                            BackgroundColor="Transparent">
-                            <lvc:PieChart.Series>
-                                <lvc:SeriesCollection>
-                                    <lvc:XamlGaugeSeries
-                                        DataLabelsSize="20"
-                                        GaugeValue="{Binding MasterPasswordStrength}"
-                                        MaxRadialColumnWidth="50" 
-                                        Fill="{x:Static vm:Paints.Color}"
-                                        IsHoverable="False"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                </lvc:SeriesCollection>
-                            </lvc:PieChart.Series>
-                        </lvc:PieChart>
-                        <Label
-                            FontSize="14"
+                        Text="{Binding VaultTierText}" />
+                    <FlexLayout
+                        AlignItems="Center"
+                        Direction="Row"
+                        JustifyContent="SpaceEvenly"
+                        Wrap="Wrap">
+                        <VerticalStackLayout
+                            Grid.Column="0"
+                            FlexLayout.Basis="200"
+                            FlexLayout.Grow="1"
                             HorizontalOptions="Center"
-                            Text="Master Password Strength" />
-                        <Label
-                            FontSize="13"
-                            HorizontalOptions="Center"
-                            Text="{Binding MasterPasswordCategory}"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                    </VerticalStackLayout>
+                            Spacing="6">
+                            <lvc:PieChart
+                                BackgroundColor="Transparent"
+                                HeightRequest="150"
+                                InitialRotation="-90"
+                                MaxValue="400"
+                                MinValue="0"
+                                WidthRequest="150">
+                                <lvc:PieChart.Series>
+                                    <lvc:SeriesCollection>
+                                        <lvc:XamlGaugeSeries
+                                            DataLabelsSize="20"
+                                            Fill="{x:Static vm:Paints.Color}"
+                                            GaugeValue="{Binding MasterPasswordStrength}"
+                                            IsHoverable="False"
+                                            MaxRadialColumnWidth="50" />
+                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
+                                    </lvc:SeriesCollection>
+                                </lvc:PieChart.Series>
+                            </lvc:PieChart>
+                            <Label
+                                FontSize="14"
+                                HorizontalOptions="Center"
+                                Text="Master Password Strength" />
+                            <Label
+                                FontSize="13"
+                                HorizontalOptions="Center"
+                                Text="{Binding MasterPasswordCategory}"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                            Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
 
-                    <VerticalStackLayout
-                        Grid.Column="1"
-                        HorizontalOptions="Center"
-                        Spacing="6">
-                        <lvc:PieChart
-                            HeightRequest="150"
-                            InitialRotation="-90"
-                            MaxValue="200"
-                            MinValue="0"
-                            WidthRequest="150"
-                            BackgroundColor="Transparent">
-                            <lvc:PieChart.Series>
-                                <lvc:SeriesCollection>
-                                    <lvc:XamlGaugeSeries
-                                        DataLabelsSize="20"
-                                        GaugeValue="{Binding AveragePasswordsStrength}"
-                                        MaxRadialColumnWidth="50" 
-                                        Fill="{x:Static vm:Paints.Color}"
-                                        IsHoverable="False"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                </lvc:SeriesCollection>
-                            </lvc:PieChart.Series>
-                        </lvc:PieChart>
-                        <Label
-                            FontSize="14"
+                        <VerticalStackLayout
+                            Grid.Column="1"
+                            FlexLayout.Basis="150"
+                            FlexLayout.Grow="1"
                             HorizontalOptions="Center"
-                            Text="Average Password Strength" />
-                        <Label
-                            FontSize="13"
-                            HorizontalOptions="Center"
-                            Text="{Binding AveragePasswordsCategory}"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                    </VerticalStackLayout>
+                            Spacing="6">
+                            <lvc:PieChart
+                                BackgroundColor="Transparent"
+                                HeightRequest="150"
+                                InitialRotation="-90"
+                                MaxValue="200"
+                                MinValue="0"
+                                WidthRequest="150">
+                                <lvc:PieChart.Series>
+                                    <lvc:SeriesCollection>
+                                        <lvc:XamlGaugeSeries
+                                            DataLabelsSize="20"
+                                            Fill="{x:Static vm:Paints.Color}"
+                                            GaugeValue="{Binding AveragePasswordsStrength}"
+                                            IsHoverable="False"
+                                            MaxRadialColumnWidth="50" />
+                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
+                                    </lvc:SeriesCollection>
+                                </lvc:PieChart.Series>
+                            </lvc:PieChart>
+                            <Label
+                                FontSize="14"
+                                HorizontalOptions="Center"
+                                Text="Average Password Strength" />
+                            <Label
+                                FontSize="13"
+                                HorizontalOptions="Center"
+                                Text="{Binding AveragePasswordsCategory}"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                            Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
 
-                    <VerticalStackLayout
-                        Grid.Column="2"
-                        HorizontalOptions="Center"
-                        Spacing="6">
-                        <lvc:PieChart
-                            HeightRequest="150"
-                            InitialRotation="-90"
-                            MaxValue="200"
-                            MinValue="0"
-                            WidthRequest="150"
-                            BackgroundColor="Transparent">
-                            <lvc:PieChart.Series>
-                                <lvc:SeriesCollection>
-                                    <lvc:XamlGaugeSeries
-                                        DataLabelsSize="20"
-                                        GaugeValue="{Binding ReuseRate}"
-                                        MaxRadialColumnWidth="50"
-                                        Fill="{x:Static vm:Paints.Color}"
-                                        IsHoverable="False"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                </lvc:SeriesCollection>
-                            </lvc:PieChart.Series>
-                        </lvc:PieChart>
-                        <Label
-                            FontSize="14"
+                        <VerticalStackLayout
+                            Grid.Column="2"
+                            FlexLayout.Basis="150"
+                            FlexLayout.Grow="1"
                             HorizontalOptions="Center"
-                            Text="Password Originality" />
-                        <Label
-                            FontSize="13"
-                            HorizontalOptions="Center"
-                            Text="{Binding OriginalityCategory}"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                    </VerticalStackLayout>
+                            Spacing="6">
+                            <lvc:PieChart
+                                BackgroundColor="Transparent"
+                                HeightRequest="150"
+                                InitialRotation="-90"
+                                MaxValue="200"
+                                MinValue="0"
+                                WidthRequest="150">
+                                <lvc:PieChart.Series>
+                                    <lvc:SeriesCollection>
+                                        <lvc:XamlGaugeSeries
+                                            DataLabelsSize="20"
+                                            Fill="{x:Static vm:Paints.Color}"
+                                            GaugeValue="{Binding ReuseRate}"
+                                            IsHoverable="False"
+                                            MaxRadialColumnWidth="50" />
+                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
+                                    </lvc:SeriesCollection>
+                                </lvc:PieChart.Series>
+                            </lvc:PieChart>
+                            <Label
+                                FontSize="14"
+                                HorizontalOptions="Center"
+                                Text="Password Originality" />
+                            <Label
+                                FontSize="13"
+                                HorizontalOptions="Center"
+                                Text="{Binding OriginalityCategory}"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                            Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
 
-                    <VerticalStackLayout
-                        Grid.Column="3"
-                        HorizontalOptions="Center"
-                        Spacing="6">
-                        <lvc:PieChart
-                            HeightRequest="150"
-                            InitialRotation="-90"
-                            MaxValue="100"
-                            MinValue="0"
-                            WidthRequest="150"
-                            BackgroundColor="Transparent">
-                            <lvc:PieChart.Series>
-                                <lvc:SeriesCollection>
-                                    <lvc:XamlGaugeSeries
-                                        DataLabelsSize="20"
-                                        GaugeValue="{Binding BreachesCount}"
-                                        MaxRadialColumnWidth="50" 
-                                        Fill="{x:Static vm:Paints.Color}"
-                                        IsHoverable="False"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                </lvc:SeriesCollection>
-                            </lvc:PieChart.Series>
-                        </lvc:PieChart>
-                        <Label
-                            FontSize="14"
+                        <VerticalStackLayout
+                            Grid.Column="3"
+                            FlexLayout.Basis="150"
+                            FlexLayout.Grow="1"
                             HorizontalOptions="Center"
-                            Text="Compromised Passwords" />
-                        <Label
-                            FontSize="13"
-                            HorizontalOptions="Center"
-                            Text="{Binding BreachesCategory}"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                    </VerticalStackLayout>
+                            Spacing="6">
+                            <lvc:PieChart
+                                BackgroundColor="Transparent"
+                                HeightRequest="150"
+                                InitialRotation="-90"
+                                MaxValue="100"
+                                MinValue="0"
+                                WidthRequest="150">
+                                <lvc:PieChart.Series>
+                                    <lvc:SeriesCollection>
+                                        <lvc:XamlGaugeSeries
+                                            DataLabelsSize="20"
+                                            Fill="{x:Static vm:Paints.Color}"
+                                            GaugeValue="{Binding BreachesCount}"
+                                            IsHoverable="False"
+                                            MaxRadialColumnWidth="50" />
+                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
+                                    </lvc:SeriesCollection>
+                                </lvc:PieChart.Series>
+                            </lvc:PieChart>
+                            <Label
+                                FontSize="14"
+                                HorizontalOptions="Center"
+                                Text="Compromised Passwords" />
+                            <Label
+                                FontSize="13"
+                                HorizontalOptions="Center"
+                                Text="{Binding BreachesCategory}"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                            Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
 
-                    <VerticalStackLayout
-                        Grid.Column="4"
-                        HorizontalOptions="Center"
-                        Spacing="6">
-                        <lvc:PieChart
-                            HeightRequest="150"
-                            InitialRotation="-90"
-                            MaxValue="200"
-                            MinValue="0"
-                            WidthRequest="150"
-                            BackgroundColor="Transparent">
-                            <lvc:PieChart.Series>
-                                <lvc:SeriesCollection>
-                                    <lvc:XamlGaugeSeries
-                                        DataLabelsSize="20"
-                                        GaugeValue="{Binding MfaPercent}"
-                                        MaxRadialColumnWidth="50" 
-                                        Fill="{x:Static vm:Paints.Color}"
-                                        IsHoverable="False"/>
-                                    <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                </lvc:SeriesCollection>
-                            </lvc:PieChart.Series>
-                        </lvc:PieChart>
-                        <Label
-                            FontSize="14"
+                        <VerticalStackLayout
+                            Grid.Column="4"
+                            FlexLayout.Basis="150"
+                            FlexLayout.Grow="1"
                             HorizontalOptions="Center"
-                            Text="MFA" />
-                        <Label
-                            FontSize="13"
-                            HorizontalOptions="Center"
-                            Text="{Binding MfaCategory}"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                    </VerticalStackLayout>
-                </Grid>
-            </VerticalStackLayout>
+                            Spacing="6">
+                            <lvc:PieChart
+                                BackgroundColor="Transparent"
+                                HeightRequest="150"
+                                InitialRotation="-90"
+                                MaxValue="200"
+                                MinValue="0"
+                                WidthRequest="150">
+                                <lvc:PieChart.Series>
+                                    <lvc:SeriesCollection>
+                                        <lvc:XamlGaugeSeries
+                                            DataLabelsSize="20"
+                                            Fill="{x:Static vm:Paints.Color}"
+                                            GaugeValue="{Binding MfaPercent}"
+                                            IsHoverable="False"
+                                            MaxRadialColumnWidth="50" />
+                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
+                                    </lvc:SeriesCollection>
+                                </lvc:PieChart.Series>
+                            </lvc:PieChart>
+                            <Label
+                                FontSize="14"
+                                HorizontalOptions="Center"
+                                Text="MFA" />
+                            <Label
+                                FontSize="13"
+                                HorizontalOptions="Center"
+                                Text="{Binding MfaCategory}"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                            Dark={StaticResource Gray400}}" />
+                        </VerticalStackLayout>
+                    </FlexLayout>
+                </VerticalStackLayout>
+            </controls:Component>
 
             <!--  Account Credentials Section  -->
-            <controls:ComponentHeader Title="Account Credentials" />
-            <controls:Component>
+            <controls:Component
+                Title="Account Credentials"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
                 <VerticalStackLayout Padding="20" Spacing="20">
 
                     <!--  Email  -->
-                    <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource sLarge}">
                         <Label
                             FontAttributes="Bold"
                             Text="Email"
@@ -209,16 +243,22 @@
                         <Label
                             Grid.Column="1"
                             FontSize="14"
+                            HorizontalOptions="End"
+                            LineBreakMode="TailTruncation"
                             Text="{Binding Email}"
                             VerticalOptions="Center" />
                         <controls:ImageButton
                             Grid.Column="2"
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
+                                                            Dark={StaticResource DarkPrimaryContainer}}"
                             Command="{Binding EditEmailCommand}"
+                            IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                        Dark={StaticResource DarkOnPrimaryContainer}}"
                             IconGlyph="{x:Static m:MaterialRounded.Edit}" />
                     </Grid>
 
                     <!--  Master Password  -->
-                    <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource sLarge}">
                         <Label
                             FontAttributes="Bold"
                             Text="Master Password"
@@ -226,19 +266,30 @@
                         <Label
                             Grid.Column="1"
                             FontSize="14"
+                            HorizontalOptions="End"
                             Text="••••••••••••"
                             VerticalOptions="Center" />
                         <controls:ImageButton
                             Grid.Column="2"
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
+                                                            Dark={StaticResource DarkPrimaryContainer}}"
                             Command="{Binding EditMasterPasswordCommand}"
+                            IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                        Dark={StaticResource DarkOnPrimaryContainer}}"
                             IconGlyph="{x:Static m:MaterialRounded.Edit}" />
                     </Grid>
                 </VerticalStackLayout>
             </controls:Component>
 
             <!--  Two-Factor Authentication Section  -->
-            <controls:ComponentHeader Title="Two-Factor Authentication" />
-            <controls:Component>
+            <controls:Component
+                Title="MFA"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
                 <VerticalStackLayout Padding="20" Spacing="15">
                     <!--  MFA Status  -->
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
@@ -272,8 +323,8 @@
                     <!--  Enable/Disable Button  -->
                     <Button
                         Margin="0,10,0,0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary},
-                                                          Dark={StaticResource PrimaryDark}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                                          Dark={StaticResource DarkPrimary}}"
                         Command="{Binding EnableMfaCommand}"
                         IsEnabled="{Binding IsNotBusy}"
                         IsVisible="{Binding MfaEnabled, Converter={StaticResource InvertedBoolConverter}}"

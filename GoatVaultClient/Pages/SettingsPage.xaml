@@ -1,89 +1,66 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 
-<ContentPage 
+<ContentPage
+    x:Class="GoatVaultClient.Pages.SettingsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="GoatVaultClient.Pages.SettingsPage"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     x:DataType="vm:SettingsPageViewModel"
-    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},Dark={StaticResource DarkSurface}}">
+    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
+                                      Dark={StaticResource DarkSurface}}">
 
-	<ScrollView>
-		<VerticalStackLayout Padding="{StaticResource pLarge}" Spacing="{StaticResource sLarge}">
-			<!--  Interface Section  -->
-			<controls:ComponentHeader Title="Interface" />
-			<controls:Component>
-				<VerticalStackLayout Padding="20" Spacing="20">
+    <ScrollView>
+        <VerticalStackLayout Padding="{StaticResource pLarge}" Spacing="{StaticResource sLarge}">
+            <!--  Interface Section  -->
+            <controls:Component
+                Title="General Settings"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
+                <VerticalStackLayout Padding="20" Spacing="20">
 
                     <!--  Enable/Disable Goat  -->
-					<Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
-						<Label
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource sLarge}">
+                        <Label
                             FontAttributes="Bold"
                             Text="Goat"
                             VerticalOptions="Center" />
 
-						<!--  Status text  -->
-						<Label
-                            Grid.Column="1"
-                            FontSize="14"
-                            Text="Disabled"
-                            VerticalOptions="Center">
-							<Label.Triggers>
-								<DataTrigger
-                                    Binding="{Binding GoatEnabled}"
-                                    TargetType="Label"
-                                    Value="True">
-									<Setter Property="Text" Value="Enabled" />
-								</DataTrigger>
-							</Label.Triggers>
-						</Label>
-
-						<!--  Button text  -->
-						<Button
+                        <!--  Button text  -->
+                        <Button
                             Grid.Column="2"
                             BackgroundColor="{Binding GoatEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
                             Command="{Binding ToggleGoatCommand}"
                             HeightRequest="40"
+                            HorizontalOptions="End"
                             Text="Enable"
                             TextColor="White"
                             WidthRequest="100">
-							<Button.Triggers>
-								<DataTrigger
+                            <Button.Triggers>
+                                <DataTrigger
                                     Binding="{Binding GoatEnabled}"
                                     TargetType="Button"
                                     Value="True">
-									<Setter Property="Text" Value="Disable" />
-								</DataTrigger>
-							</Button.Triggers>
-						</Button>
-					</Grid>
+                                    <Setter Property="Text" Value="Disable" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
 
                     <!--  Toggle Theme  -->
-                    <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource sLarge}">
                         <Label
                             FontAttributes="Bold"
                             Text="Dark Mode"
                             VerticalOptions="Center" />
 
-                        <!--  Status text  -->
-                        <Label
-                            Grid.Column="1"
-                            FontSize="14"
-                            Text="Disabled"
-                            VerticalOptions="Center">
-                            <Label.Triggers>
-                                <DataTrigger
-                                    Binding="{Binding DarkModeEnabled}"
-                                    TargetType="Label"
-                                    Value="True">
-                                    <Setter Property="Text" Value="Enabled" />
-                                </DataTrigger>
-                            </Label.Triggers>
-                        </Label>
 
                         <!--  Button text  -->
                         <Button
@@ -91,6 +68,7 @@
                             BackgroundColor="{Binding DarkModeEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
                             Command="{Binding ToggleDarkModeCommand}"
                             HeightRequest="40"
+                            HorizontalOptions="End"
                             Text="Enable"
                             TextColor="White"
                             WidthRequest="100">
@@ -105,8 +83,8 @@
                         </Button>
                     </Grid>
 
-				</VerticalStackLayout>
-			</controls:Component>
-		</VerticalStackLayout>
-	</ScrollView>
+                </VerticalStackLayout>
+            </controls:Component>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
