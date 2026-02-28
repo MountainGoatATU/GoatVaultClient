@@ -10,12 +10,13 @@
     <ContentView.ControlTemplate>
         <ControlTemplate>
             <Border
+                Margin="{StaticResource mCompact}"
                 BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                                   Dark={StaticResource DarkSurface}}"
-                MaximumHeightRequest="650"
+                MaximumHeightRequest="700"
+                MaximumWidthRequest="{TemplateBinding FrameWidth}"
                 StrokeThickness="0"
-                VerticalOptions="Center"
-                WidthRequest="{TemplateBinding FrameWidth}">
+                VerticalOptions="Center">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="{x:StaticResource xLargeIncreased}" />
                 </Border.StrokeShape>
