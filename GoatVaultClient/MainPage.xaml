@@ -17,20 +17,27 @@
     <Grid>
         <Grid
             x:Name="MainGrid"
-            RowDefinitions="Auto, *"
+            RowDefinitions="Auto,Auto, *"
             RowSpacing="{StaticResource sLarge}">
-            <controls:Component ContentPadding="{StaticResource sContent}">
+            <controls:Component>
                 <Grid ColumnDefinitions="*,Auto">
-                    <SearchBar
-                        Background="{AppThemeBinding Light={StaticResource LightSurface},
-                                                     Dark={StaticResource DarkSurface}}"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
-                                                          Dark={StaticResource DarkSurface}}"
-                        HeightRequest="48"
-                        Placeholder="Search Vault..."
-                        Text="{Binding SearchText}" />
+                    <Label
+                        x:Name="Title"
+                        Style="{StaticResource MaterialHeadlineLarge}"
+                        Text="GoatVault" />
                     <controls:SyncStatusBar x:Name="SyncStatusBar" Grid.Column="1" />
                 </Grid>
+            </controls:Component>
+            <controls:Component Grid.Row="1" ContentPadding="{StaticResource sContent}">
+
+                <SearchBar
+                    Background="{AppThemeBinding Light={StaticResource LightSurface},
+                                                 Dark={StaticResource DarkSurface}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
+                                                      Dark={StaticResource DarkSurface}}"
+                    HeightRequest="48"
+                    Placeholder="Search Vault..."
+                    Text="{Binding SearchText}" />
             </controls:Component>
 
             <Grid
@@ -39,24 +46,41 @@
                                                   Dark={x:StaticResource DarkSurface}}"
                 ColumnDefinitions="*, 2*, 1.5*"
                 ColumnSpacing="{StaticResource sLarge}"
-                RowDefinitions="Auto,*">
+                RowDefinitions="Auto,*"
+                RowSpacing="{StaticResource sLarge}">
 
                 <controls:Component
+                    x:Name="MobileCategoryPicker"
+                    Title="Categories"
                     Grid.Row="0"
                     Grid.Column="0"
-                    Grid.ColumnSpan="3">
-                    <Grid
-                        x:Name="MobileCategoryPicker"
-                        ColumnDefinitions="*,Auto"
-                        ColumnSpacing="{StaticResource sContent}"
-                        VerticalOptions="Center">
-                        <controls:ImageButton
-                            Grid.Column="1"
-                            Command="{Binding CreateCategoryCommand}"
-                            IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                        Dark={StaticResource DarkOnPrimaryContainer}}"
-                            IconGlyph="{x:Static m:MaterialOutlined.Add}" />
-                    </Grid>
+                    Grid.ColumnSpan="3"
+                    BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainer},
+                                              Dark={StaticResource DarkSurfaceContainer}}"
+                    ContentPadding="{StaticResource formSpacing}"
+                    FooterBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                    Dark={StaticResource DarkSurfaceContainerLow}}"
+                    HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                    Dark={StaticResource DarkSurfaceContainerLow}}"
+                    ShowHeader="True">
+                    <controls:Component.HeaderActions>
+                        <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
+                            <controls:IconTextButton
+                                Grid.Column="1"
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
+                                                                Dark={StaticResource DarkPrimaryContainer}}"
+                                ButtonText="Add Category"
+                                Command="{Binding CreateCategoryCommand}"
+                                IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
+                                IconGlyph="{x:Static m:MaterialRounded.Add}" />
+                        </HorizontalStackLayout>
+                    </controls:Component.HeaderActions>
+                    <Picker
+                        Title="Select Category"
+                        ItemDisplayBinding="{Binding Name}"
+                        ItemsSource="{Binding Categories}"
+                        SelectedItem="{Binding SelectedCategory}" />
                 </controls:Component>
 
                 <controls:Component
@@ -330,10 +354,12 @@
                         <Setter TargetName="DesktopCategoriesPane" Property="IsVisible" Value="False" />
                         <Setter TargetName="DetailsPane" Property="IsVisible" Value="False" />
                         <Setter TargetName="MobileCategoryPicker" Property="IsVisible" Value="True" />
+                        <Setter TargetName="Title" Property="IsVisible" Value="False" />
 
                         <Setter TargetName="PasswordsPane" Property="Grid.Column" Value="0" />
                         <Setter TargetName="PasswordsPane" Property="Grid.ColumnSpan" Value="3" />
-                        <Setter TargetName="MainGrid" Property="Margin" Value="{StaticResource mCompact}" />
+                        <Setter TargetName="MainGrid" Property="Margin" Value="{StaticResource layoutMarginMobile}" />
+                        <Setter TargetName="MainGrid" Property="RowSpacing" Value="{StaticResource sContent}" />
                     </VisualState.Setters>
                 </VisualState>
 
@@ -348,7 +374,7 @@
 
                         <Setter TargetName="PasswordsPane" Property="Grid.Column" Value="1" />
                         <Setter TargetName="PasswordsPane" Property="Grid.ColumnSpan" Value="1" />
-                        <Setter TargetName="MainGrid" Property="Margin" Value="{StaticResource mLarge}" />
+                        <Setter TargetName="MainGrid" Property="Margin" Value="{StaticResource layoutMarginDesktop}" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
