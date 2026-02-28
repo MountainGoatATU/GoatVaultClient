@@ -73,11 +73,10 @@
                         <material:TextField Title="Description (Optional)" Text="{Binding ViewModel.Description}" />
 
                         <!--  Category Dropdown Field  -->
-                        <material:AutoCompleteTextField
+                        <Picker
                             x:Name="CategoryInput"
                             Title="Category"
-                            AllowClear="True"
-                            Text="{Binding ViewModel.Category}" />
+                            ItemDisplayBinding="{Binding Name}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout

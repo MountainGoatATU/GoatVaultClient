@@ -26,7 +26,17 @@ public partial class VaultEntryDialog : PopupPage
         AcceptCommand = new Command(OnAccept);
         CancelCommand = new Command(OnCancel);
 
-        CategoryInput.ItemsSource = vm.AvailableCategories.ConvertAll(c => c.Name);
+        if (vm.AvailableCategories != null)
+        {
+            CategoryInput.ItemsSource = vm.AvailableCategories;
+            CategoryInput.SelectedItem = vm.AvailableCategories.FirstOrDefault();
+
+        }
+        else
+        {
+            CategoryInput.ItemsSource = new List<CategoryItem>();
+        }
+        
 
         BindingContext = this;
     }
