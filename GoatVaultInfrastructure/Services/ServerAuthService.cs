@@ -42,6 +42,9 @@ public class ServerAuthService(
         var response = await http.DeleteAsync($"{BaseUrl}/v1/users/{userId}", ct);
         await EnsureSuccessAsync(response, ct);
         var json = await response.Content.ReadAsStringAsync(ct);
+        if (string.IsNullOrWhiteSpace(json))
+            return string.Empty;
+
         return JsonSerializer.Deserialize<string>(json, JsonOptions) ?? throw new InvalidOperationException("Invalid response");
     }
 
