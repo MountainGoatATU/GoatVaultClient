@@ -6,10 +6,7 @@
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material">
-    <HorizontalStackLayout
-        Padding="12,8"
-        HorizontalOptions="End"
-        Spacing="8">
+    <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
 
         <!--  Sync Status Indicator  -->
         <HorizontalStackLayout Spacing="{StaticResource sContent}">

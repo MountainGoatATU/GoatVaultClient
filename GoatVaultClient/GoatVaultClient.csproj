@@ -164,6 +164,9 @@
 	  <MauiXaml Update="Controls\EntryDetailView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Controls\EntryItemCell.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Controls\ImageButton.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

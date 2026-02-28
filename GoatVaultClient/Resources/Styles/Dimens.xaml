@@ -27,7 +27,8 @@
     <!--  Margins  -->
     <Thickness x:Key="mCompact">16</Thickness>
     <Thickness x:Key="mLarge">24</Thickness>
-    <Thickness x:Key="layoutMargin">24,0,24,16</Thickness>
+    <Thickness x:Key="layoutMarginDesktop">24,16,24,16</Thickness>
+    <Thickness x:Key="layoutMarginMobile">16,8,16,8</Thickness>
     <Thickness x:Key="componentMarginLarge">0,0,24,0</Thickness>
     <Thickness x:Key="componentMarginCompact">0,0,16,0</Thickness>
     <Thickness x:Key="headerMargin">0,16,0,16</Thickness>
