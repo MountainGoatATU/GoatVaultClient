@@ -31,6 +31,9 @@ public partial class VaultEntryForm : VaultEntry
                 case nameof(Password):
                     EvaluatePasswordStrength();
                     break;
+                case nameof(SelectedCategory):
+                    Category = SelectedCategory?.Name ?? string.Empty;
+                    break;
             }
         };
 
@@ -38,6 +41,7 @@ public partial class VaultEntryForm : VaultEntry
     }
 
     [ObservableProperty] [property: Required] private List<CategoryItem> _availableCategories;
+    [ObservableProperty] private CategoryItem? _selectedCategory;
     [ObservableProperty] private string? _crackTime;
     [ObservableProperty] private double _crackProgress;
     [ObservableProperty] private string? _password;

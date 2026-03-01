@@ -22,7 +22,7 @@ public class VaultEntryManagerService(
         var formModel = new VaultEntryForm(categoriesList, passwordStrength)
         {
             // Optional: Set a default selected category
-            Category = categoriesList.FirstOrDefault()?.Name ?? ""
+            SelectedCategory = categoriesList.FirstOrDefault()
         };
 
         // Show the Auto-Generated Dialog
@@ -108,9 +108,9 @@ public class VaultEntryManagerService(
             Site = target.Site,
             Password = target.Password,
             Description = target.Description,
-            Category = target.Category,
             MfaSecret = target.MfaSecret,
-            HasMfa = target.HasMfa
+            HasMfa = target.HasMfa,
+            SelectedCategory = categoriesList.FirstOrDefault(c => c.Name == target.Category) ?? categoriesList.FirstOrDefault()
         };
 
         var dialog = new VaultEntryDialog(formModel);
