@@ -345,9 +345,15 @@
             </controls:Component>
 
             <!--  Danger Zone Section  -->
-            <controls:ComponentHeader Title="Danger Zone" />
-            <controls:Component>
-                <VerticalStackLayout>
+            <controls:Component
+                Title="Danger Zone"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
+                <VerticalStackLayout Padding="20" Spacing="15">
 
                     <!-- Delete Account Button  -->
                     <Button
