@@ -40,7 +40,7 @@ public partial class VaultEntryForm : VaultEntry
         _passwordStrengthService = passwordStrengthService;
     }
 
-    [ObservableProperty] [property: Required] private List<CategoryItem> _availableCategories;
+    [ObservableProperty] private List<CategoryItem> _availableCategories;
     [ObservableProperty] private CategoryItem? _selectedCategory;
     [ObservableProperty] private string? _crackTime;
     [ObservableProperty] private double _crackProgress;

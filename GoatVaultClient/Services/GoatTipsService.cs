@@ -7,9 +7,9 @@ public partial class GoatTipsService : ObservableObject
 {
     private const string GoatEnabledKey = "GoatEnabled";
 
-    [ObservableProperty] private string? currentTip;
-    [ObservableProperty] private bool isTipVisible;
-    [ObservableProperty] private bool isGoatEnabled;
+    [ObservableProperty] private string? _currentTip;
+    [ObservableProperty] private bool _isTipVisible;
+    [ObservableProperty] private bool _isGoatEnabled;
 
     private readonly Random _random = new();
     private IDispatcherTimer? _timer;
