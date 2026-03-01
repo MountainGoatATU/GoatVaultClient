@@ -36,6 +36,8 @@ public sealed class SessionContext : ISessionContext
     {
         _masterKey?.Dispose();
         _masterKey = null;
+        UserId = null;
+        MasterPasswordStrength = 0;
         UpdateVault(null);
     }
 }
