@@ -267,7 +267,7 @@ public partial class SecurityPageViewModel : BaseViewModel
     #region Danger Zone
 
     [RelayCommand]
-    private async Task DeleteAccount()
+    private async Task DeleteAccountAsync()
     {
         var confirm1 = await ShowConfirmationAsync("Delete Account", 
             "Are you sure you want to delete your account? This action is permanent and cannot be reversed.");
@@ -297,7 +297,7 @@ public partial class SecurityPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task WipeVault()
+    private async Task WipeVaultAsync()
     {
         var confirm1 = await ShowConfirmationAsync("Wipe Vault",
             "This will permanently delete all vault entries and categories from this device and the server. Continue?");
