@@ -2,5 +2,5 @@
 
 public class UpdateShamirRequest
 {
-    public required bool ShamirEnabled { get; set; } = false;
+    public required bool ShamirEnabled { get; set; }
 }
