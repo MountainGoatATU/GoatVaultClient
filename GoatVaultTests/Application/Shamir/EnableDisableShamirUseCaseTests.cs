@@ -65,7 +65,7 @@ public class EnableDisableShamirUseCaseTests
         var serverAuth = new Mock<IServerAuthService>();
         serverAuth.Setup(x => x.UpdateUserAsync(
                 userId,
-                It.Is<object>(o => o is DisableShamirRequest && ((DisableShamirRequest)o).ShamirEnabled),
+                It.Is<object>(o => o is UpdateShamirRequest && ((UpdateShamirRequest)o).ShamirEnabled),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateServerUserResponse(userId, shamirEnabled: true, updatedAtUtc: now));
 
@@ -121,7 +121,7 @@ public class EnableDisableShamirUseCaseTests
         var serverAuth = new Mock<IServerAuthService>();
         serverAuth.Setup(x => x.UpdateUserAsync(
                 userId,
-                It.Is<object>(o => o is DisableShamirRequest && !((DisableShamirRequest)o).ShamirEnabled),
+                It.Is<object>(o => o is UpdateShamirRequest && !((UpdateShamirRequest)o).ShamirEnabled),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateServerUserResponse(userId, shamirEnabled: false, updatedAtUtc: now));
 

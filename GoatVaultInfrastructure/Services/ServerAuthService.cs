@@ -18,7 +18,6 @@ public class ServerAuthService(
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true
-        // DefaultIgnoreCondition removed. Individual DTOs control serialization.
     };
 
     public async Task<AuthInitResponse> InitAsync(AuthInitRequest payload, CancellationToken ct = default) => await PostAsync<AuthInitResponse>("v1/auth/init", payload, ct);
