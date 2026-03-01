@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="GoatVaultClient.Controls.IconTextButton"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    x:Name="this">
+    <material:ButtonView BackgroundColor="{Binding ButtonBgColor, Source={x:Reference this}}" PressedCommand="{Binding Command, Source={x:Reference this}}">
+        <HorizontalStackLayout Spacing="{StaticResource sContent}">
+            <Image
+                HeightRequest="{OnIdiom Phone={StaticResource iconMobile},
+                                        Desktop={StaticResource iconDesktop}}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="{OnIdiom Phone={StaticResource iconMobile},
+                                       Desktop={StaticResource iconDesktop}}">
+                <Image.Source>
+                    <FontImageSource
+                        FontFamily="MaterialRounded"
+                        Glyph="{Binding IconGlyph, Source={x:Reference this}}"
+                        Size="{OnIdiom Phone={StaticResource iconMobileResolution},
+                                       Desktop={StaticResource iconDesktopResolution}}"
+                        Color="{Binding IconColor, Source={x:Reference this}}" />
+                </Image.Source>
+            </Image>
+            <Label
+                Style="{StaticResource MaterialBodyMedium}"
+                Text="{Binding ButtonText, Source={x:Reference this}}"
+                VerticalTextAlignment="Center" />
+        </HorizontalStackLayout>
+
+    </material:ButtonView>
+</ContentView>

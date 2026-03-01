@@ -2,12 +2,12 @@ using System.Windows.Input;
 
 namespace GoatVaultClient.Controls;
 
-public partial class CategoryItemCell : ContentView
+public partial class EntryItemCell : ContentView
 {
-    public CategoryItemCell()
-    {
-        InitializeComponent();
-    }
+	public EntryItemCell()
+	{
+		InitializeComponent();
+	}
 
     // 1. MAIN TEXT (Heading)
     public static readonly BindableProperty TextProperty = BindableProperty.Create(
@@ -19,13 +19,13 @@ public partial class CategoryItemCell : ContentView
         set => SetValue(TextProperty, value);
     }
 
-    public static readonly BindableProperty EntryCountProperty = BindableProperty.Create(
-        nameof(EntryCount), typeof(string), typeof(CategoryItemCell), string.Empty);
+    public static readonly BindableProperty CategoryNameProperty = BindableProperty.Create(
+        nameof(CategoryName), typeof(string), typeof(CategoryItemCell), "...");
 
-    public string EntryCount
+    public string CategoryName
     {
-        get => (string)GetValue(EntryCountProperty);
-        set => SetValue(EntryCountProperty, value);
+        get => (string)GetValue(CategoryNameProperty);
+        set => SetValue(CategoryNameProperty, value);
     }
 
     // 2. LEADING ICON (Left side)

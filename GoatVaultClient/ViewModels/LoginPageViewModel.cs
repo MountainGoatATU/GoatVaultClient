@@ -39,6 +39,21 @@ public partial class LoginPageViewModel(
         await LoadLocalUsersAsync();
     }
 
+    partial void OnSelectedUserChanged(User? value)
+    {
+        if (value != null)
+        {
+            if (!IsOnline)
+            {
+                SelectedUser = value;
+            }
+            else
+            {
+                EmailText = value.Email.Value;
+            }
+        }
+    }
+
     #region Connectivity
 
     public void Cleanup() => connectivity.ConnectivityChanged -= OnConnectivityChanged;
@@ -81,6 +96,10 @@ public partial class LoginPageViewModel(
         var users = await userRepository.GetAllAsync();
         LocalUsers = new ObservableCollection<User>(users);
         HasLocalUsers = LocalUsers.Count > 0;
+        if (HasLocalUsers)
+        {
+            SelectedUser = LocalUsers.FirstOrDefault();
+        }
     }
 
     [RelayCommand]
@@ -141,21 +160,23 @@ public partial class LoginPageViewModel(
         else
         {
             EmailText = user.Email.Value;
-            SelectedUser = null; // Clear selection for online login
         }
     }
 
     [RelayCommand]
-    private async Task RemoveOfflineUser(User user)
+    private async Task RemoveOfflineUser()
     {
-        var confirm = await Shell.Current.DisplayAlertAsync("Remove User",
-            $"Are you sure you want to remove {user.Email} from this device?", "Yes", "No");
+        if (SelectedUser != null)
+        {
+            var confirm = await Shell.Current.DisplayAlertAsync("Remove User",
+            $"Are you sure you want to remove {SelectedUser.Email} from this device?", "Yes", "No");
 
-        if (!confirm)
-            return;
+            if (!confirm)
+                return;
 
-        await userRepository.DeleteAsync(user);
-        await LoadLocalUsersAsync();
+            await userRepository.DeleteAsync(SelectedUser);
+            await LoadLocalUsersAsync();
+        }
     }
 
     [RelayCommand]

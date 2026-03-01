@@ -15,77 +15,105 @@
                                       Dark={x:StaticResource DarkSurface}}">
 
     <Grid>
-        <Grid x:Name="MainGrid" RowDefinitions="Auto, Auto, *">
-            <controls:SyncStatusBar x:Name="SyncStatusBar" Grid.Row="0" />
+        <Grid
+            x:Name="MainGrid"
+            RowDefinitions="Auto,Auto, *"
+            RowSpacing="{StaticResource sLarge}">
+            <controls:Component>
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label
+                        x:Name="Title"
+                        Style="{StaticResource MaterialHeadlineLarge}"
+                        Text="GoatVault" />
+                    <controls:SyncStatusBar x:Name="SyncStatusBar" Grid.Column="1" />
+                </Grid>
+            </controls:Component>
+            <controls:Component Grid.Row="1" ContentPadding="{StaticResource sContent}">
 
-            <controls:Component x:Name="SearchBar" Grid.Row="1">
                 <SearchBar
+                    Background="{AppThemeBinding Light={StaticResource LightSurface},
+                                                 Dark={StaticResource DarkSurface}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
+                                                      Dark={StaticResource DarkSurface}}"
                     HeightRequest="48"
-                    Placeholder="Search passwords..."
+                    Placeholder="Search Vault..."
                     Text="{Binding SearchText}" />
             </controls:Component>
 
             <Grid
+                x:Name="VaultContentGrid"
                 Grid.Row="2"
                 BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
                                                   Dark={x:StaticResource DarkSurface}}"
-                ColumnDefinitions="Auto, 300, *"
-                RowDefinitions="Auto,*">
+                ColumnDefinitions="*, 2*, 1.5*"
+                ColumnSpacing="{StaticResource sLarge}"
+                RowDefinitions="Auto,*"
+                RowSpacing="{StaticResource sLarge}">
 
                 <controls:Component
+                    x:Name="MobileCategoryPicker"
+                    Title="Categories"
                     Grid.Row="0"
                     Grid.Column="0"
-                    Grid.ColumnSpan="3">
-                    <Grid
-                        x:Name="MobileCategoryPicker"
-                        ColumnDefinitions="*,Auto"
-                        ColumnSpacing="{StaticResource sContent}"
-                        VerticalOptions="Center">
-                        <!--<material:DropdownField
-                            AllowClear="True"
-                            Icon="{x:Static m:MaterialRounded.Filter_list}"
-                            ItemsSource="{Binding Categories}"
-                            SelectedItem="{Binding SelectedCategory}" />-->
-                        <controls:ImageButton
-                            Grid.Column="1"
-                            Command="{Binding CreateCategoryCommand}"
-                            IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                               Dark={StaticResource DarkOnPrimaryContainer}}"
-                            IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                        Dark={StaticResource DarkOnPrimaryContainer}}"
-                            IconGlyph="{x:Static m:MaterialOutlined.Add}" />
-                    </Grid>
+                    Grid.ColumnSpan="3"
+                    BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                              Dark={StaticResource DarkSurfaceContainerLowest}}"
+                    ContentPadding="{StaticResource formSpacing}"
+                    FooterBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                    Dark={StaticResource DarkSurfaceContainerLow}}"
+                    HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                    Dark={StaticResource DarkSurfaceContainerLow}}"
+                    ShowHeader="True">
+                    <controls:Component.HeaderActions>
+                        <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
+                            <controls:IconTextButton
+                                Grid.Column="1"
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
+                                                                Dark={StaticResource DarkPrimaryContainer}}"
+                                ButtonText="Add Category"
+                                Command="{Binding CreateCategoryCommand}"
+                                IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
+                                IconGlyph="{x:Static m:MaterialRounded.Add}" />
+                        </HorizontalStackLayout>
+                    </controls:Component.HeaderActions>
+                    <Picker
+                        Title="Select Category"
+                        ItemDisplayBinding="{Binding Name}"
+                        ItemsSource="{Binding Categories}"
+                        SelectedItem="{Binding SelectedCategory}" />
                 </controls:Component>
 
                 <controls:Component
                     x:Name="DesktopCategoriesPane"
+                    Title="Categories"
                     Grid.Row="1"
-                    Grid.Column="0">
+                    Grid.Column="0"
+                    BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                              Dark={StaticResource DarkSurfaceContainerLowest}}"
+                    ContentPadding="{StaticResource sContent}"
+                    FooterBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                    Dark={StaticResource DarkSurfaceContainerLow}}"
+                    HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                    Dark={StaticResource DarkSurfaceContainerLow}}"
+                    ShowFooter="True"
+                    ShowHeader="True">
 
-                    <Grid RowDefinitions="Auto, Auto, *">
-                        <controls:ComponentHeader Title="Categories" Grid.Row="0">
-                            <controls:ComponentHeader.Actions>
-                                <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
-                                    <controls:ImageButton
-                                        Command="{Binding SortCategoriesCommand}"
-                                        IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                                           Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                                    Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Sort}" />
-                                    <controls:ImageButton
-                                        Command="{Binding CreateCategoryCommand}"
-                                        IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                                           Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                                    Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Add}" />
-                                </HorizontalStackLayout>
-                            </controls:ComponentHeader.Actions>
-                        </controls:ComponentHeader>
+                    <controls:Component.HeaderActions>
+                        <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
+                            <controls:ImageButton
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                                Dark={StaticResource DarkSecondaryContainer}}"
+                                Command="{Binding SortCategoriesCommand}"
+                                IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}"
+                                IconGlyph="{x:Static m:MaterialRounded.Sort}" />
+                        </HorizontalStackLayout>
+                    </controls:Component.HeaderActions>
 
+                    <Grid RowDefinitions="Auto, *, Auto">
+                        <!--  Show All Passwords Button  -->
                         <Button
-                            Grid.Row="1"
                             Margin="0,0,0,16"
                             BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
                                                               Dark={StaticResource DarkSecondaryContainer}}"
@@ -93,13 +121,13 @@
                             CornerRadius="{StaticResource Large}"
                             FontFamily="{StaticResource MaterialMediumFont}"
                             FontSize="{StaticResource tMedium}"
-                            Text="All Passwords"
+                            Text="Show All"
                             TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
                                                         Dark={StaticResource DarkOnSecondaryContainer}}" />
-
+                        <!--  Categories List  -->
                         <CollectionView
                             x:Name="CategoriesCollection"
-                            Grid.Row="2"
+                            Grid.Row="1"
                             ItemsSource="{Binding Categories}"
                             SelectedItem="{Binding SelectedCategory}"
                             SelectionMode="Single">
@@ -108,147 +136,220 @@
                             </CollectionView.ItemsLayout>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
-                                    <controls:CategoryItemCell
-                                        ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Folder}"
-                                        Text="{Binding Name}">
-                                        <FlyoutBase.ContextFlyout>
-                                            <MenuFlyout>
-                                                <MenuFlyoutItem
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
-                                                    CommandParameter="{Binding .}"
-                                                    Text="Edit">
-                                                    <MenuFlyoutItem.IconImageSource>
-                                                        <FontImageSource
-                                                            FontFamily="MaterialRounded"
-                                                            Glyph="{x:Static m:MaterialRounded.Edit}"
-                                                            Color="{StaticResource Primary}" />
-                                                    </MenuFlyoutItem.IconImageSource>
-                                                </MenuFlyoutItem>
+                                    <Grid>
+                                        <controls:CategoryItemCell
+                                            ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
+                                            EntryCount="{Binding EntryCount}"
+                                            IconGlyph="{x:Static m:MaterialRounded.Folder}"
+                                            Text="{Binding Name}">
+                                            <FlyoutBase.ContextFlyout>
+                                                <MenuFlyout>
+                                                    <MenuFlyoutItem
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        Text="Edit">
+                                                        <MenuFlyoutItem.IconImageSource>
+                                                            <FontImageSource
+                                                                FontFamily="MaterialRounded"
+                                                                Glyph="{x:Static m:MaterialRounded.Edit}"
+                                                                Color="{StaticResource Primary}" />
+                                                        </MenuFlyoutItem.IconImageSource>
+                                                    </MenuFlyoutItem>
 
-                                                <MenuFlyoutItem
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}"
-                                                    CommandParameter="{Binding .}"
-                                                    Text="Delete">
-                                                    <MenuFlyoutItem.IconImageSource>
-                                                        <FontImageSource
-                                                            FontFamily="MaterialRounded"
-                                                            Glyph="{x:Static m:MaterialRounded.Delete}"
-                                                            Color="{StaticResource Error}" />
-                                                    </MenuFlyoutItem.IconImageSource>
-                                                </MenuFlyoutItem>
-                                            </MenuFlyout>
-                                        </FlyoutBase.ContextFlyout>
-                                    </controls:CategoryItemCell>
+                                                    <MenuFlyoutItem
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        Text="Delete">
+                                                        <MenuFlyoutItem.IconImageSource>
+                                                            <FontImageSource
+                                                                FontFamily="MaterialRounded"
+                                                                Glyph="{x:Static m:MaterialRounded.Delete}"
+                                                                Color="{StaticResource Error}" />
+                                                        </MenuFlyoutItem.IconImageSource>
+                                                    </MenuFlyoutItem>
+                                                </MenuFlyout>
+                                            </FlyoutBase.ContextFlyout>
+                                        </controls:CategoryItemCell>
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurfaceContainer}, Dark={StaticResource DarkSurfaceContainer}}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurfaceContainerHighest}, Dark={StaticResource DarkSurfaceContainerHighest}}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
                     </Grid>
+                    <!--  Create Category Passwords Button  -->
+                    <controls:Component.FooterActions>
+                        <controls:IconTextButton
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
+                                                            Dark={StaticResource DarkPrimaryContainer}}"
+                            ButtonText="Add Category"
+                            Command="{Binding CreateCategoryCommand}"
+                            IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                        Dark={StaticResource DarkOnPrimaryContainer}}"
+                            IconGlyph="{x:Static m:MaterialRounded.Add}" />
+                    </controls:Component.FooterActions>
                 </controls:Component>
 
                 <controls:Component
                     x:Name="PasswordsPane"
+                    Title="Passwords"
                     Grid.Row="1"
-                    Grid.Column="0">
+                    Grid.Column="0"
+                    BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                              Dark={StaticResource DarkSurfaceContainerLowest}}"
+                    ContentPadding="{StaticResource sContent}"
+                    HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                    Dark={StaticResource DarkSurfaceContainerLow}}"
+                    ShowHeader="True">
 
-                    <Grid RowDefinitions="Auto, *">
-                        <controls:ComponentHeader Title="Passwords" Grid.Row="0">
-                            <controls:ComponentHeader.Actions>
-                                <HorizontalStackLayout Spacing="{x:StaticResource sContent}" VerticalOptions="Center">
-                                    <controls:ImageButton
-                                        Command="{Binding SortEntriesCommand}"
-                                        IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                                           Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                                    Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Sort}" />
-                                    <controls:ImageButton
-                                        Command="{Binding CreateEntryCommand}"
-                                        IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                                           Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                                    Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Add}" />
-                                </HorizontalStackLayout>
-                            </controls:ComponentHeader.Actions>
-                        </controls:ComponentHeader>
+                    <controls:Component.HeaderActions>
+                        <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
+                            <controls:ImageButton
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                                Dark={StaticResource DarkSecondaryContainer}}"
+                                Command="{Binding SortEntriesCommand}"
+                                IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}"
+                                IconGlyph="{x:Static m:MaterialRounded.Sort}" />
+                            <controls:IconTextButton
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
+                                                                Dark={StaticResource DarkPrimaryContainer}}"
+                                ButtonText="Add Password"
+                                Command="{Binding CreateEntryCommand}"
+                                IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
+                                IconGlyph="{x:Static m:MaterialRounded.Add}" />
+                        </HorizontalStackLayout>
+                    </controls:Component.HeaderActions>
 
-                        <CollectionView
-                            x:Name="EntriesCollection"
-                            Grid.Row="1"
-                            ItemsSource="{Binding Passwords}"
-                            SelectedItem="{Binding SelectedEntry}"
-                            SelectionMode="Single">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout ItemSpacing="{x:StaticResource sContent}" Orientation="Vertical" />
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <controls:CategoryItemCell
-                                        ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Key}"
-                                        Text="{Binding Site}">
-                                        <FlyoutBase.ContextFlyout>
-                                            <MenuFlyout>
-                                                <MenuFlyoutItem
+                    <CollectionView
+                        x:Name="EntriesCollection"
+                        Grid.Row="1"
+                        ItemsSource="{Binding Passwords}"
+                        SelectedItem="{Binding SelectedEntry}"
+                        SelectionMode="Single">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout ItemSpacing="{x:StaticResource sContent}" Orientation="Vertical" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <SwipeView>
+                                        <SwipeView.RightItems>
+                                            <SwipeItems Mode="Reveal">
+                                                <SwipeItem
+                                                    BackgroundColor="{StaticResource Primary}"
                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    Text="Edit">
-                                                    <MenuFlyoutItem.IconImageSource>
-                                                        <FontImageSource
-                                                            FontFamily="MaterialRounded"
-                                                            Glyph="{x:Static m:MaterialRounded.Edit}"
-                                                            Color="{StaticResource Primary}" />
-                                                    </MenuFlyoutItem.IconImageSource>
-                                                </MenuFlyoutItem>
-                                                <MenuFlyoutItem
+                                                    IconImageSource="{FontImageSource FontFamily=MaterialRounded,
+                                                                                      Glyph={x:Static m:MaterialRounded.Edit}}"
+                                                    Text="Edit" />
+
+                                                <SwipeItem
+                                                    BackgroundColor="{StaticResource Error}"
                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
                                                     CommandParameter="{Binding .}"
-                                                    Text="Delete">
-                                                    <MenuFlyoutItem.IconImageSource>
-                                                        <FontImageSource
-                                                            FontFamily="MaterialRounded"
-                                                            Glyph="{x:Static m:MaterialRounded.Delete}"
-                                                            Color="{StaticResource Error}" />
-                                                    </MenuFlyoutItem.IconImageSource>
-                                                </MenuFlyoutItem>
-                                            </MenuFlyout>
-                                        </FlyoutBase.ContextFlyout>
-                                    </controls:CategoryItemCell>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </Grid>
+                                                    IconImageSource="{FontImageSource FontFamily=MaterialRounded,
+                                                                                      Glyph={x:Static m:MaterialRounded.Delete}}"
+                                                    Text="Delete" />
+                                            </SwipeItems>
+                                        </SwipeView.RightItems>
+                                        <controls:EntryItemCell
+                                            ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
+                                            CategoryName="{Binding Category}"
+                                            IconGlyph="{x:Static m:MaterialRounded.Key}"
+                                            Text="{Binding Site}">
+                                            <FlyoutBase.ContextFlyout>
+                                                <MenuFlyout>
+                                                    <MenuFlyoutItem
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        Text="Edit">
+                                                        <MenuFlyoutItem.IconImageSource>
+                                                            <FontImageSource
+                                                                FontFamily="MaterialRounded"
+                                                                Glyph="{x:Static m:MaterialRounded.Edit}"
+                                                                Color="{StaticResource Primary}" />
+                                                        </MenuFlyoutItem.IconImageSource>
+                                                    </MenuFlyoutItem>
+                                                    <MenuFlyoutItem
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        Text="Delete">
+                                                        <MenuFlyoutItem.IconImageSource>
+                                                            <FontImageSource
+                                                                FontFamily="MaterialRounded"
+                                                                Glyph="{x:Static m:MaterialRounded.Delete}"
+                                                                Color="{StaticResource Error}" />
+                                                        </MenuFlyoutItem.IconImageSource>
+                                                    </MenuFlyoutItem>
+                                                </MenuFlyout>
+                                            </FlyoutBase.ContextFlyout>
+                                        </controls:EntryItemCell>
+                                    </SwipeView>
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurfaceContainer}, Dark={StaticResource DarkSurfaceContainer}}" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurfaceContainerHighest}, Dark={StaticResource DarkSurfaceContainerHighest}}" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </controls:Component>
-
                 <controls:Component
                     x:Name="DetailsPane"
+                    Title="{Binding SelectedEntry.Site}"
                     Grid.Row="1"
                     Grid.Column="2"
-                    IsVisible="{Binding IsDetailsPanelVisible}">
-                    <Grid RowDefinitions="Auto, *">
-                        <controls:ComponentHeader Title="Details" Grid.Row="0">
-                            <controls:ComponentHeader.Actions>
-                                <HorizontalStackLayout Spacing="{x:StaticResource sContent}" VerticalOptions="Center">
-                                    <controls:ImageButton
-                                        Command="{Binding DeleteEntryCommand}"
-                                        IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                                           Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                                    Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Delete}" />
-                                    <controls:ImageButton
-                                        Command="{Binding CreateEntryCommand}"
-                                        IconBgColorHover="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                                           Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                                    Dark={StaticResource DarkOnPrimaryContainer}}"
-                                        IconGlyph="{x:Static m:MaterialRounded.Add}" />
-                                </HorizontalStackLayout>
-                            </controls:ComponentHeader.Actions>
-                        </controls:ComponentHeader>
-                        <controls:EntryDetailView Grid.Row="1" BindingContext="{Binding SelectedEntry}" />
-                    </Grid>
+                    BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHigh},
+                                              Dark={StaticResource DarkSurfaceContainerHigh}}"
+                    ContentPadding="{StaticResource sContent}"
+                    HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                    Dark={StaticResource DarkSurfaceContainerLow}}"
+                    IsVisible="{Binding IsDetailsPanelVisible}"
+                    ShowHeader="True">
+
+                    <controls:Component.HeaderActions>
+                        <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
+                            <controls:ImageButton
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                                Dark={StaticResource DarkSecondaryContainer}}"
+                                Command="{Binding EditEntryCommand}"
+                                IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}"
+                                IconGlyph="{x:Static m:MaterialRounded.Edit}" />
+                            <controls:ImageButton
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                                Dark={StaticResource DarkSecondaryContainer}}"
+                                Command="{Binding DeleteEntryCommand}"
+                                IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}"
+                                IconGlyph="{x:Static m:MaterialRounded.Delete}" />
+                        </HorizontalStackLayout>
+                    </controls:Component.HeaderActions>
+                    <controls:EntryDetailView Grid.Row="1" />
                 </controls:Component>
             </Grid>
         </Grid>
@@ -277,7 +378,7 @@
                 <Border
                     Padding="12"
                     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHighest},
-                                  Dark={StaticResource DarkSurfaceContainerHighest}}"
+                                                      Dark={StaticResource DarkSurfaceContainerHighest}}"
                     HorizontalOptions="End"
                     StrokeShape="RoundRectangle 12">
                     <Label
@@ -286,12 +387,12 @@
                         MaxLines="3"
                         Text="{Binding GoatComment}"
                         TextColor="{AppThemeBinding Light={StaticResource LightOnSurface},
-                            Dark={StaticResource DarkOnSurface}}" />
+                                                    Dark={StaticResource DarkOnSurface}}" />
                 </Border>
                 <BoxView
                     Margin="0,-8,16,0"
                     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHighest},
-                                  Dark={StaticResource DarkSurfaceContainerHighest}}"
+                                                      Dark={StaticResource DarkSurfaceContainerHighest}}"
                     HeightRequest="12"
                     HorizontalOptions="End"
                     Rotation="45"
@@ -308,10 +409,15 @@
                         <Setter TargetName="DesktopCategoriesPane" Property="IsVisible" Value="False" />
                         <Setter TargetName="DetailsPane" Property="IsVisible" Value="False" />
                         <Setter TargetName="MobileCategoryPicker" Property="IsVisible" Value="True" />
+                        <Setter TargetName="Title" Property="IsVisible" Value="False" />
+
+                        <Setter TargetName="VaultContentGrid" Property="ColumnDefinitions" Value="*, 0, 0" />
+                        <Setter TargetName="VaultContentGrid" Property="ColumnSpacing" Value="0" />
 
                         <Setter TargetName="PasswordsPane" Property="Grid.Column" Value="0" />
-                        <Setter TargetName="PasswordsPane" Property="Grid.ColumnSpan" Value="3" />
-                        <Setter TargetName="MainGrid" Property="Margin" Value="{StaticResource mCompact}" />
+                        <Setter TargetName="PasswordsPane" Property="Grid.ColumnSpan" Value="1" />
+                        <Setter TargetName="MainGrid" Property="Margin" Value="{StaticResource layoutMarginMobile}" />
+                        <Setter TargetName="MainGrid" Property="RowSpacing" Value="{StaticResource sContent}" />
                     </VisualState.Setters>
                 </VisualState>
 
@@ -324,9 +430,12 @@
                         <!--<Setter TargetName="DetailsPane" Property="IsVisible" Value="True" />-->
                         <Setter TargetName="MobileCategoryPicker" Property="IsVisible" Value="False" />
 
+                        <Setter TargetName="VaultContentGrid" Property="ColumnDefinitions" Value="*, 2*, 1.5*" />
+                        <Setter TargetName="VaultContentGrid" Property="ColumnSpacing" Value="{StaticResource sLarge}" />
+
                         <Setter TargetName="PasswordsPane" Property="Grid.Column" Value="1" />
                         <Setter TargetName="PasswordsPane" Property="Grid.ColumnSpan" Value="1" />
-                        <Setter TargetName="MainGrid" Property="Margin" Value="{StaticResource mLarge}" />
+                        <Setter TargetName="MainGrid" Property="Margin" Value="{StaticResource layoutMarginDesktop}" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

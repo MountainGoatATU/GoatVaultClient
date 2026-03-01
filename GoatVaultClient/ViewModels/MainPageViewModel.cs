@@ -137,6 +137,8 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
             _allVaultEntries = [.. vault.Entries];
             _allVaultCategories = [.. vault.Categories];
 
+            SelectedCategory = _allVaultCategories.FirstOrDefault();
+
             ReloadVaultData();
         });
     }
@@ -159,6 +161,12 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
             {
                 _allVaultEntries = [.. _session.Vault.Entries];
                 _allVaultCategories = [.. _session.Vault.Categories];
+
+                // Calculate entry counts 
+                foreach (var category in _allVaultCategories)
+                {
+                    category.EntryCount = _allVaultEntries.Count(e => e.Category == category.Name);
+                }
             }
 
             UpdateCollection(Passwords, _allVaultEntries);

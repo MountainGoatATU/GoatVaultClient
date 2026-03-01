@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
@@ -70,8 +71,31 @@
                         </VerticalStackLayout>
                     </input:FormView>
 
-                    <VerticalStackLayout IsVisible="{Binding HasLocalUsers}" Spacing="{StaticResource sContent}">
-                        <Label Style="{StaticResource MaterialHeadlineSmall}" Text="Saved Accounts" />
+                    <Grid
+                        ColumnDefinitions="*,Auto"
+                        ColumnSpacing="{StaticResource sContent}"
+                        IsVisible="{Binding HasLocalUsers}">
+                        <Picker
+                            x:Name="LocalAccountPicker"
+                            Title="Select Offline User"
+                            IsVisible="{Binding HasLocalUsers}"
+                            ItemDisplayBinding="{Binding Email}"
+                            ItemsSource="{Binding LocalUsers}"
+                            SelectedItem="{Binding SelectedUser}"
+                            TitleColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                         Dark={StaticResource DarkOnSurfaceVariant}}" />
+                        <controls:ImageButton
+                            Grid.Column="1"
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                            Dark={StaticResource DarkSecondaryContainer}}"
+                            Command="{Binding RemoveOfflineUserCommand}"
+                            IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                        Dark={StaticResource DarkOnSecondaryContainer}}"
+                            IconGlyph="{x:Static m:MaterialOutlined.Delete}"
+                            VerticalOptions="End" />
+                    </Grid>
+
+                    <!--<Label Style="{StaticResource MaterialHeadlineSmall}" Text="Saved Accounts" />
 
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding LocalUsers}" Spacing="{StaticResource sContent}">
                             <BindableLayout.ItemTemplate>
@@ -120,8 +144,8 @@
                                     </Border>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
-                    </VerticalStackLayout>
+                        </VerticalStackLayout>-->
+
 
                     <input:FormView SubmitCommand="{Binding LoginCommand}">
                         <VerticalStackLayout IsVisible="{Binding IsOnline, Converter={StaticResource InvertedBoolConverter}}" Spacing="{StaticResource formSpacing}">

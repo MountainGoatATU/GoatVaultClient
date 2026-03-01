@@ -7,8 +7,11 @@
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+    xmlns:popups="clr-namespace:GoatVaultClient.Controls.Popups"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
-    BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#B0000000}"
+    x:DataType="popups:CreateCategoryPopup"
+    BackgroundColor="{AppThemeBinding Light=#80000000,
+                                      Dark=#B0000000}"
     CloseWhenBackgroundIsClicked="True">
     <controls:PopupTemplate
         x:Name="PopupRoot"
@@ -16,7 +19,6 @@
         AcceptCommand="{Binding AcceptCommand}"
         AcceptText="Save"
         CancelCommand="{Binding CancelCommand}">
-
         <VerticalStackLayout>
             <material:TextField
                 x:Name="CategoryField"
@@ -26,30 +28,5 @@
                 <validation:MinLengthValidation MinLength="2" />
             </material:TextField>
         </VerticalStackLayout>
-
     </controls:PopupTemplate>
-
-    <!--
-    <VisualStateManager.VisualStateGroups>
-        <VisualStateGroup x:Name="WindowStates">
-            <VisualState x:Name="Mobile">
-                <VisualState.StateTriggers>
-                    <AdaptiveTrigger MinWindowWidth="0" />
-                </VisualState.StateTriggers>
-                <VisualState.Setters>
-                    <Setter TargetName="PopupRoot" Property="FrameWidth" Value="350" />
-                </VisualState.Setters>
-            </VisualState>
-
-            <VisualState x:Name="Desktop">
-                <VisualState.StateTriggers>
-                    <AdaptiveTrigger MinWindowWidth="900" />
-                </VisualState.StateTriggers>
-                <VisualState.Setters>
-                    <Setter TargetName="PopupRoot" Property="FrameWidth" Value="500" />
-                </VisualState.Setters>
-            </VisualState>
-        </VisualStateGroup>
-    </VisualStateManager.VisualStateGroups>
-    -->
 </mopups:PopupPage>

@@ -6,11 +6,37 @@
     xmlns:local="clr-namespace:GoatVaultClient"
     xmlns:m="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:pages="clr-namespace:GoatVaultClient.Pages"
+    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     Title="GoatVault"
+    x:DataType="vm:AppShellViewModel"
     BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
                                       Dark={x:StaticResource DarkSurface}}"
-    Shell.FlyoutBehavior="Disabled"
-    Shell.TabBarIsVisible="False">
+    FlyoutBehavior="Disabled"
+    ForegroundColor="{AppThemeBinding Light={StaticResource LightOnPrimary},
+                                      Dark={StaticResource DarkOnPrimary}}"
+    TabBarBackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
+                                            Dark={x:StaticResource DarkSurface}}"
+    TabBarForegroundColor="{AppThemeBinding Light={x:StaticResource LightPrimary},
+                                            Dark={x:StaticResource DarkPrimary}}"
+    TabBarIsVisible="False"
+    TabBarTitleColor="{AppThemeBinding Light={x:StaticResource LightOnSurface},
+                                       Dark={x:StaticResource DarkOnSurface}}"
+    TabBarUnselectedColor="{AppThemeBinding Light={x:StaticResource Gray500},
+                                            Dark={x:StaticResource Gray400}}"
+    TitleColor="{AppThemeBinding Light={x:StaticResource LightOnSurface},
+                                 Dark={x:StaticResource DarkOnSurface}}">
+    <Shell.TabBarIsVisible>
+        <OnPlatform x:TypeArguments="x:Boolean">
+            <On Platform="WinUI" Value="True" />
+            <On Platform="Android, iOS, MacCatalyst" Value="False" />
+        </OnPlatform>
+    </Shell.TabBarIsVisible>
+    <Shell.NavBarIsVisible>
+        <OnPlatform x:TypeArguments="x:Boolean">
+            <On Platform="WinUI" Value="False" />
+            <On Platform="Android, iOS, MacCatalyst" Value="True" />
+        </OnPlatform>
+    </Shell.NavBarIsVisible>
     <!--
         NAVIGATION ARCHITECTURE (Flyout):
         ═══════════════════════════════════════════════════════════
@@ -77,7 +103,6 @@
     <!--  POST-AUTH: Flyout menu items  -->
     <!--  ============================================================  -->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems" Route="main">
-
         <ShellContent
             Title="Vault"
             ContentTemplate="{DataTemplate local:MainPage}"
@@ -104,8 +129,37 @@
                                    Color={AppThemeBinding Light={StaticResource LightOnSurface},
                                                           Dark={StaticResource DarkOnSurface}}}"
             Route="settings" />
-
     </FlyoutItem>
+
+    <TabBar>
+        <ShellContent
+            Title="Vault"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Icon="{FontImageSource FontFamily=MaterialSharp,
+                                   Glyph={x:Static m:MaterialRounded.Lock},
+                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
+                                                          Dark={StaticResource DarkOnSurface}}}"
+            Route="home"
+            Shell.NavBarIsVisible="False" />
+
+        <ShellContent
+            Title="Security"
+            ContentTemplate="{DataTemplate pages:SecurityPage}"
+            Icon="{FontImageSource FontFamily=MaterialSharp,
+                                   Glyph={x:Static m:MaterialRounded.Security},
+                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
+                                                          Dark={StaticResource DarkOnSurface}}}"
+            Route="security" />
+
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate pages:SettingsPage}"
+            Icon="{FontImageSource FontFamily=MaterialSharp,
+                                   Glyph={x:Static m:MaterialRounded.Settings},
+                                   Color={AppThemeBinding Light={StaticResource LightOnSurface},
+                                                          Dark={StaticResource DarkOnSurface}}}"
+            Route="settings" />
+    </TabBar>
 
     <!--  ============================================================  -->
     <!--  FLYOUT FOOTER  -->

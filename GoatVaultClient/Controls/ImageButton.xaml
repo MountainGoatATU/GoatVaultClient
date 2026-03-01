@@ -3,10 +3,13 @@
     x:Class="GoatVaultClient.Controls.ImageButton"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-    x:Name="this">
+    x:Name="this"
+    x:DataType="controls:ImageButton">
     <material:ButtonView
+        BackgroundColor="{Binding ButtonBgColor, Source={x:Reference this}}"
         HeightRequest="{OnIdiom Phone={StaticResource iconMobileZone},
                                 Desktop={StaticResource iconDesktopZone}}"
         PressedCommand="{Binding Command, Source={x:Reference this}}"
