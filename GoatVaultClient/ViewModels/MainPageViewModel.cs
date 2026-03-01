@@ -20,8 +20,8 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private readonly CategoryManagerService _categoryManager;
     private readonly VaultEntryManagerService _vaultEntryManager;
     private readonly ILogger<MainPageViewModel>? _logger;
-    // private readonly PwnedPasswordService _pwnedPassword;
-    public GoatTipsService GoatTips { get; }
+
+    private GoatTipsService GoatTips { get; }
 
     #endregion
 
