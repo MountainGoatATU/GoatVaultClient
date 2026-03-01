@@ -61,8 +61,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         CategoryManagerService categoryManager,
         VaultEntryManagerService vaultEntryManager,
         GoatTipsService goatTips,
-        ILogger<MainPageViewModel>? logger = null/*,
-        PwnedPasswordService pwnedPassword*/)
+        ILogger<MainPageViewModel>? logger = null)
     {
         _loadVault = loadVault;
         _session = session;
@@ -171,10 +170,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
             UpdateCollection(Passwords, _allVaultEntries);
             UpdateCollection(Categories, _allVaultCategories);
-
-            // TODO: Old pre-refactor code
-            // Passwords = _allVaultEntries.ToObservableCollection();
-            // Categories = _allVaultCategories.ToObservableCollection();
 
             PresortEntries(true);
             PresortCategories(true);
