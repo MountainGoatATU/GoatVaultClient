@@ -355,6 +355,16 @@
                 ShowHeader="True">
                 <VerticalStackLayout Padding="20" Spacing="15">
 
+                    <!-- Wipe Vault Button  -->
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                            Dark={StaticResource ErrorDark}}"
+                        Command="{Binding WipeVaultCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        Text="Wipe Vault"
+                        TextColor="White" />
+
                     <!-- Delete Account Button  -->
                     <Button
                         Margin="0,10,0,0"

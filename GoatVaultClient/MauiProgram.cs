@@ -136,6 +136,7 @@ public static class MauiProgram
         builder.Services.AddTransient<SaveVaultUseCase>();
         builder.Services.AddTransient<SyncVaultUseCase>();
         builder.Services.AddTransient<UpdateVaultEntryUseCase>();
+        builder.Services.AddTransient<WipeVaultUseCase>();
 
         builder.Services.AddTransient<ChangeEmailUseCase>();
         builder.Services.AddTransient<ChangePasswordUseCase>();

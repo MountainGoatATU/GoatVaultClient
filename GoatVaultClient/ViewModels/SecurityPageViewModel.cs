@@ -21,6 +21,7 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly EnableMfaUseCase _enableMfa;
     private readonly DisableMfaUseCase _disableMfa;
     private readonly DeleteAccountUseCase _deleteAccount;
+    private readonly WipeVaultUseCase _wipeVault;
     private readonly ISessionContext _session;
 
     [ObservableProperty] private string email = string.Empty;
@@ -44,6 +45,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
         DeleteAccountUseCase deleteAccount,
+        WipeVaultUseCase wipeVault,
         ISessionContext session)
     {
         _loadUserProfile = loadUserProfile;
@@ -53,6 +55,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
         _deleteAccount = deleteAccount;
+        _wipeVault = wipeVault;
         _session = session;
 
 
@@ -75,6 +78,8 @@ public partial class SecurityPageViewModel : BaseViewModel
             await RefreshVaultScoreAsync();
         });
     }
+
+    #region Vault Score
 
     [RelayCommand]
     private async Task RefreshVaultScoreAsync()
@@ -151,6 +156,10 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     public string MfaCategory => MfaEnabled ? "Very Strong" : "Poor";
 
+    #endregion
+
+    #region Account Credentials
+
     [RelayCommand]
     private async Task EditEmailAsync()
     {
@@ -191,6 +200,10 @@ public partial class SecurityPageViewModel : BaseViewModel
             await RefreshVaultScoreAsync();
         });
     }
+
+    #endregion
+
+    #region Multi-Factor Authentication
 
     [RelayCommand]
     private async Task EnableMfaAsync()
@@ -249,6 +262,10 @@ public partial class SecurityPageViewModel : BaseViewModel
         });
     }
 
+    #endregion
+
+    #region Danger Zone
+
     [RelayCommand]
     private async Task DeleteAccount()
     {
@@ -262,7 +279,7 @@ public partial class SecurityPageViewModel : BaseViewModel
             return;
 
         var confirm2 = await ShowConfirmationAsync("Delete Account",
-            "Are you really sure? There is no turning back after confirming this.");
+            "Are you absolutely sure? There is no turning back after confirming this.");
         if (!confirm2)
             return;
 
@@ -278,6 +295,29 @@ public partial class SecurityPageViewModel : BaseViewModel
             await Shell.Current.GoToAsync("//login");
         });
     }
+
+    [RelayCommand]
+    private async Task WipeVault()
+    {
+        var confirm1 = await ShowConfirmationAsync("Wipe Vault",
+            "This will permanently delete all vault entries and categories from this device and the server. Continue?");
+        if (!confirm1)
+            return;
+
+        var confirm2 = await ShowConfirmationAsync("Wipe Vault",
+            "Are you absolutely sure? This action cannot be undone.");
+        if (!confirm2)
+            return;
+
+        await SafeExecuteAsync(async () =>
+        {
+            await _wipeVault.ExecuteAsync();
+            await ShowSuccessAsync("Vault wiped successfully.");
+            await RefreshVaultScoreAsync();
+        });
+    }
+
+    #endregion
 
     #region UI Helpers
 
