@@ -1,10 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Account;
-using GoatVaultApplication.Auth;
 using GoatVaultApplication.Vault;
 using GoatVaultClient.Controls.Popups;
-using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -22,6 +20,8 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly ChangePasswordUseCase _changePassword;
     private readonly EnableMfaUseCase _enableMfa;
     private readonly DisableMfaUseCase _disableMfa;
+    private readonly DeleteAccountUseCase _deleteAccount;
+    private readonly WipeVaultUseCase _wipeVault;
     private readonly ISessionContext _session;
 
     [ObservableProperty] private string email = string.Empty;
@@ -44,6 +44,8 @@ public partial class SecurityPageViewModel : BaseViewModel
         ChangePasswordUseCase changePassword,
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
+        DeleteAccountUseCase deleteAccount,
+        WipeVaultUseCase wipeVault,
         ISessionContext session)
     {
         _loadUserProfile = loadUserProfile;
@@ -52,6 +54,8 @@ public partial class SecurityPageViewModel : BaseViewModel
         _changePassword = changePassword;
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
+        _deleteAccount = deleteAccount;
+        _wipeVault = wipeVault;
         _session = session;
 
 
@@ -74,6 +78,8 @@ public partial class SecurityPageViewModel : BaseViewModel
             await RefreshVaultScoreAsync();
         });
     }
+
+    #region Vault Score
 
     [RelayCommand]
     private async Task RefreshVaultScoreAsync()
@@ -150,6 +156,10 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     public string MfaCategory => MfaEnabled ? "Very Strong" : "Poor";
 
+    #endregion
+
+    #region Account Credentials
+
     [RelayCommand]
     private async Task EditEmailAsync()
     {
@@ -190,6 +200,10 @@ public partial class SecurityPageViewModel : BaseViewModel
             await RefreshVaultScoreAsync();
         });
     }
+
+    #endregion
+
+    #region Multi-Factor Authentication
 
     [RelayCommand]
     private async Task EnableMfaAsync()
@@ -247,6 +261,63 @@ public partial class SecurityPageViewModel : BaseViewModel
             await RefreshVaultScoreAsync();
         });
     }
+
+    #endregion
+
+    #region Danger Zone
+
+    [RelayCommand]
+    private async Task DeleteAccountAsync()
+    {
+        var confirm1 = await ShowConfirmationAsync("Delete Account", 
+            "Are you sure you want to delete your account? This action is permanent and cannot be reversed.");
+        if (!confirm1)
+            return;
+
+        var password = await PromptPasswordAsync("Confirm Password");
+        if (password == null)
+            return;
+
+        var confirm2 = await ShowConfirmationAsync("Delete Account",
+            "Are you absolutely sure? There is no turning back after confirming this.");
+        if (!confirm2)
+            return;
+
+        await SafeExecuteAsync(async () =>
+        {
+            await _deleteAccount.ExecuteAsync(password);
+            await ShowSuccessAsync("Your account has been permanently deleted.");
+
+            if (Shell.Current is AppShell appShell)
+                appShell.DisableFlyout();
+
+            // Clear the navigation stack and return to the intro route
+            await Shell.Current.GoToAsync("//login");
+        });
+    }
+
+    [RelayCommand]
+    private async Task WipeVaultAsync()
+    {
+        var confirm1 = await ShowConfirmationAsync("Wipe Vault",
+            "This will permanently delete all vault entries and categories from this device and the server. Continue?");
+        if (!confirm1)
+            return;
+
+        var confirm2 = await ShowConfirmationAsync("Wipe Vault",
+            "Are you absolutely sure? This action cannot be undone.");
+        if (!confirm2)
+            return;
+
+        await SafeExecuteAsync(async () =>
+        {
+            await _wipeVault.ExecuteAsync();
+            await ShowSuccessAsync("Vault wiped successfully.");
+            await RefreshVaultScoreAsync();
+        });
+    }
+
+    #endregion
 
     #region UI Helpers
 

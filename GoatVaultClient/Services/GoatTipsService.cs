@@ -7,9 +7,9 @@ public partial class GoatTipsService : ObservableObject
 {
     private const string GoatEnabledKey = "GoatEnabled";
 
-    [ObservableProperty] private string? currentTip;
-    [ObservableProperty] private bool isTipVisible;
-    [ObservableProperty] private bool isGoatEnabled;
+    [ObservableProperty] private string? _currentTip;
+    [ObservableProperty] private bool _isTipVisible;
+    [ObservableProperty] private bool _isGoatEnabled;
 
     private readonly Random _random = new();
     private IDispatcherTimer? _timer;
@@ -113,7 +113,7 @@ public partial class GoatTipsService : ObservableObject
     private async Task ShowTip()
     {
         CurrentTip = await GetContextualTip();
-        IsTipVisible = true;
+        IsTipVisible = !string.IsNullOrWhiteSpace(CurrentTip);
     }
 
     private void HideTip()
@@ -124,8 +124,13 @@ public partial class GoatTipsService : ObservableObject
 
     private async Task<string> GetContextualTip()
     {
-        var userId = _session.UserId ?? throw new InvalidOperationException("UserId is null");
-        var user = await _users.GetByIdAsync(userId) ?? throw new InvalidOperationException("User is null");
+        var userId = _session.UserId;
+        if (userId == null)
+            return string.Empty;
+
+        var user = await _users.GetByIdAsync(userId.Value);
+        if (user == null)
+            return string.Empty;
         var entries = _session.Vault?.Entries ?? [];
         var masterStrength = _session.MasterPasswordStrength;
 

@@ -136,12 +136,14 @@ public static class MauiProgram
         builder.Services.AddTransient<SaveVaultUseCase>();
         builder.Services.AddTransient<SyncVaultUseCase>();
         builder.Services.AddTransient<UpdateVaultEntryUseCase>();
+        builder.Services.AddTransient<WipeVaultUseCase>();
 
         builder.Services.AddTransient<ChangeEmailUseCase>();
         builder.Services.AddTransient<ChangePasswordUseCase>();
         builder.Services.AddTransient<DisableMfaUseCase>();
         builder.Services.AddTransient<EnableMfaUseCase>();
         builder.Services.AddTransient<LoadUserProfileUseCase>();
+        builder.Services.AddTransient<DeleteAccountUseCase>();
 
         // Misc services
         builder.Services.AddSingleton<GoatTipsService>();
@@ -151,8 +153,8 @@ public static class MauiProgram
         builder.Services.AddTransient<IPwnedPasswordService, PwnedPasswordService>();
         builder.Services.AddTransient<IVaultScoreCalculatorService, VaultScoreCalculatorService>();
         builder.Services.AddTransient<IPasswordStrengthService, PasswordStrengthService>();
-        builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
         builder.Services.AddTransient<IRandomTipService, RandomTipService>();
+
         // Shamir Test
         builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
         builder.Services.AddSingleton<IRandom, StrongRandom>();

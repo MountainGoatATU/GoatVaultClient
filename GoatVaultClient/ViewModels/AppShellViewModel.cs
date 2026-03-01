@@ -1,26 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Auth;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class AppShellViewModel : ObservableObject
+public partial class AppShellViewModel(LogoutUseCase logout) : ObservableObject
 {
-    private readonly LogoutUseCase _logoutUseCase;
-
-    public AppShellViewModel(LogoutUseCase logoutUseCase)
-    {
-        _logoutUseCase = logoutUseCase;
-    }
-
     [RelayCommand]
     private async Task LogoutAsync()
     {
         // Execute the business logic
-        await _logoutUseCase.ExecuteAsync();
+        await logout.ExecuteAsync();
 
         // Disable the flyout menu upon logout
         if (Shell.Current is AppShell appShell)

@@ -18,7 +18,6 @@ public class ServerAuthService(
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true
-        // DefaultIgnoreCondition removed. Individual DTOs control serialization.
     };
 
     public async Task<AuthInitResponse> InitAsync(AuthInitRequest payload, CancellationToken ct = default) => await PostAsync<AuthInitResponse>("v1/auth/init", payload, ct);
@@ -36,6 +35,17 @@ public class ServerAuthService(
     public async Task<UserResponse> UpdateUserAsync(Guid userId, object payload, CancellationToken ct = default) => await PatchAsync<UserResponse>($"v1/users/{userId}", payload, ct);
 
     public async Task<AuthRegisterResponse> RegisterAsync(AuthRegisterRequest payload, CancellationToken ct = default) => await PostAsync<AuthRegisterResponse>("v1/auth/register", payload, ct);
+
+    public async Task<string> DeleteUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var response = await http.DeleteAsync($"{BaseUrl}/v1/users/{userId}", ct);
+        await EnsureSuccessAsync(response, ct);
+        var json = await response.Content.ReadAsStringAsync(ct);
+        if (string.IsNullOrWhiteSpace(json))
+            return string.Empty;
+
+        return JsonSerializer.Deserialize<string>(json, JsonOptions) ?? throw new InvalidOperationException("Invalid response");
+    }
 
     private async Task<T> PostAsync<T>(string endpoint, object payload, CancellationToken ct)
     {

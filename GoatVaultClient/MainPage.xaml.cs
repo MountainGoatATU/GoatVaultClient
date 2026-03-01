@@ -123,7 +123,7 @@ public partial class MainPage : ContentPage
             return;
 
         // Check the current window width to determine if the Mobile layout is active
-        if (this.Width < 768)
+        if (Width < 768)
         {
             // MOBILE BEHAVIOR: Route to a separate details page
             var navigationParameters = new Dictionary<string, object>

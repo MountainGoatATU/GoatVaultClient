@@ -9,4 +9,5 @@ public interface IServerAuthService
     Task<UserResponse> GetUserAsync(Guid userId, CancellationToken ct = default);
     Task<UserResponse> UpdateUserAsync(Guid userId, object request, CancellationToken ct = default);
     Task<AuthRegisterResponse> RegisterAsync(AuthRegisterRequest authRegisterRequest, CancellationToken ct = default);
+    Task<string> DeleteUserAsync(Guid userId, CancellationToken ct = default);
 }
