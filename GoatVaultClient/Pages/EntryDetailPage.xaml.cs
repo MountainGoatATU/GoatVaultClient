@@ -2,7 +2,7 @@ using GoatVaultClient.ViewModels;
 
 namespace GoatVaultClient.Pages;
 
-public partial class EntryDetailPage : ContentPage
+public partial class EntryDetailPage
 {
 	public EntryDetailPage(EntryDetailsViewModel vm)
 	{

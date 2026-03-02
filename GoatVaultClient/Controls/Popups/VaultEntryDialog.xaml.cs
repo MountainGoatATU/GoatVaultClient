@@ -1,12 +1,11 @@
 using GoatVaultCore.Models;
 using Microsoft.Extensions.Logging;
-using Mopups.Pages;
 using Mopups.Services;
 using System.Windows.Input;
 
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class VaultEntryDialog : PopupPage
+public partial class VaultEntryDialog
 {
     private readonly ILogger<VaultEntryDialog>? _logger;
     // This allows the ViewModel to await the result (true = Save, false = Cancel)

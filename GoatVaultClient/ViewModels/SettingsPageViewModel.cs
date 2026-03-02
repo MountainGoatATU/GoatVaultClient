@@ -9,10 +9,10 @@ public partial class SettingsPageViewModel : BaseViewModel
 {
 
     private readonly GoatTipsService _goatTips;
-    private ILogger<SettingsPageViewModel>? _logger;
+    private readonly ILogger<SettingsPageViewModel>? _logger;
 
-    [ObservableProperty] private bool goatEnabled;
-    [ObservableProperty] private bool darkModeEnabled;
+    [ObservableProperty] private bool _goatEnabled;
+    [ObservableProperty] private bool _darkModeEnabled;
 
     public SettingsPageViewModel(GoatTipsService goatTips, ILogger<SettingsPageViewModel>? logger = null)
     {

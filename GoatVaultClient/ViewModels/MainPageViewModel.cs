@@ -20,8 +20,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private readonly CategoryManagerService _categoryManager;
     private readonly VaultEntryManagerService _vaultEntryManager;
     private readonly ILogger<MainPageViewModel>? _logger;
-    // private readonly PwnedPasswordService _pwnedPassword;
-    public GoatTipsService GoatTips { get; }
+    private GoatTipsService GoatTips { get; }
 
     #endregion
 
@@ -61,8 +60,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         CategoryManagerService categoryManager,
         VaultEntryManagerService vaultEntryManager,
         GoatTipsService goatTips,
-        ILogger<MainPageViewModel>? logger = null/*,
-        PwnedPasswordService pwnedPassword*/)
+        ILogger<MainPageViewModel>? logger = null)
     {
         _loadVault = loadVault;
         _session = session;
@@ -72,7 +70,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         _vaultEntryManager = vaultEntryManager;
         _logger = logger;
         GoatTips = goatTips;
-        // _pwnedPassword = pwnedPassword;
 
         // TODO: Check if logic is the same here
         _session.VaultChanged += OnVaultChanged;
@@ -164,17 +161,11 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
                 // Calculate entry counts 
                 foreach (var category in _allVaultCategories)
-                {
                     category.EntryCount = _allVaultEntries.Count(e => e.Category == category.Name);
-                }
             }
 
             UpdateCollection(Passwords, _allVaultEntries);
             UpdateCollection(Categories, _allVaultCategories);
-
-            // TODO: Old pre-refactor code
-            // Passwords = _allVaultEntries.ToObservableCollection();
-            // Categories = _allVaultCategories.ToObservableCollection();
 
             PresortEntries(true);
             PresortCategories(true);
@@ -255,23 +246,23 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         {
             _isUpdatingCollections = true;
 
-            if (!string.IsNullOrWhiteSpace(SearchText))
-            {
-                var filteredCategories = VaultFilterService.FilterAndSortCategories(
-                    _allVaultCategories, // Filter from ALL
-                    SearchText,
-                    _categoriesSortAsc);
+            if (string.IsNullOrWhiteSpace(SearchText)) 
+                return;
 
-                UpdateCollection(Categories, filteredCategories);
+            var filteredCategories = VaultFilterService.FilterAndSortCategories(
+                _allVaultCategories, // Filter from ALL
+                SearchText,
+                _categoriesSortAsc);
 
-                var filteredEntries = VaultFilterService.FilterAndSortEntries(
-                    _allVaultEntries, // Filter from ALL
-                    SearchText,
-                    SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name, // Keep category filter
-                    _passwordsSortAsc);
+            UpdateCollection(Categories, filteredCategories);
 
-                UpdateCollection(Passwords, filteredEntries);
-            }
+            var filteredEntries = VaultFilterService.FilterAndSortEntries(
+                _allVaultEntries, // Filter from ALL
+                SearchText,
+                SelectedCategory?.Name == "All" ? null : SelectedCategory?.Name, // Keep category filter
+                _passwordsSortAsc);
+
+            UpdateCollection(Passwords, filteredEntries);
         }
         finally
         {
@@ -287,13 +278,9 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     partial void OnSelectedEntryChanged(VaultEntry? value) => _totpManager.TrackEntry(value);
 
     [RelayCommand]
-    private async Task CopyTotpCode()
-    {
-        await SafeExecuteAsync(async () =>
-        {
-            await _totpManager.CopyTotpCodeAsync(SelectedEntry);
-        });
-    }
+    private async Task CopyTotpCode() 
+        => await SafeExecuteAsync(async () 
+            => await _totpManager.CopyTotpCodeAsync(SelectedEntry));
 
     #endregion
 
@@ -342,8 +329,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         if (!CanSync())
             return;
 
-        // We use SafeExecuteAsync to handle errors, but we also want to show IsSyncing state.
-        // SafeExecuteAsync sets IsBusy, which disables CanSync (good).
         await SafeExecuteAsync(async () =>
         {
             IsSyncing = true;
@@ -414,9 +399,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         {
             var changed = await _vaultEntryManager.CreateEntryAsync(Categories);
             if (changed)
-            {
                 ReloadVaultData();
-            }
         });
     }
 
@@ -443,13 +426,9 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     }
 
     [RelayCommand]
-    private async Task CopyEntry()
-    {
-        await SafeExecuteAsync(async () =>
-        {
-            await VaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry);
-        });
-    }
+    private async Task CopyEntry() 
+        => await SafeExecuteAsync(async () 
+            => await VaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry));
 
     [RelayCommand]
     private void TogglePasswordVisibility() => IsPasswordVisible = !IsPasswordVisible;

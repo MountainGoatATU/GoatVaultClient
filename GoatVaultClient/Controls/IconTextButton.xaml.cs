@@ -2,12 +2,9 @@ using System.Windows.Input;
 
 namespace GoatVaultClient.Controls;
 
-public partial class IconTextButton : ContentView
+public partial class IconTextButton
 {
-	public IconTextButton()
-	{
-		InitializeComponent();
-	}
+	public IconTextButton() => InitializeComponent();
 
     public static readonly BindableProperty ButtonTextProperty = BindableProperty.Create(
        nameof(ButtonText),

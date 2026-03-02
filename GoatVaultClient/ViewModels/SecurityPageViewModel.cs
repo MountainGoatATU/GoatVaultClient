@@ -1,10 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Account;
-using GoatVaultApplication.Auth;
 using GoatVaultApplication.Vault;
 using GoatVaultClient.Controls.Popups;
-using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -24,18 +22,18 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly DisableMfaUseCase _disableMfa;
     private readonly ISessionContext _session;
 
-    [ObservableProperty] private string email = string.Empty;
-    [ObservableProperty] private bool mfaEnabled;
-    [ObservableProperty] private string? mfaSecret;
-    [ObservableProperty] private string? mfaQrCodeUrl;
+    [ObservableProperty] private string _email = string.Empty;
+    [ObservableProperty] private bool _mfaEnabled;
+    [ObservableProperty] private string? _mfaSecret;
+    [ObservableProperty] private string? _mfaQrCodeUrl;
 
-    [ObservableProperty] private double vaultScore;
-    [ObservableProperty] private double masterPasswordStrength;
-    [ObservableProperty] private double averagePasswordsStrength;
-    [ObservableProperty] private double reuseRate;
-    [ObservableProperty] private int breachesCount;
-    [ObservableProperty] private double mfaPercent;
-    [ObservableProperty] private string? vaultTierText;
+    [ObservableProperty] private double _vaultScore;
+    [ObservableProperty] private double _masterPasswordStrength;
+    [ObservableProperty] private double _averagePasswordsStrength;
+    [ObservableProperty] private double _reuseRate;
+    [ObservableProperty] private int _breachesCount;
+    [ObservableProperty] private double _mfaPercent;
+    [ObservableProperty] private string? _vaultTierText;
 
     public SecurityPageViewModel(
         LoadUserProfileUseCase loadUserProfile,
@@ -54,10 +52,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         _disableMfa = disableMfa;
         _session = session;
 
-
         _session.VaultChanged += OnVaultChanged;
-
-        // Initial load
         Task.Run(InitializeAsync);
     }
 
@@ -213,12 +208,7 @@ public partial class SecurityPageViewModel : BaseViewModel
 
             // Verify locally first (sanity check)
             if (!TotpService.VerifyCode(secret, code))
-            {
-                // We use throw instead of ShowErrorAsync so SafeExecuteAsync catches it?
-                // Or we can manually show error and return.
-                // But SafeExecuteAsync logic is simpler if we throw.
                 throw new InvalidOperationException("Invalid code. Please try again.");
-            }
 
             // Enable on backend
             await _enableMfa.ExecuteAsync(password, secret);
@@ -311,8 +301,6 @@ public partial class SecurityPageViewModel : BaseViewModel
 
 public static class Paints
 {
-    private static SolidColorPaint? _colorPaint;
-
     public static SolidColorPaint Color
     {
         get
@@ -324,12 +312,12 @@ public static class Paints
                 : new SKColor(107, 95, 16);   // LightPrimary #6B5F10
 
             // Create new paint if null or if theme changed
-            if (_colorPaint == null || _colorPaint.Color != skColor)
+            if (field == null || field.Color != skColor)
             {
-                _colorPaint = new SolidColorPaint(skColor);
+                field = new SolidColorPaint(skColor);
             }
 
-            return _colorPaint;
+            return field;
         }
     }
 }

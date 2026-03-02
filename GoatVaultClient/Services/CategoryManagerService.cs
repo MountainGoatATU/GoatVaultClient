@@ -5,7 +5,6 @@ using Mopups.Services;
 
 namespace GoatVaultClient.Services;
 
-// TODO: refactor?
 public class CategoryManagerService(
     ISessionContext session,
     ISyncingService syncing)
@@ -72,7 +71,6 @@ public class CategoryManagerService(
         var reassign = false;
 
         // Check if any passwords use this category
-        // We check the source of truth
         var vaultEntries = session.Vault?.Entries;
         if (vaultEntries == null)
             return false;
@@ -94,18 +92,14 @@ public class CategoryManagerService(
             reassign = await promptPopup.WaitForScan();
         }
         else
-        {
             reassign = true;
-        }
 
         // Update category name
         categories?[index].Name = response;
 
         // Update passwords
         foreach (var pwd in vaultEntries.Where(e => e.Category == oldName))
-        {
             pwd.Category = reassign ? response : string.Empty;
-        }
 
         session.RaiseVaultChanged();
 
@@ -152,9 +146,7 @@ public class CategoryManagerService(
             if (promptResponse)
             {
                 foreach (var pwd in passwordsToDelete)
-                {
                     vaultEntries.Remove(pwd);
-                }
             }
         }
 
