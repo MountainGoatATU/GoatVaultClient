@@ -22,8 +22,6 @@ public class VaultEntryManagerService(
         var formModel = new VaultEntryForm(categoriesList, passwordStrength)
         {
             Category = categoriesList.FirstOrDefault()?.Name ?? ""
-            // Optional: Set a default selected category
-            SelectedCategory = categoriesList.FirstOrDefault()
         };
 
         // Show the Auto-Generated Dialog

@@ -20,8 +20,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private readonly CategoryManagerService _categoryManager;
     private readonly VaultEntryManagerService _vaultEntryManager;
     private readonly ILogger<MainPageViewModel>? _logger;
-    public GoatTipsService GoatTips { get; }
-
     private GoatTipsService GoatTips { get; }
 
     #endregion
@@ -163,7 +161,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
                 // Calculate entry counts 
                 foreach (var category in _allVaultCategories)
-            }
+                    category.EntryCount = _allVaultEntries.Count(e => e.Category == category.Name);
             }
 
             UpdateCollection(Passwords, _allVaultEntries);
