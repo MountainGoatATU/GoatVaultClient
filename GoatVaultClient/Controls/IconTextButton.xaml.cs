@@ -44,10 +44,22 @@ public partial class IconTextButton
         typeof(Color),
         typeof(ImageButton),
         Colors.Transparent);
+
+    public static readonly BindableProperty ButtonTextColorProperty = BindableProperty.Create(
+        nameof(ButtonTextColor),
+        typeof(Color),
+        typeof(ImageButton),
+        Colors.Transparent);
     public Color ButtonBgColor
     {
         get => (Color)GetValue(ButtonBgColorProperty);
         set => SetValue(ButtonBgColorProperty, value);
+    }
+
+    public Color ButtonTextColor
+    {
+        get => (Color)GetValue(ButtonTextColorProperty);
+        set => SetValue(ButtonTextColorProperty, value);
     }
 
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(

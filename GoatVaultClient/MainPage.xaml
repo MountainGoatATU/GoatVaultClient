@@ -65,12 +65,14 @@
                         <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
                             <controls:IconTextButton
                                 Grid.Column="1"
-                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                                Dark={StaticResource DarkPrimaryContainer}}"
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                              Dark={StaticResource DarkSecondaryContainer}}"
                                 ButtonText="Add Category"
+                                ButtonTextColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                           Dark={StaticResource DarkOnPrimaryContainer}}"
                                 Command="{Binding CreateCategoryCommand}"
-                                IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
+                                IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}"
                                 IconGlyph="{x:Static m:MaterialRounded.Add}" />
                         </HorizontalStackLayout>
                     </controls:Component.HeaderActions>
@@ -111,6 +113,7 @@
                     <Grid RowDefinitions="Auto, *, Auto">
                         <!--  Show All Passwords Button  -->
                         <Button
+                            StyleClass="FilledButton"
                             Margin="0,0,0,16"
                             BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
                                                               Dark={StaticResource DarkSecondaryContainer}}"
@@ -189,12 +192,14 @@
                     <!--  Create Category Passwords Button  -->
                     <controls:Component.FooterActions>
                         <controls:IconTextButton
-                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                            Dark={StaticResource DarkPrimaryContainer}}"
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                            Dark={StaticResource DarkSecondaryContainer}}"
                             ButtonText="Add Category"
+                            ButtonTextColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                           Dark={StaticResource DarkOnPrimaryContainer}}"
                             Command="{Binding CreateCategoryCommand}"
-                            IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
-                                                        Dark={StaticResource DarkOnPrimaryContainer}}"
+                            IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                Dark={StaticResource DarkOnSecondaryContainer}}"
                             IconGlyph="{x:Static m:MaterialRounded.Add}" />
                     </controls:Component.FooterActions>
                 </controls:Component>
@@ -221,9 +226,11 @@
                                                             Dark={StaticResource DarkOnSecondaryContainer}}"
                                 IconGlyph="{x:Static m:MaterialRounded.Sort}" />
                             <controls:IconTextButton
-                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
-                                                                Dark={StaticResource DarkPrimaryContainer}}"
+                                ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                              Dark={StaticResource DarkSecondaryContainer}}"
                                 ButtonText="Add Password"
+                                ButtonTextColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                            Dark={StaticResource DarkOnPrimaryContainer}}"
                                 Command="{Binding CreateEntryCommand}"
                                 IconColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
                                                             Dark={StaticResource DarkOnPrimaryContainer}}"

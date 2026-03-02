@@ -313,9 +313,7 @@ public static class Paints
 
             // Create new paint if null or if theme changed
             if (field == null || field.Color != skColor)
-            {
                 field = new SolidColorPaint(skColor);
-            }
 
             return field;
         }

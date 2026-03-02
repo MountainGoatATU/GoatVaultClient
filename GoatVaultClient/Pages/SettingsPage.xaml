@@ -63,7 +63,7 @@
                         <!--  Button text  -->
                         <Button
                             Grid.Column="2"
-                            BackgroundColor="{Binding DarkModeEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
+                                BackgroundColor="{Binding DarkModeEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
                             Command="{Binding ToggleDarkModeCommand}"
                             HeightRequest="40"
                             HorizontalOptions="End"

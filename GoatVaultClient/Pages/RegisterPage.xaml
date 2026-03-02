@@ -247,10 +247,18 @@
                                                         Dark={StaticResource DarkPrimary}}" />
                     </HorizontalStackLayout>
 
-                    <ActivityIndicator
-                        HorizontalOptions="Center"
-                        IsRunning="{Binding IsBusy}"
-                        IsVisible="{Binding IsBusy}" />
+                    <VerticalStackLayout
+                        IsVisible="{Binding IsBusy}"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center">
+                        <ActivityIndicator IsRunning="{Binding IsBusy}"/>
+                        <Label 
+                            Text="Registering..." 
+                            Padding="0, 20, 0, 0"
+                            TextColor="{AppThemeBinding 
+                                Light={StaticResource LightPrimary},
+                                Dark={StaticResource DarkPrimary}}"/>
+                    </VerticalStackLayout>
 
                 </VerticalStackLayout>
             </Border>

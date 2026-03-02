@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="GoatVaultClient.Controls.AngularGaugeView"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui">
+
+    <lvc:PieChart
+        BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+          Dark={StaticResource DarkSurfaceContainerLowest}}"
+        InitialRotation="{Binding InitialRotation, Source={x:Reference Root}}"
+        MaxAngle="{Binding MaxAngle, Source={x:Reference Root}}"
+        MinValue="{Binding MinValue, Source={x:Reference Root}}"
+        MaxValue="{Binding MaxValue, Source={x:Reference Root}}"
+        WidthRequest="{Binding WidthRequest, Source={x:Reference Root}}"
+        HeightRequest="{Binding HeightRequest, Source={x:Reference Root}}">
+
+        <lvc:PieChart.Series>
+            <lvc:SeriesCollection>
+                <lvc:XamlAngularGaugeSeries
+                    GaugeValue="{Binding Segment1, Source={x:Reference Root}}"
+                    Fill="#D32F2F"
+                    OuterRadiusOffset="130"
+                    MaxRadialColumnWidth="15" />
+
+                <lvc:XamlAngularGaugeSeries
+                    GaugeValue="{Binding Segment2, Source={x:Reference Root}}"
+                    Fill="#F57C00"
+                    OuterRadiusOffset="130"
+                    MaxRadialColumnWidth="15" />
+
+                <lvc:XamlAngularGaugeSeries
+                    GaugeValue="{Binding Segment3, Source={x:Reference Root}}"
+                    Fill="#388E3C"
+                    OuterRadiusOffset="130"
+                    MaxRadialColumnWidth="15" />
+            </lvc:SeriesCollection>
+        </lvc:PieChart.Series>
+
+        <lvc:PieChart.VisualElements>
+            <lvc:VisualsCollection>
+                <lvc:XamlNeedle
+                    Width="20"
+                    Value="{Binding Value, Source={x:Reference Root}}" />
+
+                <lvc:XamlAngularTicks
+                    LabelsSize="20"
+                    LabelsOuterOffset="20"
+                    OuterOffset="95"
+                    TicksLength="10"/>
+            </lvc:VisualsCollection>
+        </lvc:PieChart.VisualElements>
+
+    </lvc:PieChart>
+</ContentView>

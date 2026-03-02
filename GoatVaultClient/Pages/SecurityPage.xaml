@@ -22,6 +22,7 @@
                 HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
                                                 Dark={StaticResource DarkSurfaceContainerLow}}"
                 ShowHeader="True">
+
                 <!--  Vault Score Section  -->
                 <VerticalStackLayout HorizontalOptions="Fill" Spacing="10">
                     <Label
@@ -34,31 +35,16 @@
                         Direction="Row"
                         JustifyContent="SpaceEvenly"
                         Wrap="Wrap">
-                        <VerticalStackLayout
-                            Grid.Column="0"
-                            FlexLayout.Basis="200"
-                            FlexLayout.Grow="1"
-                            HorizontalOptions="Center"
-                            Spacing="6">
-                            <lvc:PieChart
-                                BackgroundColor="Transparent"
-                                HeightRequest="150"
-                                InitialRotation="-90"
-                                MaxValue="400"
+
+                        <!-- Master Password Strength -->
+                        <VerticalStackLayout>
+                            <controls:AngularGaugeView
+                                Value="{Binding MasterPasswordStrength}"
+                                Segment1="200"
+                                Segment2="150"
+                                Segment3="50"
                                 MinValue="0"
-                                WidthRequest="150">
-                                <lvc:PieChart.Series>
-                                    <lvc:SeriesCollection>
-                                        <lvc:XamlGaugeSeries
-                                            DataLabelsSize="20"
-                                            Fill="{x:Static vm:Paints.Color}"
-                                            GaugeValue="{Binding MasterPasswordStrength}"
-                                            IsHoverable="False"
-                                            MaxRadialColumnWidth="50" />
-                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                    </lvc:SeriesCollection>
-                                </lvc:PieChart.Series>
-                            </lvc:PieChart>
+                                MaxValue="400"/>
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -67,35 +53,20 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding MasterPasswordCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
-                                                            Dark={StaticResource Gray400}}" />
+                                TextColor="{AppThemeBinding 
+                                    Light={StaticResource LightOnSecondaryContainer},
+                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
-                        <VerticalStackLayout
-                            Grid.Column="1"
-                            FlexLayout.Basis="150"
-                            FlexLayout.Grow="1"
-                            HorizontalOptions="Center"
-                            Spacing="6">
-                            <lvc:PieChart
-                                BackgroundColor="Transparent"
-                                HeightRequest="150"
-                                InitialRotation="-90"
-                                MaxValue="200"
+                        <!-- Average Password Strength -->
+                        <VerticalStackLayout>
+                            <controls:AngularGaugeView
+                                Value="{Binding AveragePasswordsStrength}"
+                                Segment1="100"
+                                Segment2="75"
+                                Segment3="25"
                                 MinValue="0"
-                                WidthRequest="150">
-                                <lvc:PieChart.Series>
-                                    <lvc:SeriesCollection>
-                                        <lvc:XamlGaugeSeries
-                                            DataLabelsSize="20"
-                                            Fill="{x:Static vm:Paints.Color}"
-                                            GaugeValue="{Binding AveragePasswordsStrength}"
-                                            IsHoverable="False"
-                                            MaxRadialColumnWidth="50" />
-                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                    </lvc:SeriesCollection>
-                                </lvc:PieChart.Series>
-                            </lvc:PieChart>
+                                MaxValue="200"/>
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -104,35 +75,20 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding AveragePasswordsCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
-                                                            Dark={StaticResource Gray400}}" />
+                                TextColor="{AppThemeBinding 
+                                    Light={StaticResource LightOnSecondaryContainer},
+                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
-                        <VerticalStackLayout
-                            Grid.Column="2"
-                            FlexLayout.Basis="150"
-                            FlexLayout.Grow="1"
-                            HorizontalOptions="Center"
-                            Spacing="6">
-                            <lvc:PieChart
-                                BackgroundColor="Transparent"
-                                HeightRequest="150"
-                                InitialRotation="-90"
-                                MaxValue="200"
+                        <!-- Originality Strength -->
+                        <VerticalStackLayout>
+                            <controls:AngularGaugeView
+                                Value="{Binding ReuseRate}"
+                                Segment1="100"
+                                Segment2="75"
+                                Segment3="25"
                                 MinValue="0"
-                                WidthRequest="150">
-                                <lvc:PieChart.Series>
-                                    <lvc:SeriesCollection>
-                                        <lvc:XamlGaugeSeries
-                                            DataLabelsSize="20"
-                                            Fill="{x:Static vm:Paints.Color}"
-                                            GaugeValue="{Binding ReuseRate}"
-                                            IsHoverable="False"
-                                            MaxRadialColumnWidth="50" />
-                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                    </lvc:SeriesCollection>
-                                </lvc:PieChart.Series>
-                            </lvc:PieChart>
+                                MaxValue="200"/>
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -141,35 +97,20 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding OriginalityCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
-                                                            Dark={StaticResource Gray400}}" />
+                                TextColor="{AppThemeBinding 
+                                    Light={StaticResource LightOnSecondaryContainer},
+                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
-                        <VerticalStackLayout
-                            Grid.Column="3"
-                            FlexLayout.Basis="150"
-                            FlexLayout.Grow="1"
-                            HorizontalOptions="Center"
-                            Spacing="6">
-                            <lvc:PieChart
-                                BackgroundColor="Transparent"
-                                HeightRequest="150"
-                                InitialRotation="-90"
-                                MaxValue="100"
+                        <!-- Compromised Passwords -->
+                        <VerticalStackLayout>
+                            <controls:AngularGaugeView
+                                Value="{Binding BreachesCount}"
+                                Segment1="50"
+                                Segment2="37.5"
+                                Segment3="12.5"
                                 MinValue="0"
-                                WidthRequest="150">
-                                <lvc:PieChart.Series>
-                                    <lvc:SeriesCollection>
-                                        <lvc:XamlGaugeSeries
-                                            DataLabelsSize="20"
-                                            Fill="{x:Static vm:Paints.Color}"
-                                            GaugeValue="{Binding BreachesCount}"
-                                            IsHoverable="False"
-                                            MaxRadialColumnWidth="50" />
-                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                    </lvc:SeriesCollection>
-                                </lvc:PieChart.Series>
-                            </lvc:PieChart>
+                                MaxValue="100"/>
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -178,46 +119,33 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding BreachesCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
-                                                            Dark={StaticResource Gray400}}" />
+                                TextColor="{AppThemeBinding 
+                                    Light={StaticResource LightOnSecondaryContainer},
+                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
-                        <VerticalStackLayout
-                            Grid.Column="4"
-                            FlexLayout.Basis="150"
-                            FlexLayout.Grow="1"
-                            HorizontalOptions="Center"
-                            Spacing="6">
-                            <lvc:PieChart
-                                BackgroundColor="Transparent"
-                                HeightRequest="150"
-                                InitialRotation="-90"
-                                MaxValue="200"
+                        <!-- MFA -->
+                        <VerticalStackLayout>
+                            <controls:AngularGaugeView
+                                Value="{Binding MfaPercent}"
+                                Segment1="0"
+                                Segment2="175"
+                                Segment3="25"
                                 MinValue="0"
-                                WidthRequest="150">
-                                <lvc:PieChart.Series>
-                                    <lvc:SeriesCollection>
-                                        <lvc:XamlGaugeSeries
-                                            DataLabelsSize="20"
-                                            Fill="{x:Static vm:Paints.Color}"
-                                            GaugeValue="{Binding MfaPercent}"
-                                            IsHoverable="False"
-                                            MaxRadialColumnWidth="50" />
-                                        <lvc:XamlGaugeBackgroundSeries Fill="Transparent" MaxRadialColumnWidth="50" />
-                                    </lvc:SeriesCollection>
-                                </lvc:PieChart.Series>
-                            </lvc:PieChart>
+                                MaxValue="200"/>
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
-                                Text="MFA" />
+                                Text="Multi-Factor Authentication" />
                             <Label
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding MfaCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource Gray500},
-                                                            Dark={StaticResource Gray400}}" />
+                                TextColor="{AppThemeBinding 
+                                    Light={StaticResource LightOnSecondaryContainer},
+                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
+
                     </FlexLayout>
                 </VerticalStackLayout>
             </controls:Component>
@@ -322,13 +250,14 @@
                     <!--  Enable/Disable Button  -->
                     <Button
                         Margin="0,10,0,0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary},
-                                                          Dark={StaticResource DarkPrimary}}"
-                        Command="{Binding EnableMfaCommand}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                          Dark={StaticResource DarkSecondaryContainer}}"
+                        Command="{Binding EnableMfaCommand}"    
                         IsEnabled="{Binding IsNotBusy}"
                         IsVisible="{Binding MfaEnabled, Converter={StaticResource InvertedBoolConverter}}"
                         Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
-                        TextColor="White" />
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                          Dark={StaticResource DarkOnSecondaryContainer}}" />
 
                     <Button
                         Margin="0,10,0,0"
@@ -338,7 +267,8 @@
                         IsEnabled="{Binding IsNotBusy}"
                         IsVisible="{Binding MfaEnabled}"
                         Text="Disable MFA"
-                        TextColor="White" />
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                  Dark={StaticResource DarkOnSecondaryContainer}}" />
 
                 </VerticalStackLayout>
             </controls:Component>

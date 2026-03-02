@@ -134,6 +134,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Controls\AngularGaugeChart.xaml.cs">
+	    <DependentUpon>AngularGaugeChart.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Controls\Popups\SingleInputPopup.xaml.cs">
 	    <DependentUpon>SingleInputPopup.xaml</DependentUpon>
 	  </Compile>
@@ -155,6 +158,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Controls\AngularGaugeChart.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Controls\CategoryItemCell.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

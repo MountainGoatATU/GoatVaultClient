@@ -26,6 +26,7 @@
             <Label
                 Style="{StaticResource MaterialBodyMedium}"
                 Text="{Binding ButtonText, Source={x:Reference This}}"
+                TextColor="{Binding ButtonTextColor, Source={x:Reference This}}"
                 VerticalTextAlignment="Center" />
         </HorizontalStackLayout>
 
