@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Auth;
+using GoatVaultApplication.Shamir;
 using GoatVaultClient.Controls.Popups;
+using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
@@ -19,6 +21,7 @@ public partial class LoginPageViewModel(
     LoginOnlineUseCase loginOnline,
     LoginOfflineUseCase loginOffline,
     IUserRepository userRepository,
+    ValidateUserEmailUseCase validateUserEmailUseCase,
     ILogger<LoginPageViewModel>? logger = null)
     : BaseViewModel
 {
@@ -195,6 +198,41 @@ public partial class LoginPageViewModel(
         catch (Exception e)
         {
             logger?.LogError(e, "Error navigating to register page");
+        }
+    }
+
+    [RelayCommand]
+    private async Task GoToRecover()
+    {
+        var shamirPopup = new AuthorizePopup("Enter your email", isPassword: false);
+        await MopupService.Instance.PushAsync(shamirPopup);
+        var mopupResponse = await shamirPopup.WaitForScan();
+        if (mopupResponse != null)
+        {
+            try
+            {
+                // Display loading popup
+                await MopupService.Instance.PopAllAsync();
+                var loadingPopup = new PendingPopup("Validating...");
+                await MopupService.Instance.PushAsync(loadingPopup);
+                // Validate email
+                await validateUserEmailUseCase.Execute(new Email(mopupResponse));
+                // Dismiss loading popup
+                await MopupService.Instance.PopAllAsync();
+                // If email is valid, navigate to recover page
+                await Shell.Current.GoToAsync(nameof(RecoverSecretPage));
+            }
+            catch
+            (Exception e)
+            {
+                // Log the error
+                logger?.LogError(e,"User does not exist in the database");
+                // Display error popup
+                await MopupService.Instance.PopAllAsync();
+                var errorPopup = new ErrorPopup(e.Message);
+                await MopupService.Instance.PushAsync(errorPopup);
+                return;
+            }
         }
     }
 

@@ -80,6 +80,7 @@ public partial class SecurityPageViewModel : BaseViewModel
             var user = await _loadUserProfile.ExecuteAsync();
             Email = user.Email.Value;
             MfaEnabled = user.MfaEnabled;
+            ShamirEnabled = user.ShamirEnabled;
 
             await RefreshVaultScoreAsync();
         });

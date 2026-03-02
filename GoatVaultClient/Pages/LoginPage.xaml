@@ -95,58 +95,6 @@
                             VerticalOptions="End" />
                     </Grid>
 
-                    <!--<Label Style="{StaticResource MaterialHeadlineSmall}" Text="Saved Accounts" />
-
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding LocalUsers}" Spacing="{StaticResource sContent}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="models:User">
-                                    <Border
-                                        Padding="0"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceVariant},
-                                                                          Dark={StaticResource DarkSurfaceVariant}}"
-                                        StrokeThickness="0">
-
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="{StaticResource Medium}" />
-                                        </Border.StrokeShape>
-
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LoginPageViewModel}}, Path=SelectLocalUserCommand}" CommandParameter="{Binding .}" />
-                                        </Border.GestureRecognizers>
-
-                                        <Grid
-                                            Padding="{StaticResource pMedium}"
-                                            ColumnDefinitions="*,Auto"
-                                            ColumnSpacing="{StaticResource sContent}">
-
-                                            <Label
-                                                Style="{StaticResource MaterialBodyLarge}"
-                                                Text="{Binding Email}"
-                                                TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
-                                                                            Dark={StaticResource DarkOnSurfaceVariant}}"
-                                                VerticalOptions="Center" />
-
-                                            <Button
-                                                Grid.Column="1"
-                                                Padding="8"
-                                                BackgroundColor="Transparent"
-                                                BorderColor="Transparent"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LoginPageViewModel}}, Path=RemoveOfflineUserCommand}"
-                                                CommandParameter="{Binding .}"
-                                                CornerRadius="20"
-                                                HeightRequest="40"
-                                                Text="✕"
-                                                TextColor="{AppThemeBinding Light={StaticResource LightError},
-                                                                            Dark={StaticResource DarkError}}"
-                                                VerticalOptions="Center"
-                                                WidthRequest="40" />
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>-->
-
-
                     <input:FormView SubmitCommand="{Binding LoginCommand}">
                         <VerticalStackLayout IsVisible="{Binding IsOnline, Converter={StaticResource InvertedBoolConverter}}" Spacing="{StaticResource formSpacing}">
                             <Label Style="{StaticResource MaterialHeadlineSmall}" Text="Offline Login" />
@@ -216,6 +164,28 @@
                             FontFamily="{StaticResource MaterialMediumFont}"
                             FontSize="{StaticResource tMedium}"
                             Text="Register"
+                            TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                                        Dark={StaticResource DarkPrimary}}" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout
+                        Margin="0,8,0,0"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding IsOnline}"
+                        Spacing="4">
+                        <Label
+                            Text="Forgot password?"
+                            TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                        Dark={StaticResource DarkOnSurfaceVariant}}"
+                            VerticalOptions="Center" />
+                        <Button
+                            Padding="8,0"
+                            BackgroundColor="Transparent"
+                            BorderColor="Transparent"
+                            Command="{Binding GoToRecoverCommand}"
+                            FontFamily="{StaticResource MaterialMediumFont}"
+                            FontSize="{StaticResource tMedium}"
+                            Text="Recover"
                             TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
                                                         Dark={StaticResource DarkPrimary}}" />
                     </HorizontalStackLayout>
