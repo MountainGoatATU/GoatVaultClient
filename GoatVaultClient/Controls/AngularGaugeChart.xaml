@@ -20,19 +20,19 @@
             <lvc:SeriesCollection>
                 <lvc:XamlAngularGaugeSeries
                     GaugeValue="{Binding Segment1, Source={x:Reference Root}}"
-                    Fill="#D32F2F"
+                    Fill="{lvc:RadialGradientPaint Colors='#FFCDD2, #B71C1C'}"
                     OuterRadiusOffset="130"
                     MaxRadialColumnWidth="15" />
 
                 <lvc:XamlAngularGaugeSeries
                     GaugeValue="{Binding Segment2, Source={x:Reference Root}}"
-                    Fill="#F57C00"
+                    Fill="{lvc:RadialGradientPaint Colors='#FFE0B2, #E65100'}"
                     OuterRadiusOffset="130"
                     MaxRadialColumnWidth="15" />
 
                 <lvc:XamlAngularGaugeSeries
                     GaugeValue="{Binding Segment3, Source={x:Reference Root}}"
-                    Fill="#388E3C"
+                    Fill="{lvc:RadialGradientPaint Colors='#C8E6C9, #1B5E20'}"
                     OuterRadiusOffset="130"
                     MaxRadialColumnWidth="15" />
             </lvc:SeriesCollection>
