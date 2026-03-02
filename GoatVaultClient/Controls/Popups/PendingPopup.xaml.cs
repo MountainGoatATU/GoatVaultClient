@@ -1,8 +1,6 @@
-using Mopups.Pages;
-
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class PendingPopup : PopupPage
+public partial class PendingPopup
 {
     private readonly TaskCompletionSource<bool> _tcs = new();
     public Task<bool> WaitForScan() => _tcs.Task;

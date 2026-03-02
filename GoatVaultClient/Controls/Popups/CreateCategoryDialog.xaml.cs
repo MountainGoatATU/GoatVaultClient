@@ -1,11 +1,10 @@
 using Microsoft.Extensions.Logging;
-using Mopups.Pages;
 using Mopups.Services;
 using System.Windows.Input;
 
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class CreateCategoryPopup : PopupPage
+public partial class CreateCategoryPopup
 {
     // This allows the ViewModel to await the result (true = Save, false = Cancel)
     private readonly TaskCompletionSource<string?> _tcs = new();

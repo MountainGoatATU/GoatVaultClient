@@ -5,14 +5,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-    x:Name="this"
+    x:Name="This"
     x:DataType="controls:ImageButton">
     <material:ButtonView
-        BackgroundColor="{Binding ButtonBgColor, Source={x:Reference this}}"
+        BackgroundColor="{Binding ButtonBgColor, Source={x:Reference This}}"
         HeightRequest="{OnIdiom Phone={StaticResource iconMobileZone},
                                 Desktop={StaticResource iconDesktopZone}}"
-        PressedCommand="{Binding Command, Source={x:Reference this}}"
+        PressedCommand="{Binding Command, Source={x:Reference This}}"
         WidthRequest="{OnIdiom Phone={StaticResource iconMobileZone},
                                Desktop={StaticResource iconDesktopZone}}">
         <material:ButtonView.StrokeShape>
@@ -28,10 +27,10 @@
             <Image.Source>
                 <FontImageSource
                     FontFamily="MaterialRounded"
-                    Glyph="{Binding IconGlyph, Source={x:Reference this}}"
+                    Glyph="{Binding IconGlyph, Source={x:Reference This}}"
                     Size="{OnIdiom Phone={StaticResource iconMobileResolution},
                                    Desktop={StaticResource iconDesktopResolution}}"
-                    Color="{Binding IconColor, Source={x:Reference this}}" />
+                    Color="{Binding IconColor, Source={x:Reference This}}" />
             </Image.Source>
         </Image>
     </material:ButtonView>

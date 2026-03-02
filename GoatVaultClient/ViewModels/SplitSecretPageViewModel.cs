@@ -80,9 +80,7 @@ public partial class SplitSecretViewModel(
 
         var response = await splitKeyUseCase.Execute(Mp, Passphrase, TotalShares, Threshold);
         foreach (var share in response)
-        {
             GeneratedShares.Add(share);
-        }
 
         HasResults = true;
     }
@@ -123,13 +121,14 @@ public partial class SplitSecretViewModel(
                "Did you copy the shares and passphrase properly? Without them, you are not going to be able to recover your master password",
                "Yes",
                "No"
-           );
+               );
+
             await MopupService.Instance.PushAsync(popup);
+
             var result = await popup.WaitForScan();
             if (result)
-            {
                 _safetyCheckPass++;
-            }
+
             await MopupService.Instance.PopAllAsync();
         }
         else if (_safetyCheckPass == 1)
@@ -139,7 +138,8 @@ public partial class SplitSecretViewModel(
                "LOSING ACCESS OR HAVING INCORRECTLY COPIED THE SHARES AND PASSPHRASE WILL RESULT IN INNABILITY TO RECOVER YOUR MASTER PASSWORD",
                "I understand",
                "Cancel"
-            );
+               );
+
             await MopupService.Instance.PushAsync(popup);
             var result = await popup.WaitForScan();
             if (result)
@@ -149,6 +149,7 @@ public partial class SplitSecretViewModel(
                 await MopupService.Instance.PopAllAsync();
                 await Shell.Current.GoToAsync("//gratitude");
             }
+
             await MopupService.Instance.PopAllAsync();
         }
     }

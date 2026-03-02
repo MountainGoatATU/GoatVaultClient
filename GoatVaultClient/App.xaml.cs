@@ -4,17 +4,15 @@ using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient;
 
-public partial class App : Application
+public partial class App
 {
     private readonly ISessionContext _session;
-    private readonly IUserRepository _users;
     private readonly ILogger<App> _logger;
 
-    public App(ISessionContext session, IUserRepository users, ILogger<App> logger)
+    public App(ISessionContext session, ILogger<App> logger)
     {
         InitializeComponent();
         _session = session;
-        _users = users;
         _logger = logger;
 
         // Wire up global exception handlers
@@ -47,25 +45,6 @@ public partial class App : Application
                 return;
 
             _logger.LogDebug("No active vault session to save on stop");
-
-            // TODO: Fix
-            // Use synchronous save - we're in a non-async event handler
-            /*
-            var saveTask = _users.SaveVaultAsync(
-                _session.CurrentUser,
-                _session.MasterPassword,
-                _session.DecryptedVault);
-
-            // Wait with timeout
-            if (saveTask.Wait(TimeSpan.FromSeconds(3)))
-            {
-                _logger.LogInformation("Vault saved successfully on stop");
-            }
-            else
-            {
-                _logger.LogWarning("Vault save timed out on stop (3s)");
-            }
-            */
         }
         catch (Exception ex)
         {
@@ -77,22 +56,15 @@ public partial class App : Application
     {
         base.OnStart();
 
-        // Retrieve the "IsFirstRun" flag. If it doesn't exist, it defaults to true.
         var isFirstRun = Preferences.Default.Get("IsFirstRun", true);
 
         if (isFirstRun)
         {
-            // Set the flag to false so this block never runs again
             Preferences.Default.Set("IsFirstRun", false);
-
-            // Route to the Introduction / Onboarding flow
             await Shell.Current.GoToAsync("//intro");
         }
         else
-        {
-            // Route directly to the Login page for returning users
             await Shell.Current.GoToAsync("//login");
-        }
     }
 
     protected override void OnSleep()
@@ -134,9 +106,7 @@ public partial class App : Application
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         if (e.ExceptionObject is Exception ex)
-        {
             _logger.LogCritical(ex, "Unhandled AppDomain exception (IsTerminating: {IsTerminating})", e.IsTerminating);
-        }
         else
         {
             _logger.LogCritical("Unhandled AppDomain exception of type {Type} (IsTerminating: {IsTerminating})",

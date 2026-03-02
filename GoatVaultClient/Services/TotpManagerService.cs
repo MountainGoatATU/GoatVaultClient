@@ -16,12 +16,10 @@ public class TotpManagerService(ILogger<TotpManagerService>? logger = null)
         if (_trackedEntry is { HasMfa: true } && !string.IsNullOrWhiteSpace(_trackedEntry.MfaSecret))
         {
             StartTimer();
-            UpdateTotpCodes(); // Update immediately
+            UpdateTotpCodes();  // Update immediately
         }
         else
-        {
             StopTimer();
-        }
     }
 
     private void StartTimer()
@@ -42,6 +40,7 @@ public class TotpManagerService(ILogger<TotpManagerService>? logger = null)
     {
         if (_timer == null)
             return;
+
         _timer.Stop();
         _timer = null;
     }
@@ -83,9 +82,7 @@ public class TotpManagerService(ILogger<TotpManagerService>? logger = null)
             {
                 var current = await Clipboard.Default.GetTextAsync();
                 if (current == entry.CurrentTotpCode)
-                {
                     await Clipboard.Default.SetTextAsync("");
-                }
             });
         });
     }

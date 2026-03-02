@@ -10,33 +10,37 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
 {
     // Services
     private CancellationTokenSource? _debounceCts;
+
     // Observable Properties (Bound to Entry fields)
-    [ObservableProperty] private string? email;
-    [ObservableProperty] private string? password;
-    [ObservableProperty] private string? confirmPassword;
-    [ObservableProperty] private bool createRecovery = false;
+    [ObservableProperty] private string? _email;
+    [ObservableProperty] private string? _password;
+    [ObservableProperty] private string? _confirmPassword;
+    [ObservableProperty] private bool _createRecovery;
 
-    [ObservableProperty] private string passwordMessage = string.Empty;
-    [ObservableProperty] private bool isPasswordWarning;
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsFormValid))]
-    private bool isPasswordGood;
+    [ObservableProperty] private string _passwordMessage = string.Empty;
+    [ObservableProperty] private bool _isPasswordWarning;
 
-    [ObservableProperty] private string confirmPasswordMessage = string.Empty;
-    [ObservableProperty] private bool isConfirmPasswordWarning;
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsFormValid))]
-    private bool isConfirmPasswordGood;
+    [ObservableProperty] private string _confirmPasswordMessage = string.Empty;
+    [ObservableProperty] private bool _isConfirmPasswordWarning;
 
-    [ObservableProperty] private string emailMessage = string.Empty;
-    [ObservableProperty] private bool isEmailWarning;
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsFormValid))]
-    private bool isEmailGood;
+    [ObservableProperty] private string _emailMessage = string.Empty;
+    [ObservableProperty] private bool _isEmailWarning;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsFormValid))]
-    private bool isFormViewValid;
+    private bool _isPasswordGood;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFormValid))]
+    private bool _isConfirmPasswordGood;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFormValid))]
+    private bool _isEmailGood;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFormValid))]
+    private bool _isFormViewValid;
 
     public bool IsFormValid => 
         IsEmailGood &&
@@ -66,15 +70,12 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
     }
 
     // NEW: Trigger the match check when the Confirm Password field changes
-    partial void OnConfirmPasswordChanged(string? value)
-    {
-        ValidatePasswordMatch();
-    }
+    partial void OnConfirmPasswordChanged(string? value) => ValidatePasswordMatch();
 
     // NEW: Synchronous logic to evaluate password match
     private void ValidatePasswordMatch()
     {
-        // Don't show errors if they haven't started typing in the confirm box yet
+        // Don't show errors if they haven't started typing in the confirmation box yet
         if (string.IsNullOrEmpty(ConfirmPassword))
         {
             IsConfirmPasswordWarning = false;
@@ -103,7 +104,8 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
         try { await Task.Delay(300, token); }
         catch (TaskCanceledException) { return; }
 
-        if (token.IsCancellationRequested) return;
+        if (token.IsCancellationRequested) 
+            return;
 
         // Delegate business logic to the Use Case
         var passwordValidationResult = await register.ValidatePasswordAsync(value);
@@ -127,15 +129,9 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
                 await register.ExecuteAsync(new Email(Email), Password);
 
             if (CreateRecovery)
-            {
                 await Shell.Current.GoToAsync($"{ nameof(SplitSecretPage)}?Mp={Password}");
-            }
             else
-            {
                 await Shell.Current.GoToAsync("//gratitude");
-            }
-            
-
         });
     }
 

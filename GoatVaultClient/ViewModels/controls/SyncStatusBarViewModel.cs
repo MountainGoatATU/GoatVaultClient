@@ -6,10 +6,6 @@ using System.Windows.Input;
 
 namespace GoatVaultClient.ViewModels.Controls;
 
-/// <summary>
-/// ViewModel for the SyncStatusBar control
-/// Manages state and commands for the sync status display
-/// </summary>
 public class SyncStatusBarViewModel : INotifyPropertyChanged
 {
     private readonly ISyncingService _syncingService;
@@ -71,54 +67,15 @@ public class SyncStatusBarViewModel : INotifyPropertyChanged
 
     #region Properties
 
-    /// <summary>
-    /// Indicates if sync is currently in progress
-    /// </summary>
     public bool IsSyncing => _syncingService.IsSyncing;
-
-    /// <summary>
-    /// Indicates if sync completed successfully
-    /// </summary>
     public bool IsSynced => _syncingService.SyncStatus == SyncStatus.Synced;
-
-    /// <summary>
-    /// Indicates if sync failed
-    /// </summary>
     public bool SyncFailed => _syncingService.SyncStatus == SyncStatus.Failed;
-
-    /// <summary>
-    /// Text to display for current sync status
-    /// </summary>
     public string SyncStatusText => _syncingService.SyncStatusMessage;
-
-    /// <summary>
-    /// Formatted last synced time
-    /// </summary>
     public string LastSyncedFormatted => _syncingService.LastSyncedFormatted;
-
-    /// <summary>
-    /// Controls visibility of sync button based on auto-sync setting
-    /// </summary>
     public static bool ShowSyncButton => true; // Always show, but can be controlled by settings
-
-    /// <summary>
-    /// Controls whether sync button is enabled
-    /// </summary>
     public bool IsSyncButtonEnabled => !_syncingService.IsSyncing;
-
-    /// <summary>
-    /// Controls visibility of sync status indicator
-    /// </summary>
     public static bool ShowSyncStatus => true;
-
-    /// <summary>
-    /// Controls visibility of last updated label
-    /// </summary>
     public bool ShowLastUpdated => _syncingService.LastSynced != default;
-
-    /// <summary>
-    /// Indicates if auto-sync is disabled
-    /// </summary>
     public bool IsAutoSyncDisabled => !_syncingService.HasAutoSync;
 
     #endregion
@@ -187,7 +144,7 @@ public class SyncStatusBarViewModel : INotifyPropertyChanged
 
     public void Dispose()
     {
-        _updateTimer?.Dispose();
+        _updateTimer.Dispose();
         _syncingService.PropertyChanged -= OnSyncingServicePropertyChanged;
         _syncingService.SyncStarted -= OnSyncStarted;
         _syncingService.SyncCompleted -= OnSyncCompleted;

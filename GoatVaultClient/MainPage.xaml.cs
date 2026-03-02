@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace GoatVaultClient;
 
 // TODO: Refactor
-public partial class MainPage : ContentPage
+public partial class MainPage
 {
     private readonly ISyncingService _syncingService;
     private readonly ILogger<MainPage>? _logger;
@@ -25,16 +25,11 @@ public partial class MainPage : ContentPage
         _logger = logger;
 
         InitializeComponent();
-
-        // Set main viewmodel
         BindingContext = viewModel;
 
-        // set sync status bar viewmodel
         SyncStatusBar.BindingContext = syncStatusBarViewModel;
-
         GoatBubbleStack.Opacity = 0; // Start hidden
 
-        // Start hidden until first tip shows
         ApplyVisibility();
 
         viewModel.PropertyChanged += async (s, e) =>
@@ -89,7 +84,6 @@ public partial class MainPage : ContentPage
                 }
             });
 
-            // Start periodic background sync (every 5 minutes)
             _syncingService.StartPeriodicSync(TimeSpan.FromMinutes(SyncIntervalMinutes));
 
             // Safely cast the BindingContext and call the method
@@ -111,8 +105,6 @@ public partial class MainPage : ContentPage
         base.OnDisappearing();
 
         // Stop periodic sync when page is not visible
-        // This prevents unnecessary background operations
-        // Note: For global sync, move this to App.xaml.cs lifecycle
         _syncingService.StopPeriodicSync();
     }
 

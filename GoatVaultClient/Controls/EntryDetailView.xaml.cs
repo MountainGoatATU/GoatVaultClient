@@ -1,9 +1,6 @@
 namespace GoatVaultClient.Controls;
 
-public partial class EntryDetailView : ContentView
+public partial class EntryDetailView
 {
-    public EntryDetailView()
-    {
-        InitializeComponent();
-    }
+    public EntryDetailView() => InitializeComponent();
 }

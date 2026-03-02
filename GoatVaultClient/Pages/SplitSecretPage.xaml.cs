@@ -2,7 +2,7 @@ using GoatVaultClient.ViewModels;
 
 namespace GoatVaultClient.Pages;
 
-public partial class SplitSecretPage : ContentPage
+public partial class SplitSecretPage
 {
     public SplitSecretPage(SplitSecretViewModel vm)
     {

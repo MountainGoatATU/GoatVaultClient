@@ -1,13 +1,11 @@
 using Microsoft.Extensions.Logging;
-using Mopups.Pages;
 using Mopups.Services;
-using System.ComponentModel;
 using System.Windows.Input;
 using UraniumUI.Material.Controls;
 
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class AuthorizePopup : PopupPage, INotifyPropertyChanged
+public partial class AuthorizePopup
 {
     public static new readonly BindableProperty TitleProperty = BindableProperty.Create(
         nameof(Title), typeof(string), typeof(AuthorizePopup), "Authorization");

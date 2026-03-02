@@ -21,8 +21,7 @@ public class VaultEntryManagerService(
 
         var formModel = new VaultEntryForm(categoriesList, passwordStrength)
         {
-            // Optional: Set a default selected category
-            SelectedCategory = categoriesList.FirstOrDefault()
+            Category = categoriesList.FirstOrDefault()?.Name ?? ""
         };
 
         // Show the Auto-Generated Dialog
@@ -32,15 +31,11 @@ public class VaultEntryManagerService(
         var result = await dialog.WaitForScan();
 
         if (result == null)
-        {
             return false;
-        }
 
         // Simple validation
         if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
-        {
             return false;
-        }
 
         var newEntry = new VaultEntry
         {
@@ -55,7 +50,7 @@ public class VaultEntryManagerService(
 
         if (!string.IsNullOrEmpty(newEntry.Password))
         {
-            newEntry.BreachCount = (int)(await pwned.CheckPasswordAsync(newEntry.Password) ?? 0);
+            newEntry.BreachCount = await pwned.CheckPasswordAsync(newEntry.Password) ?? 0;
 
             // If breached, confirm with user before saving
             if (newEntry.BreachCount > 0)
@@ -70,18 +65,12 @@ public class VaultEntryManagerService(
                 await MopupService.Instance.PushAsync(prompt);
                 var keep = await prompt.WaitForScan();
                 if (!keep)
-                {
                     return false;
-                }
             }
         }
 
         // Add to list
         await addEntry.ExecuteAsync(newEntry);
-
-        // Notify that entries changed
-        // session.RaiseVaultEntriesChanged(); // Handled by use case
-
         await syncing.AutoSaveIfEnabled();
 
         return true;
@@ -119,15 +108,11 @@ public class VaultEntryManagerService(
         var result = await dialog.WaitForScan();
 
         if (result == null)
-        {
             return false;
-        }
         
 
         if (string.IsNullOrWhiteSpace(formModel.Site) || string.IsNullOrWhiteSpace(formModel.Password))
-        {
             return false;
-        }
 
         var updatedEntry = new VaultEntry
         {
@@ -156,17 +141,11 @@ public class VaultEntryManagerService(
                 await MopupService.Instance.PushAsync(prompt);
                 var keep = await prompt.WaitForScan();
                 if (!keep)
-                {
                     return false;
-                }
             }
         }
 
         await updateEntry.ExecuteAsync(target, updatedEntry);
-
-        // Notify that entries changed
-        // session.RaiseVaultEntriesChanged(); // Handled by use case
-
         await syncing.AutoSaveIfEnabled();
 
         return true;
@@ -177,25 +156,16 @@ public class VaultEntryManagerService(
         if (target == null)
             return false;
 
-        // Creating new prompt dialog
         var dialog = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the password for \"{target.Site}\"?", "Delete");
 
-        // Push the dialog to MopupService
         await MopupService.Instance.PushAsync(dialog);
 
-        // Wait for the response
         var response = await dialog.WaitForScan();
-
-        // Act based on the response
         if (!response)
             return false;
 
         // Remove from the list
         await deleteEntry.ExecuteAsync(target);
-
-        // Notify that entries changed
-        // session.RaiseVaultEntriesChanged(); // Handled by use case
-
         await syncing.AutoSaveIfEnabled();
 
         return true;

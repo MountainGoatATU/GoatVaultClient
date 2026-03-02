@@ -1,11 +1,8 @@
 namespace GoatVaultClient.Controls;
 
-public partial class Component : ContentView
+public partial class Component
 {
-    public Component()
-    {
-        InitializeComponent();
-    }
+    public Component() => InitializeComponent();
 
     // --- Original Component Properties ---
 

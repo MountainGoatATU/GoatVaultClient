@@ -1,14 +1,12 @@
 namespace GoatVaultClient.Controls;
 
-public partial class SyncStatusBar : ContentView
+public partial class SyncStatusBar
 {
-    private bool _isRotating = false;
+    private bool _isRotating;
 
     public SyncStatusBar()
     {
         InitializeComponent();
-
-        // Set the binding context to itself to enable property bindings
         BindingContext = this;
     }
 

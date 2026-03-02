@@ -2,9 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.Services;
 
-/// <summary>
-/// Service for managing network connectivity state across the application
-/// </summary>
 public class ConnectivityService : IDisposable
 {
     private readonly ILogger<ConnectivityService>? _logger;
@@ -12,7 +9,7 @@ public class ConnectivityService : IDisposable
 
     public event EventHandler<bool>? ConnectivityChanged;
 
-    public bool IsConnected { get; private set; }
+    private bool IsConnected { get; set; }
 
     public ConnectivityService(ILogger<ConnectivityService>? logger = null)
     {
@@ -37,27 +34,6 @@ public class ConnectivityService : IDisposable
         ConnectivityChanged?.Invoke(this, IsConnected);
     }
 
-    /// <summary>
-    /// Check if there is internet connectivity
-    /// </summary>
-    public bool CheckConnectivity()
-    {
-        try
-        {
-            var networkAccess = Connectivity.Current.NetworkAccess;
-            IsConnected = networkAccess == NetworkAccess.Internet;
-            return IsConnected;
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "Error checking connectivity");
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Get detailed network information
-    /// </summary>
     public NetworkInfo GetNetworkInfo()
     {
         var profiles = Connectivity.Current.ConnectionProfiles;
@@ -81,9 +57,6 @@ public class ConnectivityService : IDisposable
     }
 }
 
-/// <summary>
-/// Detailed network information
-/// </summary>
 public class NetworkInfo
 {
     public bool IsConnected { get; set; }

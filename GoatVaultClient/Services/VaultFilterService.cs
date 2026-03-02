@@ -14,9 +14,9 @@ public static class VaultFilterService
         var query = allCategories;
 
         if (!string.IsNullOrWhiteSpace(searchText))
-        {
-            query = query.Where(x => x.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-        }
+            query = query
+                .Where(x => x.Name
+                    .Contains(searchText, StringComparison.OrdinalIgnoreCase));
 
         query = sortAsc
             ? query.OrderBy(f => f.Name)
@@ -34,13 +34,12 @@ public static class VaultFilterService
         var query = allEntries;
 
         if (!string.IsNullOrWhiteSpace(searchText))
-        {
-            query = query.Where(x => x.Site.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-        }
+            query = query
+                .Where(x => x.Site
+                    .Contains(searchText, StringComparison.OrdinalIgnoreCase));
         else if (!string.IsNullOrWhiteSpace(categoryFilter) && !categoryFilter.Equals("All", StringComparison.OrdinalIgnoreCase))
-        {
-            query = query.Where(x => x.Category == categoryFilter);
-        }
+            query = query
+                .Where(x => x.Category == categoryFilter);
 
         query = sortAsc
             ? query.OrderBy(f => f.Site)

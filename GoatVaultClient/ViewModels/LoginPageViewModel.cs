@@ -41,17 +41,13 @@ public partial class LoginPageViewModel(
 
     partial void OnSelectedUserChanged(User? value)
     {
-        if (value != null)
-        {
-            if (!IsOnline)
-            {
-                SelectedUser = value;
-            }
-            else
-            {
-                EmailText = value.Email.Value;
-            }
-        }
+        if (value == null) 
+            return;
+
+        if (!IsOnline)
+            SelectedUser = value;
+        else
+            EmailText = value.Email.Value;
     }
 
     #region Connectivity
@@ -62,23 +58,23 @@ public partial class LoginPageViewModel(
     {
         UpdateConnectivityState();
 
-        if (!isConnected)
+        if (isConnected) 
+            return;
+
+        MainThread.BeginInvokeOnMainThread(async void () =>
         {
-            MainThread.BeginInvokeOnMainThread(async void () =>
+            try
             {
-                try
-                {
-                    await Shell.Current.DisplayAlertAsync(
-                        "Connection Lost",
-                        "Your internet connection was lost.",
-                        "OK");
-                }
-                catch (Exception e)
-                {
-                    logger?.LogError(e, "Error displaying connectivity alert");
-                }
-            });
-        }
+                await Shell.Current.DisplayAlertAsync(
+                    "Connection Lost",
+                    "Your internet connection was lost.",
+                    "OK");
+            }
+            catch (Exception e)
+            {
+                logger?.LogError(e, "Error displaying connectivity alert");
+            }
+        });
     }
 
     private void UpdateConnectivityState()
@@ -97,9 +93,7 @@ public partial class LoginPageViewModel(
         LocalUsers = new ObservableCollection<User>(users);
         HasLocalUsers = LocalUsers.Count > 0;
         if (HasLocalUsers)
-        {
             SelectedUser = LocalUsers.FirstOrDefault();
-        }
     }
 
     [RelayCommand]
@@ -110,17 +104,11 @@ public partial class LoginPageViewModel(
             if (IsOnline)
             {
                 await LoginOnline();
-                syncing.StartPeriodicSync(TimeSpan.FromMinutes(2)); // Start auto-sync
+                syncing.StartPeriodicSync(TimeSpan.FromMinutes(2));
             }
             else
-            {
                 await LoginOffline();
-                // We might want to sync if connection comes back? 
-                // For now, only start periodic sync if online login, as it implies we have fresh token?
-                // Actually LoginOffline doesn't get a token usually unless we refresh it.
-            }
 
-            // Navigate to main
             await Shell.Current.GoToAsync("//main/home");
         });
     }
@@ -154,13 +142,9 @@ public partial class LoginPageViewModel(
     private void SelectLocalUser(User user)
     {
         if (!IsOnline)
-        {
             SelectedUser = user;
-        }
         else
-        {
             EmailText = user.Email.Value;
-        }
     }
 
     [RelayCommand]

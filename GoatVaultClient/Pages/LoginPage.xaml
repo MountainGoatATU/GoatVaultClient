@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
+<uranium:UraniumContentPage
     x:Class="GoatVaultClient.Pages.LoginPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -7,9 +7,9 @@
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-    xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     x:DataType="vm:LoginPageViewModel"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
@@ -209,6 +209,7 @@
                                                         Dark={StaticResource DarkOnSurfaceVariant}}"
                             VerticalOptions="Center" />
                         <Button
+                            StyleClass="TextButton"
                             Padding="8,0"
                             BackgroundColor="Transparent"
                             BorderColor="Transparent"
@@ -220,13 +221,21 @@
                                                         Dark={StaticResource DarkPrimary}}" />
                     </HorizontalStackLayout>
 
-                    <ActivityIndicator
-                        HorizontalOptions="Center"
-                        IsRunning="{Binding IsBusy}"
-                        IsVisible="{Binding IsBusy}" />
+                    <VerticalStackLayout
+                        IsVisible="{Binding IsBusy}"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center">
+                        <ActivityIndicator IsRunning="{Binding IsBusy}"/>
+                        <Label 
+                            Text="Logging in..." 
+                            Padding="0, 20, 0, 0"
+                            TextColor="{AppThemeBinding 
+                                Light={StaticResource LightPrimary},
+                                Dark={StaticResource DarkPrimary}}"/>
+                    </VerticalStackLayout>
 
                 </VerticalStackLayout>
             </Border>
         </Grid>
     </ScrollView>
-</ContentPage>
+</uranium:UraniumContentPage>

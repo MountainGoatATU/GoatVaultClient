@@ -1,12 +1,11 @@
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultCore.Models.API;
-using Mopups.Pages;
 using Mopups.Services;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class ErrorPopup : PopupPage
+public partial class ErrorPopup
 {
     public string Message { get; }
     public ObservableCollection<string> Errors { get; } = [];

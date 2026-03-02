@@ -29,8 +29,8 @@
 		<ApplicationId>com.mountaingoat.goatvaultclient</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>0.7.1</ApplicationDisplayVersion>
-		<ApplicationVersion>20</ApplicationVersion>
+		<ApplicationDisplayVersion>0.7.2</ApplicationDisplayVersion>
+		<ApplicationVersion>21</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>MSIX</WindowsPackageType>
@@ -134,6 +134,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Controls\AngularGaugeChart.xaml.cs">
+	    <DependentUpon>AngularGaugeChart.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Controls\Popups\SingleInputPopup.xaml.cs">
 	    <DependentUpon>SingleInputPopup.xaml</DependentUpon>
 	  </Compile>
@@ -155,6 +158,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Controls\AngularGaugeChart.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Controls\CategoryItemCell.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -177,9 +183,6 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\Popups\AuthorizePopup.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Controls\Popups\IncorrectPasswordPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\Popups\PromptPopup.xaml">

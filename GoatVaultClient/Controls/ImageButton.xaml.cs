@@ -2,12 +2,9 @@ using System.Windows.Input;
 
 namespace GoatVaultClient.Controls;
 
-public partial class ImageButton : ContentView
+public partial class ImageButton
 {
-    public ImageButton()
-    {
-        InitializeComponent();
-    }
+    public ImageButton() => InitializeComponent();
 
     public static readonly BindableProperty IconGlyphProperty = BindableProperty.Create(
         nameof(IconGlyph),

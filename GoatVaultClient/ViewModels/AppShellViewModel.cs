@@ -14,9 +14,7 @@ public partial class AppShellViewModel(LogoutUseCase logout) : ObservableObject
 
         // Disable the flyout menu upon logout
         if (Shell.Current is AppShell appShell)
-        {
             appShell.DisableFlyout();
-        }
 
         // Clear the navigation stack and return to the intro route
         await Shell.Current.GoToAsync("//login");
