@@ -50,6 +50,10 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
     partial void OnEmailChanged(string? value)
     {
         var result = register.ValidateEmail(Email);
+
+        if (result == null) 
+            return;
+
         IsEmailWarning = result.IsWarning;
         IsEmailGood = result.IsGood;
         EmailMessage = result.Message;

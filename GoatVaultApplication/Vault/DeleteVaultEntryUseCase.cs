@@ -8,9 +8,7 @@ public class DeleteVaultEntryUseCase(ISessionContext session, SaveVaultUseCase s
     public async Task ExecuteAsync(VaultEntry entry)
     {
         if (session.Vault is null)
-        {
             throw new InvalidOperationException("Vault not loaded.");
-        }
 
         session.Vault.Entries.Remove(entry);
         session.RaiseVaultChanged();

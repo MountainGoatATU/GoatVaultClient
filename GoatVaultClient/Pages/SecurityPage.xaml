@@ -272,6 +272,65 @@
 
                 </VerticalStackLayout>
             </controls:Component>
+
+            <!--  Danger Zone Section  -->
+            <controls:Component
+                Title="Danger Zone"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
+                <VerticalStackLayout Padding="20" Spacing="15">
+
+                    <!-- Wipe Vault  -->
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="14"
+                        Text="Wipe Vault"
+                        VerticalOptions="Center" />
+
+                    <Label
+                        FontSize="12"
+                        LineBreakMode="WordWrap"
+                        Text="Wipe all passwords and categories in your vault. This action will apply on your device and on the cloud, and cannot be reversed!"
+                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                    Dark={StaticResource Gray400}}" />
+
+                    <Button
+                        Margin="0,10,0,10"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                            Dark={StaticResource ErrorDark}}"
+                        Command="{Binding WipeVaultCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        Text="Wipe Vault"
+                        TextColor="White" />
+
+                    <!-- Delete Account  -->
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="14"
+                        Text="Delete Account"
+                        VerticalOptions="Center" />
+
+                    <Label
+                        FontSize="12"
+                        LineBreakMode="WordWrap"
+                        Text="Permanently delete your GoatVault account. This action will apply on your device and on the cloud, and cannot be reversed!"
+                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                    Dark={StaticResource Gray400}}" />
+
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                            Dark={StaticResource ErrorDark}}"
+                        Command="{Binding DeleteAccountCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        Text="Delete Account"
+                        TextColor="White" />
+                </VerticalStackLayout>
+            </controls:Component>
         </VerticalStackLayout>
     </ScrollView>
 </uranium:UraniumContentPage>

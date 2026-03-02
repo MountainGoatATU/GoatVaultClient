@@ -145,7 +145,7 @@ public class VaultCryptoTests
         // Arrange
         using var key = new MasterKey(CreateFixedKey(10));
         var nonce = CryptoService.GenerateNonce();
-        var plaintext = Encoding.UTF8.GetBytes("not json");
+        var plaintext = "not json"u8.ToArray();
         var ciphertext = new byte[plaintext.Length];
         var tag = new byte[16];
 

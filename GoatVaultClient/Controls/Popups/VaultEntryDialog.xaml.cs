@@ -25,18 +25,7 @@ public partial class VaultEntryDialog
         AcceptCommand = new Command(OnAccept);
         CancelCommand = new Command(OnCancel);
 
-        if (vm.AvailableCategories != null)
-        {
-            CategoryInput.ItemsSource = vm.AvailableCategories;
-            CategoryInput.SelectedItem = vm.AvailableCategories.FirstOrDefault();
-
-        }
-        else
-        {
-            CategoryInput.ItemsSource = new List<CategoryItem>();
-        }
         
-
         BindingContext = this;
     }
 
