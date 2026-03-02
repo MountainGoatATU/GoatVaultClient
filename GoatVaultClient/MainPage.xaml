@@ -1,13 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
+<uranium:UraniumContentPage
     x:Class="GoatVaultClient.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
-    xmlns:converters="clr-namespace:GoatVaultClient.Converters"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-    xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
@@ -118,7 +115,7 @@
                             BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
                                                               Dark={StaticResource DarkSecondaryContainer}}"
                             Command="{Binding ShowAllPasswordsCommand}"
-                            CornerRadius="{StaticResource Large}"
+                            CornerRadius="15"
                             FontFamily="{StaticResource MaterialMediumFont}"
                             FontSize="{StaticResource tMedium}"
                             Text="Show All"
@@ -441,4 +438,4 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </Grid>
-</ContentPage>
+</uranium:UraniumContentPage>
