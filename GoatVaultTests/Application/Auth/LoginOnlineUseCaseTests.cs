@@ -19,7 +19,7 @@ public class LoginOnlineUseCaseTests
         var nonce = Convert.ToBase64String(new byte[] { 5, 6, 7, 8 });
         var serverAuth = new Mock<IServerAuthService>();
         serverAuth.Setup(x => x.InitAsync(It.IsAny<AuthInitRequest>(), ct))
-            .ReturnsAsync(new AuthInitResponse { UserId = Guid.NewGuid().ToString(), AuthSalt = authSalt, Nonce = nonce, MfaEnabled = true });
+            .ReturnsAsync(new AuthInitResponse { UserId = Guid.NewGuid().ToString(), AuthSalt = authSalt, Nonce = nonce, MfaEnabled = true, ShamirEnabled=false });
 
         var useCase = CreateUseCase(
             serverAuth.Object,
@@ -46,7 +46,7 @@ public class LoginOnlineUseCaseTests
         var nonce = Convert.ToBase64String(new byte[] { 5, 6, 7, 8 });
         var serverAuth = new Mock<IServerAuthService>();
         serverAuth.Setup(x => x.InitAsync(It.IsAny<AuthInitRequest>(), ct))
-            .ReturnsAsync(new AuthInitResponse { UserId = Guid.NewGuid().ToString(), AuthSalt = authSalt, Nonce = nonce, MfaEnabled = true });
+            .ReturnsAsync(new AuthInitResponse { UserId = Guid.NewGuid().ToString(), AuthSalt = authSalt, Nonce = nonce, MfaEnabled = true, ShamirEnabled = false });
 
         var useCase = CreateUseCase(
             serverAuth.Object,
@@ -100,7 +100,8 @@ public class LoginOnlineUseCaseTests
             UserId = userId.ToString(),
             AuthSalt = Convert.ToBase64String(authSaltBytes),
             Nonce = Convert.ToBase64String(nonceBytes),
-            MfaEnabled = true
+            MfaEnabled = true,
+            ShamirEnabled = true
         });
         serverAuth.Setup(x => x.VerifyAsync(It.IsAny<AuthVerifyRequest>(), ct)).ReturnsAsync(new AuthVerifyResponse
         {
@@ -178,7 +179,8 @@ public class LoginOnlineUseCaseTests
             UserId = userId.ToString(),
             AuthSalt = Convert.ToBase64String(authSaltBytes),
             Nonce = Convert.ToBase64String(nonceBytes),
-            MfaEnabled = false
+            MfaEnabled = false,
+            ShamirEnabled = false
         });
         serverAuth.Setup(x => x.VerifyAsync(It.IsAny<AuthVerifyRequest>(), ct)).ReturnsAsync(new AuthVerifyResponse
         {
@@ -250,7 +252,8 @@ public class LoginOnlineUseCaseTests
             UserId = userId.ToString(),
             AuthSalt = Convert.ToBase64String(authSaltBytes),
             Nonce = Convert.ToBase64String(nonceBytes),
-            MfaEnabled = false
+            MfaEnabled = false,
+            ShamirEnabled = false
         });
         serverAuth.Setup(x => x.VerifyAsync(It.IsAny<AuthVerifyRequest>(), ct)).ReturnsAsync(new AuthVerifyResponse
         {
@@ -303,7 +306,8 @@ public class LoginOnlineUseCaseTests
             UserId = userId.ToString(),
             AuthSalt = Convert.ToBase64String(authSaltBytes),
             Nonce = Convert.ToBase64String(nonceBytes),
-            MfaEnabled = false
+            MfaEnabled = false,
+            ShamirEnabled = false
         });
         serverAuth.Setup(x => x.VerifyAsync(It.IsAny<AuthVerifyRequest>(), ct)).ReturnsAsync(new AuthVerifyResponse
         {

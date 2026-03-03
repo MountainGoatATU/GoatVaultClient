@@ -16,7 +16,7 @@ public class ServerAuthServiceTests
         // Arrange
         var ct = TestContext.Current.CancellationToken;
         const string responseJson = """
-            {"_id":"user-1","authSalt":"salt-1","nonce":"nonce-1","mfaEnabled":false}
+            {"_id":"user-1","authSalt":"salt-1","nonce":"nonce-1","mfaEnabled":false,"shamirEnabled":false}
             """;
         var handler = CreateHandler(HttpStatusCode.OK, responseJson, HttpMethod.Post, "https://api.test/v1/auth/init");
         var serverAuth = CreateServerAuth(handler.Object);
@@ -29,6 +29,7 @@ public class ServerAuthServiceTests
         Assert.Equal("salt-1", result.AuthSalt);
         Assert.Equal("nonce-1", result.Nonce);
         Assert.False(result.MfaEnabled);
+        Assert.False(result.ShamirEnabled);
     }
 
     [Fact]
@@ -123,7 +124,7 @@ public class ServerAuthServiceTests
                 var path = request.RequestUri!.AbsolutePath;
 
                 if (request.Method == HttpMethod.Post && path == "/v1/auth/init")
-                    return JsonResponse("""{"_id":"u1","authSalt":"salt","nonce":"n1","mfaEnabled":false}""");
+                    return JsonResponse("""{"_id":"u1","authSalt":"salt","nonce":"n1","mfaEnabled":false,"shamirEnabled":false}""");
 
                 if (request.Method == HttpMethod.Post && path == "/v1/auth/verify")
                     return JsonResponse("""{"accessToken":"a","refreshToken":"r"}""");
