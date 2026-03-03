@@ -7,9 +7,9 @@
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     x:DataType="vm:LoginPageViewModel"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
@@ -146,64 +146,63 @@
                         </VerticalStackLayout>
                     </input:FormView>
 
-                    <HorizontalStackLayout
-                        Margin="0,8,0,0"
-                        HorizontalOptions="Center"
-                        IsVisible="{Binding IsOnline}"
-                        Spacing="4">
-                        <Label
-                            Text="Don't have an account yet?"
-                            TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
-                                                        Dark={StaticResource DarkOnSurfaceVariant}}"
-                            VerticalOptions="Center" />
-                        <Button
-                            StyleClass="TextButton"
-                            Padding="8,0"
-                            BackgroundColor="Transparent"
-                            BorderColor="Transparent"
-                            Command="{Binding GoToRegisterCommand}"
-                            FontFamily="{StaticResource MaterialMediumFont}"
-                            FontSize="{StaticResource tMedium}"
-                            Text="Register"
-                            TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
-                                                        Dark={StaticResource DarkPrimary}}" />
-                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="{StaticResource sContent}">
+                        <HorizontalStackLayout
+                            Margin="0,8,0,0"
+                            HorizontalOptions="Center"
+                            IsVisible="{Binding IsOnline}"
+                            Spacing="4">
+                            <Label
+                                Text="Don't have an account yet?"
+                                TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                            Dark={StaticResource DarkOnSurfaceVariant}}"
+                                VerticalOptions="Center" />
+                            <Button
+                                Padding="8,0"
+                                BackgroundColor="Transparent"
+                                BorderColor="Transparent"
+                                Command="{Binding GoToRegisterCommand}"
+                                FontFamily="{StaticResource MaterialMediumFont}"
+                                FontSize="{StaticResource tMedium}"
+                                StyleClass="TextButton"
+                                Text="Register"
+                                TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                                            Dark={StaticResource DarkPrimary}}" />
+                        </HorizontalStackLayout>
 
-                    <HorizontalStackLayout
-                        Margin="0,8,0,0"
-                        HorizontalOptions="Center"
-                        IsVisible="{Binding IsOnline}"
-                        Spacing="4">
-                        <Label
-                            Text="Forgot password?"
-                            TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
-                                                        Dark={StaticResource DarkOnSurfaceVariant}}"
-                            VerticalOptions="Center" />
-                        <Button
-                            Padding="8,0"
-                            BackgroundColor="Transparent"
-                            BorderColor="Transparent"
-                            Command="{Binding GoToRecoverCommand}"
-                            FontFamily="{StaticResource MaterialMediumFont}"
-                            FontSize="{StaticResource tMedium}"
-                            Text="Recover"
-                            TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
-                                                        Dark={StaticResource DarkPrimary}}" />
-                    </HorizontalStackLayout>
-                  
-                    <VerticalStackLayout
-                        IsVisible="{Binding IsBusy}"
-                        VerticalOptions="Center"
-                        HorizontalOptions="Center">
-                        <ActivityIndicator IsRunning="{Binding IsBusy}"/>
-                        <Label 
-                            Text="Logging in..." 
-                            Padding="0, 20, 0, 0"
-                            TextColor="{AppThemeBinding 
-                                Light={StaticResource LightPrimary},
-                                Dark={StaticResource DarkPrimary}}"/>
+                        <HorizontalStackLayout
+                            HorizontalOptions="Center"
+                            IsVisible="{Binding IsOnline}"
+                            Spacing="{StaticResource sContent}">
+                            <Label
+                                Text="Forgot password?"
+                                TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                            Dark={StaticResource DarkOnSurfaceVariant}}"
+                                VerticalOptions="Center" />
+                            <Button
+                                Padding="8,0"
+                                BackgroundColor="Transparent"
+                                BorderColor="Transparent"
+                                Command="{Binding GoToRecoverCommand}"
+                                FontFamily="{StaticResource MaterialMediumFont}"
+                                FontSize="{StaticResource tMedium}"
+                                Text="Recover"
+                                TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                                            Dark={StaticResource DarkPrimary}}" />
+                        </HorizontalStackLayout>
+
+                        <VerticalStackLayout
+                            HorizontalOptions="Center"
+                            IsVisible="{Binding IsBusy}"
+                            VerticalOptions="Center">
+                            <ActivityIndicator IsRunning="{Binding IsBusy}" />
+                            <Label
+                                Padding="0,20,0,0"
+                                Text="Logging in..."
+                                TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                                            Dark={StaticResource DarkPrimary}}" />
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
-
                 </VerticalStackLayout>
             </Border>
         </Grid>
