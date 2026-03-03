@@ -128,6 +128,7 @@ public static class MauiProgram
         builder.Services.AddTransient<EnableShamirUseCase>();
         builder.Services.AddTransient<RecoverKeyUseCase>();
         builder.Services.AddTransient<SplitKeyUseCase>();
+        builder.Services.AddTransient<ValidateUserEmailUseCase>();
 
         builder.Services.AddTransient<AddVaultEntryUseCase>();
         builder.Services.AddTransient<CalculateVaultScoreUseCase>();
@@ -154,7 +155,7 @@ public static class MauiProgram
         builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
         builder.Services.AddTransient<IRandomTipService, RandomTipService>();
         // Shamir Test
-        builder.Services.AddSingleton<IShamirsSecretSharing, ShamirsSecretSharing>();
+        builder.Services.AddTransient<IShamirsSecretSharing, ShamirsSecretSharing>();
         builder.Services.AddSingleton<IRandom, StrongRandom>();
         builder.Services.AddTransient<IShamirSsService,ShamirSsService>();
 
@@ -193,7 +194,7 @@ public static class MauiProgram
         #region App pages & view models
 
         builder.Services.AddTransient<SyncStatusBarViewModel>();
-        builder.Services.AddTransient<MainPageViewModel>();
+        builder.Services.AddSingleton<MainPageViewModel>();
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<OnboardingPageViewModel>();
         builder.Services.AddTransient<OnboardingPage>();
