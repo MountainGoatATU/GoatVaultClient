@@ -284,7 +284,11 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     {
         if (value != null)
         {
+            // When an entry is selected, we want to start tracking it for TOTP updates
             _totpManager.TrackEntry(value);
+            // Update the detail view model with the selected entry
+            DetailVM.Entry = value;
+
             if (DeviceInfo.Current.Idiom == DeviceIdiom.Phone)
             {
                 // On Android, we want to automatically copy the TOTP code when an entry is selected
