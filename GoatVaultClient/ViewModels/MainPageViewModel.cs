@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Vault;
+using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
@@ -284,7 +285,21 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
     #region TOTP
 
-    partial void OnSelectedEntryChanged(VaultEntry? value) => _totpManager.TrackEntry(value);
+    partial void OnSelectedEntryChanged(VaultEntry? value)
+    {
+        if (value != null)
+        {
+            _totpManager.TrackEntry(value);
+            if (DeviceInfo.Current.Idiom== DeviceIdiom.Phone)
+            {
+                // On Android, we want to automatically copy the TOTP code when an entry is selected
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await Shell.Current.GoToAsync(nameof(EntryDetailPage));
+                });
+            }
+        }
+    }
 
     [RelayCommand]
     private async Task CopyTotpCode()
@@ -427,7 +442,13 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         {
             var target = entry ?? SelectedEntry;
             if (await _vaultEntryManager.EditEntryAsync(target, Categories))
-                ReloadVaultData();
+            {
+                if (DeviceInfo.Current.Idiom != DeviceIdiom.Phone)
+                {
+                    ReloadVaultData();
+                }
+            }
+                
         });
     }
 
@@ -438,7 +459,15 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         {
             var target = entry ?? SelectedEntry;
             if (await _vaultEntryManager.DeleteEntryAsync(target))
+            {
+                // Navigate to main page if on mobile
+                if (DeviceInfo.Current.Idiom == DeviceIdiom.Phone)
+                {
+                    await Shell.Current.GoToAsync("//main/home");
+                }
                 ReloadVaultData();
+            }
+            
         });
     }
 
