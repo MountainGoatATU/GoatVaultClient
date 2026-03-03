@@ -75,6 +75,7 @@ public partial class MainPage : ContentPage
 
             // Enable flyout navigation
             ((AppShell)Shell.Current).EnableFlyout();
+            //if ()
 
             // Fire-and-forget sync so the page renders immediately (Bug 2 fix)
             _ = Task.Run(async () =>
@@ -95,9 +96,11 @@ public partial class MainPage : ContentPage
             // Safely cast the BindingContext and call the method
             if (BindingContext is not MainPageViewModel vm)
                 return;
-
-            // TODO: Fix
-            //vm.LoadVaultData();
+            // Clear selection when returning to the main list
+            if (DeviceInfo.Current.Idiom == DeviceIdiom.Phone)
+            {
+                vm.SelectedEntry = null;
+            }
             vm.StartRandomGoatComments();
         }
         catch (Exception e)
@@ -114,30 +117,6 @@ public partial class MainPage : ContentPage
         // This prevents unnecessary background operations
         // Note: For global sync, move this to App.xaml.cs lifecycle
         _syncingService.StopPeriodicSync();
-    }
-
-    private async void OnEntrySelected(object sender, SelectionChangedEventArgs e)
-    {
-        // Ensure we have a valid selected item (adjust VaultEntryModel to your actual model name)
-        if (e.CurrentSelection.FirstOrDefault() is not VaultEntry selectedEntry)
-            return;
-
-        // Check the current window width to determine if the Mobile layout is active
-        if (this.Width < 768)
-        {
-            // MOBILE BEHAVIOR: Route to a separate details page
-            var navigationParameters = new Dictionary<string, object>
-        {
-            { "Entry", selectedEntry }
-        };
-
-            // Ensure EntryDetailsPage is registered in AppShell.xaml routes
-            await Shell.Current.GoToAsync(nameof(EntryDetailPage), navigationParameters);
-
-            // Clear the CollectionView selection so it can be tapped again upon returning
-            ((CollectionView)sender).SelectedItem = null;
-        }
-        // DESKTOP BEHAVIOR: Do nothing programmatically; the XAML binding handles it.
     }
 
     private void OnCategoriesCollectionMenuOpening(object sender, EventArgs e)
