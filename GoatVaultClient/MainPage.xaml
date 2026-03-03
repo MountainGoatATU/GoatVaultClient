@@ -19,7 +19,7 @@
             <controls:Component>
                 <Grid ColumnDefinitions="*,Auto">
                     <Label
-                        x:Name="Title"
+                        x:Name="PageHeaderTitle"
                         Style="{StaticResource MaterialHeadlineLarge}"
                         Text="GoatVault" />
                     <controls:SyncStatusBar x:Name="SyncStatusBar" Grid.Column="1" />
@@ -413,7 +413,7 @@
                         <Setter TargetName="DesktopCategoriesPane" Property="IsVisible" Value="False" />
                         <Setter TargetName="DetailsPane" Property="IsVisible" Value="False" />
                         <Setter TargetName="MobileCategoryPicker" Property="IsVisible" Value="True" />
-                        <Setter TargetName="Title" Property="IsVisible" Value="False" />
+                        <Setter TargetName="PageHeaderTitle" Property="IsVisible" Value="False" />
 
                         <Setter TargetName="VaultContentGrid" Property="ColumnDefinitions" Value="*, 0, 0" />
                         <Setter TargetName="VaultContentGrid" Property="ColumnSpacing" Value="0" />
