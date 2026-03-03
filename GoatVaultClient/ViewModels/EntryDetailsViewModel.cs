@@ -7,5 +7,5 @@ namespace GoatVaultClient.ViewModels;
 public partial class EntryDetailsViewModel : BaseViewModel
 {
     [ObservableProperty]
-    private VaultEntry _entry = new();
+    private VaultEntry _entry;
 }
