@@ -7,6 +7,7 @@ using GoatVaultApplication.Vault;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
 using GoatVaultClient.ViewModels;
+using GoatVaultClient.ViewModels.controls;
 using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
@@ -196,7 +197,7 @@ public static class MauiProgram
         #region App pages & view models
 
         builder.Services.AddTransient<SyncStatusBarViewModel>();
-        builder.Services.AddSingleton<MainPageViewModel>();
+        builder.Services.AddTransient<MainPageViewModel>();
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<OnboardingPageViewModel>();
         builder.Services.AddTransient<OnboardingPage>();
@@ -213,6 +214,7 @@ public static class MauiProgram
         builder.Services.AddTransient<EntryDetailPage>();
         builder.Services.AddTransient<EntryDetailsViewModel>();  
         builder.Services.AddTransient<AppShellViewModel>();
+        builder.Services.AddTransient<EntryDetailViewViewModel>();
 
         #endregion
 

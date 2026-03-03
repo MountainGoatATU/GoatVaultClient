@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Vault;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
+using GoatVaultClient.ViewModels.controls;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private readonly CategoryManagerService _categoryManager;
     private readonly VaultEntryManagerService _vaultEntryManager;
     private readonly ILogger<MainPageViewModel>? _logger;
+    public EntryDetailViewViewModel DetailVM { get; }
     private GoatTipsService GoatTips { get; }
 
     #endregion
@@ -61,6 +63,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         CategoryManagerService categoryManager,
         VaultEntryManagerService vaultEntryManager,
         GoatTipsService goatTips,
+        EntryDetailViewViewModel detailVM,
         ILogger<MainPageViewModel>? logger = null)
     {
         _loadVault = loadVault;
@@ -71,6 +74,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         _vaultEntryManager = vaultEntryManager;
         _logger = logger;
         GoatTips = goatTips;
+        DetailVM = detailVM;
 
         // TODO: Check if logic is the same here
         _session.VaultChanged += OnVaultChanged;
@@ -281,21 +285,21 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         if (value != null)
         {
             _totpManager.TrackEntry(value);
-            if (DeviceInfo.Current.Idiom== DeviceIdiom.Phone)
+            if (DeviceInfo.Current.Idiom == DeviceIdiom.Phone)
             {
                 // On Android, we want to automatically copy the TOTP code when an entry is selected
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    await Shell.Current.GoToAsync(nameof(EntryDetailPage));
+                    var navigationParameters = new Dictionary<string, object>
+                    {
+                        {"Entry", value },
+                        {"Categories", Categories }
+                    };
+                    await Shell.Current.GoToAsync(nameof(EntryDetailPage), navigationParameters);
                 });
             }
         }
     }
-
-    [RelayCommand]
-    private async Task CopyTotpCode() 
-        => await SafeExecuteAsync(async () 
-            => await _totpManager.CopyTotpCodeAsync(SelectedEntry));
 
     #endregion
 
@@ -453,14 +457,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
             
         });
     }
-
-    [RelayCommand]
-    private async Task CopyEntry() 
-        => await SafeExecuteAsync(async () 
-            => await VaultEntryManagerService.CopyEntryPasswordAsync(SelectedEntry));
-
-    [RelayCommand]
-    private void TogglePasswordVisibility() => IsPasswordVisible = !IsPasswordVisible;
 
     #endregion
 }

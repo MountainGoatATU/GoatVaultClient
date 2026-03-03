@@ -1,3 +1,5 @@
+using GoatVaultCore.Models;
+
 namespace GoatVaultClient.Controls;
 
 public partial class EntryDetailView

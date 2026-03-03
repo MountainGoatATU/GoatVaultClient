@@ -8,8 +8,8 @@
     xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
-    Title="{Binding SelectedEntry.Site}"
-    x:DataType="vm:MainPageViewModel"
+    Title="{Binding Entry.Site}"
+    x:DataType="vm:EntryDetailsViewModel"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
     <ScrollView>
@@ -39,7 +39,7 @@
                         IconGlyph="{x:Static m:MaterialRounded.Delete}" />
                 </HorizontalStackLayout>
             </controls:Component.HeaderActions>
-            <controls:EntryDetailView />
+            <controls:EntryDetailView BindingContext="{Binding DetailVM}" />
         </controls:Component>
     </ScrollView>
 </uranium:UraniumContentPage>
