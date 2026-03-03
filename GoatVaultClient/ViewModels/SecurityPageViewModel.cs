@@ -68,7 +68,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         _deleteAccount = deleteAccount;
         _wipeVault = wipeVault;
         _session = session;
-        
+
         _session.VaultChanged += OnVaultChanged;
         Task.Run(InitializeAsync);
     }
@@ -283,10 +283,15 @@ public partial class SecurityPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task DisableShamirAsync()
     {
-        var confirm = await ShowConfirmationAsync("Disable MFA", "Are you sure you want to disable two-factor authentication?");
+        var confirm = await ShowConfirmationAsync("Disable Shamir", "Are you sure you want to disable Shamir Recovery?");
         if (!confirm)
-        
-         await SafeExecuteAsync(async () =>
+            return;
+
+        var password = await PromptPasswordAsync("Confirm Password");
+        if (password == null)
+            return;
+
+        await SafeExecuteAsync(async () =>
         {
             await _disableShamir.ExecuteAsync(password);
             ShamirEnabled = false;
@@ -302,7 +307,7 @@ public partial class SecurityPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task DeleteAccountAsync()
     {
-        var confirm1 = await ShowConfirmationAsync("Delete Account", 
+        var confirm1 = await ShowConfirmationAsync("Delete Account",
             "Are you sure you want to delete your account? This action is permanent and cannot be reversed.");
         if (!confirm1)
             return;
@@ -310,7 +315,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         var password = await PromptPasswordAsync("Confirm Password");
         if (password == null)
             return;
-       
+
         var confirm2 = await ShowConfirmationAsync("Delete Account",
             "Are you absolutely sure? There is no turning back after confirming this.");
         if (!confirm2)

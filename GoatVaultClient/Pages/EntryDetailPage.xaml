@@ -6,6 +6,7 @@
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     Title="{Binding SelectedEntry.Site}"
     x:DataType="vm:MainPageViewModel"
