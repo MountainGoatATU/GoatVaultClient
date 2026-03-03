@@ -15,9 +15,9 @@ public partial class EntryDetailsViewModel : BaseViewModel
     public EntryDetailViewViewModel DetailVM { get; }
 
     [ObservableProperty]
-    private VaultEntry _entry;
+    private VaultEntry? _entry;
     [ObservableProperty]
-    private ObservableCollection<CategoryItem> _categories;
+    private ObservableCollection<CategoryItem>? _categories;
 
     public EntryDetailsViewModel(EntryDetailViewViewModel detailVM, VaultEntryManagerService vaultEntryManager)
     {
@@ -25,15 +25,18 @@ public partial class EntryDetailsViewModel : BaseViewModel
         DetailVM = detailVM;
     }
 
-    partial void OnEntryChanged(VaultEntry value)
+    partial void OnEntryChanged(VaultEntry? value)
     {
-        DetailVM.Entry = value;
+        if (value != null)
+        {
+            DetailVM.Entry = value;
+        }
     }
 
     [RelayCommand]
     private async Task EditEntry()
     {
-        if (Entry != null)
+        if (Entry != null && Categories != null)
         {
             await SafeExecuteAsync(async () =>
             {

@@ -10,7 +10,7 @@ namespace GoatVaultClient.ViewModels.controls;
 
 public partial class EntryDetailViewViewModel(TotpManagerService totpManager) : BaseViewModel
 {
-    [ObservableProperty] private VaultEntry _entry;
+    [ObservableProperty] private VaultEntry? _entry;
     [ObservableProperty] private bool _isPasswordVisible = false;
 
     [RelayCommand]
