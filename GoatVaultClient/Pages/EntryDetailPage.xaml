@@ -4,13 +4,41 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
-    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-    Title="{Binding Site}"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
+    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+    Title="{Binding SelectedEntry.Site}"
+    x:DataType="vm:MainPageViewModel"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
     <ScrollView>
-        <Grid Padding="{StaticResource mCompact}">
-            <controls:EntryDetailView BindingContext="{Binding .}" />
-        </Grid>
+        <controls:Component
+            Title="Details"
+            BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                      Dark={StaticResource DarkSurfaceContainerLowest}}"
+            ContentPadding="{StaticResource sContent}"
+            HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                            Dark={StaticResource DarkSurfaceContainerLow}}"
+            ShowHeader="True">
+            <controls:Component.HeaderActions>
+                <HorizontalStackLayout Spacing="{x:StaticResource sContent}">
+                    <controls:ImageButton
+                        ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                        Dark={StaticResource DarkSecondaryContainer}}"
+                        Command="{Binding EditEntryCommand}"
+                        IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                    Dark={StaticResource DarkOnSecondaryContainer}}"
+                        IconGlyph="{x:Static m:MaterialRounded.Edit}" />
+                    <controls:ImageButton
+                        ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                        Dark={StaticResource DarkSecondaryContainer}}"
+                        Command="{Binding DeleteEntryCommand}"
+                        IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                    Dark={StaticResource DarkOnSecondaryContainer}}"
+                        IconGlyph="{x:Static m:MaterialRounded.Delete}" />
+                </HorizontalStackLayout>
+            </controls:Component.HeaderActions>
+            <controls:EntryDetailView />
+        </controls:Component>
     </ScrollView>
 </uranium:UraniumContentPage>

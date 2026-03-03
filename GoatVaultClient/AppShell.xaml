@@ -37,6 +37,11 @@
             <On Platform="Android, iOS, MacCatalyst" Value="True" />
         </OnPlatform>
     </Shell.NavBarIsVisible>
+    <Shell.FlyoutBehavior>
+        <OnPlatform x:TypeArguments="FlyoutBehavior" Default="Disabled">
+            <On Platform="Android, iOS, MacCatalyst" Value="Flyout" />
+        </OnPlatform>
+    </Shell.FlyoutBehavior>
     <!--
         NAVIGATION ARCHITECTURE (Flyout):
         ═══════════════════════════════════════════════════════════

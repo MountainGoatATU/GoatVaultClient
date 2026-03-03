@@ -331,6 +331,67 @@
                         TextColor="White" />
                 </VerticalStackLayout>
             </controls:Component>
+            <controls:Component
+                Title="Shamir Backup"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
+                <VerticalStackLayout Padding="20" Spacing="15">
+                    <!--  MFA Status  -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="14"
+                            Text="Status"
+                            VerticalOptions="Center" />
+                        <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                            <Border
+                                BackgroundColor="{Binding ShamirEnabled, Converter={StaticResource BoolToColorConverter}}"
+                                HeightRequest="12"
+                                StrokeShape="RoundRectangle 6"
+                                VerticalOptions="Center"
+                                WidthRequest="12" />
+                            <Label
+                                FontSize="14"
+                                Text="{Binding ShamirEnabled, Converter={StaticResource BoolToMfaStatusConverter}}"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!--  MFA Description  -->
+                    <Label
+                        FontSize="12"
+                        LineBreakMode="WordWrap"
+                        Text="Shamir Backup splits your master password into several unique 'shares', requiring a specific minimum number of them to be reunited to reconstruct the original key."
+                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                    Dark={StaticResource Gray400}}" />
+
+                    <!--  Enable/Disable Button  -->
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                                          Dark={StaticResource DarkPrimary}}"
+                        Command="{Binding EnableShamirCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        IsVisible="{Binding ShamirEnabled, Converter={StaticResource InvertedBoolConverter}}"
+                        Text="{Binding ShamirEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
+                        TextColor="White" />
+
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                                                          Dark={StaticResource ErrorDark}}"
+                        Command="{Binding DisableShamirCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        IsVisible="{Binding MfaEnabled}"
+                        Text="Enable Shamir Backup"
+                        TextColor="White" />
+
+                </VerticalStackLayout>
+            </controls:Component>
         </VerticalStackLayout>
     </ScrollView>
 </uranium:UraniumContentPage>

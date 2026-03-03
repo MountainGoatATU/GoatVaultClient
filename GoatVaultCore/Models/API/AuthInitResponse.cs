@@ -8,4 +8,5 @@ public class AuthInitResponse
     public required string AuthSalt { get; set; }
     public required string Nonce { get; set; }
     public required bool MfaEnabled { get; set; }
+    public required bool ShamirEnabled { get; set; }
 }

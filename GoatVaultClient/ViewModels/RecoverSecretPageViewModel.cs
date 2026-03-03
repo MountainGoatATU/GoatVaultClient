@@ -1,12 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Objects;
 using GoatVaultCore.Services;
 using System.Collections.ObjectModel;
 
 namespace GoatVaultClient.ViewModels;
 
-public partial class RecoverSecretViewModel(ShamirSsService shamir) : BaseViewModel
+public partial class RecoverSecretViewModel(IShamirSsService shamir) : BaseViewModel
 {
     // ── Input fields ─────────────────────────────────────────────
 

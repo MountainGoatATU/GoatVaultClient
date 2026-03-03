@@ -1,12 +1,17 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Account;
+using GoatVaultApplication.Auth;
+using GoatVaultApplication.Shamir;
 using GoatVaultApplication.Vault;
 using GoatVaultClient.Controls.Popups;
+using GoatVaultClient.Pages;
+using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 using LiveChartsCore.SkiaSharpView.Painting;
 using Mopups.Services;
+using PasswordGenerator;
 using SkiaSharp;
 using Email = GoatVaultCore.Models.Objects.Email;
 
@@ -19,6 +24,8 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly ChangeEmailUseCase _changeEmail;
     private readonly ChangePasswordUseCase _changePassword;
     private readonly EnableMfaUseCase _enableMfa;
+    private readonly EnableShamirUseCase _enableShamir;
+    private readonly DisableShamirUseCase _disableShamir;
     private readonly DisableMfaUseCase _disableMfa;
     private readonly DeleteAccountUseCase _deleteAccount;
     private readonly WipeVaultUseCase _wipeVault;
@@ -26,9 +33,9 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     [ObservableProperty] private string _email = string.Empty;
     [ObservableProperty] private bool _mfaEnabled;
+    [ObservableProperty] private bool shamirEnabled;
     [ObservableProperty] private string? _mfaSecret;
     [ObservableProperty] private string? _mfaQrCodeUrl;
-
     [ObservableProperty] private double _vaultScore;
     [ObservableProperty] private double _masterPasswordStrength;
     [ObservableProperty] private double _averagePasswordsStrength;
@@ -44,6 +51,8 @@ public partial class SecurityPageViewModel : BaseViewModel
         ChangePasswordUseCase changePassword,
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
+        EnableShamirUseCase enableShamir,
+        DisableShamirUseCase disableShamir,
         DeleteAccountUseCase deleteAccount,
         WipeVaultUseCase wipeVault,
         ISessionContext session)
@@ -54,10 +63,12 @@ public partial class SecurityPageViewModel : BaseViewModel
         _changePassword = changePassword;
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
+        _enableShamir = enableShamir;
+        _disableShamir = disableShamir;
         _deleteAccount = deleteAccount;
         _wipeVault = wipeVault;
         _session = session;
-
+        
         _session.VaultChanged += OnVaultChanged;
         Task.Run(InitializeAsync);
     }
@@ -71,6 +82,7 @@ public partial class SecurityPageViewModel : BaseViewModel
             var user = await _loadUserProfile.ExecuteAsync();
             Email = user.Email.Value;
             MfaEnabled = user.MfaEnabled;
+            ShamirEnabled = user.ShamirEnabled;
 
             await RefreshVaultScoreAsync();
         });
@@ -254,6 +266,35 @@ public partial class SecurityPageViewModel : BaseViewModel
         });
     }
 
+    [RelayCommand]
+    private async Task EnableShamirAsync()
+    {
+        var password = await PromptPasswordAsync("Confirm Password");
+        if (password == null)
+            return;
+
+        await SafeExecuteAsync(async () =>
+        {
+            await Shell.Current.GoToAsync($"{nameof(SplitSecretPage)}?Mp={password}");
+            await RefreshVaultScoreAsync();
+        });
+    }
+
+    [RelayCommand]
+    private async Task DisableShamirAsync()
+    {
+        var confirm = await ShowConfirmationAsync("Disable MFA", "Are you sure you want to disable two-factor authentication?");
+        if (!confirm)
+        
+         await SafeExecuteAsync(async () =>
+        {
+            await _disableShamir.ExecuteAsync(password);
+            ShamirEnabled = false;
+            await ShowSuccessAsync("Shamir Backup disabled successfully.");
+            await RefreshVaultScoreAsync();
+        });
+    }
+
     #endregion
 
     #region Danger Zone
@@ -269,7 +310,7 @@ public partial class SecurityPageViewModel : BaseViewModel
         var password = await PromptPasswordAsync("Confirm Password");
         if (password == null)
             return;
-
+       
         var confirm2 = await ShowConfirmationAsync("Delete Account",
             "Are you absolutely sure? There is no turning back after confirming this.");
         if (!confirm2)
