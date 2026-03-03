@@ -2,7 +2,7 @@ using GoatVaultClient.ViewModels;
 
 namespace GoatVaultClient.Pages;
 
-public partial class SecurityPage : ContentPage
+public partial class SecurityPage
 {
     public SecurityPage(SecurityPageViewModel vm)
     {

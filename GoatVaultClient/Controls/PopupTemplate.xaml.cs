@@ -2,12 +2,9 @@ using System.Windows.Input;
 
 namespace GoatVaultClient.Controls;
 
-public partial class PopupTemplate : ContentView
+public partial class PopupTemplate
 {
-    public PopupTemplate()
-    {
-        InitializeComponent();
-    }
+    public PopupTemplate() => InitializeComponent();
 
     public static readonly BindableProperty FrameWidthProperty = BindableProperty.Create(
         nameof(FrameWidth),

@@ -27,21 +27,22 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly EnableShamirUseCase _enableShamir;
     private readonly DisableShamirUseCase _disableShamir;
     private readonly DisableMfaUseCase _disableMfa;
+    private readonly DeleteAccountUseCase _deleteAccount;
+    private readonly WipeVaultUseCase _wipeVault;
     private readonly ISessionContext _session;
 
-    [ObservableProperty] private string email = string.Empty;
-    [ObservableProperty] private bool mfaEnabled;
+    [ObservableProperty] private string _email = string.Empty;
+    [ObservableProperty] private bool _mfaEnabled;
     [ObservableProperty] private bool shamirEnabled;
-    [ObservableProperty] private string? mfaSecret;
-    [ObservableProperty] private string? mfaQrCodeUrl;
-
-    [ObservableProperty] private double vaultScore;
-    [ObservableProperty] private double masterPasswordStrength;
-    [ObservableProperty] private double averagePasswordsStrength;
-    [ObservableProperty] private double reuseRate;
-    [ObservableProperty] private int breachesCount;
-    [ObservableProperty] private double mfaPercent;
-    [ObservableProperty] private string? vaultTierText;
+    [ObservableProperty] private string? _mfaSecret;
+    [ObservableProperty] private string? _mfaQrCodeUrl;
+    [ObservableProperty] private double _vaultScore;
+    [ObservableProperty] private double _masterPasswordStrength;
+    [ObservableProperty] private double _averagePasswordsStrength;
+    [ObservableProperty] private double _reuseRate;
+    [ObservableProperty] private int _breachesCount;
+    [ObservableProperty] private double _mfaPercent;
+    [ObservableProperty] private string? _vaultTierText;
 
     public SecurityPageViewModel(
         LoadUserProfileUseCase loadUserProfile,
@@ -52,6 +53,8 @@ public partial class SecurityPageViewModel : BaseViewModel
         DisableMfaUseCase disableMfa,
         EnableShamirUseCase enableShamir,
         DisableShamirUseCase disableShamir,
+        DeleteAccountUseCase deleteAccount,
+        WipeVaultUseCase wipeVault,
         ISessionContext session)
     {
         _loadUserProfile = loadUserProfile;
@@ -62,12 +65,11 @@ public partial class SecurityPageViewModel : BaseViewModel
         _disableMfa = disableMfa;
         _enableShamir = enableShamir;
         _disableShamir = disableShamir;
+        _deleteAccount = deleteAccount;
+        _wipeVault = wipeVault;
         _session = session;
-
-
+        
         _session.VaultChanged += OnVaultChanged;
-
-        // Initial load
         Task.Run(InitializeAsync);
     }
 
@@ -85,6 +87,8 @@ public partial class SecurityPageViewModel : BaseViewModel
             await RefreshVaultScoreAsync();
         });
     }
+
+    #region Vault Score
 
     [RelayCommand]
     private async Task RefreshVaultScoreAsync()
@@ -161,6 +165,10 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     public string MfaCategory => MfaEnabled ? "Very Strong" : "Poor";
 
+    #endregion
+
+    #region Account Credentials
+
     [RelayCommand]
     private async Task EditEmailAsync()
     {
@@ -202,6 +210,10 @@ public partial class SecurityPageViewModel : BaseViewModel
         });
     }
 
+    #endregion
+
+    #region Multi-Factor Authentication
+
     [RelayCommand]
     private async Task EnableMfaAsync()
     {
@@ -224,12 +236,7 @@ public partial class SecurityPageViewModel : BaseViewModel
 
             // Verify locally first (sanity check)
             if (!TotpService.VerifyCode(secret, code))
-            {
-                // We use throw instead of ShowErrorAsync so SafeExecuteAsync catches it?
-                // Or we can manually show error and return.
-                // But SafeExecuteAsync logic is simpler if we throw.
                 throw new InvalidOperationException("Invalid code. Please try again.");
-            }
 
             // Enable on backend
             await _enableMfa.ExecuteAsync(password, secret);
@@ -278,13 +285,8 @@ public partial class SecurityPageViewModel : BaseViewModel
     {
         var confirm = await ShowConfirmationAsync("Disable MFA", "Are you sure you want to disable two-factor authentication?");
         if (!confirm)
-            return;
-
-        var password = await PromptPasswordAsync("Confirm Password");
-        if (password == null)
-            return;
-
-        await SafeExecuteAsync(async () =>
+        
+         await SafeExecuteAsync(async () =>
         {
             await _disableShamir.ExecuteAsync(password);
             ShamirEnabled = false;
@@ -292,6 +294,63 @@ public partial class SecurityPageViewModel : BaseViewModel
             await RefreshVaultScoreAsync();
         });
     }
+
+    #endregion
+
+    #region Danger Zone
+
+    [RelayCommand]
+    private async Task DeleteAccountAsync()
+    {
+        var confirm1 = await ShowConfirmationAsync("Delete Account", 
+            "Are you sure you want to delete your account? This action is permanent and cannot be reversed.");
+        if (!confirm1)
+            return;
+
+        var password = await PromptPasswordAsync("Confirm Password");
+        if (password == null)
+            return;
+       
+        var confirm2 = await ShowConfirmationAsync("Delete Account",
+            "Are you absolutely sure? There is no turning back after confirming this.");
+        if (!confirm2)
+            return;
+
+        await SafeExecuteAsync(async () =>
+        {
+            await _deleteAccount.ExecuteAsync(password);
+            await ShowSuccessAsync("Your account has been permanently deleted.");
+
+            if (Shell.Current is AppShell appShell)
+                appShell.DisableFlyout();
+
+            // Clear the navigation stack and return to the intro route
+            await Shell.Current.GoToAsync("//login");
+        });
+    }
+
+    [RelayCommand]
+    private async Task WipeVaultAsync()
+    {
+        var confirm1 = await ShowConfirmationAsync("Wipe Vault",
+            "This will permanently delete all vault entries and categories from this device and the server. Continue?");
+        if (!confirm1)
+            return;
+
+        var confirm2 = await ShowConfirmationAsync("Wipe Vault",
+            "Are you absolutely sure? This action cannot be undone.");
+        if (!confirm2)
+            return;
+
+        await SafeExecuteAsync(async () =>
+        {
+            await _wipeVault.ExecuteAsync();
+            await ShowSuccessAsync("Vault wiped successfully.");
+            await RefreshVaultScoreAsync();
+        });
+    }
+
+    #endregion
 
     #region UI Helpers
 
@@ -356,8 +415,6 @@ public partial class SecurityPageViewModel : BaseViewModel
 
 public static class Paints
 {
-    private static SolidColorPaint? _colorPaint;
-
     public static SolidColorPaint Color
     {
         get
@@ -369,12 +426,10 @@ public static class Paints
                 : new SKColor(107, 95, 16);   // LightPrimary #6B5F10
 
             // Create new paint if null or if theme changed
-            if (_colorPaint == null || _colorPaint.Color != skColor)
-            {
-                _colorPaint = new SolidColorPaint(skColor);
-            }
+            if (field == null || field.Color != skColor)
+                field = new SolidColorPaint(skColor);
 
-            return _colorPaint;
+            return field;
         }
     }
 }

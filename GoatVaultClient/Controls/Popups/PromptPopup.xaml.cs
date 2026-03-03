@@ -1,11 +1,10 @@
 using Microsoft.Extensions.Logging;
-using Mopups.Pages;
 using Mopups.Services;
 using System.Windows.Input;
 
 namespace GoatVaultClient.Controls.Popups;
 
-public partial class PromptPopup : PopupPage
+public partial class PromptPopup
 {
     private readonly ILogger<SingleInputPopup>? _logger;
     private readonly TaskCompletionSource<bool> _tcs = new();

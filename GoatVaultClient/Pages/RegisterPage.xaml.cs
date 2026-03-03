@@ -2,7 +2,7 @@
 
 namespace GoatVaultClient.Pages;
 
-public partial class RegisterPage : ContentPage
+public partial class RegisterPage
 {
     public RegisterPage(RegisterPageViewModel vm)
     {

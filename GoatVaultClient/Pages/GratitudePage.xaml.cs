@@ -2,7 +2,7 @@ using GoatVaultClient.ViewModels;
 
 namespace GoatVaultClient.Pages;
 
-public partial class GratitudePage : ContentPage
+public partial class GratitudePage
 {
     public GratitudePage(GratitudePageViewModel vm)
     {

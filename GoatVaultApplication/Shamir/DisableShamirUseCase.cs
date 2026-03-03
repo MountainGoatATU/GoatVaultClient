@@ -23,15 +23,10 @@ public class DisableShamirUseCase(
         // 1. Verify current password
         var currentAuthVerifier = await Task.Run(() => cryptoService.GenerateAuthVerifier(currentPassword, user.AuthSalt, user.Argon2Parameters));
         if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
-        {
             throw new UnauthorizedAccessException("Incorrect current password.");
-        }
 
         // 2. Update server
-        var updateRequest = new DisableShamirRequest
-        {
-            ShamirEnabled = false
-        };
+        var updateRequest = new UpdateShamirRequest { ShamirEnabled = false };
 
         var serverUser = await serverAuth.UpdateUserAsync(user.Id, updateRequest);
 

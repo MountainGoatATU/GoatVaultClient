@@ -19,9 +19,7 @@ public class RegisterUseCase(
         // 1. Check pwned
         var pwnCount = await pwned.CheckPasswordAsync(password);
         if (pwnCount > 0)
-        {
             throw new InvalidOperationException("This password has been breached before.");
-        }
 
         // 2. Generate auth salt, auth verifier, & vault salt
         var argon2Parameters = Argon2Parameters.Default;

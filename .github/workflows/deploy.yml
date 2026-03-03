@@ -187,11 +187,17 @@ jobs:
         shell: pwsh
         run: |
           $xml = [xml](Get-Content "${{ env.WORKING_DIRECTORY }}/GoatVaultClient/GoatVaultClient.csproj")
+
           $displayVersion = ($xml.Project.PropertyGroup | Where-Object { $_.ApplicationDisplayVersion } | Select-Object -First 1).ApplicationDisplayVersion
           $appVersion = ($xml.Project.PropertyGroup | Where-Object { $_.ApplicationVersion } | Select-Object -First 1).ApplicationVersion
+
           $fullVersion = "${displayVersion}.${appVersion}"
-          "version=$fullVersion" >> $env:GITHUB_OUTPUT
-          Write-Output "Extracted full version: $fullVersion (Display: $displayVersion, App: $appVersion)"
+
+          "display_version=$displayVersion" >> $env:GITHUB_OUTPUT
+          "full_version=$fullVersion" >> $env:GITHUB_OUTPUT
+
+          Write-Output "Display version: $displayVersion"
+          Write-Output "Full (package) version: $fullVersion"
 
       # --------------------------
       # Update AppInstaller version
@@ -201,17 +207,17 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
         run: |
-          $version = "${{ steps.extract_version.outputs.version }}"
+          $ver = "${{ steps.extract_version.outputs.full_version }}"
           $publisher = "${{ steps.setup_cert.outputs.publisher }}"
           $appInstallerPath = "${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller"
 
           if (Test-Path $appInstallerPath) {
             [xml]$xml = Get-Content $appInstallerPath
-            $xml.AppInstaller.Version = $version
-            $xml.AppInstaller.MainPackage.Version = $version
+            $xml.AppInstaller.Version = $ver
+            $xml.AppInstaller.MainPackage.Version = $ver
             $xml.AppInstaller.MainPackage.Publisher = $publisher
             $xml.Save((Resolve-Path $appInstallerPath))
-            Write-Output "Updated AppInstaller to version $version with publisher: $publisher"
+            Write-Output "Updated AppInstaller to version $ver with publisher: $publisher"
           } else {
             Write-Warning "AppInstaller file not found at: $appInstallerPath"
           }
@@ -224,7 +230,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
         run: |
-          $ver = "${{ steps.extract_version.outputs.version }}"
+          $ver = "${{ steps.extract_version.outputs.full_version }}"
           $packagesDir = "GoatVaultClient/bin/${{ env.PLATFORM }}/${{ env.CONFIGURATION }}/${{ env.TARGET_FRAMEWORK }}/${{ env.RUNTIME_IDENTIFIER }}/AppPackages"
 
           # Find and rename files (search pattern includes wildcard for ApplicationVersion)
@@ -258,7 +264,7 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
-            const tagName = `refs/tags/v${{ steps.extract_version.outputs.version }}`;
+            const tagName = `refs/tags/v${{ steps.extract_version.outputs.display_version }}`;
             try {
               await github.rest.git.createRef({
                 owner: context.repo.owner,
@@ -274,10 +280,6 @@ jobs:
                 throw error;
               }
             }
-
-      # --------------------------
-      # Create GitHub release
-      # --------------------------
 
       # --------------------------
       # Prepare Android keystore
@@ -330,7 +332,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.extract_version.outputs.version }}
+          tag_name: v${{ steps.extract_version.outputs.display_version }}
           fail_on_unmatched_files: true
           files: |
             ${{ env.WORKING_DIRECTORY }}/GoatVaultClient.appinstaller

@@ -202,9 +202,7 @@ public class SyncingService(
                     timeDiff);
 
                 if (Math.Abs(timeDiff) < 1.0)
-                {
                     logger?.LogInformation("Data already in sync (within tolerance)");
-                }
                 else if (timeDiff > 0)
                 {
                     logger?.LogInformation("Local data is newer ({Local} > {Server}), pushing to server", localUser.UpdatedAtUtc, serverUser.UpdatedAtUtc);
@@ -285,7 +283,7 @@ public class SyncingService(
 
         try
         {
-            await Task.Run(() => Sync());
+            await Task.Run(Sync);
         }
         catch (Exception ex)
         {

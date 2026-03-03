@@ -76,7 +76,9 @@
                         <Picker
                             x:Name="CategoryInput"
                             Title="Category"
-                            ItemDisplayBinding="{Binding Name}" />
+                            ItemDisplayBinding="{Binding Name}"
+                            ItemsSource="{Binding ViewModel.AvailableCategories}"
+                            SelectedItem="{Binding ViewModel.SelectedCategory}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout

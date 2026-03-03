@@ -2,12 +2,9 @@ using System.Windows.Input;
 
 namespace GoatVaultClient.Controls;
 
-public partial class EntryItemCell : ContentView
+public partial class EntryItemCell
 {
-	public EntryItemCell()
-	{
-		InitializeComponent();
-	}
+	public EntryItemCell() => InitializeComponent();
 
     // 1. MAIN TEXT (Heading)
     public static readonly BindableProperty TextProperty = BindableProperty.Create(

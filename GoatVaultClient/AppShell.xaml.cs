@@ -3,7 +3,7 @@ using GoatVaultClient.ViewModels;
 
 namespace GoatVaultClient;
 
-public partial class AppShell : Shell
+public partial class AppShell
 {
     public AppShell(AppShellViewModel vm)
     {
@@ -13,7 +13,7 @@ public partial class AppShell : Shell
         // Register routes for pages that use relative navigation (not declared in Shell XAML)
         Routing.RegisterRoute(nameof(SplitSecretPage), typeof(SplitSecretPage));
         Routing.RegisterRoute(nameof(RecoverSecretPage), typeof(RecoverSecretPage));
-        Routing.RegisterRoute(nameof(EntryDetailPage), typeof(Pages.EntryDetailPage));
+        Routing.RegisterRoute(nameof(EntryDetailPage), typeof(EntryDetailPage));
     }
 
     public void EnableFlyout() => FlyoutBehavior = FlyoutBehavior.Flyout;

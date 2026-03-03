@@ -17,7 +17,7 @@ public static partial class TotpService
         {
             var cleanSecret = CleanSecret(secret);
             var secretBytes = Base32Encoding.ToBytes(cleanSecret);
-            var totp = new Totp(secretBytes, step: 30); // 30 second step (standard)
+            var totp = new Totp(secretBytes, step: 30);
 
             var code = totp.ComputeTotp();
             var remainingSeconds = totp.RemainingSeconds();
@@ -42,7 +42,7 @@ public static partial class TotpService
             var totp = new Totp(secretBytes);
 
             // Verify with time window (allows for clock skew)
-            return totp.VerifyTotp(code, out var timeStepMatched, new VerificationWindow(window, window));
+            return totp.VerifyTotp(code, out _, new VerificationWindow(window, window));
         }
         catch
         {

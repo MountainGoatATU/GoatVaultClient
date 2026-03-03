@@ -1,16 +1,18 @@
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models;
 
 namespace GoatVaultApplication.Vault;
 
-public class AddVaultEntryUseCase(ISessionContext session, SaveVaultUseCase saveVault)
+public sealed class WipeVaultUseCase(
+    ISessionContext session, 
+    SaveVaultUseCase saveVault)
 {
-    public async Task ExecuteAsync(VaultEntry entry)
+    public async Task ExecuteAsync()
     {
         if (session.Vault is null)
             throw new InvalidOperationException("Vault not loaded.");
 
-        session.Vault.Entries.Add(entry);
+        session.Vault.Categories.Clear();
+        session.Vault.Entries.Clear();
         session.RaiseVaultChanged();
         await saveVault.ExecuteAsync();
     }

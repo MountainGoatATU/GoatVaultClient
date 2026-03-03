@@ -7,9 +7,9 @@ public partial class GoatTipsService : ObservableObject
 {
     private const string GoatEnabledKey = "GoatEnabled";
 
-    [ObservableProperty] private string? currentTip;
-    [ObservableProperty] private bool isTipVisible;
-    [ObservableProperty] private bool isGoatEnabled;
+    [ObservableProperty] private string? _currentTip;
+    [ObservableProperty] private bool _isTipVisible;
+    [ObservableProperty] private bool _isGoatEnabled;
 
     private readonly Random _random = new();
     private IDispatcherTimer? _timer;
@@ -28,8 +28,8 @@ public partial class GoatTipsService : ObservableObject
         _session = session;
         _users = users;
         _vaultScoreCalculator = vaultScoreCalculator;
-        IsGoatEnabled = Preferences.Default.Get(GoatEnabledKey, true);
         _randomTips = randomTips;
+        IsGoatEnabled = Preferences.Default.Get(GoatEnabledKey, true);
     }
 
     public void SetEnabled(bool enabled)
@@ -47,17 +47,15 @@ public partial class GoatTipsService : ObservableObject
         CurrentTip = string.Empty;
     }
 
-    public void ApplyEnabledState(bool enabled) => SetEnabled(enabled);
-
-    public async Task StartTips()
+    public Task StartTips()
     {
         // Prevent multiple timers from being created
         if (_timer != null)
-            return;
+            return Task.CompletedTask;
 
         _timer = Application.Current?.Dispatcher.CreateTimer();
         if (_timer == null)
-            return;
+            return Task.CompletedTask;
 
         // Counts 5-second ticks. Used to control the 60-second display cycle.
         var tick = 0;
@@ -108,12 +106,13 @@ public partial class GoatTipsService : ObservableObject
         };
 
         _timer.Start();
+        return Task.CompletedTask;
     }
 
     private async Task ShowTip()
     {
         CurrentTip = await GetContextualTip();
-        IsTipVisible = true;
+        IsTipVisible = !string.IsNullOrWhiteSpace(CurrentTip);
     }
 
     private void HideTip()
@@ -124,8 +123,13 @@ public partial class GoatTipsService : ObservableObject
 
     private async Task<string> GetContextualTip()
     {
-        var userId = _session.UserId ?? throw new InvalidOperationException("UserId is null");
-        var user = await _users.GetByIdAsync(userId) ?? throw new InvalidOperationException("User is null");
+        var userId = _session.UserId;
+        if (userId == null)
+            return string.Empty;
+
+        var user = await _users.GetByIdAsync(userId.Value);
+        if (user == null)
+            return string.Empty;
         var entries = _session.Vault?.Entries ?? [];
         var masterStrength = _session.MasterPasswordStrength;
 

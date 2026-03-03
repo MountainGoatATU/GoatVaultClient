@@ -5,7 +5,7 @@ using Mopups.Services;
 
 namespace GoatVaultClient.Pages;
 
-public partial class LoginPage : ContentPage
+public partial class LoginPage
 {
     private readonly LoginPageViewModel _viewModel;
     private readonly ILogger<LoginPage>? _logger;

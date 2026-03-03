@@ -16,13 +16,9 @@ public sealed class UserRepository(AppDbContext db) : IUserRepository
     public async Task SaveAsync(User user)
     {
         if (db.Users.Any(u => u.Id == user.Id))
-        {
             db.Users.Update(user);
-        }
         else
-        {
             db.Users.Add(user);
-        }
 
         await db.SaveChangesAsync();
     }
