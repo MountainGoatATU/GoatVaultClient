@@ -12,8 +12,8 @@
     x:DataType="vm:SecurityPageViewModel"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
-    
-    
+
+
 
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource pLarge}" Spacing="{StaticResource sLarge}">
@@ -31,6 +31,7 @@
                     <Label
                         Margin="{StaticResource mLarge}"
                         HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
                         Style="{StaticResource MaterialDisplayMedium}"
                         Text="{Binding VaultTierText}" />
                     <FlexLayout

@@ -17,17 +17,15 @@
 
     <ScrollView HorizontalOptions="Center" VerticalOptions="Center">
 
-        <Grid Padding="{OnIdiom Phone='16,32', Desktop='24,64'}">
+        <Grid Padding="{OnIdiom Phone={StaticResource pSmall}, Desktop={StaticResource pLarge}}">
             <Border
-                Padding="{OnIdiom Phone='0',
-                                  Desktop='40,48'}"
+                Padding="{StaticResource sLarge}"
                 BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
                                                   Dark={StaticResource DarkSurfaceContainerLowest}}"
                 HorizontalOptions="Center"
                 Stroke="{AppThemeBinding Light={StaticResource LightOutlineVariant},
                                          Dark={StaticResource DarkOutlineVariant}}"
-                StrokeThickness="{OnIdiom Phone=0,
-                                          Desktop=1}"
+                StrokeThickness="1"
                 VerticalOptions="Center"
                 WidthRequest="{OnIdiom Phone=360,
                                        Desktop=450}">
