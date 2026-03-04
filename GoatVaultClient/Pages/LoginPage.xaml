@@ -7,6 +7,7 @@
     xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
@@ -79,11 +80,14 @@
                             x:Name="LocalAccountPicker"
                             Title="Select Offline User"
                             IsVisible="{Binding HasLocalUsers}"
-                            ItemDisplayBinding="{Binding Email}"
                             ItemsSource="{Binding LocalUsers}"
                             SelectedItem="{Binding SelectedUser}"
                             TitleColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
-                                                         Dark={StaticResource DarkOnSurfaceVariant}}" />
+                                                         Dark={StaticResource DarkOnSurfaceVariant}}">
+                            <Picker.ItemDisplayBinding>
+                                <Binding x:DataType="models:User" Path="Email.Value" />
+                            </Picker.ItemDisplayBinding>
+                        </Picker>
                         <controls:ImageButton
                             Grid.Column="1"
                             ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},

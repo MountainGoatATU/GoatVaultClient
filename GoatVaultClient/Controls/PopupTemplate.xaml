@@ -41,13 +41,13 @@
                             Text="{TemplateBinding CancelText}">
                             <Button.Triggers>
                                 <DataTrigger
-                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    Binding="{Binding CancelText, Source={RelativeSource Self}}"
                                     TargetType="Button"
                                     Value="">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
                                 <DataTrigger
-                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    Binding="{Binding CancelText, Source={RelativeSource Self}}"
                                     TargetType="Button"
                                     Value="{x:Null}">
                                     <Setter Property="IsVisible" Value="False" />
@@ -62,13 +62,13 @@
 
                             <Button.Triggers>
                                 <DataTrigger
-                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    Binding="{Binding AcceptText, Source={RelativeSource Self}}"
                                     TargetType="Button"
                                     Value="">
                                     <Setter Property="IsVisible" Value="False" />
                                 </DataTrigger>
                                 <DataTrigger
-                                    Binding="{Binding Text, Source={RelativeSource Self}}"
+                                    Binding="{Binding AcceptText, Source={RelativeSource Self}}"
                                     TargetType="Button"
                                     Value="{x:Null}">
                                     <Setter Property="IsVisible" Value="False" />
