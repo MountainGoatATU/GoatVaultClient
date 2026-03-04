@@ -32,6 +32,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     // Observables
     [ObservableProperty] private ObservableCollection<CategoryItem> _categories = [];
     [ObservableProperty] private ObservableCollection<VaultEntry> _passwords = [];
+    [NotifyPropertyChangedFor(nameof(IsMobileActionsVisible))]
     [ObservableProperty] private CategoryItem? _selectedCategory;
     [ObservableProperty] private string? _searchText;
     [ObservableProperty] private bool _isPasswordVisible;
@@ -52,6 +53,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private bool _isUpdatingCollections;
 
     public bool IsDetailsPanelVisible => SelectedEntry != null;
+    public bool IsMobileActionsVisible => SelectedCategory != null;
 
     #endregion
 
@@ -138,8 +140,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
             _allVaultEntries = [.. vault.Entries];
             _allVaultCategories = [.. vault.Categories];
-
-            SelectedCategory = _allVaultCategories.FirstOrDefault();
 
             ReloadVaultData();
         });
