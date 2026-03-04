@@ -17,6 +17,7 @@
                     <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
                     <converters:BoolToMfaStatusConverter x:Key="BoolToMfaStatusConverter" />
                     <converters:BoolToMfaButtonTextConverter x:Key="BoolToMfaButtonTextConverter" />
+                    <converters:BoolToShamirButtonTextConverter x:Key="BoolToShamirButtonTextConverter" />
                     <converters:EyeIconConverter x:Key="EyeIconConverter" />
                     <converters:BoolToGoatButtonColorConverter x:Key="BoolToGoatButtonColorConverter" />
                 </ResourceDictionary>
