@@ -36,15 +36,15 @@
                         JustifyContent="SpaceEvenly"
                         Wrap="Wrap">
 
-                        <!-- Master Password Strength -->
+                        <!--  Master Password Strength  -->
                         <VerticalStackLayout>
                             <controls:AngularGaugeView
-                                Value="{Binding MasterPasswordStrength}"
+                                MaxValue="400"
+                                MinValue="0"
                                 Segment1="200"
                                 Segment2="150"
                                 Segment3="50"
-                                MinValue="0"
-                                MaxValue="400"/>
+                                Value="{Binding MasterPasswordStrength}" />
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -53,20 +53,19 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding MasterPasswordCategory}"
-                                TextColor="{AppThemeBinding 
-                                    Light={StaticResource LightOnSecondaryContainer},
-                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
+                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
-                        <!-- Average Password Strength -->
+                        <!--  Average Password Strength  -->
                         <VerticalStackLayout>
                             <controls:AngularGaugeView
-                                Value="{Binding AveragePasswordsStrength}"
+                                MaxValue="200"
+                                MinValue="0"
                                 Segment1="100"
                                 Segment2="75"
                                 Segment3="25"
-                                MinValue="0"
-                                MaxValue="200"/>
+                                Value="{Binding AveragePasswordsStrength}" />
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -75,20 +74,19 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding AveragePasswordsCategory}"
-                                TextColor="{AppThemeBinding 
-                                    Light={StaticResource LightOnSecondaryContainer},
-                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
+                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
-                        <!-- Originality Strength -->
+                        <!--  Originality Strength  -->
                         <VerticalStackLayout>
                             <controls:AngularGaugeView
-                                Value="{Binding ReuseRate}"
+                                MaxValue="200"
+                                MinValue="0"
                                 Segment1="100"
                                 Segment2="75"
                                 Segment3="25"
-                                MinValue="0"
-                                MaxValue="200"/>
+                                Value="{Binding ReuseRate}" />
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -97,20 +95,19 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding OriginalityCategory}"
-                                TextColor="{AppThemeBinding 
-                                    Light={StaticResource LightOnSecondaryContainer},
-                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
+                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
-                        <!-- Compromised Passwords -->
+                        <!--  Compromised Passwords  -->
                         <VerticalStackLayout>
                             <controls:AngularGaugeView
-                                Value="{Binding BreachesCount}"
+                                MaxValue="100"
+                                MinValue="0"
                                 Segment1="50"
                                 Segment2="37.5"
                                 Segment3="12.5"
-                                MinValue="0"
-                                MaxValue="100"/>
+                                Value="{Binding BreachesCount}" />
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -119,20 +116,19 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding BreachesCategory}"
-                                TextColor="{AppThemeBinding 
-                                    Light={StaticResource LightOnSecondaryContainer},
-                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
+                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
-                        <!-- MFA -->
+                        <!--  MFA  -->
                         <VerticalStackLayout>
                             <controls:AngularGaugeView
-                                Value="{Binding MfaPercent}"
+                                MaxValue="200"
+                                MinValue="0"
                                 Segment1="0"
                                 Segment2="175"
                                 Segment3="25"
-                                MinValue="0"
-                                MaxValue="200"/>
+                                Value="{Binding MfaPercent}" />
                             <Label
                                 FontSize="14"
                                 HorizontalOptions="Center"
@@ -141,9 +137,8 @@
                                 FontSize="13"
                                 HorizontalOptions="Center"
                                 Text="{Binding MfaCategory}"
-                                TextColor="{AppThemeBinding 
-                                    Light={StaticResource LightOnSecondaryContainer},
-                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
+                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
                         </VerticalStackLayout>
 
                     </FlexLayout>
@@ -252,12 +247,12 @@
                         Margin="0,10,0,0"
                         BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
                                                           Dark={StaticResource DarkSecondaryContainer}}"
-                        Command="{Binding EnableMfaCommand}"    
+                        Command="{Binding EnableMfaCommand}"
                         IsEnabled="{Binding IsNotBusy}"
                         IsVisible="{Binding MfaEnabled, Converter={StaticResource InvertedBoolConverter}}"
                         Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
                         TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                          Dark={StaticResource DarkOnSecondaryContainer}}" />
+                                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
 
                     <Button
                         Margin="0,10,0,0"
@@ -268,69 +263,11 @@
                         IsVisible="{Binding MfaEnabled}"
                         Text="Disable MFA"
                         TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                  Dark={StaticResource DarkOnSecondaryContainer}}" />
+                                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
 
                 </VerticalStackLayout>
             </controls:Component>
 
-            <!--  Danger Zone Section  -->
-            <controls:Component
-                Title="Danger Zone"
-                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
-                          Dark={StaticResource DarkSurfaceContainerLowest}}"
-                ContentPadding="{StaticResource sContent}"
-                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
-                                Dark={StaticResource DarkSurfaceContainerLow}}"
-                ShowHeader="True">
-                <VerticalStackLayout Padding="20" Spacing="15">
-
-                    <!-- Wipe Vault  -->
-                    <Label
-                        FontAttributes="Bold"
-                        FontSize="14"
-                        Text="Wipe Vault"
-                        VerticalOptions="Center" />
-
-                    <Label
-                        FontSize="12"
-                        LineBreakMode="WordWrap"
-                        Text="Wipe all passwords and categories in your vault. This action will apply on your device and on the cloud, and cannot be reversed!"
-                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
-                                                    Dark={StaticResource Gray400}}" />
-
-                    <Button
-                        Margin="0,10,0,10"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
-                            Dark={StaticResource ErrorDark}}"
-                        Command="{Binding WipeVaultCommand}"
-                        IsEnabled="{Binding IsNotBusy}"
-                        Text="Wipe Vault"
-                        TextColor="White" />
-
-                    <!-- Delete Account  -->
-                    <Label
-                        FontAttributes="Bold"
-                        FontSize="14"
-                        Text="Delete Account"
-                        VerticalOptions="Center" />
-
-                    <Label
-                        FontSize="12"
-                        LineBreakMode="WordWrap"
-                        Text="Permanently delete your GoatVault account. This action will apply on your device and on the cloud, and cannot be reversed!"
-                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
-                                                    Dark={StaticResource Gray400}}" />
-
-                    <Button
-                        Margin="0,10,0,0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
-                            Dark={StaticResource ErrorDark}}"
-                        Command="{Binding DeleteAccountCommand}"
-                        IsEnabled="{Binding IsNotBusy}"
-                        Text="Delete Account"
-                        TextColor="White" />
-                </VerticalStackLayout>
-            </controls:Component>
             <controls:Component
                 Title="Shamir Backup"
                 BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
@@ -340,7 +277,7 @@
                                                 Dark={StaticResource DarkSurfaceContainerLow}}"
                 ShowHeader="True">
                 <VerticalStackLayout Padding="20" Spacing="15">
-                    <!--  MFA Status  -->
+                    <!--  Shamir Status  -->
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <Label
                             FontAttributes="Bold"
@@ -361,7 +298,7 @@
                         </HorizontalStackLayout>
                     </Grid>
 
-                    <!--  MFA Description  -->
+                    <!--  Shamir Description  -->
                     <Label
                         FontSize="12"
                         LineBreakMode="WordWrap"
@@ -377,7 +314,7 @@
                         Command="{Binding EnableShamirCommand}"
                         IsEnabled="{Binding IsNotBusy}"
                         IsVisible="{Binding ShamirEnabled, Converter={StaticResource InvertedBoolConverter}}"
-                        Text="{Binding ShamirEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
+                        Text="{Binding ShamirEnabled, Converter={StaticResource BoolToShamirButtonTextConverter}}"
                         TextColor="White" />
 
                     <Button
@@ -390,6 +327,65 @@
                         Text="Enable Shamir Backup"
                         TextColor="White" />
 
+                </VerticalStackLayout>
+            </controls:Component>
+
+            <!--  Danger Zone Section  -->
+            <controls:Component
+                Title="Danger Zone"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
+                <VerticalStackLayout Padding="20" Spacing="15">
+
+                    <!--  Wipe Vault  -->
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="14"
+                        Text="Wipe Vault"
+                        VerticalOptions="Center" />
+
+                    <Label
+                        FontSize="12"
+                        LineBreakMode="WordWrap"
+                        Text="Wipe all passwords and categories in your vault. This action will apply on your device and on the cloud, and cannot be reversed!"
+                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                    Dark={StaticResource Gray400}}" />
+
+                    <Button
+                        Margin="0,10,0,10"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                                                          Dark={StaticResource ErrorDark}}"
+                        Command="{Binding WipeVaultCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        Text="Wipe Vault"
+                        TextColor="White" />
+
+                    <!--  Delete Account  -->
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="14"
+                        Text="Delete Account"
+                        VerticalOptions="Center" />
+
+                    <Label
+                        FontSize="12"
+                        LineBreakMode="WordWrap"
+                        Text="Permanently delete your GoatVault account. This action will apply on your device and on the cloud, and cannot be reversed!"
+                        TextColor="{AppThemeBinding Light={StaticResource Gray500},
+                                                    Dark={StaticResource Gray400}}" />
+
+                    <Button
+                        Margin="0,10,0,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
+                                                          Dark={StaticResource ErrorDark}}"
+                        Command="{Binding DeleteAccountCommand}"
+                        IsEnabled="{Binding IsNotBusy}"
+                        Text="Delete Account"
+                        TextColor="White" />
                 </VerticalStackLayout>
             </controls:Component>
         </VerticalStackLayout>
