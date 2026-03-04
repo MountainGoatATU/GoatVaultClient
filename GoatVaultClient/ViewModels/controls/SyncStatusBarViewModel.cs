@@ -72,7 +72,7 @@ public class SyncStatusBarViewModel : INotifyPropertyChanged
     public bool SyncFailed => _syncingService.SyncStatus == SyncStatus.Failed;
     public string SyncStatusText => _syncingService.SyncStatusMessage;
     public string LastSyncedFormatted => _syncingService.LastSyncedFormatted;
-    public static bool ShowSyncButton => true; // Always show, but can be controlled by settings
+    public bool ShowSyncButton => true; // Always show, but can be controlled by settings
     public bool IsSyncButtonEnabled => !_syncingService.IsSyncing;
     public static bool ShowSyncStatus => true;
     public bool ShowLastUpdated => _syncingService.LastSynced != default;
