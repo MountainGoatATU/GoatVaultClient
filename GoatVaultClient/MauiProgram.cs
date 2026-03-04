@@ -6,7 +6,9 @@ using GoatVaultApplication.Shamir;
 using GoatVaultApplication.Vault;
 using GoatVaultClient.Pages;
 using GoatVaultClient.Services;
+using GoatVaultClient.Services.Registration;
 using GoatVaultClient.ViewModels;
+using GoatVaultClient.ViewModels.controls;
 using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
@@ -106,114 +108,19 @@ public static class MauiProgram
         var connectionString = $"Data Source={dbPath}";
         builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Transient);
 
-        #region Builder Services
-
-        // Core app services
-        builder.Services.AddSingleton<ConnectivityService>();
-        builder.Services.AddSingleton<ISyncingService, SyncingService>();
-        builder.Services.AddSingleton<ISessionContext, SessionContext>();
-        builder.Services.AddTransient<IUserRepository, UserRepository>();
-        builder.Services.AddSingleton<ICryptoService, CryptoService>();
-        builder.Services.AddSingleton<IVaultCrypto, VaultCrypto>();
-        builder.Services.AddSingleton<IAuthTokenService, AuthTokenService>();
-        builder.Services.AddSingleton<JwtUtils>();
-
-        // Use cases
-        builder.Services.AddTransient<LoginOfflineUseCase>();
-        builder.Services.AddTransient<LoginOnlineUseCase>();
-        builder.Services.AddTransient<LogoutUseCase>();
-        builder.Services.AddTransient<RegisterUseCase>();
-
-        builder.Services.AddTransient<DisableShamirUseCase>();
-        builder.Services.AddTransient<EnableShamirUseCase>();
-        builder.Services.AddTransient<RecoverKeyUseCase>();
-        builder.Services.AddTransient<SplitKeyUseCase>();
-        builder.Services.AddTransient<ValidateUserEmailUseCase>();
-
-        builder.Services.AddTransient<AddVaultEntryUseCase>();
-        builder.Services.AddTransient<CalculateVaultScoreUseCase>();
-        builder.Services.AddTransient<DeleteVaultEntryUseCase>();
-        builder.Services.AddTransient<LoadVaultUseCase>();
-        builder.Services.AddTransient<SaveVaultUseCase>();
-        builder.Services.AddTransient<SyncVaultUseCase>();
-        builder.Services.AddTransient<UpdateVaultEntryUseCase>();
-        builder.Services.AddTransient<WipeVaultUseCase>();
-
-        builder.Services.AddTransient<ChangeEmailUseCase>();
-        builder.Services.AddTransient<ChangePasswordUseCase>();
-        builder.Services.AddTransient<DisableMfaUseCase>();
-        builder.Services.AddTransient<EnableMfaUseCase>();
-        builder.Services.AddTransient<LoadUserProfileUseCase>();
-        builder.Services.AddTransient<DeleteAccountUseCase>();
-
-        // Misc services
-        builder.Services.AddSingleton<GoatTipsService>();
-        builder.Services.AddSingleton<TotpManagerService>();
-        builder.Services.AddTransient<CategoryManagerService>();
-        builder.Services.AddTransient<VaultEntryManagerService>();
-        builder.Services.AddTransient<IPwnedPasswordService, PwnedPasswordService>();
-        builder.Services.AddTransient<IVaultScoreCalculatorService, VaultScoreCalculatorService>();
-        builder.Services.AddTransient<IPasswordStrengthService, PasswordStrengthService>();
-        builder.Services.AddTransient<IRandomTipService, RandomTipService>();
-
-        // Shamir Test
-        builder.Services.AddTransient<IShamirsSecretSharing, ShamirsSecretSharing>();
-        builder.Services.AddSingleton<IRandom, StrongRandom>();
-        builder.Services.AddTransient<IShamirSsService,ShamirSsService>();
-
-        // TODO: Fix Shamir services
-        builder.Services.AddTransient<SplitSecretViewModel>();
-        builder.Services.AddTransient<SplitSecretPage>();
-        builder.Services.AddTransient<RecoverSecretViewModel>();
-        builder.Services.AddTransient<RecoverSecretPage>();
-
         // UraniumUI
         builder.Services.AddMopupsDialogs();
         builder.Services.AddCommunityToolkitDialogs();
 
-        #endregion
+        #region Service Registration
+        // Core services
+        builder.Services.AddAppServices();
 
-        builder.Services.AddTransient<AuthenticatedHttpHandler>(sp =>
-        {
-            const string refreshEndpoint = "v1/auth/refresh";
-            var serverBaseUrl = sp.GetRequiredService<IConfiguration>()["API_BASE_URL"];
-            var authService = sp.GetRequiredService<IAuthTokenService>();
-            var jwtUtils = sp.GetRequiredService<JwtUtils>();
-            var logger = sp.GetService<ILogger<AuthenticatedHttpHandler>>();
-            return new AuthenticatedHttpHandler(
-                authService,
-                jwtUtils,
-                $"{serverBaseUrl}/{refreshEndpoint}",
-                logger
-            );
-        });
+        // Use cases
+        builder.Services.AddUseCases();
 
-        builder.Services.AddHttpClient<IServerAuthService, ServerAuthService>()
-            .AddHttpMessageHandler<AuthenticatedHttpHandler>();
-        builder.Services.AddHttpClient<IHttpService, HttpService>()
-            .AddHttpMessageHandler<AuthenticatedHttpHandler>();
-
-        #region App pages & view models
-
-        builder.Services.AddTransient<SyncStatusBarViewModel>();
-        builder.Services.AddSingleton<MainPageViewModel>();
-        builder.Services.AddTransient<MainPage>();
-        builder.Services.AddTransient<OnboardingPageViewModel>();
-        builder.Services.AddTransient<OnboardingPage>();
-        builder.Services.AddTransient<RegisterPageViewModel>();
-        builder.Services.AddTransient<RegisterPage>();
-        builder.Services.AddTransient<LoginPageViewModel>();
-        builder.Services.AddTransient<LoginPage>();
-        builder.Services.AddTransient<GratitudePageViewModel>();
-        builder.Services.AddTransient<GratitudePage>();
-        builder.Services.AddTransient<SecurityPageViewModel>();
-        builder.Services.AddTransient<SecurityPage>();
-        builder.Services.AddTransient<SettingsPageViewModel>();
-        builder.Services.AddTransient<SettingsPage>();
-        builder.Services.AddTransient<EntryDetailPage>();
-        builder.Services.AddTransient<EntryDetailsViewModel>();  
-        builder.Services.AddTransient<AppShellViewModel>();
-
+        // Pages & ViewModels
+        builder.Services.AddPagesAndViewModels();
         #endregion
 
         // Build & ensure DB

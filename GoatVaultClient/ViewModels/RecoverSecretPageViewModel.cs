@@ -133,6 +133,12 @@ public partial class RecoverSecretViewModel(IShamirSsService shamir) : BaseViewM
     }
 
     [RelayCommand]
+    private async Task GoToLoginAsync()
+    {
+        await Shell.Current.GoToAsync("//login");
+    }
+
+    [RelayCommand]
     private void Reset()
     {
         CurrentShareInput = string.Empty;

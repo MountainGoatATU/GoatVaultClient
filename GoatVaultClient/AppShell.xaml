@@ -9,22 +9,25 @@
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     Title="GoatVault"
     x:DataType="vm:AppShellViewModel"
-    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
-                                      Dark={x:StaticResource DarkSurface}}"
+    BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimary},
+                                      Dark={x:StaticResource DarkPrimary}}"
     FlyoutBehavior="Disabled"
+    FlyoutIcon="{FontImageSource FontFamily=MaterialSharp,
+                                 Glyph={x:Static m:MaterialRounded.Menu},
+                                 Color={AppThemeBinding Light={x:StaticResource LightOnPrimary},
+                                                        Dark={x:StaticResource DarkOnPrimary}}}"
     ForegroundColor="{AppThemeBinding Light={StaticResource LightOnPrimary},
                                       Dark={StaticResource DarkOnPrimary}}"
     TabBarBackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
                                             Dark={x:StaticResource DarkSurface}}"
     TabBarForegroundColor="{AppThemeBinding Light={x:StaticResource LightPrimary},
                                             Dark={x:StaticResource DarkPrimary}}"
-    TabBarIsVisible="False"
     TabBarTitleColor="{AppThemeBinding Light={x:StaticResource LightOnSurface},
                                        Dark={x:StaticResource DarkOnSurface}}"
     TabBarUnselectedColor="{AppThemeBinding Light={x:StaticResource Gray500},
                                             Dark={x:StaticResource Gray400}}"
-    TitleColor="{AppThemeBinding Light={x:StaticResource LightOnSurface},
-                                 Dark={x:StaticResource DarkOnSurface}}">
+    TitleColor="{AppThemeBinding Light={x:StaticResource LightOnPrimary},
+                                 Dark={x:StaticResource DarkOnPrimary}}">
     <Shell.TabBarIsVisible>
         <OnPlatform x:TypeArguments="x:Boolean">
             <On Platform="WinUI" Value="True" />
@@ -87,22 +90,26 @@
         ContentTemplate="{DataTemplate pages:OnboardingPage}"
         FlyoutItemIsVisible="False"
         Route="intro"
-        Shell.NavBarIsVisible="False" />
+        Shell.NavBarIsVisible="False"
+        Shell.TabBarIsVisible="False" />
     <ShellContent
         ContentTemplate="{DataTemplate pages:LoginPage}"
         FlyoutItemIsVisible="False"
         Route="login"
-        Shell.NavBarIsVisible="False" />
+        Shell.NavBarIsVisible="False"
+        Shell.TabBarIsVisible="False" />
     <ShellContent
         ContentTemplate="{DataTemplate pages:RegisterPage}"
         FlyoutItemIsVisible="False"
         Route="register"
-        Shell.NavBarIsVisible="False" />
+        Shell.NavBarIsVisible="False"
+        Shell.TabBarIsVisible="False" />
     <ShellContent
         ContentTemplate="{DataTemplate pages:GratitudePage}"
         FlyoutItemIsVisible="False"
         Route="gratitude"
-        Shell.NavBarIsVisible="False" />
+        Shell.NavBarIsVisible="False"
+        Shell.TabBarIsVisible="False" />
 
     <!--  ============================================================  -->
     <!--  POST-AUTH: Flyout menu items  -->

@@ -4,7 +4,7 @@ namespace GoatVaultClient.Pages;
 
 public partial class EntryDetailPage
 {
-	public EntryDetailPage(MainPageViewModel vm)
+	public EntryDetailPage(EntryDetailsViewModel vm)
 	{
 		InitializeComponent();
         BindingContext = vm;
