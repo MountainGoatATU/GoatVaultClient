@@ -12,10 +12,6 @@
     BackgroundColor="{AppThemeBinding Light={x:StaticResource LightPrimary},
                                       Dark={x:StaticResource DarkPrimary}}"
     FlyoutBehavior="Disabled"
-    FlyoutIcon="{FontImageSource FontFamily=MaterialSharp,
-                                 Glyph={x:Static m:MaterialRounded.Menu},
-                                 Color={AppThemeBinding Light={x:StaticResource LightOnPrimary},
-                                                        Dark={x:StaticResource DarkOnPrimary}}}"
     ForegroundColor="{AppThemeBinding Light={StaticResource LightOnPrimary},
                                       Dark={StaticResource DarkOnPrimary}}"
     TabBarBackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
