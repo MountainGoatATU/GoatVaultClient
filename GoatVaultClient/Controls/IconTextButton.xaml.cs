@@ -9,7 +9,7 @@ public partial class IconTextButton
     public static readonly BindableProperty ButtonTextProperty = BindableProperty.Create(
        nameof(ButtonText),
        typeof(string),
-       typeof(ImageButton),
+       typeof(IconTextButton),
        string.Empty);
     public string ButtonText
     {
@@ -20,7 +20,7 @@ public partial class IconTextButton
     public static readonly BindableProperty IconGlyphProperty = BindableProperty.Create(
        nameof(IconGlyph),
        typeof(string),
-       typeof(ImageButton),
+        typeof(IconTextButton),
        string.Empty);
     public string IconGlyph
     {
@@ -31,7 +31,7 @@ public partial class IconTextButton
     public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
         nameof(IconColor),
         typeof(Color),
-        typeof(ImageButton),
+        typeof(IconTextButton),
         Colors.Transparent);
     public Color IconColor
     {
@@ -42,13 +42,13 @@ public partial class IconTextButton
     public static readonly BindableProperty ButtonBgColorProperty = BindableProperty.Create(
         nameof(ButtonBgColor),
         typeof(Color),
-        typeof(ImageButton),
+        typeof(IconTextButton),
         Colors.Transparent);
 
     public static readonly BindableProperty ButtonTextColorProperty = BindableProperty.Create(
         nameof(ButtonTextColor),
         typeof(Color),
-        typeof(ImageButton),
+        typeof(IconTextButton),
         Colors.Transparent);
     public Color ButtonBgColor
     {
@@ -63,7 +63,10 @@ public partial class IconTextButton
     }
 
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
-        nameof(Command), typeof(ICommand), typeof(ImageButton), null);
+        nameof(Command), 
+        typeof(ICommand), 
+        typeof(IconTextButton), 
+        null);
 
     public ICommand Command
     {
