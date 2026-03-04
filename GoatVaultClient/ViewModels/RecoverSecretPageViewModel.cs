@@ -12,7 +12,7 @@ public partial class RecoverSecretViewModel(IShamirSsService shamir) : BaseViewM
     // ── Input fields ─────────────────────────────────────────────
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(AddShareCommand))]
+    [NotifyCanExecuteChangedFor(nameof(AddShareAsyncCommand))]
     private string _currentShareInput = string.Empty;
 
     [ObservableProperty]
@@ -48,7 +48,7 @@ public partial class RecoverSecretViewModel(IShamirSsService shamir) : BaseViewM
     private bool CanAddShare() => !string.IsNullOrWhiteSpace(CurrentShareInput);
 
     [RelayCommand(CanExecute = nameof(CanAddShare))]
-    private void AddShare()
+    private void AddShareAsync()
     {
         var trimmed = CurrentShareInput.Trim();
         if (string.IsNullOrWhiteSpace(trimmed))
@@ -70,7 +70,7 @@ public partial class RecoverSecretViewModel(IShamirSsService shamir) : BaseViewM
     }
 
     [RelayCommand]
-    private void RemoveShare(RecoveryShare? share)
+    private void RemoveShareAsync(RecoveryShare? share)
     {
         if (share is null)
             return;
