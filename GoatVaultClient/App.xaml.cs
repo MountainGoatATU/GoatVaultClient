@@ -27,6 +27,11 @@ public partial class App
         var vm = Handler!.MauiContext!.Services.GetRequiredService<AppShellViewModel>();
 
         var window = new Window(new AppShell(vm));
+
+        // Set Minimum Width and Height
+        window.MinimumWidth = 900;
+        window.MinimumHeight = 600;
+
         window.Stopped += Window_Stopped;
         window.Resumed += (_, _) => _logger.LogInformation("Application resumed");
         return window;

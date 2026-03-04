@@ -5,9 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:models="clr-namespace:GoatVaultCore.Models;assembly=GoatVaultCore"
     xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
+    x:DataType="vm:MainPageViewModel"
     BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
                                       Dark={x:StaticResource DarkSurface}}">
 
@@ -43,7 +45,7 @@
                 BackgroundColor="{AppThemeBinding Light={x:StaticResource LightSurface},
                                                   Dark={x:StaticResource DarkSurface}}"
                 ColumnDefinitions="*, 2*, 1.5*"
-                ColumnSpacing="{StaticResource sLarge}"
+                ColumnSpacing="{StaticResource sContent}"
                 RowDefinitions="Auto,*"
                 RowSpacing="{StaticResource sLarge}">
 
@@ -93,9 +95,12 @@
                     </controls:Component.HeaderActions>
                     <Picker
                         Title="Select Category"
-                        ItemDisplayBinding="{Binding Name}"
                         ItemsSource="{Binding Categories}"
-                        SelectedItem="{Binding SelectedCategory}" />
+                        SelectedItem="{Binding SelectedCategory}">
+                        <Picker.ItemDisplayBinding>
+                            <Binding x:DataType="models:CategoryItem" Path="Name" />
+                        </Picker.ItemDisplayBinding>
+                    </Picker>
                 </controls:Component>
 
                 <controls:Component
@@ -150,7 +155,7 @@
                                 <LinearItemsLayout ItemSpacing="{x:StaticResource sContent}" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
                             <CollectionView.ItemTemplate>
-                                <DataTemplate>
+                                <DataTemplate x:DataType="models:CategoryItem">
                                     <Grid>
                                         <controls:CategoryItemCell
                                             ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
@@ -159,10 +164,13 @@
                                             Text="{Binding Name}">
                                             <FlyoutBase.ContextFlyout>
                                                 <MenuFlyout>
-                                                    <MenuFlyoutItem
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditCategoryCommand}"
-                                                        CommandParameter="{Binding .}"
-                                                        Text="Edit">
+                                                    <MenuFlyoutItem CommandParameter="{Binding .}" Text="Edit">
+                                                        <MenuFlyoutItem.Command>
+                                                            <Binding
+                                                                x:DataType="vm:MainPageViewModel"
+                                                                Path="EditCategoryCommand"
+                                                                Source="{RelativeSource AncestorType={x:Type vm:MainPageViewModel}}" />
+                                                        </MenuFlyoutItem.Command>
                                                         <MenuFlyoutItem.IconImageSource>
                                                             <FontImageSource
                                                                 FontFamily="MaterialRounded"
@@ -171,10 +179,13 @@
                                                         </MenuFlyoutItem.IconImageSource>
                                                     </MenuFlyoutItem>
 
-                                                    <MenuFlyoutItem
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteCategoryCommand}"
-                                                        CommandParameter="{Binding .}"
-                                                        Text="Delete">
+                                                    <MenuFlyoutItem CommandParameter="{Binding .}" Text="Delete">
+                                                        <MenuFlyoutItem.Command>
+                                                            <Binding
+                                                                x:DataType="vm:MainPageViewModel"
+                                                                Path="DeleteCategoryCommand"
+                                                                Source="{RelativeSource AncestorType={x:Type vm:MainPageViewModel}}" />
+                                                        </MenuFlyoutItem.Command>
                                                         <MenuFlyoutItem.IconImageSource>
                                                             <FontImageSource
                                                                 FontFamily="MaterialRounded"
@@ -263,7 +274,7 @@
                             <LinearItemsLayout ItemSpacing="{x:StaticResource sContent}" Orientation="Vertical" />
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="models:VaultEntry">
                                 <Grid>
                                     <controls:EntryItemCell
                                         ActionIconGlyph="{x:Static m:MaterialRounded.More_vert}"
@@ -272,10 +283,13 @@
                                         Text="{Binding Site}">
                                         <FlyoutBase.ContextFlyout>
                                             <MenuFlyout>
-                                                <MenuFlyoutItem
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditEntryCommand}"
-                                                    CommandParameter="{Binding .}"
-                                                    Text="Edit">
+                                                <MenuFlyoutItem CommandParameter="{Binding .}" Text="Edit">
+                                                    <MenuFlyoutItem.Command>
+                                                        <Binding
+                                                            x:DataType="vm:MainPageViewModel"
+                                                            Path="EditEntryCommand"
+                                                            Source="{RelativeSource AncestorType={x:Type vm:MainPageViewModel}}" />
+                                                    </MenuFlyoutItem.Command>
                                                     <MenuFlyoutItem.IconImageSource>
                                                         <FontImageSource
                                                             FontFamily="MaterialRounded"
@@ -283,10 +297,13 @@
                                                             Color="{StaticResource Primary}" />
                                                     </MenuFlyoutItem.IconImageSource>
                                                 </MenuFlyoutItem>
-                                                <MenuFlyoutItem
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteEntryCommand}"
-                                                    CommandParameter="{Binding .}"
-                                                    Text="Delete">
+                                                <MenuFlyoutItem CommandParameter="{Binding .}" Text="Delete">
+                                                    <MenuFlyoutItem.Command>
+                                                        <Binding
+                                                            x:DataType="vm:MainPageViewModel"
+                                                            Path="DeleteEntryCommand"
+                                                            Source="{RelativeSource AncestorType={x:Type vm:MainPageViewModel}}" />
+                                                    </MenuFlyoutItem.Command>
                                                     <MenuFlyoutItem.IconImageSource>
                                                         <FontImageSource
                                                             FontFamily="MaterialRounded"

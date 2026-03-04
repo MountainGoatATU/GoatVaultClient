@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:GoatVaultClient.Controls"
+    xmlns:local="clr-namespace:GoatVaultClient.Pages"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
@@ -11,6 +12,8 @@
     x:DataType="vm:SecurityPageViewModel"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
+
+
 
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource pLarge}" Spacing="{StaticResource sLarge}">
@@ -26,121 +29,267 @@
                 <!--  Vault Score Section  -->
                 <VerticalStackLayout HorizontalOptions="Fill" Spacing="10">
                     <Label
-                        FontAttributes="Bold"
-                        FontSize="18"
+                        Margin="{StaticResource mLarge}"
                         HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                        Style="{StaticResource MaterialDisplayMedium}"
                         Text="{Binding VaultTierText}" />
                     <FlexLayout
-                        AlignItems="Center"
+                        AlignContent="Start"
+                        AlignItems="Start"
                         Direction="Row"
                         JustifyContent="SpaceEvenly"
                         Wrap="Wrap">
 
                         <!--  Master Password Strength  -->
-                        <VerticalStackLayout>
-                            <controls:AngularGaugeView
-                                MaxValue="400"
-                                MinValue="0"
-                                Segment1="200"
-                                Segment2="150"
-                                Segment3="50"
-                                Value="{Binding MasterPasswordStrength}" />
-                            <Label
-                                FontSize="14"
-                                HorizontalOptions="Center"
-                                Text="Master Password Strength" />
-                            <Label
-                                FontSize="13"
-                                HorizontalOptions="Center"
-                                Text="{Binding MasterPasswordCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
-                        </VerticalStackLayout>
+                        <controls:Component
+                            Title="Master Password Strength"
+                            Margin="{StaticResource sContent}"
+                            BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHigh},
+                                                      Dark={StaticResource DarkSurfaceContainerHigh}}"
+                            ContentPadding="{StaticResource sLarge}"
+                            FlexLayout.Basis="300"
+                            HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainer},
+                                                            Dark={StaticResource DarkSurfaceContainer}}"
+                            ShowHeader="True">
+                            <VerticalStackLayout>
+                                <VerticalStackLayout>
+                                    <Label
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource MaterialDisplaySmall}"
+                                        Text="{Binding MasterPasswordStrength}"
+                                        TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                    Dark={StaticResource DarkOnSurface}}" />
+                                    <Slider
+                                        HorizontalOptions="Fill"
+                                        InputTransparent="True"
+                                        Maximum="400"
+                                        Minimum="0"
+                                        Value="{Binding MasterPasswordStrength}" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="0"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            HorizontalOptions="Center"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="400"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                                <Label
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource MaterialLabelSmall}"
+                                    Text="{Binding MasterPasswordCategory}"
+                                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                Dark={StaticResource DarkOnSurfaceVariant}}" />
+                            </VerticalStackLayout>
+                        </controls:Component>
 
                         <!--  Average Password Strength  -->
-                        <VerticalStackLayout>
-                            <controls:AngularGaugeView
-                                MaxValue="200"
-                                MinValue="0"
-                                Segment1="100"
-                                Segment2="75"
-                                Segment3="25"
-                                Value="{Binding AveragePasswordsStrength}" />
-                            <Label
-                                FontSize="14"
-                                HorizontalOptions="Center"
-                                Text="Average Password Strength" />
-                            <Label
-                                FontSize="13"
-                                HorizontalOptions="Center"
-                                Text="{Binding AveragePasswordsCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
-                        </VerticalStackLayout>
+                        <controls:Component
+                            Title="Average Password Strength"
+                            Margin="{StaticResource sContent}"
+                            BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHigh},
+                                                      Dark={StaticResource DarkSurfaceContainerHigh}}"
+                            ContentPadding="{StaticResource sLarge}"
+                            FlexLayout.Basis="300"
+                            HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainer},
+                                                            Dark={StaticResource DarkSurfaceContainer}}"
+                            ShowHeader="True">
+                            <VerticalStackLayout>
+                                <VerticalStackLayout>
+                                    <Label
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource MaterialDisplaySmall}"
+                                        Text="{Binding AveragePasswordsStrength}"
+                                        TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                    Dark={StaticResource DarkOnSurface}}" />
+                                    <Slider
+                                        HorizontalOptions="Fill"
+                                        InputTransparent="True"
+                                        Maximum="200"
+                                        Minimum="0"
+                                        Value="{Binding AveragePasswordsStrength}" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="0"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            HorizontalOptions="Center"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="200"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                                <Label
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource MaterialLabelSmall}"
+                                    Text="{Binding AveragePasswordsCategory}"
+                                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                Dark={StaticResource DarkOnSurfaceVariant}}" />
+                            </VerticalStackLayout>
+                        </controls:Component>
 
                         <!--  Originality Strength  -->
-                        <VerticalStackLayout>
-                            <controls:AngularGaugeView
-                                MaxValue="200"
-                                MinValue="0"
-                                Segment1="100"
-                                Segment2="75"
-                                Segment3="25"
-                                Value="{Binding ReuseRate}" />
-                            <Label
-                                FontSize="14"
-                                HorizontalOptions="Center"
-                                Text="Password Originality" />
-                            <Label
-                                FontSize="13"
-                                HorizontalOptions="Center"
-                                Text="{Binding OriginalityCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
-                        </VerticalStackLayout>
+                        <controls:Component
+                            Title="Password Originality"
+                            Margin="{StaticResource sContent}"
+                            BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHigh},
+                                                      Dark={StaticResource DarkSurfaceContainerHigh}}"
+                            ContentPadding="{StaticResource sLarge}"
+                            FlexLayout.Basis="300"
+                            HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainer},
+                                                            Dark={StaticResource DarkSurfaceContainer}}"
+                            ShowHeader="True">
+                            <VerticalStackLayout>
+                                <VerticalStackLayout>
+                                    <Label
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource MaterialDisplaySmall}"
+                                        Text="{Binding ReuseRate}"
+                                        TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                    Dark={StaticResource DarkOnSurface}}" />
+                                    <Slider
+                                        HorizontalOptions="Fill"
+                                        InputTransparent="True"
+                                        Maximum="200"
+                                        Minimum="0"
+                                        Value="{Binding ReuseRate}" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="0"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            HorizontalOptions="Center"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="200"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                                <Label
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource MaterialLabelSmall}"
+                                    Text="{Binding OriginalityCategory}"
+                                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                Dark={StaticResource DarkOnSurfaceVariant}}" />
+                            </VerticalStackLayout>
+                        </controls:Component>
 
                         <!--  Compromised Passwords  -->
-                        <VerticalStackLayout>
-                            <controls:AngularGaugeView
-                                MaxValue="100"
-                                MinValue="0"
-                                Segment1="50"
-                                Segment2="37.5"
-                                Segment3="12.5"
-                                Value="{Binding BreachesCount}" />
-                            <Label
-                                FontSize="14"
-                                HorizontalOptions="Center"
-                                Text="Compromised Passwords" />
-                            <Label
-                                FontSize="13"
-                                HorizontalOptions="Center"
-                                Text="{Binding BreachesCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
-                        </VerticalStackLayout>
+                        <controls:Component
+                            Title="Compromised Passwords"
+                            Margin="{StaticResource sContent}"
+                            BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHigh},
+                                                      Dark={StaticResource DarkSurfaceContainerHigh}}"
+                            ContentPadding="{StaticResource sLarge}"
+                            FlexLayout.Basis="300"
+                            HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainer},
+                                                            Dark={StaticResource DarkSurfaceContainer}}"
+                            ShowHeader="True">
+                            <VerticalStackLayout>
+                                <VerticalStackLayout>
+                                    <Label
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource MaterialDisplaySmall}"
+                                        Text="{Binding BreachesCount}"
+                                        TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                    Dark={StaticResource DarkOnSurface}}" />
+                                    <Slider
+                                        HorizontalOptions="Fill"
+                                        InputTransparent="True"
+                                        Maximum="100"
+                                        Minimum="0"
+                                        Value="{Binding BreachesCount}" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="0"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            HorizontalOptions="Center"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="100"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                                <Label
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource MaterialLabelSmall}"
+                                    Text="{Binding BreachesCategory}"
+                                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                Dark={StaticResource DarkOnSurfaceVariant}}" />
+                            </VerticalStackLayout>
+                        </controls:Component>
 
                         <!--  MFA  -->
-                        <VerticalStackLayout>
-                            <controls:AngularGaugeView
-                                MaxValue="200"
-                                MinValue="0"
-                                Segment1="0"
-                                Segment2="175"
-                                Segment3="25"
-                                Value="{Binding MfaPercent}" />
-                            <Label
-                                FontSize="14"
-                                HorizontalOptions="Center"
-                                Text="Multi-Factor Authentication" />
-                            <Label
-                                FontSize="13"
-                                HorizontalOptions="Center"
-                                Text="{Binding MfaCategory}"
-                                TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                            Dark={StaticResource DarkOnSecondaryContainer}}" />
-                        </VerticalStackLayout>
-
+                        <controls:Component
+                            Title="Multi-Factor Authentication"
+                            Margin="{StaticResource sContent}"
+                            BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerHigh},
+                                                      Dark={StaticResource DarkSurfaceContainerHigh}}"
+                            ContentPadding="{StaticResource sLarge}"
+                            FlexLayout.Basis="300"
+                            HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainer},
+                                                            Dark={StaticResource DarkSurfaceContainer}}"
+                            ShowHeader="True">
+                            <VerticalStackLayout>
+                                <VerticalStackLayout>
+                                    <Label
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource MaterialDisplaySmall}"
+                                        Text="{Binding MfaPercent}"
+                                        TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                    Dark={StaticResource DarkOnSurface}}" />
+                                    <Slider
+                                        HorizontalOptions="Fill"
+                                        InputTransparent="True"
+                                        Maximum="200"
+                                        Minimum="0"
+                                        Value="{Binding MfaPercent}" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label
+                                            HorizontalOptions="Start"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="0"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            HorizontalOptions="Center"
+                                            Style="{StaticResource MaterialLabelSmall}"
+                                            Text="200"
+                                            TextColor="{AppThemeBinding Light={StaticResource LightSurfaceDim},
+                                                                        Dark={StaticResource DarkSurfaceDim}}" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                                <Label
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource MaterialLabelSmall}"
+                                    Text="{Binding MfaCategory}"
+                                    TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                                Dark={StaticResource DarkOnSurfaceVariant}}" />
+                            </VerticalStackLayout>
+                        </controls:Component>
                     </FlexLayout>
                 </VerticalStackLayout>
             </controls:Component>

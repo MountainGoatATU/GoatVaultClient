@@ -1,3 +1,5 @@
+using GoatVaultClient.ViewModels.Controls;
+
 namespace GoatVaultClient.Controls;
 
 public partial class SyncStatusBar
@@ -7,20 +9,33 @@ public partial class SyncStatusBar
     public SyncStatusBar()
     {
         InitializeComponent();
-        BindingContext = this;
     }
 
-    protected override void OnPropertyChanged(string? propertyName = null)
+    // Resolve the ViewModel when the control is added to the visual tree
+    protected override void OnHandlerChanged()
     {
-        base.OnPropertyChanged(propertyName);
+        base.OnHandlerChanged();
 
-        // Start rotation animation when IsSyncing becomes true
-        if (propertyName != nameof(IsSyncing))
-            return;
-
-        if (IsSyncing && !_isRotating)
+        if (Handler?.MauiContext != null)
         {
-            _ = AnimateSyncIcon();
+            // Dynamically grab the ViewModel from your dependency injection container
+            var viewModel = Handler.MauiContext.Services.GetService<SyncStatusBarViewModel>();
+            BindingContext = viewModel;
+
+            // Listen for changes to trigger your rotation animation
+            if (viewModel != null)
+            {
+                viewModel.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(SyncStatusBarViewModel.IsSyncing))
+                    {
+                        if (viewModel.IsSyncing && !_isRotating)
+                        {
+                            _ = AnimateSyncIcon();
+                        }
+                    }
+                };
+            }
         }
     }
 
@@ -31,7 +46,9 @@ public partial class SyncStatusBar
     {
         _isRotating = true;
 
-        while (IsSyncing && _isRotating)
+        var vm = BindingContext as SyncStatusBarViewModel;
+
+        while (vm != null && vm.IsSyncing && _isRotating)
         {
             await SyncingIcon.RotateToAsync(360, 1000, Easing.Linear);
             SyncingIcon.Rotation = 0; // Reset rotation for continuous animation

@@ -4,29 +4,27 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:vm="clr-namespace:GoatVaultClient.ViewModels"
     x:DataType="vm:RegisterPageViewModel"
     BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                       Dark={StaticResource DarkSurface}}">
 
     <ScrollView>
-        <Grid Padding="{OnIdiom Phone='16,32', Desktop='24,64'}">
+        <Grid Padding="{OnIdiom Phone={StaticResource pSmall}, Desktop={StaticResource pLarge}}">
             <Border
-                Padding="{OnIdiom Phone='0',
-                                  Desktop='40,48'}"
+                Padding="{StaticResource sLarge}"
                 BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
                                                   Dark={StaticResource DarkSurfaceContainerLowest}}"
                 HorizontalOptions="Center"
                 Stroke="{AppThemeBinding Light={StaticResource LightOutlineVariant},
                                          Dark={StaticResource DarkOutlineVariant}}"
-                StrokeThickness="{OnIdiom Phone=0,
-                                          Desktop=1}"
+                StrokeThickness="1"
                 VerticalOptions="Center"
                 WidthRequest="{OnIdiom Phone=360,
                                        Desktop=450}">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="{OnIdiom Phone=0, Desktop={StaticResource Large}}" />
+                    <RoundRectangle CornerRadius="{StaticResource Large}" />
                 </Border.StrokeShape>
 
                 <VerticalStackLayout Spacing="{StaticResource formSpacing}">
@@ -248,16 +246,15 @@
                     </HorizontalStackLayout>
 
                     <VerticalStackLayout
+                        HorizontalOptions="Center"
                         IsVisible="{Binding IsBusy}"
-                        VerticalOptions="Center"
-                        HorizontalOptions="Center">
-                        <ActivityIndicator IsRunning="{Binding IsBusy}"/>
-                        <Label 
-                            Text="Registering..." 
-                            Padding="0, 20, 0, 0"
-                            TextColor="{AppThemeBinding 
-                                Light={StaticResource LightPrimary},
-                                Dark={StaticResource DarkPrimary}}"/>
+                        VerticalOptions="Center">
+                        <ActivityIndicator IsRunning="{Binding IsBusy}" />
+                        <Label
+                            Padding="0,20,0,0"
+                            Text="Registering..."
+                            TextColor="{AppThemeBinding Light={StaticResource LightPrimary},
+                                                        Dark={StaticResource DarkPrimary}}" />
                     </VerticalStackLayout>
 
                 </VerticalStackLayout>

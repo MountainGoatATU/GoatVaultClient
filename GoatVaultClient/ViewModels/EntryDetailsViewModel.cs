@@ -51,10 +51,17 @@ public partial class EntryDetailsViewModel : BaseViewModel
     {
         if (Entry != null)
         {
-            await SafeExecuteAsync(async () =>
+            try
             {
-                await _vaultEntryManager.DeleteEntryAsync(Entry);
-            });
+                await SafeExecuteAsync(async () =>
+                {
+                    await _vaultEntryManager.DeleteEntryAsync(Entry);
+                });
+            }
+            finally
+            {
+                await Shell.Current.GoToAsync("//main/home");
+            }
         }
     }
 }

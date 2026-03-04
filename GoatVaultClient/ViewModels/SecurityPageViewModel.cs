@@ -106,7 +106,7 @@ public partial class SecurityPageViewModel : BaseViewModel
                 MfaPercent = details.MfaEnabled ? 200 : 0;
 
                 VaultScore = details.VaultScore;
-                VaultTierText = $"{GetVaultTier(VaultScore)} ({VaultScore:0}/1000)";
+                VaultTierText = $"{GetVaultTier(VaultScore)}";
                 BreachesCount = details.BreachesCount;
 
                 OnPropertyChanged(nameof(MasterPasswordCategory));
@@ -124,11 +124,11 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     private static string GetVaultTier(double score) => score switch
     {
-        >= 900 => "The Summit Sovereign (900+)",
-        >= 750 => "The Ridge Walker (750-899)",
-        >= 500 => "The Cliffside Scrambler (500-749)",
-        >= 300 => "The Treeline Grazer (300-499)",
-        _ => "The Dead Meat (< 300)"
+        >= 900 => "The Summit Sovereign",// (900+)",
+        >= 750 => "The Ridge Walker",// (750-899)",
+        >= 500 => "The Cliffside Scrambler",// (500-749)",
+        >= 300 => "The Treeline Grazer",// (300-499)",
+        _ => "The Dead Meat"// (< 300)"
     };
 
     public string MasterPasswordCategory => MasterPasswordStrength switch
