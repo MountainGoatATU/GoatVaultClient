@@ -78,6 +78,15 @@ public partial class PopupTemplate
         set => SetValue(CancelTextProperty, value);
     }
 
+    public static readonly BindableProperty IsCancelButtonVisibleProperty = BindableProperty.Create(
+        nameof(IsCancelButtonVisible), typeof(bool), typeof(PopupTemplate), true);
+
+    public bool IsCancelButtonVisible
+    {
+        get => (bool)GetValue(IsCancelButtonVisibleProperty);
+        set => SetValue(IsCancelButtonVisibleProperty, value);
+    }
+
     public static readonly BindableProperty IsFormProperty = BindableProperty.Create(
         nameof(IsForm), typeof(bool), typeof(PopupTemplate), false);
 

@@ -16,8 +16,7 @@
         AcceptCommand="{Binding AcceptCommand}"
         AcceptText="{Binding AcceptText}"
         CancelCommand="{Binding CancelCommand}"
-        CancelText="{Binding CancelText}"
-        FrameWidth="500">
+        CancelText="{Binding CancelText}">
         <VerticalStackLayout>
             <Label LineBreakMode="WordWrap" Text="{Binding Body}" />
         </VerticalStackLayout>

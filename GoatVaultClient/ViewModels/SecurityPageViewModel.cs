@@ -373,9 +373,9 @@ public partial class SecurityPageViewModel : BaseViewModel
         return await popup.WaitForScan();
     }
 
-    private static async Task ShowErrorAsync(string message) => await MopupService.Instance.PushAsync(new PromptPopup("Error", message, "OK"));
+    private static async Task ShowErrorAsync(string message) => await MopupService.Instance.PushAsync(new ConfirmPopup("Error", message, "OK"));
 
-    private static async Task ShowSuccessAsync(string message) => await MopupService.Instance.PushAsync(new PromptPopup("Success", message, "OK"));
+    private static async Task ShowSuccessAsync(string message) => await MopupService.Instance.PushAsync(new ConfirmPopup("Success", message, "OK"));
 
     private static async Task<bool> ShowConfirmationAsync(string title, string message)
     {
@@ -404,7 +404,8 @@ public partial class SecurityPageViewModel : BaseViewModel
         var setupPopup = new PromptPopup(
             title: "Setup MFA",
             body: message,
-            aText: "OK"
+            aText: "OK",
+            cText:"Cancel"
         );
         await MopupService.Instance.PushAsync(setupPopup);
         await setupPopup.WaitForScan();
