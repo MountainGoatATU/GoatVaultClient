@@ -29,8 +29,8 @@
 		<ApplicationId>com.mountaingoat.goatvaultclient</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>0.7.4</ApplicationDisplayVersion>
-		<ApplicationVersion>23</ApplicationVersion>
+		<ApplicationDisplayVersion>0.7.5</ApplicationDisplayVersion>
+		<ApplicationVersion>24</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>MSIX</WindowsPackageType>
@@ -180,6 +180,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\ImageButton.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Controls\Popups\ConfirmPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\Popups\CreateCategoryDialog.xaml">

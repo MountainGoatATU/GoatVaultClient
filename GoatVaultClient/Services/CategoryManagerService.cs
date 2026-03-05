@@ -79,11 +79,10 @@ public class CategoryManagerService(
 
         if (hasDependentPasswords)
         {
-            while (MopupService.Instance.PopupStack.Contains(categoryPopup))
-                await Task.Delay(50);
+            await MopupService.Instance.PopAllAsync();
 
             // Asking user to reassign the passwords
-            var promptPopup = new PromptPopup("Reassign Passwords", $"Do you want to reassign passwords from \"{target.Name}\" to \"{response}\"?", "Accept");
+            var promptPopup = new PromptPopup("Reassign Passwords", $"Do you want to reassign passwords from \"{target.Name}\" to \"{response}\"?", "Accept", "Cancel");
 
             // Displaying dialog
             await MopupService.Instance.PushAsync(promptPopup);
@@ -114,7 +113,7 @@ public class CategoryManagerService(
             return false;
 
         // Creating new prompt dialog
-        var categoryPopup = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the \"{target.Name}\" category?", "Delete");
+        var categoryPopup = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the \"{target.Name}\" category?", "Delete", "Cancel");
 
         // Push the dialog to MopupService
         await MopupService.Instance.PushAsync(categoryPopup);
@@ -131,11 +130,10 @@ public class CategoryManagerService(
         if (vaultEntries?.Any(c => c.Category == target.Name) == true)
         {
             // Wait before pushing another dialog
-            while (MopupService.Instance.PopupStack.Contains(categoryPopup))
-                await Task.Delay(50);
+            await MopupService.Instance.PopAllAsync();
 
             // Asking user to delete the passwords assign to the deleting category
-            var promptPopup = new PromptPopup("Delete Passwords", $"Do you want to delete all passwords from \"{target.Name}\"?", "Delete");
+            var promptPopup = new PromptPopup("Delete Passwords", $"Do you want to delete all passwords from \"{target.Name}\"?", "Delete", "Cancel");
 
             // Displaying dialog
             await MopupService.Instance.PushAsync(promptPopup);

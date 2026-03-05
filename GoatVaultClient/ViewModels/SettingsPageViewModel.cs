@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using GoatVaultClient.Services;
+using GoatVaultCore.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient.ViewModels;
@@ -9,40 +9,55 @@ public partial class SettingsPageViewModel : BaseViewModel
 {
 
     private readonly GoatTipsService _goatTips;
+    private readonly IOfflineModeService _offlineMode;
     private readonly ILogger<SettingsPageViewModel>? _logger;
+
 
     [ObservableProperty] private bool _goatEnabled;
     [ObservableProperty] private bool _darkModeEnabled;
+    [ObservableProperty] private bool _offlineModeEnabled;
+    [ObservableProperty] private bool _isConnectivityAvailable;
 
-    public SettingsPageViewModel(GoatTipsService goatTips, ILogger<SettingsPageViewModel>? logger = null)
+    public SettingsPageViewModel(GoatTipsService goatTips, IOfflineModeService offlineMode, ILogger<SettingsPageViewModel>? logger = null)
     {
         _goatTips = goatTips;
+        _offlineMode = offlineMode;
         _logger = logger;
 
         GoatEnabled = _goatTips.IsGoatEnabled;
 
+        // Offline mode
+        _offlineMode.OfflineModeChanged += OnOfflineModeChanged;
+        IsConnectivityAvailable = _offlineMode.IsConnectivityAvailable;
+
         var savedTheme = Preferences.Get("app_theme", "system");
         DarkModeEnabled = savedTheme == "dark" || (savedTheme == "system" && Application.Current?.RequestedTheme == AppTheme.Dark);
-
-        Application.Current?.UserAppTheme = DarkModeEnabled ? AppTheme.Dark : AppTheme.Light;
     }
 
-    [RelayCommand]
-    private void ToggleGoat()
+    private void OnOfflineModeChanged(object? sender, bool isOffline)
     {
-        GoatEnabled = !GoatEnabled;
-        _goatTips.SetEnabled(GoatEnabled);
-        _logger?.LogInformation("Toggled goat");
+        OfflineModeEnabled = isOffline;
+        IsConnectivityAvailable = _offlineMode.IsConnectivityAvailable;
     }
 
-    [RelayCommand]
-    private void ToggleDarkMode()
+    partial void OnOfflineModeEnabledChanged(bool value)
     {
-        DarkModeEnabled = !DarkModeEnabled;
+        if (!_offlineMode.IsConnectivityAvailable)
+            return;
 
-        Application.Current?.UserAppTheme = DarkModeEnabled ? AppTheme.Dark : AppTheme.Light;
-        Preferences.Set("app_theme", DarkModeEnabled ? "dark" : "light");
+        _offlineMode.SetManualOffline(value);
+    }
 
+    partial void OnDarkModeEnabledChanged(bool value)
+    {
+        Application.Current?.UserAppTheme = value ? AppTheme.Dark : AppTheme.Light;
+        Preferences.Set("app_theme", value ? "dark" : "light");
         _logger?.LogInformation("Toggled dark mode");
+    }
+
+    partial void OnGoatEnabledChanged(bool value)
+    {
+        _goatTips.SetEnabled(value);
+        _logger?.LogInformation("Toggled goat");
     }
 }

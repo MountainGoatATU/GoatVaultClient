@@ -13,19 +13,17 @@ public partial class PromptPopup
     public string Body { get; set; }
     public string AcceptText { get; set; }
     public string CancelText { get; set; }
-    public bool ShowCancelButton { get; set; }
     public ICommand? AcceptCommand { get; private set; }
     public ICommand? CancelCommand { get; private set; }
 
-    public PromptPopup(string title, string body, string aText, string? cText = null, ILogger<SingleInputPopup>? logger = null)
+    public PromptPopup(string title, string body, string aText, string cText, ILogger<SingleInputPopup>? logger = null)
     {
         _logger = logger;
 
         Title = title;
         Body = body;
         AcceptText = aText;
-        CancelText = cText ?? "Cancel";
-        ShowCancelButton = !string.IsNullOrEmpty(cText);
+        CancelText = cText;
 
         AcceptCommand = new Command(OnAccept);
         CancelCommand = new Command(OnCancel);

@@ -43,7 +43,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     [ObservableProperty] private bool _isSyncing;
     [ObservableProperty] private bool _isOfflineModeEnabled;
     [ObservableProperty] private bool _isConnectivityAvailable;
-    private bool _suppressOfflineToggleUpdate;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDetailsPanelVisible))]
     private VaultEntry? _selectedEntry;
@@ -88,7 +87,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         _session.VaultChanged += OnVaultChanged;
         _syncing.AuthenticationRequired += OnAuthenticationRequired;
         _offlineMode.OfflineModeChanged += OnOfflineModeChanged;
-        UpdateOfflineToggleState();
         IsConnectivityAvailable = _offlineMode.IsConnectivityAvailable;
 
         StartRandomGoatComments();
@@ -141,7 +139,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
 
     private void OnOfflineModeChanged(object? sender, bool isOffline)
     {
-        UpdateOfflineToggleState();
         IsConnectivityAvailable = _offlineMode.IsConnectivityAvailable;
 
         if (!_offlineMode.IsOffline && _syncing.HasAutoSync)
@@ -149,25 +146,6 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
             _ = _syncing.Sync();
         }
     }
-
-    partial void OnIsOfflineModeEnabledChanged(bool value)
-    {
-        if (_suppressOfflineToggleUpdate)
-            return;
-
-        if (!IsConnectivityAvailable)
-            return;
-
-        _offlineMode.SetManualOffline(value);
-    }
-
-    private void UpdateOfflineToggleState()
-    {
-        _suppressOfflineToggleUpdate = true;
-        IsOfflineModeEnabled = _offlineMode.IsOffline;
-        _suppressOfflineToggleUpdate = false;
-    }
-
 
     private async Task InitializeAsync() => await LoadVaultAsync();
 

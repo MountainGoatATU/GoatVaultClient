@@ -1,6 +1,7 @@
+using GoatVaultClient.Controls.Popups;
 using GoatVaultCore.Abstractions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Storage;
+using Mopups.Services;
 
 namespace GoatVaultClient.Services;
 
@@ -33,7 +34,9 @@ public sealed class OfflineModeService : IOfflineModeService, IDisposable
     public void SetManualOffline(bool enabled)
     {
         if (IsManualOfflineEnabled == enabled)
+        {
             return;
+        }
 
         IsManualOfflineEnabled = enabled;
         Preferences.Default.Set(ManualOfflineKey, enabled);
@@ -48,6 +51,14 @@ public sealed class OfflineModeService : IOfflineModeService, IDisposable
         var shouldBeOffline = IsManualOfflineEnabled || !_connectivity.GetNetworkInfo().IsConnected;
         if (IsOffline == shouldBeOffline)
             return;
+
+        if (shouldBeOffline)
+        {
+            MopupService.Instance.PushAsync(new ConfirmPopup("Offline Mode", "You are offline. All your changes will be saved to local datbase. Sync is not available", "OK"));
+        } else
+        {
+            MopupService.Instance.PushAsync(new ConfirmPopup("Online Mode", "You are back online. All your changes are being synced with the server", "OK"));
+        }
 
         IsOffline = shouldBeOffline;
         _logger?.LogInformation("Offline mode changed: {IsOffline}", IsOffline);

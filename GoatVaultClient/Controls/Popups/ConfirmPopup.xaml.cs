@@ -1,0 +1,67 @@
+using Microsoft.Extensions.Logging;
+using Mopups.Services;
+using System.Windows.Input;
+
+namespace GoatVaultClient.Controls.Popups;
+
+public partial class ConfirmPopup
+{
+    private readonly ILogger<SingleInputPopup>? _logger;
+    private readonly TaskCompletionSource<bool> _tcs = new();
+    public Task<bool> WaitForScan() => _tcs.Task;
+    public new string Title { get; set; }
+    public string Body { get; set; }
+    public string AcceptText { get; set; }
+    public ICommand? AcceptCommand { get; private set; }
+
+    public ConfirmPopup(string title, string body, string aText, ILogger<SingleInputPopup>? logger = null)
+    {
+        _logger = logger;
+
+        Title = title;
+        Body = body;
+        AcceptText = aText;
+
+        AcceptCommand = new Command(OnAccept);
+
+        InitializeComponent();
+        BindingContext = this;
+    }
+
+    private bool _resultSet = false;
+
+    private async void OnAccept()
+    {
+        try
+        {
+            if (_resultSet)
+                return;
+            _resultSet = true;
+
+            try
+            {
+                await MopupService.Instance.PopAsync();
+                _tcs.TrySetResult(true);
+            }
+            catch (Exception e)
+            {
+                _logger?.LogError(e, "Error during OnAccept() of PromptPopup");
+                _tcs.TrySetResult(false);
+            }
+        }
+        catch (Exception e)
+        {
+            _logger?.LogError(e, "Error during OnAccept() of PromptPopup");
+        }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (_resultSet)
+            return;
+
+        _resultSet = true;
+        _tcs.TrySetResult(false);
+    }
+}

@@ -31,10 +31,8 @@ public partial class LoginPage
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error initializing login page");
-                await MopupService.Instance.PushAsync(new PromptPopup(
-                    title: "Error",
-                    body: "Failed to initialize login page. Please restart the application.",
-                    aText: "OK"
+                await MopupService.Instance.PushAsync(new ErrorPopup(
+                    message: "Failed to initialize login page. Please restart the application."
                 ));
             }
         }

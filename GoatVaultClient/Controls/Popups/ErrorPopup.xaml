@@ -15,19 +15,17 @@
         Title="Error"
         AcceptCommand="{Binding CloseCommand}"
         AcceptText="Close"
-        CancelText=""
-        FrameWidth="350">
-
-        <VerticalStackLayout Padding="10" Spacing="10">
+        IsCancelButtonVisible="False">
+        <VerticalStackLayout Spacing="{StaticResource sContent}">
             <Label
-                LineBreakMode="WordWrap"
+                Grid.Row="0"
                 Text="{Binding Message}"
                 TextColor="{AppThemeBinding Light={StaticResource LightOnSurface},
                                             Dark={StaticResource DarkOnSurface}}" />
 
             <CollectionView
+                Grid.Row="1"
                 ItemsSource="{Binding Errors}"
-                MaximumHeightRequest="200"
                 SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="x:String">
@@ -41,6 +39,5 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </VerticalStackLayout>
-
     </controls:PopupTemplate>
 </mopups:PopupPage>

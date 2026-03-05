@@ -156,7 +156,7 @@ public class VaultEntryManagerService(
         if (target == null)
             return false;
 
-        var dialog = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the password for \"{target.Site}\"?", "Delete");
+        var dialog = new PromptPopup("Confirm Delete", $"Are you sure you want to delete the password for \"{target.Site}\"?", "Delete","Cancel");
 
         await MopupService.Instance.PushAsync(dialog);
 

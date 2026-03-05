@@ -12,6 +12,7 @@
                 Margin="{StaticResource mCompact}"
                 BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
                                                   Dark={StaticResource DarkSurface}}"
+                HorizontalOptions="Center"
                 MaximumHeightRequest="700"
                 MaximumWidthRequest="{TemplateBinding FrameWidth}"
                 StrokeThickness="0"
@@ -37,6 +38,7 @@
                         Spacing="{x:StaticResource formSpacing}">
                         <Button
                             Command="{TemplateBinding CancelCommand}"
+                            IsVisible="{TemplateBinding IsCancelButtonVisible}"
                             StyleClass="OutlinedButton"
                             Text="{TemplateBinding CancelText}">
                             <Button.Triggers>
