@@ -27,7 +27,7 @@
                     <!--  Enable/Disable Goat  -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource sLarge}">
                         <Label
-                            FontAttributes="Bold"
+                            Style="{StaticResource MaterialLabelMedium}"
                             Text="Goat"
                             VerticalOptions="Center" />
                         <!--  Switch  -->
@@ -41,7 +41,7 @@
                     <!--  Toggle Theme  -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource sLarge}">
                         <Label
-                            FontAttributes="Bold"
+                            Style="{StaticResource MaterialLabelMedium}"
                             Text="Dark Mode"
                             VerticalOptions="Center" />
                         <!--  Switch  -->
@@ -52,6 +52,33 @@
                             VerticalOptions="Center" />
                     </Grid>
 
+                </VerticalStackLayout>
+            </controls:Component>
+
+            <!--  Connectivity Section  -->
+            <controls:Component
+                Title="Connectivity"
+                BgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                          Dark={StaticResource DarkSurfaceContainerLowest}}"
+                ContentPadding="{StaticResource sContent}"
+                HeaderBgColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLow},
+                                                Dark={StaticResource DarkSurfaceContainerLow}}"
+                ShowHeader="True">
+                <VerticalStackLayout Padding="20" Spacing="20">
+
+                    <!--  Enable/Disable Goat  -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource sLarge}">
+                        <Label
+                            Style="{StaticResource MaterialLabelMedium}"
+                            Text="Offline Mode"
+                            VerticalOptions="Center" />
+                        <!--  Switch  -->
+                        <Switch
+                            Grid.Column="2"
+                            HorizontalOptions="End"
+                            IsToggled="{Binding GoatEnabled}"
+                            VerticalOptions="Center" />
+                    </Grid>
                 </VerticalStackLayout>
             </controls:Component>
         </VerticalStackLayout>
