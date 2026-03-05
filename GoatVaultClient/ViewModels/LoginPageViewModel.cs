@@ -18,6 +18,7 @@ namespace GoatVaultClient.ViewModels;
 public partial class LoginPageViewModel(
     ISyncingService syncing,
     ConnectivityService connectivity,
+    IOfflineModeService offlineMode,
     LoginOnlineUseCase loginOnline,
     LoginOfflineUseCase loginOffline,
     IUserRepository userRepository,
@@ -28,17 +29,22 @@ public partial class LoginPageViewModel(
     [ObservableProperty] private string? _emailText;
     [ObservableProperty] private string? _password;
     [ObservableProperty] private bool _isOnline = true;
+    [ObservableProperty] private bool _isOfflineModeEnabled;
+    [ObservableProperty] private bool _isConnectivityAvailable;
     [ObservableProperty] private string _connectivityMessage = string.Empty;
     [ObservableProperty] private string _connectionType = string.Empty;
     [ObservableProperty] private ObservableCollection<User> _localUsers = [];
     [ObservableProperty] private User? _selectedUser;
     [ObservableProperty] private bool _hasLocalUsers;
     [ObservableProperty] private string? _offlinePassword;
+    private bool _suppressOfflineToggleUpdate;
 
     public async Task InitializeAsync()
     {
         UpdateConnectivityState();
         connectivity.ConnectivityChanged += OnConnectivityChanged;
+        offlineMode.OfflineModeChanged += OnOfflineModeChanged;
+        UpdateOfflineToggleState();
         await LoadLocalUsersAsync();
     }
 
@@ -55,7 +61,17 @@ public partial class LoginPageViewModel(
 
     #region Connectivity
 
-    public void Cleanup() => connectivity.ConnectivityChanged -= OnConnectivityChanged;
+    public void Cleanup()
+    {
+        connectivity.ConnectivityChanged -= OnConnectivityChanged;
+        offlineMode.OfflineModeChanged -= OnOfflineModeChanged;
+    }
+
+    private void OnOfflineModeChanged(object? sender, bool isOffline)
+    {
+        UpdateOfflineToggleState();
+        UpdateConnectivityState();
+    }
 
     private void OnConnectivityChanged(object? sender, bool isConnected)
     {
@@ -83,9 +99,36 @@ public partial class LoginPageViewModel(
     private void UpdateConnectivityState()
     {
         var networkInfo = connectivity.GetNetworkInfo();
-        IsOnline = networkInfo.IsConnected;
+        IsConnectivityAvailable = networkInfo.IsConnected;
+        IsOnline = networkInfo.IsConnected && !offlineMode.IsManualOfflineEnabled;
         ConnectionType = networkInfo.GetConnectionType();
-        ConnectivityMessage = IsOnline ? $"Connected via {ConnectionType}" : "No internet connection available";
+        ConnectivityMessage = IsOnline
+            ? $"Connected via {ConnectionType}"
+            : offlineMode.IsManualOfflineEnabled
+                ? "Offline mode enabled"
+                : "No internet connection available";
+    }
+
+    partial void OnIsOfflineModeEnabledChanged(bool value)
+    {
+        if (_suppressOfflineToggleUpdate)
+            return;
+
+        if (!IsConnectivityAvailable)
+            return;
+
+        offlineMode.SetManualOffline(value);
+        UpdateConnectivityState();
+
+        if (!value && SelectedUser != null)
+            EmailText = SelectedUser.Email.Value;
+    }
+
+    private void UpdateOfflineToggleState()
+    {
+        _suppressOfflineToggleUpdate = true;
+        IsOfflineModeEnabled = offlineMode.IsOffline;
+        _suppressOfflineToggleUpdate = false;
     }
 
     #endregion

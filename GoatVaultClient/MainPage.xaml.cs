@@ -1,8 +1,6 @@
-using GoatVaultClient.Pages;
 using GoatVaultClient.ViewModels;
 using GoatVaultClient.ViewModels.Controls;
 using GoatVaultCore.Abstractions;
-using GoatVaultCore.Models;
 using Microsoft.Extensions.Logging;
 
 namespace GoatVaultClient;
@@ -28,7 +26,7 @@ public partial class MainPage
         BindingContext = viewModel;
 
         SyncStatusBar.BindingContext = syncStatusBarViewModel;
-        GoatBubbleStack.Opacity = 0; // Start hidden
+        GoatBubbleStack.Opacity = 0;  // Start hidden
 
         ApplyVisibility();
 
@@ -90,11 +88,11 @@ public partial class MainPage
             // Safely cast the BindingContext and call the method
             if (BindingContext is not MainPageViewModel vm)
                 return;
+            
             // Clear selection when returning to the main list
             if (DeviceInfo.Current.Idiom == DeviceIdiom.Phone)
-            {
                 vm.SelectedEntry = null;
-            }
+            
             vm.StartRandomGoatComments();
         }
         catch (Exception e)

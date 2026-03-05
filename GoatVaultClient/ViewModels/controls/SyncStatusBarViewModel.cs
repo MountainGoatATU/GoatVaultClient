@@ -9,12 +9,17 @@ namespace GoatVaultClient.ViewModels.Controls;
 public class SyncStatusBarViewModel : INotifyPropertyChanged
 {
     private readonly ISyncingService _syncingService;
+    private readonly IOfflineModeService _offlineMode;
     private readonly Timer _updateTimer;
     private readonly ILogger<SyncStatusBarViewModel>? _logger;
 
-    public SyncStatusBarViewModel(ISyncingService syncingService, ILogger<SyncStatusBarViewModel>? logger = null)
+    public SyncStatusBarViewModel(
+        ISyncingService syncingService,
+        IOfflineModeService offlineMode,
+        ILogger<SyncStatusBarViewModel>? logger = null)
     {
         _syncingService = syncingService;
+        _offlineMode = offlineMode;
         _logger = logger;
 
         // Subscribe to syncing service events
@@ -22,6 +27,7 @@ public class SyncStatusBarViewModel : INotifyPropertyChanged
         _syncingService.SyncStarted += OnSyncStarted;
         _syncingService.SyncCompleted += OnSyncCompleted;
         _syncingService.SyncFailed += OnSyncFailed;
+        _offlineMode.OfflineModeChanged += OnOfflineModeChanged;
 
         // Initialize commands
         SyncCommand = new Command(async void () =>
@@ -67,10 +73,11 @@ public class SyncStatusBarViewModel : INotifyPropertyChanged
 
     #region Properties
 
-    public bool IsSyncing => _syncingService.IsSyncing;
-    public bool IsSynced => _syncingService.SyncStatus == SyncStatus.Synced;
-    public bool SyncFailed => _syncingService.SyncStatus == SyncStatus.Failed;
-    public string SyncStatusText => _syncingService.SyncStatusMessage;
+    public bool IsSyncing => !_offlineMode.IsOffline && _syncingService.IsSyncing;
+    public bool IsSynced => !_offlineMode.IsOffline && _syncingService.SyncStatus == SyncStatus.Synced;
+    public bool SyncFailed => !_offlineMode.IsOffline && _syncingService.SyncStatus == SyncStatus.Failed;
+    public bool IsOfflineModeEnabled => _offlineMode.IsOffline;
+    public string SyncStatusText => _offlineMode.IsOffline ? "Offline" : _syncingService.SyncStatusMessage;
     public string LastSyncedFormatted => _syncingService.LastSyncedFormatted;
     public bool ShowSyncButton => true; // Always show, but can be controlled by settings
     public bool IsSyncButtonEnabled => !_syncingService.IsSyncing;
@@ -130,6 +137,17 @@ public class SyncStatusBarViewModel : INotifyPropertyChanged
         // Example: await DisplayAlertAsync("Sync Failed", e.ErrorMessage, "OK");
     }
 
+    private void OnOfflineModeChanged(object? sender, bool isOffline)
+    {
+        OnPropertyChanged(nameof(IsOfflineModeEnabled));
+        OnPropertyChanged(nameof(IsSyncing));
+        OnPropertyChanged(nameof(IsSynced));
+        OnPropertyChanged(nameof(SyncFailed));
+        OnPropertyChanged(nameof(SyncStatusText));
+        OnPropertyChanged(nameof(IsSyncButtonEnabled));
+        ((Command)SyncCommand).ChangeCanExecute();
+    }
+
     #endregion
 
     #region INotifyPropertyChanged
@@ -149,6 +167,7 @@ public class SyncStatusBarViewModel : INotifyPropertyChanged
         _syncingService.SyncStarted -= OnSyncStarted;
         _syncingService.SyncCompleted -= OnSyncCompleted;
         _syncingService.SyncFailed -= OnSyncFailed;
+        _offlineMode.OfflineModeChanged -= OnOfflineModeChanged;
     }
 
     #endregion

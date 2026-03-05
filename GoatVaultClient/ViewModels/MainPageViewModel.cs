@@ -22,6 +22,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     private readonly CategoryManagerService _categoryManager;
     private readonly VaultEntryManagerService _vaultEntryManager;
     private readonly ILogger<MainPageViewModel>? _logger;
+    private readonly IOfflineModeService _offlineMode;
     public EntryDetailViewViewModel DetailVM { get; }
     private GoatTipsService GoatTips { get; }
 
@@ -40,6 +41,9 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     [ObservableProperty] private string _goatComment = string.Empty;
     [ObservableProperty] private bool _isGoatCommentVisible;
     [ObservableProperty] private bool _isSyncing;
+    [ObservableProperty] private bool _isOfflineModeEnabled;
+    [ObservableProperty] private bool _isConnectivityAvailable;
+    private bool _suppressOfflineToggleUpdate;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDetailsPanelVisible))]
     private VaultEntry? _selectedEntry;
@@ -66,6 +70,7 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         VaultEntryManagerService vaultEntryManager,
         GoatTipsService goatTips,
         EntryDetailViewViewModel detailVM,
+        IOfflineModeService offlineMode,
         ILogger<MainPageViewModel>? logger = null)
     {
         _loadVault = loadVault;
@@ -75,12 +80,16 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
         _categoryManager = categoryManager;
         _vaultEntryManager = vaultEntryManager;
         _logger = logger;
+        _offlineMode = offlineMode;
         GoatTips = goatTips;
         DetailVM = detailVM;
 
         // TODO: Check if logic is the same here
         _session.VaultChanged += OnVaultChanged;
         _syncing.AuthenticationRequired += OnAuthenticationRequired;
+        _offlineMode.OfflineModeChanged += OnOfflineModeChanged;
+        UpdateOfflineToggleState();
+        IsConnectivityAvailable = _offlineMode.IsConnectivityAvailable;
 
         StartRandomGoatComments();
         Task.Run(async () => await InitializeAsync());
@@ -126,8 +135,39 @@ public partial class MainPageViewModel : BaseViewModel, IDisposable
     {
         _session.VaultChanged -= OnVaultChanged;
         _syncing.AuthenticationRequired -= OnAuthenticationRequired;
+        _offlineMode.OfflineModeChanged -= OnOfflineModeChanged;
         GoatTips.PropertyChanged -= OnGoatTipsPropertyChanged;
     }
+
+    private void OnOfflineModeChanged(object? sender, bool isOffline)
+    {
+        UpdateOfflineToggleState();
+        IsConnectivityAvailable = _offlineMode.IsConnectivityAvailable;
+
+        if (!_offlineMode.IsOffline && _syncing.HasAutoSync)
+        {
+            _ = _syncing.Sync();
+        }
+    }
+
+    partial void OnIsOfflineModeEnabledChanged(bool value)
+    {
+        if (_suppressOfflineToggleUpdate)
+            return;
+
+        if (!IsConnectivityAvailable)
+            return;
+
+        _offlineMode.SetManualOffline(value);
+    }
+
+    private void UpdateOfflineToggleState()
+    {
+        _suppressOfflineToggleUpdate = true;
+        IsOfflineModeEnabled = _offlineMode.IsOffline;
+        _suppressOfflineToggleUpdate = false;
+    }
+
 
     private async Task InitializeAsync() => await LoadVaultAsync();
 

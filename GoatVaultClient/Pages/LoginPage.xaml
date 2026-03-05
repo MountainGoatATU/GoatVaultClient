@@ -18,6 +18,7 @@
     <ScrollView HorizontalOptions="Center" VerticalOptions="Center">
 
         <Grid Padding="{OnIdiom Phone={StaticResource pSmall}, Desktop={StaticResource pLarge}}">
+            <VerticalStackLayout Spacing="{StaticResource formSpacing}">
             <Border
                 Padding="{StaticResource sLarge}"
                 BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
@@ -69,33 +70,6 @@
 
                         </VerticalStackLayout>
                     </input:FormView>
-
-                    <Grid
-                        ColumnDefinitions="*,Auto"
-                        ColumnSpacing="{StaticResource sContent}"
-                        IsVisible="{Binding HasLocalUsers}">
-                        <Picker
-                            x:Name="LocalAccountPicker"
-                            Title="Select Offline User"
-                            IsVisible="{Binding HasLocalUsers}"
-                            ItemsSource="{Binding LocalUsers}"
-                            SelectedItem="{Binding SelectedUser}"
-                            TitleColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
-                                                         Dark={StaticResource DarkOnSurfaceVariant}}">
-                            <Picker.ItemDisplayBinding>
-                                <Binding x:DataType="models:User" Path="Email.Value" />
-                            </Picker.ItemDisplayBinding>
-                        </Picker>
-                        <controls:ImageButton
-                            Grid.Column="1"
-                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
-                                                            Dark={StaticResource DarkSecondaryContainer}}"
-                            Command="{Binding RemoveOfflineUserCommand}"
-                            IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                        Dark={StaticResource DarkOnSecondaryContainer}}"
-                            IconGlyph="{x:Static m:MaterialOutlined.Delete}"
-                            VerticalOptions="End" />
-                    </Grid>
 
                     <input:FormView SubmitCommand="{Binding LoginCommand}">
                         <VerticalStackLayout IsVisible="{Binding IsOnline, Converter={StaticResource InvertedBoolConverter}}" Spacing="{StaticResource formSpacing}">
@@ -150,7 +124,7 @@
 
                     <VerticalStackLayout Spacing="{StaticResource sContent}">
                         <HorizontalStackLayout
-                            Margin="0,8,0,0"
+                            Margin="0,4,0,0"
                             HorizontalOptions="Center"
                             IsVisible="{Binding IsOnline}"
                             Spacing="4">
@@ -207,6 +181,69 @@
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
+
+            <Border
+                Padding="{StaticResource sLarge}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightSurfaceContainerLowest},
+                                                  Dark={StaticResource DarkSurfaceContainerLowest}}"
+                HorizontalOptions="Center"
+                Stroke="{AppThemeBinding Light={StaticResource LightOutlineVariant},
+                                         Dark={StaticResource DarkOutlineVariant}}"
+                StrokeThickness="1"
+                VerticalOptions="Center"
+                WidthRequest="{OnIdiom Phone=360,
+                                       Desktop=450}">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="{StaticResource Large}" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="{StaticResource sContent}">
+                    <Label
+                        Style="{StaticResource MaterialTitleMedium}"
+                        Text="Offline Access" />
+
+                    <Grid
+                        ColumnDefinitions="*,Auto"
+                        ColumnSpacing="{StaticResource sContent}"
+                        IsVisible="{Binding HasLocalUsers}">
+                        <Picker
+                            x:Name="LocalAccountPicker"
+                            Title="Select Offline User"
+                            IsVisible="{Binding HasLocalUsers}"
+                            ItemsSource="{Binding LocalUsers}"
+                            SelectedItem="{Binding SelectedUser}"
+                            TitleColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                         Dark={StaticResource DarkOnSurfaceVariant}}">
+                            <Picker.ItemDisplayBinding>
+                                <Binding x:DataType="models:User" Path="Email.Value" />
+                            </Picker.ItemDisplayBinding>
+                        </Picker>
+                        <controls:ImageButton
+                            Grid.Column="1"
+                            ButtonBgColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                            Dark={StaticResource DarkSecondaryContainer}}"
+                            Command="{Binding RemoveOfflineUserCommand}"
+                            IconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                        Dark={StaticResource DarkOnSecondaryContainer}}"
+                            IconGlyph="{x:Static m:MaterialOutlined.Delete}"
+                            VerticalOptions="End" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="{StaticResource sContent}" HorizontalOptions="Start">
+                        <Label
+                            Text="Offline Mode"
+                            TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                                        Dark={StaticResource DarkOnSurfaceVariant}}"
+                            VerticalOptions="Center" />
+                        <Switch
+                            Grid.Column="1"
+                            IsEnabled="{Binding IsConnectivityAvailable}"
+                            IsToggled="{Binding IsOfflineModeEnabled}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+            </VerticalStackLayout>
         </Grid>
     </ScrollView>
 </uranium:UraniumContentPage>

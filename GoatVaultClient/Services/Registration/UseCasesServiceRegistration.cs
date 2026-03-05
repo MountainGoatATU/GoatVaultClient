@@ -21,12 +21,14 @@ public static class UseCasesServiceRegistration
         services.AddTransient<LoginOnlineUseCase>();
         services.AddTransient<LogoutUseCase>();
         services.AddTransient<RegisterUseCase>();
+        
         // Shamir Use Cases
         services.AddTransient<DisableShamirUseCase>();
         services.AddTransient<EnableShamirUseCase>();
         services.AddTransient<RecoverKeyUseCase>();
         services.AddTransient<SplitKeyUseCase>();
         services.AddTransient<ValidateUserEmailUseCase>();
+        
         // Vault Use Cases
         services.AddTransient<AddVaultEntryUseCase>();
         services.AddTransient<CalculateVaultScoreUseCase>();
@@ -36,6 +38,7 @@ public static class UseCasesServiceRegistration
         services.AddTransient<SyncVaultUseCase>();
         services.AddTransient<UpdateVaultEntryUseCase>();
         services.AddTransient<WipeVaultUseCase>();
+        
         // Account Management Use Cases
         services.AddTransient<ChangeEmailUseCase>();
         services.AddTransient<ChangePasswordUseCase>();

@@ -42,6 +42,16 @@
                                             Dark={StaticResource DarkError}}"
                 VerticalOptions="Center" />
 
+            <!-- Icon when offline mode enabled  -->
+            <Label
+                FontFamily="MaterialRounded"
+                FontSize="16"
+                IsVisible="{Binding IsOfflineModeEnabled}"
+                Text="{x:Static m:MaterialRounded.Cloud_off}"
+                TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
+                                            Dark={StaticResource DarkOnSurfaceVariant}}"
+                VerticalOptions="Center" />
+
             <!--  Status text  -->
             <Label
                 FontAttributes="Bold"

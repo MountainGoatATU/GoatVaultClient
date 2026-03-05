@@ -14,6 +14,8 @@ public class SyncingService(
     IServiceProvider services,
     IServerAuthService serverAuth,
     IVaultCrypto vaultCrypto,
+    IOfflineModeService offlineMode,
+    IAuthTokenService authTokenService,
     ILogger<SyncingService>? logger = null)
     : ObservableObject, ISyncingService
 {
@@ -157,6 +159,23 @@ public class SyncingService(
         if (IsSyncing)
         {
             logger?.LogWarning("Sync already in progress");
+            return;
+        }
+
+        if (offlineMode.IsOffline)
+        {
+            logger?.LogInformation("Sync skipped: offline mode enabled");
+            SyncStatus = SyncStatus.Unsynced;
+            SyncStatusMessage = "OFFLINE";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(authTokenService.GetToken()))
+        {
+            SyncStatus = SyncStatus.Failed;
+            SyncStatusMessage = "Sign in online to sync";
+            SyncFailed?.Invoke(this, new SyncFailedEventArgs(new InvalidOperationException("Missing auth token")));
+            logger?.LogWarning("Sync skipped: missing auth token");
             return;
         }
 
