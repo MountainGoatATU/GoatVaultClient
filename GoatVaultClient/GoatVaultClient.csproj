@@ -29,8 +29,8 @@
 		<ApplicationId>com.mountaingoat.goatvaultclient</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>0.7.3</ApplicationDisplayVersion>
-		<ApplicationVersion>22</ApplicationVersion>
+		<ApplicationDisplayVersion>0.7.4</ApplicationDisplayVersion>
+		<ApplicationVersion>23</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>MSIX</WindowsPackageType>
@@ -248,6 +248,7 @@
 	</ItemGroup>
 	
 </Project>
+
 
 
 
