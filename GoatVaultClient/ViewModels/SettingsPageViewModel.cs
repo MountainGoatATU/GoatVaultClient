@@ -27,22 +27,17 @@ public partial class SettingsPageViewModel : BaseViewModel
         Application.Current?.UserAppTheme = DarkModeEnabled ? AppTheme.Dark : AppTheme.Light;
     }
 
-    [RelayCommand]
-    private void ToggleGoat()
+    partial void OnDarkModeEnabledChanged(bool value)
     {
-        GoatEnabled = !GoatEnabled;
-        _goatTips.SetEnabled(GoatEnabled);
-        _logger?.LogInformation("Toggled goat");
-    }
-
-    [RelayCommand]
-    private void ToggleDarkMode()
-    {
-        DarkModeEnabled = !DarkModeEnabled;
-
         Application.Current?.UserAppTheme = DarkModeEnabled ? AppTheme.Dark : AppTheme.Light;
         Preferences.Set("app_theme", DarkModeEnabled ? "dark" : "light");
 
         _logger?.LogInformation("Toggled dark mode");
+    }
+
+    partial void OnGoatEnabledChanged(bool value)
+    {
+        _goatTips.SetEnabled(GoatEnabled);
+        _logger?.LogInformation("Toggled goat");
     }
 }

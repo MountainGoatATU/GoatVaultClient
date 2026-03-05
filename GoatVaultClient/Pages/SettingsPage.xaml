@@ -30,26 +30,12 @@
                             FontAttributes="Bold"
                             Text="Goat"
                             VerticalOptions="Center" />
-
-                        <!--  Button text  -->
-                        <Button
+                        <!--  Switch  -->
+                        <Switch
                             Grid.Column="2"
-                            BackgroundColor="{Binding GoatEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
-                            Command="{Binding ToggleGoatCommand}"
-                            HeightRequest="40"
                             HorizontalOptions="End"
-                            Text="Enable"
-                            TextColor="White"
-                            WidthRequest="100">
-                            <Button.Triggers>
-                                <DataTrigger
-                                    Binding="{Binding GoatEnabled}"
-                                    TargetType="Button"
-                                    Value="True">
-                                    <Setter Property="Text" Value="Disable" />
-                                </DataTrigger>
-                            </Button.Triggers>
-                        </Button>
+                            IsToggled="{Binding GoatEnabled}"
+                            VerticalOptions="Center" />
                     </Grid>
 
                     <!--  Toggle Theme  -->
@@ -58,27 +44,12 @@
                             FontAttributes="Bold"
                             Text="Dark Mode"
                             VerticalOptions="Center" />
-
-
-                        <!--  Button text  -->
-                        <Button
+                        <!--  Switch  -->
+                        <Switch
                             Grid.Column="2"
-                                BackgroundColor="{Binding DarkModeEnabled, Converter={StaticResource BoolToGoatButtonColorConverter}}"
-                            Command="{Binding ToggleDarkModeCommand}"
-                            HeightRequest="40"
                             HorizontalOptions="End"
-                            Text="Enable"
-                            TextColor="White"
-                            WidthRequest="100">
-                            <Button.Triggers>
-                                <DataTrigger
-                                    Binding="{Binding DarkModeEnabled}"
-                                    TargetType="Button"
-                                    Value="True">
-                                    <Setter Property="Text" Value="Disable" />
-                                </DataTrigger>
-                            </Button.Triggers>
-                        </Button>
+                            IsToggled="{Binding DarkModeEnabled}"
+                            VerticalOptions="Center" />
                     </Grid>
 
                 </VerticalStackLayout>
