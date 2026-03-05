@@ -23,6 +23,7 @@ public static class AppServiceRegistration
     {
         // Core app services
         services.AddSingleton<ConnectivityService>();
+        services.AddSingleton<IOfflineModeService, OfflineModeService>();
         services.AddSingleton<ISyncingService, SyncingService>();
         services.AddSingleton<ISessionContext, SessionContext>();
         services.AddTransient<IUserRepository, UserRepository>();
@@ -53,10 +54,12 @@ public static class AppServiceRegistration
             var serverBaseUrl = sp.GetRequiredService<IConfiguration>()["API_BASE_URL"];
             var authService = sp.GetRequiredService<IAuthTokenService>();
             var jwtUtils = sp.GetRequiredService<JwtUtils>();
+            var offlineMode = sp.GetRequiredService<IOfflineModeService>();
             var logger = sp.GetService<ILogger<AuthenticatedHttpHandler>>();
             return new AuthenticatedHttpHandler(
                 authService,
                 jwtUtils,
+                offlineMode,
                 $"{serverBaseUrl}/{refreshEndpoint}",
                 logger
             );
