@@ -1,4 +1,6 @@
+using GoatVaultCore.Abstractions;
 using GoatVaultInfrastructure.Services.Api;
+using Moq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Sockets;
@@ -24,9 +26,13 @@ public class AuthenticatedHttpHandlerTests
                 Content = new StringContent("ok")
             }));
 
+        var offlineMode = new Mock<IOfflineModeService>();
+        offlineMode.SetupGet(x => x.IsOffline).Returns(false);
+
         var authHandler = new AuthenticatedHttpHandler(
             authTokenService,
             new JwtUtils(),
+            offlineMode.Object,
             refreshUrl: RefreshUri)
         {
             InnerHandler = innerHandler
@@ -57,9 +63,13 @@ public class AuthenticatedHttpHandlerTests
                 Content = new StringContent("ok")
             }));
 
+        var offlineMode = new Mock<IOfflineModeService>();
+        offlineMode.SetupGet(x => x.IsOffline).Returns(false);
+
         var authHandler = new AuthenticatedHttpHandler(
             authTokenService,
             new JwtUtils(),
+            offlineMode.Object,
             refreshUrl: RefreshUri)
         {
             InnerHandler = innerHandler
@@ -83,9 +93,13 @@ public class AuthenticatedHttpHandlerTests
         var authTokenService = new AuthTokenService();
         authTokenService.SetToken(CreateToken(DateTime.UtcNow.AddMinutes(-10)));
 
+        var offlineMode = new Mock<IOfflineModeService>();
+        offlineMode.SetupGet(x => x.IsOffline).Returns(false);
+
         var authHandler = new AuthenticatedHttpHandler(
             authTokenService,
             new JwtUtils(),
+            offlineMode.Object,
             refreshUrl: RefreshUri)
         {
             InnerHandler = new CaptureHandler(_ =>
@@ -110,9 +124,13 @@ public class AuthenticatedHttpHandlerTests
         var authTokenService = new AuthTokenService();
         authTokenService.SetToken(CreateToken(DateTime.UtcNow.AddMinutes(10)));
 
+        var offlineMode = new Mock<IOfflineModeService>();
+        offlineMode.SetupGet(x => x.IsOffline).Returns(false);
+
         var authHandler = new AuthenticatedHttpHandler(
             authTokenService,
             new JwtUtils(),
+            offlineMode.Object,
             refreshUrl: RefreshUri)
         {
             InnerHandler = new CaptureHandler(_ => throw new HttpRequestException("network", new SocketException((int)SocketError.HostUnreachable)))
@@ -127,6 +145,34 @@ public class AuthenticatedHttpHandlerTests
         // Assert
         Assert.Contains("offline mode", ex.Message, StringComparison.OrdinalIgnoreCase);
         Assert.NotNull(ex.InnerException);
+    }
+
+    [Fact]
+    public async Task SendAsync_WhenOfflineModeEnabled_ThrowsHttpRequestException()
+    {
+        // Arrange
+        var ct = TestContext.Current.CancellationToken;
+        var authTokenService = new AuthTokenService();
+        authTokenService.SetToken(CreateToken(DateTime.UtcNow.AddMinutes(10)));
+
+        var offlineMode = new Mock<IOfflineModeService>();
+        offlineMode.SetupGet(x => x.IsOffline).Returns(true);
+
+        var authHandler = new AuthenticatedHttpHandler(
+            authTokenService,
+            new JwtUtils(),
+            offlineMode.Object,
+            refreshUrl: RefreshUri)
+        {
+            InnerHandler = new CaptureHandler(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)))
+        };
+
+        using var client = new HttpClient(authHandler);
+
+        // Act + Assert
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(async () =>
+            await client.GetAsync(TestUri, ct));
+        Assert.Contains("offline", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string CreateToken(DateTime expiresUtc)

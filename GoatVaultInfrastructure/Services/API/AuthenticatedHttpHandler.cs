@@ -9,12 +9,16 @@ namespace GoatVaultInfrastructure.Services.Api;
 public class AuthenticatedHttpHandler(
     IAuthTokenService authTokenService,
     JwtUtils jwtUtils,
+    IOfflineModeService offlineMode,
     string refreshUrl,
     ILogger<AuthenticatedHttpHandler>? logger = null)
     : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        if (offlineMode.IsOffline)
+            throw new HttpRequestException("Offline mode enabled");
+
         var token = authTokenService.GetToken();
 
         if (logger != null)
@@ -39,7 +43,7 @@ public class AuthenticatedHttpHandler(
         }
         catch (HttpRequestException ex) when (ex.InnerException is System.Net.Sockets.SocketException)
         {
-            throw new HttpRequestException("Server unreachable – use offline mode", ex);
+            throw new HttpRequestException("Server unreachable ï¿½ use offline mode", ex);
         }
     }
 
