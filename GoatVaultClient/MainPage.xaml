@@ -24,20 +24,7 @@
                         x:Name="PageHeaderTitle"
                         Style="{StaticResource MaterialHeadlineLarge}"
                         Text="GoatVault" />
-                    <HorizontalStackLayout Grid.Column="1" Spacing="6">
-                        <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
-                            <Label
-                                FontSize="12"
-                                Text="Offline Mode"
-                                TextColor="{AppThemeBinding Light={StaticResource LightOnSurfaceVariant},
-                                                            Dark={StaticResource DarkOnSurfaceVariant}}"
-                                VerticalOptions="Center" />
-                            <Switch
-                                IsEnabled="{Binding IsConnectivityAvailable}"
-                                IsToggled="{Binding IsOfflineModeEnabled}" />
-                        </HorizontalStackLayout>
-                        <controls:SyncStatusBar x:Name="SyncStatusBar" />
-                    </HorizontalStackLayout>
+                    <controls:SyncStatusBar x:Name="SyncStatusBar" />
                 </Grid>
             </controls:Component>
             <controls:Component Grid.Row="1" ContentPadding="{StaticResource sContent}">

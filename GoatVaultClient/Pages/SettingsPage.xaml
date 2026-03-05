@@ -32,7 +32,7 @@
                             VerticalOptions="Center" />
                         <!--  Switch  -->
                         <Switch
-                            Grid.Column="2"
+                            Grid.Column="1"
                             HorizontalOptions="End"
                             IsToggled="{Binding GoatEnabled}"
                             VerticalOptions="Center" />
@@ -46,7 +46,7 @@
                             VerticalOptions="Center" />
                         <!--  Switch  -->
                         <Switch
-                            Grid.Column="2"
+                            Grid.Column="1"
                             HorizontalOptions="End"
                             IsToggled="{Binding DarkModeEnabled}"
                             VerticalOptions="Center" />
@@ -74,9 +74,10 @@
                             VerticalOptions="Center" />
                         <!--  Switch  -->
                         <Switch
-                            Grid.Column="2"
+                            Grid.Column="1"
                             HorizontalOptions="End"
-                            IsToggled="{Binding GoatEnabled}"
+                            IsEnabled="{Binding IsConnectivityAvailable}"
+                            IsToggled="{Binding OfflineModeEnabled}"
                             VerticalOptions="Center" />
                     </Grid>
                 </VerticalStackLayout>
