@@ -25,6 +25,7 @@ public partial class SettingsPageViewModel : BaseViewModel
         _logger = logger;
 
         GoatEnabled = _goatTips.IsGoatEnabled;
+        OfflineModeEnabled = _offlineMode.IsOffline;
 
         // Offline mode
         _offlineMode.OfflineModeChanged += OnOfflineModeChanged;
