@@ -12,38 +12,51 @@ public static class PageServiceRegistration
 {
     public static IServiceCollection AddPagesAndViewModels(this IServiceCollection services)
     {
+        // Sync Status Bar
         services.AddTransient<SyncStatusBarViewModel>();
-        // MainPage
+        
+        // Main Page
         services.AddTransient<MainPageViewModel>();
         services.AddTransient<MainPage>();
-        // Onboarding
+        
+        // Onboarding Page
         services.AddTransient<OnboardingPageViewModel>();
         services.AddTransient<OnboardingPage>();
-        // Register
+        
+        // Register Page
         services.AddTransient<RegisterPageViewModel>();
         services.AddTransient<RegisterPage>();
-        // Login
+        
+        // Login Page
         services.AddTransient<LoginPageViewModel>();
         services.AddTransient<LoginPage>();
-        // Gratitude
+        
+        // Gratitude Page
         services.AddTransient<GratitudePageViewModel>();
         services.AddTransient<GratitudePage>();
-        // Security
+        
+        // Security Page
         services.AddTransient<SecurityPageViewModel>();
         services.AddTransient<SecurityPage>();
-        // Settings
+        
+        // Settings Page
         services.AddTransient<SettingsPageViewModel>();
         services.AddTransient<SettingsPage>();
+        
         // Entry Details Page
         services.AddTransient<EntryDetailPage>();
         services.AddTransient<EntryDetailsViewModel>();
+        
         // App Shell ViewModel
         services.AddTransient<AppShellViewModel>();
+        
         // Entry Details View ViewModel
         services.AddTransient<EntryDetailViewViewModel>();
+        
         // Split Secret Page
         services.AddTransient<SplitSecretViewModel>();
         services.AddTransient<SplitSecretPage>();
+        
         // Recover Secret Page
         services.AddTransient<RecoverSecretViewModel>();
         services.AddTransient<RecoverSecretPage>();
