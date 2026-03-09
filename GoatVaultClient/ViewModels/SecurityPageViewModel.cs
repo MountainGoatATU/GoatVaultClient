@@ -1,17 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GoatVaultApplication.Account;
-using GoatVaultApplication.Auth;
 using GoatVaultApplication.Shamir;
 using GoatVaultApplication.Vault;
 using GoatVaultClient.Controls.Popups;
 using GoatVaultClient.Pages;
-using GoatVaultClient.Services;
 using GoatVaultCore.Abstractions;
 using GoatVaultCore.Services;
 using LiveChartsCore.SkiaSharpView.Painting;
 using Mopups.Services;
-using PasswordGenerator;
 using SkiaSharp;
 using Email = GoatVaultCore.Models.Objects.Email;
 
@@ -24,7 +21,6 @@ public partial class SecurityPageViewModel : BaseViewModel
     private readonly ChangeEmailUseCase _changeEmail;
     private readonly ChangePasswordUseCase _changePassword;
     private readonly EnableMfaUseCase _enableMfa;
-    private readonly EnableShamirUseCase _enableShamir;
     private readonly DisableShamirUseCase _disableShamir;
     private readonly DisableMfaUseCase _disableMfa;
     private readonly DeleteAccountUseCase _deleteAccount;
@@ -33,7 +29,7 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     [ObservableProperty] private string _email = string.Empty;
     [ObservableProperty] private bool _mfaEnabled;
-    [ObservableProperty] private bool shamirEnabled;
+    [ObservableProperty] private bool _shamirEnabled;
     [ObservableProperty] private string? _mfaSecret;
     [ObservableProperty] private string? _mfaQrCodeUrl;
     [ObservableProperty] private double _vaultScore;
@@ -51,7 +47,6 @@ public partial class SecurityPageViewModel : BaseViewModel
         ChangePasswordUseCase changePassword,
         EnableMfaUseCase enableMfa,
         DisableMfaUseCase disableMfa,
-        EnableShamirUseCase enableShamir,
         DisableShamirUseCase disableShamir,
         DeleteAccountUseCase deleteAccount,
         WipeVaultUseCase wipeVault,
@@ -63,29 +58,23 @@ public partial class SecurityPageViewModel : BaseViewModel
         _changePassword = changePassword;
         _enableMfa = enableMfa;
         _disableMfa = disableMfa;
-        _enableShamir = enableShamir;
         _disableShamir = disableShamir;
         _deleteAccount = deleteAccount;
         _wipeVault = wipeVault;
         _session = session;
 
         _session.VaultChanged += OnVaultChanged;
-        Task.Run(InitializeAsync);
     }
 
     private void OnVaultChanged(object? sender, EventArgs e) => Task.Run(RefreshVaultScoreAsync);
 
-    private async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await SafeExecuteAsync(async () =>
-        {
-            var user = await _loadUserProfile.ExecuteAsync();
-            Email = user.Email.Value;
-            MfaEnabled = user.MfaEnabled;
-            ShamirEnabled = user.ShamirEnabled;
-
-            await RefreshVaultScoreAsync();
-        });
+        var user = await _loadUserProfile.ExecuteAsync();
+        Email = user.Email.Value;
+        MfaEnabled = user.MfaEnabled;
+        ShamirEnabled = user.ShamirEnabled;
+        await RefreshVaultScoreAsync();
     }
 
     #region Vault Score
@@ -275,8 +264,10 @@ public partial class SecurityPageViewModel : BaseViewModel
 
         await SafeExecuteAsync(async () =>
         {
-            await Shell.Current.GoToAsync($"{nameof(SplitSecretPage)}?Mp={password}");
-            await RefreshVaultScoreAsync();
+            // Safely pass the parameter without string interpolation
+            var navParams = new Dictionary<string, object> { { "Mp", password } };
+
+            await Shell.Current.GoToAsync(nameof(SplitSecretPage), navParams);
         });
     }
 
@@ -302,62 +293,62 @@ public partial class SecurityPageViewModel : BaseViewModel
 
     #endregion
 
-    #region Danger Zone
+        #region Danger Zone
 
-    [RelayCommand]
-    private async Task DeleteAccountAsync()
-    {
-        var confirm1 = await ShowConfirmationAsync("Delete Account",
-            "Are you sure you want to delete your account? This action is permanent and cannot be reversed.");
-        if (!confirm1)
-            return;
-
-        var password = await PromptPasswordAsync("Confirm Password");
-        if (password == null)
-            return;
-
-        var confirm2 = await ShowConfirmationAsync("Delete Account",
-            "Are you absolutely sure? There is no turning back after confirming this.");
-        if (!confirm2)
-            return;
-
-        await SafeExecuteAsync(async () =>
+        [RelayCommand]
+        private async Task DeleteAccountAsync()
         {
-            await _deleteAccount.ExecuteAsync(password);
-            await ShowSuccessAsync("Your account has been permanently deleted.");
+            var confirm1 = await ShowConfirmationAsync("Delete Account",
+                "Are you sure you want to delete your account? This action is permanent and cannot be reversed.");
+            if (!confirm1)
+                return;
 
-            if (Shell.Current is AppShell appShell)
-                appShell.DisableFlyout();
+            var password = await PromptPasswordAsync("Confirm Password");
+            if (password == null)
+                return;
 
-            // Clear the navigation stack and return to the intro route
-            await Shell.Current.GoToAsync("//login");
-        });
-    }
+            var confirm2 = await ShowConfirmationAsync("Delete Account",
+                "Are you absolutely sure? There is no turning back after confirming this.");
+            if (!confirm2)
+                return;
 
-    [RelayCommand]
-    private async Task WipeVaultAsync()
-    {
-        var confirm1 = await ShowConfirmationAsync("Wipe Vault",
-            "This will permanently delete all vault entries and categories from this device and the server. Continue?");
-        if (!confirm1)
-            return;
+            await SafeExecuteAsync(async () =>
+            {
+                await _deleteAccount.ExecuteAsync(password);
+                await ShowSuccessAsync("Your account has been permanently deleted.");
 
-        var confirm2 = await ShowConfirmationAsync("Wipe Vault",
-            "Are you absolutely sure? This action cannot be undone.");
-        if (!confirm2)
-            return;
+                if (Shell.Current is AppShell appShell)
+                    appShell.DisableFlyout();
 
-        await SafeExecuteAsync(async () =>
+                // Clear the navigation stack and return to the intro route
+                await Shell.Current.GoToAsync("//login");
+            });
+        }
+
+        [RelayCommand]
+        private async Task WipeVaultAsync()
         {
-            await _wipeVault.ExecuteAsync();
-            await ShowSuccessAsync("Vault wiped successfully.");
-            await RefreshVaultScoreAsync();
-        });
-    }
+            var confirm1 = await ShowConfirmationAsync("Wipe Vault",
+                "This will permanently delete all vault entries and categories from this device and the server. Continue?");
+            if (!confirm1)
+                return;
+
+            var confirm2 = await ShowConfirmationAsync("Wipe Vault",
+                "Are you absolutely sure? This action cannot be undone.");
+            if (!confirm2)
+                return;
+
+            await SafeExecuteAsync(async () =>
+            {
+                await _wipeVault.ExecuteAsync();
+                await ShowSuccessAsync("Vault wiped successfully.");
+                await RefreshVaultScoreAsync();
+            });
+        }
 
     #endregion
 
-    #region UI Helpers
+        #region UI Helpers
 
     private static async Task<string?> PromptPasswordAsync(string title)
     {
@@ -405,7 +396,7 @@ public partial class SecurityPageViewModel : BaseViewModel
             title: "Setup MFA",
             body: message,
             aText: "OK",
-            cText:"Cancel"
+            cText: "Cancel"
         );
         await MopupService.Instance.PushAsync(setupPopup);
         await setupPopup.WaitForScan();

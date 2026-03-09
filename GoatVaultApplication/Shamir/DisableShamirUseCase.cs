@@ -25,15 +25,15 @@ public class DisableShamirUseCase(
         if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
             throw new UnauthorizedAccessException("Incorrect current password.");
 
-        // 2. Update server
+        // 2. Update local DB
+        user.ShamirEnabled = false;
+        user.UpdatedAtUtc = DateTime.UtcNow;
+
+        await users.SaveAsync(user);
+
+        // 3. Update server
         var updateRequest = new UpdateShamirRequest { ShamirEnabled = false };
 
         var serverUser = await serverAuth.UpdateUserAsync(user.Id, updateRequest);
-
-        // 3. Update local DB
-        user.ShamirEnabled = serverUser.ShamirEnabled;
-        user.UpdatedAtUtc = serverUser.UpdatedAtUtc;
-
-        await users.SaveAsync(user);
     }
 }

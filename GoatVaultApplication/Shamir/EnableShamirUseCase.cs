@@ -9,30 +9,38 @@ public class EnableShamirUseCase(
     ICryptoService cryptoService,
     IServerAuthService serverAuth)
 {
-    public async Task ExecuteAsync(string currentPassword)
+    public async Task<bool> ExecuteAsync(string currentPassword)
     {
-        if (session.UserId == null)
-            throw new InvalidOperationException("No user logged in.");
+        try
+        {
+            if (session.UserId == null)
+                throw new InvalidOperationException("No user logged in.");
 
-        var user = await users.GetByIdAsync(session.UserId.Value)
-                   ?? throw new InvalidOperationException("User not found.");
+            var user = await users.GetByIdAsync(session.UserId.Value)
+                       ?? throw new InvalidOperationException("User not found.");
 
-        if (user.ShamirEnabled)
-            throw new InvalidOperationException("Shamir's Secret Sharing is already enabled for this user.");
+            if (user.ShamirEnabled)
+                throw new InvalidOperationException("Shamir's Secret Sharing is already enabled for this user.");
 
-        // 1. Verify current password
-        var currentAuthVerifier = await Task.Run(() => cryptoService.GenerateAuthVerifier(currentPassword, user.AuthSalt, user.Argon2Parameters));
-        if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
-            throw new UnauthorizedAccessException("Incorrect current password.");
+            // 1. Verify current password
+            var currentAuthVerifier = await Task.Run(() => cryptoService.GenerateAuthVerifier(currentPassword, user.AuthSalt, user.Argon2Parameters));
+            if (!currentAuthVerifier.SequenceEqual(user.AuthVerifier))
+                throw new UnauthorizedAccessException("Incorrect current password.");
 
-        // 2. Update server
-        var updateRequest = new UpdateShamirRequest { ShamirEnabled = true };
-        var serverUser = await serverAuth.UpdateUserAsync(user.Id, updateRequest);
+            // 2. Update local DB
+            user.ShamirEnabled = true;
+            user.UpdatedAtUtc = DateTime.UtcNow;
+            await users.SaveAsync(user);
 
-        // 3. Update local DB
-        user.ShamirEnabled = serverUser.ShamirEnabled;
-        user.UpdatedAtUtc = serverUser.UpdatedAtUtc;
+            // 3. Update server
+            var updateRequest = new UpdateShamirRequest { ShamirEnabled = true };
+            var serverUser = await serverAuth.UpdateUserAsync(user.Id, updateRequest);
 
-        await users.SaveAsync(user);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

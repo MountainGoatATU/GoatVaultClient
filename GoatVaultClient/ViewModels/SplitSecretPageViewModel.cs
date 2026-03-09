@@ -52,7 +52,6 @@ public partial class SplitSecretViewModel(
     public int MinShares => 2;
     public int MaxShares => 10;
     public int MinThreshold => 2;
-    private int _safetyCheckPass = 0;
 
     public int MaxThreshold => TotalShares;
 
@@ -74,15 +73,25 @@ public partial class SplitSecretViewModel(
     [RelayCommand(CanExecute = nameof(CanSplit))]
     private async Task SplitAsync()
     {
-        HasError = false;
-        ErrorMessage = string.Empty;
-        GeneratedShares.Clear();
+        await SafeExecuteAsync(async () =>
+        {
+            logger?.LogInformation("Starting SplitAsync - TotalShares: {TotalShares}, Threshold: {Threshold}", TotalShares, Threshold);
 
-        var response = await splitKeyUseCase.Execute(Mp, Passphrase, TotalShares, Threshold);
-        foreach (var share in response)
-            GeneratedShares.Add(share);
+            HasError = false;
+            ErrorMessage = string.Empty;
+            GeneratedShares.Clear();
 
-        HasResults = true;
+            var response = await splitKeyUseCase.Execute(Mp, Passphrase, TotalShares, Threshold);
+
+            logger?.LogInformation("Successfully generated {ShareCount} shares", response.Count);
+
+            foreach (var share in response)
+                GeneratedShares.Add(share);
+
+            HasResults = true;
+
+            logger?.LogInformation("SplitAsync completed successfully");
+        });
     }
 
     [RelayCommand]
@@ -114,44 +123,48 @@ public partial class SplitSecretViewModel(
     [RelayCommand]
     public async Task Continue()
     {
-        if (_safetyCheckPass == 0)
+        var firstPopup = new PromptPopup(
+           "Warning",
+           "Did you copy the shares and passphrase properly? Without them, you are not going to be able to recover your master password",
+           "Yes",
+           "No"
+           );
+
+        await MopupService.Instance.PushAsync(firstPopup);
+        await firstPopup.WaitForScan();
+
+        await MopupService.Instance.PopAllAsync();
+        var secondPopup = new PromptPopup(
+           "LAST WARNING",
+           "LOSING ACCESS OR HAVING INCORRECTLY COPIED THE SHARES AND PASSPHRASE WILL RESULT IN INNABILITY TO RECOVER YOUR MASTER PASSWORD",
+           "I understand",
+           "Cancel"
+           );
+
+        await MopupService.Instance.PushAsync(secondPopup);
+        var result = await secondPopup.WaitForScan();
+        if (result)
         {
-            var popup = new PromptPopup(
-               "Warning",
-               "Did you copy the shares and passphrase properly? Without them, you are not going to be able to recover your master password",
-               "Yes",
-               "No"
-               );
-
-            await MopupService.Instance.PushAsync(popup);
-
-            var result = await popup.WaitForScan();
-            if (result)
-                _safetyCheckPass++;
-
-            await MopupService.Instance.PopAllAsync();
-        }
-        else if (_safetyCheckPass == 1)
-        {
-            var popup = new PromptPopup(
-               "LAST WARNING",
-               "LOSING ACCESS OR HAVING INCORRECTLY COPIED THE SHARES AND PASSPHRASE WILL RESULT IN INNABILITY TO RECOVER YOUR MASTER PASSWORD",
-               "I understand",
-               "Cancel"
-               );
-
-            await MopupService.Instance.PushAsync(popup);
-            var result = await popup.WaitForScan();
-            if (result)
+            try
             {
                 await MopupService.Instance.PushAsync(new PendingPopup("Enabling Recovery on your account..."));
-                await enableShamirUseCase.ExecuteAsync(Mp);
+                var shamirResult = await enableShamirUseCase.ExecuteAsync(Mp);
                 await MopupService.Instance.PopAllAsync();
-                await Shell.Current.GoToAsync("//main/security");
+                await Shell.Current.GoToAsync("..");
+            }
+            catch(Exception e)
+            {
+                logger?.LogError(e, "Error during Continue() of SplitSecretViewModel");
+                await MopupService.Instance.PopAllAsync();
+                var errorPopup = new ErrorPopup(
+                    "An error occurred while enabling recovery on your account. Please try again."
+                    );
+                await MopupService.Instance.PushAsync(errorPopup);
             }
 
-            await MopupService.Instance.PopAllAsync();
         }
+
+        await MopupService.Instance.PopAllAsync();
     }
 
     [RelayCommand]

@@ -410,9 +410,9 @@
                         Command="{Binding DisableMfaCommand}"
                         IsEnabled="{Binding IsNotBusy}"
                         IsVisible="{Binding MfaEnabled}"
-                        Text="Disable MFA"
-                        TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
-                                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
+                        Text="{Binding MfaEnabled, Converter={StaticResource BoolToMfaButtonTextConverter}}"
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnErrorContainer},
+                                                    Dark={StaticResource DarkOnErrorContainer}}" />
 
                 </VerticalStackLayout>
             </controls:Component>
@@ -458,24 +458,25 @@
                     <!--  Enable/Disable Button  -->
                     <Button
                         Margin="0,10,0,0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimary},
-                                                          Dark={StaticResource DarkPrimary}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                          Dark={StaticResource DarkSecondaryContainer}}"
                         Command="{Binding EnableShamirCommand}"
                         IsEnabled="{Binding IsNotBusy}"
                         IsVisible="{Binding ShamirEnabled, Converter={StaticResource InvertedBoolConverter}}"
                         Text="{Binding ShamirEnabled, Converter={StaticResource BoolToShamirButtonTextConverter}}"
-                        TextColor="White" />
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                    Dark={StaticResource DarkOnSecondaryContainer}}" />
 
                     <Button
                         Margin="0,10,0,0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
-                                                          Dark={StaticResource ErrorDark}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightErrorContainer},
+                                                          Dark={StaticResource DarkErrorContainer}}"
                         Command="{Binding DisableShamirCommand}"
                         IsEnabled="{Binding IsNotBusy}"
-                        IsVisible="{Binding MfaEnabled}"
-                        Text="Enable Shamir Backup"
-                        TextColor="White" />
-
+                        IsVisible="{Binding ShamirEnabled}"
+                        Text="{Binding ShamirEnabled, Converter={StaticResource BoolToShamirButtonTextConverter}}"
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnErrorContainer},
+                                                    Dark={StaticResource DarkOnErrorContainer}}" />
                 </VerticalStackLayout>
             </controls:Component>
 
@@ -506,12 +507,13 @@
 
                     <Button
                         Margin="0,10,0,10"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
-                                                          Dark={StaticResource ErrorDark}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightErrorContainer},
+                                                          Dark={StaticResource DarkErrorContainer}}"
                         Command="{Binding WipeVaultCommand}"
                         IsEnabled="{Binding IsNotBusy}"
                         Text="Wipe Vault"
-                        TextColor="White" />
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnErrorContainer},
+                                                    Dark={StaticResource DarkOnErrorContainer}}" />
 
                     <!--  Delete Account  -->
                     <Label
@@ -529,12 +531,13 @@
 
                     <Button
                         Margin="0,10,0,0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Error},
-                                                          Dark={StaticResource ErrorDark}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightErrorContainer},
+                                                          Dark={StaticResource DarkErrorContainer}}"
                         Command="{Binding DeleteAccountCommand}"
                         IsEnabled="{Binding IsNotBusy}"
                         Text="Delete Account"
-                        TextColor="White" />
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnErrorContainer},
+                                                    Dark={StaticResource DarkOnErrorContainer}}" />
                 </VerticalStackLayout>
             </controls:Component>
         </VerticalStackLayout>
