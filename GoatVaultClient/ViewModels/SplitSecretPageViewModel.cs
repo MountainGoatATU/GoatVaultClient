@@ -148,7 +148,7 @@ public partial class SplitSecretViewModel(
             try
             {
                 await MopupService.Instance.PushAsync(new PendingPopup("Enabling Recovery on your account..."));
-                var shamirResult = await enableShamirUseCase.ExecuteAsync(Mp);
+                await enableShamirUseCase.ExecuteAsync(Mp);
                 await MopupService.Instance.PopAllAsync();
                 await Shell.Current.GoToAsync("..");
             }
