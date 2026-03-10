@@ -42,7 +42,7 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
     [NotifyPropertyChangedFor(nameof(IsFormValid))]
     private bool _isFormViewValid;
 
-    public bool IsFormValid => 
+    public bool IsFormValid =>
         IsEmailGood &&
         IsPasswordGood &&
         IsConfirmPasswordGood;
@@ -51,7 +51,7 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
     {
         var result = register.ValidateEmail(Email);
 
-        if (result == null) 
+        if (result == null)
             return;
 
         IsEmailWarning = result.IsWarning;
@@ -104,7 +104,7 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
         try { await Task.Delay(300, token); }
         catch (TaskCanceledException) { return; }
 
-        if (token.IsCancellationRequested) 
+        if (token.IsCancellationRequested)
             return;
 
         // Delegate business logic to the Use Case
@@ -124,14 +124,21 @@ public partial class RegisterPageViewModel(RegisterUseCase register) : BaseViewM
         // Prevent multiple registrations
         await SafeExecuteAsync(async () =>
         {
-            // Call Register use case
-            if (Email is not null && Password is not null)
-                await register.ExecuteAsync(new Email(Email), Password);
-
             if (CreateRecovery)
-                await Shell.Current.GoToAsync($"{ nameof(SplitSecretPage)}?Mp={Password}");
+            {
+                var navigationParams = new Dictionary<string, object?>
+                {
+                    { "Email", Email },
+                    { "Mp", Password }
+                };
+                await Shell.Current.GoToAsync($"{nameof(SplitSecretPage)}",navigationParams);
+            }
             else
+            {
+                if (Email is not null && Password is not null)
+                    await register.ExecuteAsync(new Email(Email), Password);
                 await Shell.Current.GoToAsync("//gratitude");
+            }  
         });
     }
 

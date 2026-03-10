@@ -1,19 +1,25 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GoatVaultApplication.Auth;
 using GoatVaultApplication.Shamir;
 using GoatVaultClient.Controls.Popups;
+using GoatVaultCore.Abstractions;
 using GoatVaultCore.Models.Objects;
 using Microsoft.Extensions.Logging;
 using Mopups.Services;
 using System.Collections.ObjectModel;
+using Email = GoatVaultCore.Models.Objects.Email;
 
 namespace GoatVaultClient.ViewModels;
 
 [QueryProperty("Mp", "Mp")]
+[QueryProperty("Email", "Email")]
 public partial class SplitSecretViewModel(
     // ── Constructor ──────────────────────────────────────────────
     SplitKeyUseCase splitKeyUseCase,
     EnableShamirUseCase enableShamirUseCase,
+    RegisterUseCase registerUseCase,
+    ISessionContext session,
     ILogger<SplitSecretViewModel>? logger
     ) : BaseViewModel
 {
@@ -22,6 +28,9 @@ public partial class SplitSecretViewModel(
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SplitCommand))]
     private string _mp = string.Empty;
+
+    [ObservableProperty]
+    private string _email = string.Empty;
 
     [ObservableProperty]
     private string _passphrase = string.Empty; // Added for SLIP-39
@@ -148,11 +157,20 @@ public partial class SplitSecretViewModel(
             try
             {
                 await MopupService.Instance.PushAsync(new PendingPopup("Enabling Recovery on your account..."));
-                await enableShamirUseCase.ExecuteAsync(Mp);
-                await MopupService.Instance.PopAllAsync();
-                await Shell.Current.GoToAsync("..");
+                
+                if (session.UserId != null)
+                {
+                    await registerUseCase.ExecuteAsync(new Email(Email), Mp, true);
+                    // Popup the loading popup
+                    await MopupService.Instance.PopAllAsync();
+                    await Shell.Current.GoToAsync("..");
+                }
+                else
+                {
+                    await Shell.Current.GoToAsync("//gratitude");
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 logger?.LogError(e, "Error during Continue() of SplitSecretViewModel");
                 await MopupService.Instance.PopAllAsync();

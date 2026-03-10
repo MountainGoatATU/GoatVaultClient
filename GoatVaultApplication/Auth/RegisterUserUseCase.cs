@@ -14,7 +14,7 @@ public class RegisterUseCase(
     IServerAuthService serverAuth,
     IPwnedPasswordService pwned)
 {
-    public async Task ExecuteAsync(Email email, string password)
+    public async Task ExecuteAsync(Email email, string password, bool shamirEnabled = false, bool mfaEnabled = false, string mfaSecret = "")
     {
         // 1. Check pwned
         var pwnCount = await pwned.CheckPasswordAsync(password);
@@ -44,6 +44,9 @@ public class RegisterUseCase(
             AuthVerifier = Convert.ToBase64String(authVerifier),
             VaultSalt = Convert.ToBase64String(vaultSalt),
             Argon2Parameters = argon2Parameters,
+            ShamirEnabled = shamirEnabled,
+            MfaEnabled = mfaEnabled,
+            MfaSecret = mfaSecret,
             Vault = encryptedVault
         };
 

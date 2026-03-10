@@ -15,24 +15,10 @@ public sealed class UserRepository(AppDbContext db) : IUserRepository
 
     public async Task SaveAsync(User user)
     {
-        var existingEntry = db.ChangeTracker.Entries<User>()
-            .FirstOrDefault(e => e.Entity.Id == user.Id);
-
-        if (existingEntry != null)
-        {
-            // Entity is already tracked, update its values
-            existingEntry.CurrentValues.SetValues(user);
-        }
-        else if (await db.Users.AsNoTracking().AnyAsync(u => u.Id == user.Id))
-        {
-            // Entity exists in database but not tracked
+        if (db.Users.Any(u => u.Id == user.Id))
             db.Users.Update(user);
-        }
         else
-        {
-            // New entity
             db.Users.Add(user);
-        }
 
         await db.SaveChangesAsync();
     }

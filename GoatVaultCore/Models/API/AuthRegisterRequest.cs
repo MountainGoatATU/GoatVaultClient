@@ -8,6 +8,9 @@ public class AuthRegisterRequest
     public required string AuthSalt { get; set; }
     public required string AuthVerifier { get; set; }
     public required string VaultSalt { get; set; }
+    public bool? ShamirEnabled { get; set; }
+    public bool? MfaEnabled { get; set; }  
+    public string? MfaSecret { get; set; }
     public required Argon2Parameters Argon2Parameters { get; set; }
     public required VaultEncrypted Vault { get; set; }
 }
