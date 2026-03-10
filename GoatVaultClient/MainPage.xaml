@@ -30,13 +30,17 @@
             <controls:Component Grid.Row="1" ContentPadding="{StaticResource sContent}">
 
                 <SearchBar
-                    Background="{AppThemeBinding Light={StaticResource LightSurface},
-                                                 Dark={StaticResource DarkSurface}}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource LightSurface},
-                                                      Dark={StaticResource DarkSurface}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryContainer},
+                                                      Dark={StaticResource DarkSecondaryContainer}}"
                     HeightRequest="48"
                     Placeholder="Search Vault..."
-                    Text="{Binding SearchText}" />
+                    PlaceholderColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                       Dark={StaticResource DarkOnSecondaryContainer}}"
+                    SearchIconColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                      Dark={StaticResource DarkOnSecondaryContainer}}"
+                    Text="{Binding SearchText}"
+                    TextColor="{AppThemeBinding Light={StaticResource LightOnSecondaryContainer},
+                                                Dark={StaticResource DarkOnSecondaryContainer}}" />
             </controls:Component>
 
             <Grid
@@ -95,8 +99,12 @@
                     </controls:Component.HeaderActions>
                     <Picker
                         Title="Select Category"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimaryContainer},
+                                                          Dark={StaticResource DarkPrimaryContainer}}"
                         ItemsSource="{Binding Categories}"
-                        SelectedItem="{Binding SelectedCategory}">
+                        SelectedItem="{Binding SelectedCategory}"
+                        TextColor="{AppThemeBinding Light={StaticResource LightOnPrimaryContainer},
+                                                    Dark={StaticResource DarkOnPrimaryContainer}}">
                         <Picker.ItemDisplayBinding>
                             <Binding x:DataType="models:CategoryItem" Path="Name" />
                         </Picker.ItemDisplayBinding>

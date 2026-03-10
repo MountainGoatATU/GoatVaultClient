@@ -16,7 +16,7 @@
         </Border.StrokeShape>
         <Grid
             Padding="{x:StaticResource pContent}"
-            ColumnDefinitions="40, *, Auto"
+            ColumnDefinitions="40, *, 150"
             ColumnSpacing="{StaticResource sContent}"
             VerticalOptions="Center">
 
@@ -53,7 +53,7 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="{StaticResource xSmall}" />
                 </Border.StrokeShape>
-                <HorizontalStackLayout HorizontalOptions="End" Spacing="{StaticResource sContent}">
+                <Grid ColumnDefinitions="Auto, *" ColumnSpacing="{StaticResource sContent}">
                     <Image
                         Grid.Column="0"
                         HeightRequest="{x:StaticResource iconDesktop}"
@@ -70,11 +70,12 @@
                         </Image.Source>
                     </Image>
                     <Label
+                        Grid.Column="1"
                         LineBreakMode="TailTruncation"
                         Style="{x:StaticResource MaterialLabelMedium}"
                         Text="{Binding CategoryName, Source={x:Reference This}}"
                         VerticalOptions="Center" />
-                </HorizontalStackLayout>
+                </Grid>
             </Border>
         </Grid>
     </Border>
