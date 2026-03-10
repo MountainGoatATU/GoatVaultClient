@@ -14,7 +14,7 @@ public class RegisterUseCase(
     IServerAuthService serverAuth,
     IPwnedPasswordService pwned)
 {
-    public async Task ExecuteAsync(Email email, string password, bool shamirEnabled = false, bool mfaEnabled = false, string mfaSecret = "")
+    public async Task ExecuteAsync(Email email, string password, bool shamirEnabled = false, bool mfaEnabled = false, string? mfaSecret = null)
     {
         // 1. Check pwned
         var pwnCount = await pwned.CheckPasswordAsync(password);
