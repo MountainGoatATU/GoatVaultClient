@@ -66,7 +66,21 @@ public partial class SecurityPageViewModel : BaseViewModel
         _session.VaultChanged += OnVaultChanged;
     }
 
-    private void OnVaultChanged(object? sender, EventArgs e) => Task.Run(RefreshVaultScoreAsync);
+    private void OnVaultChanged(object? sender, EventArgs e) 
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await RefreshVaultScoreAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't crash - session might be in transitional state
+                System.Diagnostics.Debug.WriteLine($"Error refreshing vault score: {ex.Message}");
+            }
+        });
+    }
 
     public async Task InitializeAsync()
     {
@@ -85,6 +99,9 @@ public partial class SecurityPageViewModel : BaseViewModel
         try
         {
             var details = await _calculateVaultScore.ExecuteAsync();
+            
+            if (details == null)
+                return; // Ignore when logging out
 
             // Updates to observable properties bound to UI must be on main thread
             await MainThread.InvokeOnMainThreadAsync(() =>
