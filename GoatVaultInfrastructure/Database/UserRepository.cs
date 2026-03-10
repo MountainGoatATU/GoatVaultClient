@@ -7,15 +7,26 @@ namespace GoatVaultInfrastructure.Database;
 
 public sealed class UserRepository(AppDbContext db) : IUserRepository
 {
-    public Task<User?> GetByEmailAsync(Email email) => db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
+    public Task<User?> GetByEmailAsync(Email email) =>
+        db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
 
     public Task<User?> GetByIdAsync(Guid id) => db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
 
-    public Task<List<User>> GetAllAsync() => db.Users.ToListAsync();
+    public Task<List<User>> GetAllAsync() => db.Users.AsNoTracking().ToListAsync();
 
     public async Task SaveAsync(User user)
     {
-        if (db.Users.Any(u => u.Id == user.Id))
+        // Detach any existing tracked User entity with the same Id
+        var existingEntry = db.ChangeTracker.Entries<User>()
+            .FirstOrDefault(e => e.Entity.Id == user.Id);
+
+        existingEntry?.State = EntityState.Detached;
+
+        var exists = await db.Users
+            .AsNoTracking()
+            .AnyAsync(u => u.Id == user.Id);
+
+        if (exists)
             db.Users.Update(user);
         else
             db.Users.Add(user);
@@ -23,9 +34,15 @@ public sealed class UserRepository(AppDbContext db) : IUserRepository
         await db.SaveChangesAsync();
     }
 
-    public Task DeleteAsync(User user)
+    public async Task DeleteAsync(User user)
     {
+        // Detach any existing tracked User entity with the same Id
+        var existingEntry = db.ChangeTracker.Entries<User>()
+            .FirstOrDefault(e => e.Entity.Id == user.Id);
+
+        existingEntry?.State = EntityState.Detached;
+
         db.Users.Remove(user);
-        return db.SaveChangesAsync();
+        await db.SaveChangesAsync();
     }
 }
