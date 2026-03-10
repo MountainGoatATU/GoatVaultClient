@@ -8,7 +8,7 @@ namespace GoatVaultTests.Application.Vault;
 public class CalculateVaultScoreUseCaseTests
 {
     [Fact]
-    public async Task ExecuteAsync_WhenSessionMissingData_ThrowsInvalidOperationException()
+    public async Task ExecuteAsync_WhenSessionMissingData_ReturnsNull()
     {
         // Arrange
         var session = new Mock<ISessionContext>();
@@ -17,8 +17,11 @@ public class CalculateVaultScoreUseCaseTests
 
         var useCase = new CalculateVaultScoreUseCase(session.Object, Mock.Of<IUserRepository>(), Mock.Of<IVaultScoreCalculatorService>());
 
-        // Act + Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await useCase.ExecuteAsync());
+        // Act
+        var result = await useCase.ExecuteAsync();
+
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]
