@@ -8,10 +8,10 @@ public class CalculateVaultScoreUseCase(
     IUserRepository users,
     IVaultScoreCalculatorService vaultScoreCalculator)
 {
-    public async Task<VaultScoreDetails> ExecuteAsync()
+    public async Task<VaultScoreDetails?> ExecuteAsync()
     {
         if (session.UserId == null || session.Vault == null)
-            throw new InvalidOperationException("No user logged in or vault not loaded.");
+            return null;
 
         // Fetch user to check MFA status
         var user = await users.GetByIdAsync(session.UserId.Value);
