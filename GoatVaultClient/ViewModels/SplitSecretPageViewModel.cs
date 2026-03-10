@@ -157,16 +157,17 @@ public partial class SplitSecretViewModel(
             try
             {
                 await MopupService.Instance.PushAsync(new PendingPopup("Enabling Recovery on your account..."));
-                
+
                 if (session.UserId != null)
                 {
-                    await registerUseCase.ExecuteAsync(new Email(Email), Mp, true);
-                    // Popup the loading popup
-                    await MopupService.Instance.PopAllAsync();
+                    await enableShamirUseCase.ExecuteAsync(Mp);
                     await Shell.Current.GoToAsync("..");
                 }
                 else
                 {
+                    await registerUseCase.ExecuteAsync(new Email(Email), Mp, true);
+                    // Popup the loading popup
+                    await MopupService.Instance.PopAllAsync();
                     await Shell.Current.GoToAsync("//gratitude");
                 }
             }
